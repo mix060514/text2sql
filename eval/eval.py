@@ -21,11 +21,11 @@ with open(ground_truth_set, "r", encoding="utf-8") as f:
 
 
 # %%
-def compare_answers(actual, expected, eval_type):
+def compare_answers(actual, expected, eval_type, eps=1e-2):
     try:
         # 1. 處理數字
         if eval_type == "number":
-            return abs(float(actual) - float(expected)) < 1e-2
+            return abs(float(actual) - float(expected)) < eps
 
         # 2. 處理字串
         elif eval_type == "string":
@@ -42,7 +42,21 @@ def compare_answers(actual, expected, eval_type):
         elif eval_type == "dataframe":
             if isinstance(actual, str):
                 actual = json.loads(actual)
-            return actual == expected
+
+            if actual.keys() != expected.keys():
+                return False
+                
+            for key in expected:
+                val_exp = expected[key]
+                val_act = actual[key]
+                
+                # 如果是數字，允許微小誤差 (例如 0.01)
+                if isinstance(val_exp, (int, float)) and isinstance(val_act, (int, float)):
+                    if abs(val_act - val_exp) > eps:
+                        return False
+                # 如果不是數字（例如字串），則直接比對
+                elif val_act != val_exp:
+                    return False
 
     except Exception as e:
         print(f"比對錯誤 [Type: {eval_type}]: {e}")
