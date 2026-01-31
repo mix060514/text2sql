@@ -1,0 +1,312 @@
+[
+    {
+        "id":0,
+        "question":"North America 的總銷售額是多少？",
+        "expected":"39932364.28",
+        "type":"number",
+        "planned_agent_v3_actual":"```sql\nSELECT SUM(\"Total Revenue\") FROM sales_data WHERE Region = 'North America';\n```\n[[39932364.28]]",
+        "planned_agent_v3_sql_result":"[(39932364.28,)]",
+        "planned_agent_v3_correct":true,
+        "problematic":false
+    },
+    {
+        "id":1,
+        "question":"LATAM 的總銷售額是多少？",
+        "expected":"5395770.58",
+        "type":"number",
+        "planned_agent_v3_actual":"```sql\nSELECT SUM(\"Total Revenue\") FROM sales_data WHERE Region = 'LATAM';\n```\n[[5395770.58]]",
+        "planned_agent_v3_sql_result":"[(5395770.58,)]",
+        "planned_agent_v3_correct":true,
+        "problematic":false
+    },
+    {
+        "id":2,
+        "question":"EMEA 的總銷售額是多少？",
+        "expected":"28854528.17",
+        "type":"number",
+        "planned_agent_v3_actual":"{\n  \"sql\": \"SELECT SUM(\\\"Total Revenue\\\") FROM sales_data WHERE Region = 'EMEA';\",\n  \"results\": [\n    [28854528.17]\n  ]\n}",
+        "planned_agent_v3_sql_result":"[(28854528.17,)]",
+        "planned_agent_v3_correct":true,
+        "problematic":false
+    },
+    {
+        "id":3,
+        "question":"APAC 的總銷售額是多少？",
+        "expected":"25286700.15",
+        "type":"number",
+        "planned_agent_v3_actual":"```sql\nSELECT SUM(\"Total Revenue\") FROM sales_data WHERE Region = 'APAC';\n```\n[[25286700.15]]",
+        "planned_agent_v3_sql_result":"[(25286700.15,)]",
+        "planned_agent_v3_correct":true,
+        "problematic":false
+    },
+    {
+        "id":4,
+        "question":"North America 銷售量最高的前三個產品是什麼？",
+        "expected":"['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27\"']",
+        "type":"list",
+        "planned_agent_v3_actual":"{\n  \"sql_query\": \"SELECT \\\"Product Name\\\", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'North America' GROUP BY \\\"Product Name\\\" ORDER BY total_qty DESC LIMIT 3;\",\n  \"results\": [\n    [\n      \"Enterprise Laptop X1\",\n      10419\n    ],\n    [\n      \"Pro Smartphone 15\",\n      8442\n    ],\n    [\n      \"4K Monitor 27\\\"\",\n      7055\n    ]\n  ]\n}",
+        "planned_agent_v3_sql_result":"[('Enterprise Laptop X1', 10419), ('Pro Smartphone 15', 8442), ('4K Monitor 27\"', 7055)]",
+        "planned_agent_v3_correct":false,
+        "problematic":true
+    },
+    {
+        "id":5,
+        "question":"LATAM 銷售量最高的前三個產品是什麼？",
+        "expected":"['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27\"']",
+        "type":"list",
+        "planned_agent_v3_actual":"{\"sql\": \"SELECT \\\"Product Name\\\", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'LATAM' GROUP BY \\\"Product Name\\\" ORDER BY total_qty DESC LIMIT 3;\", \"results\": [{\"Product Name\": \"Enterprise Laptop X1\", \"total_qty\": 1661}, {\"Product Name\": \"Pro Smartphone 15\", \"total_qty\": 1092}, {\"Product Name\": \"4K Monitor 27\\\"\", \"total_qty\": 941}]}",
+        "planned_agent_v3_sql_result":"[('Enterprise Laptop X1', 1661), ('Pro Smartphone 15', 1092), ('4K Monitor 27\"', 941)]",
+        "planned_agent_v3_correct":false,
+        "problematic":true
+    },
+    {
+        "id":6,
+        "question":"EMEA 銷售量最高的前三個產品是什麼？",
+        "expected":"['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']",
+        "type":"list",
+        "planned_agent_v3_actual":"{\"sql\": \"SELECT \\\"Product Name\\\", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'EMEA' GROUP BY \\\"Product Name\\\" ORDER BY total_qty DESC LIMIT 3;\", \"results\": [{\"Product Name\": \"Enterprise Laptop X1\", \"total_qty\": 7513}, {\"Product Name\": \"Pro Smartphone 15\", \"total_qty\": 6210}, {\"Product Name\": \"Team Collaboration Tool\", \"total_qty\": 5003}]}",
+        "planned_agent_v3_sql_result":"[('Enterprise Laptop X1', 7513), ('Pro Smartphone 15', 6210), ('Team Collaboration Tool', 5003)]",
+        "planned_agent_v3_correct":true,
+        "problematic":false
+    },
+    {
+        "id":7,
+        "question":"APAC 銷售量最高的前三個產品是什麼？",
+        "expected":"['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']",
+        "type":"list",
+        "planned_agent_v3_actual":"{\"sql\": \"SELECT \\\"Product Name\\\", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'APAC' GROUP BY \\\"Product Name\\\" ORDER BY total_qty DESC LIMIT 3;\", \"results\": [[\"Enterprise Laptop X1\", 6547], [\"Pro Smartphone 15\", 5332], [\"Team Collaboration Tool\", 3858]]}",
+        "planned_agent_v3_sql_result":"[('Enterprise Laptop X1', 6547), ('Pro Smartphone 15', 5332), ('Team Collaboration Tool', 3858)]",
+        "planned_agent_v3_correct":true,
+        "problematic":false
+    },
+    {
+        "id":8,
+        "question":"請列出 Electronics 類別在各年份的銷售額總計。",
+        "expected":"{'2023': 30090351.27, '2024': 29168222.66}",
+        "type":"dataframe",
+        "planned_agent_v3_actual":"{\"sql\": \"SELECT strftime('%Y', \\\"Order Date\\\") as Year, SUM(\\\"Total Revenue\\\") as Total_Revenue FROM sales_data WHERE \\\"Product Category\\\" = 'Electronics' GROUP BY Year ORDER BY Year;\", \"results\": [{\"Year\": \"2023\", \"Total_Revenue\": 30090351.27}, {\"Year\": \"2024\", \"Total_Revenue\": 29168222.66}]}",
+        "planned_agent_v3_sql_result":"[('2023', 30090351.27), ('2024', 29168222.66)]",
+        "planned_agent_v3_correct":false,
+        "problematic":true
+    },
+    {
+        "id":9,
+        "question":"請列出 Software 類別在各年份的銷售額總計。",
+        "expected":"{'2023': 13178975.35, '2024': 13985011.63}",
+        "type":"dataframe",
+        "planned_agent_v3_actual":"```sql\nSELECT strftime('%Y', \"Order Date\") as year, SUM(\"Total Revenue\") as total_revenue FROM sales_data WHERE \"Product Category\" = 'Software' GROUP BY year ORDER BY year;\n```\n\nResults:\n[('2023', 13178975.35), ('2024', 13985011.63)]",
+        "planned_agent_v3_sql_result":"[('2023', 13178975.35), ('2024', 13985011.63)]",
+        "planned_agent_v3_correct":false,
+        "problematic":true
+    },
+    {
+        "id":10,
+        "question":"請列出 Office Supplies 類別在各年份的銷售額總計。",
+        "expected":"{'2023': 6769810.67, '2024': 6276991.6}",
+        "type":"dataframe",
+        "planned_agent_v3_actual":"```sql\nSELECT strftime('%Y', \"Order Date\") as year, SUM(\"Total Revenue\") as total_revenue \nFROM sales_data \nWHERE \"Product Category\" = 'Office Supplies' \nGROUP BY year \nORDER BY year;\n```\n\n[('2023', 6769810.67), ('2024', 6276991.6)]",
+        "planned_agent_v3_sql_result":"[('2023', 6769810.67), ('2024', 6276991.6)]",
+        "planned_agent_v3_correct":false,
+        "problematic":true
+    },
+    {
+        "id":11,
+        "question":"Canada 訂單數量最多的客戶是誰？",
+        "expected":"Summit Beta Solutions",
+        "type":"string",
+        "planned_agent_v3_actual":"```sql\nSELECT \"Customer Name\", SUM(\"Quantity\") as total_qty FROM sales_data WHERE \"Country\" = 'Canada' GROUP BY \"Customer Name\" ORDER BY total_qty DESC LIMIT 1;\n```\n[('Apex Alpha Corp.', 349)]",
+        "planned_agent_v3_sql_result":"[('Apex Alpha Corp.', 349)]",
+        "planned_agent_v3_correct":false,
+        "problematic":true
+    },
+    {
+        "id":12,
+        "question":"India 訂單數量最多的客戶是誰？",
+        "expected":"Delta Global Systems",
+        "type":"string",
+        "planned_agent_v3_actual":"{\n  \"sql\": \"SELECT \\\"Customer Name\\\", SUM(\\\"Quantity\\\") as total_qty FROM sales_data WHERE \\\"Country\\\" = 'India' GROUP BY \\\"Customer Name\\\" ORDER BY total_qty DESC LIMIT 1;\",\n  \"results\": [\n    [\n      \"Summit Beta Solutions\",\n      206\n    ]\n  ]\n}",
+        "planned_agent_v3_sql_result":"[('Summit Beta Solutions', 206)]",
+        "planned_agent_v3_correct":false,
+        "problematic":true
+    },
+    {
+        "id":13,
+        "question":"Germany 訂單數量最多的客戶是誰？",
+        "expected":"Summit Beta Solutions",
+        "type":"string",
+        "planned_agent_v3_actual":"```sql\nSELECT \"Customer Name\", SUM(\"Quantity\") as total_qty FROM sales_data WHERE \"Country\" = 'Germany' GROUP BY \"Customer Name\" ORDER BY total_qty DESC LIMIT 1;\n```\n[('Summit Alpha Corp.', 199)]",
+        "planned_agent_v3_sql_result":"[('Summit Alpha Corp.', 199)]",
+        "planned_agent_v3_correct":false,
+        "problematic":true
+    },
+    {
+        "id":14,
+        "question":"Australia 訂單數量最多的客戶是誰？",
+        "expected":"Global Next Ltd.",
+        "type":"string",
+        "planned_agent_v3_actual":"{\"sql_query\": \"SELECT \\\"Customer Name\\\", SUM(\\\"Quantity\\\") as total_qty FROM sales_data WHERE \\\"Country\\\" = 'Australia' GROUP BY \\\"Customer Name\\\" ORDER BY total_qty DESC LIMIT 1;\", \"raw_results\": [\"('Summit Prime Systems', 114)\"]}",
+        "planned_agent_v3_sql_result":"[('Summit Prime Systems', 114)]",
+        "planned_agent_v3_correct":false,
+        "problematic":true
+    },
+    {
+        "id":15,
+        "question":"China 訂單數量最多的客戶是誰？",
+        "expected":"Apex Prime Corp.",
+        "type":"string",
+        "planned_agent_v3_actual":"```sql\nSELECT \"Customer Name\", SUM(Quantity) as total_quantity FROM sales_data WHERE \"Country\" = 'China' GROUP BY \"Customer Name\" ORDER BY total_quantity DESC LIMIT 1;\n```\n[('Elite Apex Group', 131)]",
+        "planned_agent_v3_sql_result":"[('Elite Apex Group', 131)]",
+        "planned_agent_v3_correct":false,
+        "problematic":true
+    },
+    {
+        "id":16,
+        "question":"2023 年哪一個季度的總銷售額表現最好？",
+        "expected":"Q4",
+        "type":"string",
+        "planned_agent_v3_actual":"{\"sql_query\": \"SELECT strftime('%Y-%q', \\\"Order Date\\\") as quarter, SUM(\\\"Total Revenue\\\") as total_revenue FROM sales_data WHERE strftime('%Y', \\\"Order Date\\\") = '2023' GROUP BY quarter ORDER BY total_revenue DESC LIMIT 1;\", \"raw_results\": [\"(None, 50039137.29)\"]}",
+        "planned_agent_v3_sql_result":"[(None, 50039137.29)]",
+        "planned_agent_v3_correct":false,
+        "problematic":true
+    },
+    {
+        "id":17,
+        "question":"2024 年哪一個季度的總銷售額表現最好？",
+        "expected":"Q4",
+        "type":"string",
+        "planned_agent_v3_actual":"{\"sql_query\": \"SELECT strftime('%Y-%q', \\\"Order Date\\\") as quarter, SUM(\\\"Total Revenue\\\") as total_revenue FROM sales_data WHERE strftime('%Y', \\\"Order Date\\\") = '2024' GROUP BY quarter ORDER BY total_revenue DESC LIMIT 1;\", \"results\": [{\"quarter\": null, \"total_revenue\": 49430225.89}]}",
+        "planned_agent_v3_sql_result":"[(None, 49430225.89)]",
+        "planned_agent_v3_correct":false,
+        "problematic":true
+    },
+    {
+        "id":18,
+        "question":"Electronics 類別在 2024 年相對於 2023 年的銷售額年增率 (YoY) 是多少？",
+        "expected":"-3.06",
+        "type":"number",
+        "planned_agent_v3_actual":"{\n  \"sql_query\": \"SELECT (SUM(CASE WHEN strftime('%Y', \\\"Order Date\\\") = '2024' THEN \\\"Total Revenue\\\" ELSE 0 END) - SUM(CASE WHEN strftime('%Y', \\\"Order Date\\\") = '2023' THEN \\\"Total Revenue\\\" ELSE 0 END)) * 100.0 \/ NULLIF(SUM(CASE WHEN strftime('%Y', \\\"Order Date\\\") = '2023' THEN \\\"Total Revenue\\\" ELSE 0 END), 0) AS yoy_growth_rate FROM sales_data WHERE \\\"Product Category\\\" = 'Electronics';\",\n  \"results\": [\n    [\n      -3.06453255306248\n    ]\n  ]\n}",
+        "planned_agent_v3_sql_result":"[(-3.06453255306248,)]",
+        "planned_agent_v3_correct":true,
+        "problematic":false
+    },
+    {
+        "id":19,
+        "question":"Office Supplies 類別在 2024 年相對於 2023 年的銷售額年增率 (YoY) 是多少？",
+        "expected":"-7.28",
+        "type":"number",
+        "planned_agent_v3_actual":"```sql\nSELECT (SUM(CASE WHEN strftime('%Y', \"Order Date\") = '2024' THEN \"Total Revenue\" ELSE 0 END) - SUM(CASE WHEN strftime('%Y', \"Order Date\") = '2023' THEN \"Total Revenue\" ELSE 0 END)) * 100.0 \/ NULLIF(SUM(CASE WHEN strftime('%Y', \"Order Date\") = '2023' THEN \"Total Revenue\" ELSE 0 END), 0) AS yoy_growth FROM sales_data WHERE \"Product Category\" = 'Office Supplies';\n```\n[(-7.279658088281519,)]",
+        "planned_agent_v3_sql_result":"[(-7.279658088281519,)]",
+        "planned_agent_v3_correct":true,
+        "problematic":false
+    },
+    {
+        "id":20,
+        "question":"Software 類別在 2024 年相對於 2023 年的銷售額年增率 (YoY) 是多少？",
+        "expected":"6.12",
+        "type":"number",
+        "planned_agent_v3_actual":"```sql\nSELECT (SUM(CASE WHEN strftime('%Y', \"Order Date\") = '2024' THEN \"Total Revenue\" ELSE 0 END) - SUM(CASE WHEN strftime('%Y', \"Order Date\") = '2023' THEN \"Total Revenue\" ELSE 0 END)) \/ NULLIF(SUM(CASE WHEN strftime('%Y', \"Order Date\") = '2023' THEN \"Total Revenue\" ELSE 0 END), 0) * 100 AS year_over_year_growth FROM sales_data WHERE \"Product Category\" = 'Software';\n```\n[(6.116076998353299,)]",
+        "planned_agent_v3_sql_result":"[(6.116076998353299,)]",
+        "planned_agent_v3_correct":true,
+        "problematic":false
+    },
+    {
+        "id":21,
+        "question":"請列出 North America 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+        "expected":"{'2023-1': 1501225.0, '2023-2': 1298301.23, '2023-3': 1560968.94, '2023-4': 1569450.64, '2023-5': 1239067.23, '2023-6': 1486196.84, '2023-7': 1447348.91, '2023-8': 1640436.4, '2023-9': 1673169.96, '2023-10': 2373057.31, '2023-11': 2117893.69, '2023-12': 2379353.47, '2024-1': 1516790.82, '2024-2': 1431760.02, '2024-3': 1736514.22, '2024-4': 1387412.77, '2024-5': 1535990.27, '2024-6': 1539895.94, '2024-7': 1464171.52, '2024-8': 1338957.31, '2024-9': 1074612.67, '2024-10': 2294689.2, '2024-11': 2018162.44, '2024-12': 2306937.48}",
+        "type":"dataframe",
+        "planned_agent_v3_actual":"```sql\nSELECT strftime('%Y-%m', \"Order Date\") as month, SUM(\"Total Revenue\") FROM sales_data WHERE Region = 'North America' AND strftime('%Y', \"Order Date\") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;\n```\n\n[('2023-01', 1501225.0), ('2023-02', 1298301.23), ('2023-03', 1560968.94), ('2023-04', 1569450.64), ('2023-05', 1239067.23), ('2023-06', 1486196.84), ('2023-07', 1447348.91), ('2023-08', 1640436.4), ('2023-09', 1673169.96), ('2023-10', 2373057.31), ('2023-11', 2117893.69), ('2023-12', 2379353.47), ('2024-01', 1516790.82), ('2024-02', 1431760.02), ('2024-03', 1736514.22), ('2024-04', 1387412.77), ('2024-05', 1535990.27), ('2024-06', 1539895.94), ('2024-07', 1464171.52), ('2024-08', 1338957.31), ('2024-09', 1074612.67), ('2024-10', 2294689.2), ('2024-11', 2018162.44), ('2024-12', 2306937.48)]\n",
+        "planned_agent_v3_sql_result":"[('2023-01', 1501225.0), ('2023-02', 1298301.23), ('2023-03', 1560968.94), ('2023-04', 1569450.64), ('2023-05', 1239067.23), ('2023-06', 1486196.84), ('2023-07', 1447348.91), ('2023-08', 1640436.4), ('2023-09', 1673169.96), ('2023-10', 2373057.31), ('2023-11', 2117893.69), ('2023-12', 2379353.47), ('2024-01', 1516790.82), ('2024-02', 1431760.02), ('2024-03', 1736514.22), ('2024-04', 1387412.77), ('2024-05', 1535990.27), ('2024-06', 1539895.94), ('2024-07', 1464171.52), ('2024-08', 1338957.31), ('2024-09', 1074612.67), ('2024-10', 2294689.2), ('2024-11', 2018162.44), ('2024-12', 2306937.48)]",
+        "planned_agent_v3_correct":false,
+        "problematic":true
+    },
+    {
+        "id":22,
+        "question":"請列出 LATAM 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+        "expected":"{'2023-1': 223713.48, '2023-2': 175948.62, '2023-3': 214276.38, '2023-4': 153375.98, '2023-5': 324390.47, '2023-6': 200221.42, '2023-7': 116414.84, '2023-8': 175005.51, '2023-9': 267708.42, '2023-10': 349280.05, '2023-11': 304090.41, '2023-12': 347328.27, '2024-1': 145904.33, '2024-2': 153470.14, '2024-3': 417749.45, '2024-4': 171977.2, '2024-5': 173912.15, '2024-6': 207575.73, '2024-7': 203863.23, '2024-8': 159882.9, '2024-9': 143958.6, '2024-10': 270168.5, '2024-11': 315395.29, '2024-12': 180159.21}",
+        "type":"dataframe",
+        "planned_agent_v3_actual":"```sql\nSELECT strftime('%Y-%m', \"Order Date\") as month, SUM(\"Total Revenue\") FROM sales_data WHERE Region = 'LATAM' AND (strftime('%Y', \"Order Date\") = '2023' OR strftime('%Y', \"Order Date\") = '2024') GROUP BY month ORDER BY month;\n```\n\n```text\n[('2023-01', 223713.48), ('2023-02', 175948.62), ('2023-03', 214276.38), ('2023-04', 153375.98), ('2023-05', 324390.47000000003), ('2023-06', 200221.42), ('2023-07', 116414.84), ('2023-08', 175005.51), ('2023-09', 267708.42), ('2023-10', 349280.05), ('2023-11', 304090.41), ('2023-12', 347328.27), ('2024-01', 145904.33), ('2024-02', 153470.13999999998), ('2024-03', 417749.45), ('2024-04', 171977.2), ('2024-05', 173912.15), ('2024-06', 207575.73), ('2024-07', 203863.23), ('2024-08', 159882.9), ('2024-09', 143958.6), ('2024-10', 270168.5), ('2024-11', 315395.29), ('2024-12', 180159.21)]\n",
+        "planned_agent_v3_sql_result":"[('2023-01', 223713.48), ('2023-02', 175948.62), ('2023-03', 214276.38), ('2023-04', 153375.98), ('2023-05', 324390.47000000003), ('2023-06', 200221.42), ('2023-07', 116414.84), ('2023-08', 175005.51), ('2023-09', 267708.42), ('2023-10', 349280.05), ('2023-11', 304090.41), ('2023-12', 347328.27), ('2024-01', 145904.33), ('2024-02', 153470.13999999998), ('2024-03', 417749.45), ('2024-04', 171977.2), ('2024-05', 173912.15), ('2024-06', 207575.73), ('2024-07', 203863.23), ('2024-08', 159882.9), ('2024-09', 143958.6), ('2024-10', 270168.5), ('2024-11', 315395.29), ('2024-12', 180159.21)]",
+        "planned_agent_v3_correct":false,
+        "problematic":true
+    },
+    {
+        "id":23,
+        "question":"請列出 EMEA 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+        "expected":"{'2023-1': 942448.1, '2023-2': 883639.02, '2023-3': 1285595.76, '2023-4': 883185.84, '2023-5': 1185861.27, '2023-6': 1484438.38, '2023-7': 1016786.45, '2023-8': 1020389.97, '2023-9': 1059744.44, '2023-10': 1654875.41, '2023-11': 1624625.45, '2023-12': 1634231.28, '2024-1': 1133643.54, '2024-2': 1062111.55, '2024-3': 1012640.24, '2024-4': 992568.9, '2024-5': 1040289.1, '2024-6': 880005.25, '2024-7': 1208996.95, '2024-8': 1059911.19, '2024-9': 1059862.75, '2024-10': 1679514.33, '2024-11': 1766008.98, '2024-12': 1283154.02}",
+        "type":"dataframe",
+        "planned_agent_v3_actual":"```sql\nSELECT strftime('%Y-%m', \"Order Date\") as month, SUM(\"Total Revenue\") FROM sales_data WHERE Region = 'EMEA' AND strftime('%Y', \"Order Date\") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;\n```\n\n[('2023-01', 942448.1), ('2023-02', 883639.02), ('2023-03', 1285595.76), ('2023-04', 883185.84), ('2023-05', 1185861.27), ('2023-06', 1484438.38), ('2023-07', 1016786.45), ('2023-08', 1020389.97), ('2023-09', 1059744.44), ('2023-10', 1654875.41), ('2023-11', 1624625.45), ('2023-12', 1634231.28), ('2024-01', 1133643.54), ('2024-02', 1062111.55), ('2024-03', 1012640.24), ('2024-04', 992568.9), ('2024-05', 1040289.1), ('2024-06', 880005.25), ('2024-07', 1208996.95), ('2024-08', 1059911.19), ('2024-09', 1059862.75), ('2024-10', 1679514.33), ('2024-11', 1766008.98), ('2024-12', 1283154.02)]\n",
+        "planned_agent_v3_sql_result":"[('2023-01', 942448.1), ('2023-02', 883639.02), ('2023-03', 1285595.76), ('2023-04', 883185.84), ('2023-05', 1185861.27), ('2023-06', 1484438.38), ('2023-07', 1016786.45), ('2023-08', 1020389.97), ('2023-09', 1059744.44), ('2023-10', 1654875.41), ('2023-11', 1624625.45), ('2023-12', 1634231.28), ('2024-01', 1133643.54), ('2024-02', 1062111.55), ('2024-03', 1012640.24), ('2024-04', 992568.9), ('2024-05', 1040289.1), ('2024-06', 880005.25), ('2024-07', 1208996.95), ('2024-08', 1059911.19), ('2024-09', 1059862.75), ('2024-10', 1679514.33), ('2024-11', 1766008.98), ('2024-12', 1283154.02)]",
+        "planned_agent_v3_correct":false,
+        "problematic":true
+    },
+    {
+        "id":24,
+        "question":"請列出 APAC 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+        "expected":"{'2023-1': 973776.02, '2023-2': 763996.82, '2023-3': 1005437.21, '2023-4': 1085883.84, '2023-5': 999851.05, '2023-6': 825946.06, '2023-7': 897312.68, '2023-8': 805145.36, '2023-9': 984447.16, '2023-10': 1189276.6, '2023-11': 1336621.74, '2023-12': 1357397.91, '2024-1': 933316.4, '2024-2': 1075906.73, '2024-3': 971237.02, '2024-4': 1076606.9, '2024-5': 1015613.24, '2024-6': 827017.19, '2024-7': 1053949.91, '2024-8': 888200.25, '2024-9': 757630.84, '2024-10': 1724426.36, '2024-11': 1436229.04, '2024-12': 1301473.82}",
+        "type":"dataframe",
+        "planned_agent_v3_actual":"```sql\nSELECT strftime('%Y-%m', \"Order Date\") as month, SUM(\"Total Revenue\") FROM sales_data WHERE Region = 'APAC' AND strftime('%Y', \"Order Date\") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;\n```\n\n[('2023-01', 973776.02), ('2023-02', 763996.82), ('2023-03', 1005437.21), ('2023-04', 1085883.84), ('2023-05', 999851.05), ('2023-06', 825946.06), ('2023-07', 897312.68), ('2023-08', 805145.36), ('2023-09', 984447.16), ('2023-10', 1189276.6), ('2023-11', 1336621.74), ('2023-12', 1357397.91), ('2024-01', 933316.4), ('2024-02', 1075906.73), ('2024-03', 971237.02), ('2024-04', 1076606.9), ('2024-05', 1015613.24), ('2024-06', 827017.19), ('2024-07', 1053949.91), ('2024-08', 888200.25), ('2024-09', 757630.84), ('2024-10', 1724426.36), ('2024-11', 1436229.04), ('2024-12', 1301473.82)]\n",
+        "planned_agent_v3_sql_result":"[('2023-01', 973776.02), ('2023-02', 763996.82), ('2023-03', 1005437.21), ('2023-04', 1085883.84), ('2023-05', 999851.05), ('2023-06', 825946.06), ('2023-07', 897312.68), ('2023-08', 805145.36), ('2023-09', 984447.16), ('2023-10', 1189276.6), ('2023-11', 1336621.74), ('2023-12', 1357397.91), ('2024-01', 933316.4), ('2024-02', 1075906.73), ('2024-03', 971237.02), ('2024-04', 1076606.9), ('2024-05', 1015613.24), ('2024-06', 827017.19), ('2024-07', 1053949.91), ('2024-08', 888200.25), ('2024-09', 757630.84), ('2024-10', 1724426.36), ('2024-11', 1436229.04), ('2024-12', 1301473.82)]",
+        "planned_agent_v3_correct":false,
+        "problematic":true
+    },
+    {
+        "id":25,
+        "question":"2024 年第四季相較於 2023 年第四季，總銷售額增加了多少？",
+        "expected":"-91712.92",
+        "type":"number",
+        "planned_agent_v3_actual":"```sql\nSELECT (SELECT SUM(\"Total Revenue\") FROM sales_data WHERE strftime('%Y', \"Order Date\") = '2024' AND strftime('%Y-%m', \"Order Date\") LIKE '2024-%') - (SELECT SUM(\"Total Revenue\") FROM sales_data WHERE strftime('%Y', \"Order Date\") = '2023' AND strftime('%Y-%m', \"Order Date\") LIKE '2023-%')\n```\n[(-608911.3999999985,)]",
+        "planned_agent_v3_sql_result":"[(-608911.3999999985,)]",
+        "planned_agent_v3_correct":false,
+        "problematic":true
+    },
+    {
+        "id":26,
+        "question":"在 North America 區域，2023 年前五大客戶購買各產品類別的金額占比為何？",
+        "expected":"{'Delta Elite Systems': {'Electronics': 0.225, 'Office Supplies': 0.096, 'Software': 0.679}, 'Global Beta Corp.': {'Electronics': 0.3834, 'Office Supplies': 0.0513, 'Software': 0.5654}, 'Next Beta Ltd.': {'Electronics': 0.5828, 'Office Supplies': 0.1038, 'Software': 0.3134}, 'Prime Delta Solutions': {'Electronics': 0.6316, 'Office Supplies': 0.1253, 'Software': 0.243}, 'Summit Prime Systems': {'Electronics': 0.5044, 'Office Supplies': 0.1148, 'Software': 0.3809}}",
+        "type":"dataframe",
+        "planned_agent_v3_actual":"```sql\nSELECT \"Product Category\", SUM(\"Total Revenue\") as total_revenue, \n       SUM(\"Total Revenue\") \/ (SELECT SUM(\"Total Revenue\") FROM sales_data WHERE Region = 'North America' AND strftime('%Y', \"Order Date\") = '2023') as revenue_ratio \nFROM sales_data \nWHERE Region = 'North America' AND strftime('%Y', \"Order Date\") = '2023' \nGROUP BY \"Product Category\" \nORDER BY revenue_ratio DESC \nLIMIT 5;\n```\n\n[('Electronics', 12224324.19, 0.602585093364313), ('Software', 5254904.84, 0.2590349596767345), ('Office Supplies', 2807240.59, 0.13837994695895242)]",
+        "planned_agent_v3_sql_result":"[('Electronics', 12224324.19, 0.602585093364313), ('Software', 5254904.84, 0.2590349596767345), ('Office Supplies', 2807240.59, 0.13837994695895242)]",
+        "planned_agent_v3_correct":false,
+        "problematic":true
+    },
+    {
+        "id":27,
+        "question":"在 2023 到 2024 年間，哪位客戶的購買總額變動幅度（絕對值）最大？",
+        "expected":"Elite Apex Group",
+        "type":"string",
+        "planned_agent_v3_actual":"{\"sql_query\": \"SELECT \\\"Customer Name\\\", SUM(\\\"Total Revenue\\\") as total_revenue FROM sales_data WHERE strftime('%Y', \\\"Order Date\\\") IN ('2023', '2024') GROUP BY \\\"Customer Name\\\" ORDER BY total_revenue DESC;\", \"raw_results\": [\"('Summit Prime Systems', 1396098.55)\", (\"Summit Beta Solutions\", 1381510.77), (\"Global Prime Inc.\", 1168292.52), (\"Next Beta Inc.\", 1115157.41), (\"Apex Elite Solutions\", 1043337.08), (\"Beta Next Systems\", 1036708.41), (\"Delta Elite Inc.\", 993777.47), (\"Apex Apex Ltd.\", 990927.72), (\"Prime Delta Solutions\", 959868.83), (\"Beta Next Group\", 931841.51), (\"Apex Alpha Corp.\", 924637.22), (\"Next Beta Group\", 906313.11), (\"Prime Apex Solutions\", 901600.77), (\"Beta Global Inc.\", 899313.9), (\"Global Next Ltd.\", 887552.48), (\"Prime Alpha Systems\", 854921.74), (\"Elite Apex Group\", 854360.66), (\"Next Beta Ltd.\", 830912.31), (\"Summit Alpha Corp.\", 817991.09), (\"Gamma Beta Group\", 816000.06), (\"Apex Prime Corp.\", 799005.91), (\"Global Apex Inc.\", 781889.99), (\"Next Delta Solutions\", 767000.3), (\"Gamma Beta Ltd.\", 758513.08), (\"Elite Delta Group\", 741698.56), (\"Next Apex Group\", 700475.05), (\"Global Beta Ltd.\", 689986.89), (\"Delta Global Systems\", 670070.36), (\"Delta Elite Systems\", 648457.51), (\"Next Apex Corp.\", 638662.75), (\"Summit Global Ltd.\", 633335.04), (\"Apex Global Solutions\", 606929.23), (\"Summit Elite Solutions\", 605678.11), (\"Summit Prime Ltd.\", 603463.14), (\"Global Beta Corp.\", 584937.93), (\"Apex Next Group\", 578342.8), (\"Elite Alpha Systems\", 576936.3), (\"Next Apex Solutions\", 569289.8), (\"Global Gamma Corp.\", 566523.67), (\"Prime Prime Ltd.\", 562859.66), (\"Apex Elite Systems\", 559027.7), (\"Beta Beta Group\", 553828.77), (\"Alpha Alpha Corp.\", 552103.29), (\"Next Prime Group\", 551300.88), (\"Global Next Systems\", 547321.59), (\"Apex Alpha Group\", 543498.39), (\"Next Delta Ltd.\", 535952.32), (\"Apex Delta Group\", 534995.39), (\"Beta Apex Solutions\", 525920.84), (\"Delta Prime Inc.\", 523683.08999999997), (\"Next Summit Group\", 522830.68), (\"Summit Summit Solutions\", 520437.43), (\"Summit Alpha Solutions\", 514186.58), (\"Alpha Apex Solutions\", 511185.63), (\"Prime Next Ltd.\", 501882.93), (\"Elite Delta Solutions\", 497085.23), (\"Gamma Gamma Corp.\", 493562.81), (\"Summit Gamma Systems\", 493001.34), (\"Gamma Global Solutions\", 491919.24), (\"Elite Gamma Corp.\", 491621.62), (\"Apex Delta Corp.\", 491401.61), (\"Delta Gamma Systems\", 490987.3), (\"Alpha Apex Corp.\", 490174.92), (\"Global Alpha Ltd.\", 490051.4), (\"Beta Prime Corp.\", 489657.27999999997), (\"Apex Alpha Ltd.\", 488015.77), (\"Beta Gamma Ltd.\", 487087.54), (\"Gamma Next Inc.\", 486821.68), (\"Beta Delta Inc.\", 486352.42), (\"Beta Next Solutions\", 484354.66), (\"Summit Delta Solutions\", 482543.25), (\"Next Gamma Solutions\", 481894.59), (\"Beta Elite Systems\", 481295.02999999997), (\"Beta Next Ltd.\", 475895.45), (\"Alpha Beta Group\", 473243.94), (\"Alpha Prime Solutions\", 466154.9), (\"Beta Apex Systems\", 465413.25), (\"Apex Prime Inc.\", 465236.22), (\"Alpha Summit Corp.\", 464912.26), (\"Alpha Summit Group\", 460668.71), (\"Elite Delta Corp.\", 459449.73), (\"Alpha Delta Systems\", 456881.51), (\"Apex Alpha Inc.\", 452019.02), (\"Apex Next Inc.\", 450142.41), (\"Elite Summit Corp.\", 447842.1), (\"Beta Beta Solutions\", 446951.85), (\"Prime Elite Solutions\", 444728.11), (\"Global Prime Ltd.\", 442765.37), (\"Summit Next Solutions\", 438647.83999999997), (\"Delta Delta Systems\", 437150.56), (\"Next Alpha Corp.\", 433478.68), (\"Gamma Summit Ltd.\", 431748.56), (\"Alpha Gamma Inc.\", 431598.82), (\"Beta Alpha Corp.\", 425597.58), (\"Delta Next Inc.\", 423806.45), (\"Apex Gamma Ltd.\", 420817.51), (\"Elite Global Group\", 417136.55), (\"Global Global Group\", 416774.77999999997), (\"Summit Global Group\", 413045.0), (\"Summit Prime Solutions\", 410694.32), (\"Elite Beta Corp.\", 408366.59), (\"Beta Summit Corp.\", 407421.42), (\"Summit Delta Systems\", 405112.87), (\"Beta Next Corp.\", 405054.36), (\"Global Delta Solutions\", 404955.91), (\"Gamma Elite Group\", 403001.93), (\"Next Beta Solutions\", 401833.83), (\"Summit Global Inc.\", 398957.36), (\"Apex Summit Systems\", 397896.45), (\"Summit Beta Group\", 397357.09), (\"Gamma Alpha Inc.\", 397015.6), (\"Global Prime Group\", 396906.02), (\"Gamma Next Group\", 395242.66), (\"Apex Summit Inc.\", 388173.97000000003), (\"Elite Global Systems\", 386777.25), (\"Gamma Apex Systems\", 385693.17), (\"Gamma Prime Systems\", 382815.4), (\"Gamma Elite Inc.\", 382248.79), (\"Summit Global Corp.\", 379929.5), (\"Beta Prime Solutions\", 379670.17), (\"Apex Summit Corp.\", 376553.34), (\"Prime Global Ltd.\", 375806.27), (\"Summit Elite Systems\", 374121.36), (\"Beta Gamma Corp.\", 373350.86), (\"Gamma Elite Corp.\", 372138.47000000003), (\"Alpha Elite Ltd.\", 367839.93), (\"Elite Apex Ltd.\", 367496.31), (\"Summit Alpha Ltd.\", 367066.46), (\"Summit Beta Corp.\", 367060.48), (\"Elite Prime Ltd.\", 366972.62), (\"Next Prime Inc.\", 363292.06), (\"Elite Gamma Solutions\", 358700.17), (\"Next Global Ltd.\", 353325.8), (\"Global Elite Ltd.\", 352621.96), (\"Delta Elite Ltd.\", 351550.62), (\"Prime Apex Inc.\", 351185.41), (\"Apex Delta Solutions\", 347436.13), (\"Apex Alpha Solutions\", 342485.3), (\"Gamma Beta Solutions\", 342021.04), (\"Elite Elite Group\", 338957.43), (\"Delta Gamma Group\", 335769.52), (\"Apex Global Inc.\", 331672.39), (\"Gamma Delta Systems\", 331241.78), (\"Elite Elite Systems\", 330905.75), (\"Global Summit Group\", 330486.22), (\"Alpha Gamma Solutions\", 326244.0), (\"Global Apex Solutions\", 323229.5), (\"Global Elite Group\", 322601.16), (\"Alpha Global Inc.\", 322353.0), (\"Delta Prime Systems\", 319713.32), (\"Beta Delta Systems\", 307598.83), (\"Summit Elite Corp.\", 297913.38), (\"Gamma Prime Ltd.\", 297829.69), (\"Apex Prime Group\", 293939.38), (\"Beta Summit Systems\", 292972.04), (\"Beta Global Ltd.\", 290275.91), (\"Apex Delta Inc.\", 288262.12), (\"Next Global Solutions\", 282866.05), (\"Next Delta Inc.\", 281175.46), (\"Prime Next Solutions\", 280242.46), (\"Summit Global Systems\", 274982.25), (\"Alpha Alpha Solutions\", 273857.26), (\"Beta Elite Solutions\", 268721.83), (\"Next Beta Corp.\", 267122.84), (\"Prime Gamma Solutions\", 261739.01), (\"Beta Alpha Solutions\", 260086.18), (\"Beta Summit Ltd.\", 259924.46000000002), (\"Global Summit Systems\", 251958.74), (\"Alpha Summit Systems\", 217128.72), (\"Prime Alpha Group\", 187231.41999999998), (\"Elite Next Inc.\", 186842.56), (\"Gamma Alpha Corp.\", 170305.52), (\"Next Global Corp.\", 167392.61000000002), (\"Beta Delta Group\", 165042.18), (\"Apex Beta Inc.\", 160701.41), (\"Global Apex Group\", 151333.91), (\"Next Prime Ltd.\", 150181.52), (\"Elite Gamma Ltd.\", 149409.33000000002), (\"Apex Delta Systems\", 147783.87), (\"Next Summit Systems\", 147291.87), (\"Summit Elite Group\", 143750.5), (\"Delta Prime Ltd.\", 128842.28), (\"Summit Prime Inc.\", 128595.76000000001), (\"Next Next Systems\", 121190.58), (\"Summit Gamma Corp.\", 120990.08), (\"Beta Beta Ltd.\", 117080.4), (\"Alpha Beta Solutions\", 116205.17), (\"Gamma Gamma Group\", 115600.67), (\"Alpha Gamma Group\", 112044.77), (\"Prime Global Solutions\", 109579.77), (\"Summit Gamma Inc.\", 108662.29), (\"Beta Elite Inc.\", 107907.02), (\"Delta Elite Corp.\", 106170.11), (\"Prime Elite Corp.\", 105328.66), (\"Alpha Gamma Systems\", 101989.12), (\"Prime Alpha Inc.\", 100905.5), (\"Prime Gamma Group\", 98619.12), (\"Summit Delta Corp.\", 95779.03), (\"Beta Elite Group\", 94149.74), (\"Summit Apex Inc.\", 93983.84), (\"Beta Alpha Inc.\", 93903.65), (\"Gamma Global Ltd.\", 91816.52), (\"Prime Apex Group\", 91314.85), (\"Elite Global Corp.\", 90199.99), (\"Elite Prime Solutions\", 89864.52), (\"Prime Next Inc.\", 89810.28), (\"Prime Prime Systems\", 89003.4), (\"Summit Global Solutions\", 88812.03), (\"Elite Prime Corp.\", 88566.45), (\"Gamma Global Group\", 88000.46), (\"Global Elite Corp.\", 87264.78), (\"Global Global Corp.\", 86430.94), (\"Elite Next Group\", 85223.55), (\"Delta Elite Solutions\", 85207.76), (\"Delta Next Ltd.\", 85074.16), (\"Beta Beta Corp.\", 82215.85), (\"Global Delta Inc.\", 81455.91), (\"Gamma Apex Corp.\", 79584.2), (\"Gamma Delta Inc.\", 76429.19), (\"Prime Elite Systems\", 75703.59), (\"Summit Beta Inc.\", 74959.26), (\"Prime Gamma Systems\", 74623.82), (\"Beta Next Inc.\", 73002.17), (\"Delta Gamma Solutions\", 71601.79), (\"Global Global Solutions\", 71480.8), (\"Summit Gamma Group\", 70700.76), (\"Summit Beta Systems\", 70639.7), (\"Next Elite Corp.\", 66364.81), (\"Gamma Global Corp.\", 65736.85), (\"Global Delta Corp.\", 65687.04000000001), (\"Elite Summit Systems\", 65184.58), (\"Delta Apex Ltd.\", 64924.77), (\"Next Delta Corp.\", 64787.05), (\"Next Next Corp.\", 63823.21), (\"Gamma Beta Corp.\", 62290.33), (\"Prime Global Systems\", 62056.93), (\"Prime Beta Systems\", 62017.840000000004), (\"Prime Alpha Solutions\", 61475.55), (\"Apex Apex Solutions\", 60954.15), (\"Summit Apex Systems\", 60776.72), (\"Apex Beta Corp.\", 60318.01), (\"Next Global Group\", 60278.61), (\"Prime Next Corp.\", 59758.0), (\"Elite Alpha Corp.\", 59623.9), (\"Delta Prime Corp.\", 59293.6), (\"Summit Delta Inc.\", 58618.24), (\"Apex Beta Systems\", 58442.09), (\"Global Global Ltd.\", 58296.78), (\"Summit Gamma Solutions\", 58085.12), (\"Global Summit Corp.\", 57903.99), (\"Beta Alpha Group\", 57259.29), (\"Prime Summit Solutions\", 56836.04), (\"Delta Global Ltd.\", 56016.35), (\"Elite Gamma Group\", 55373.479999999996), (\"Apex Gamma Solutions\", 55216.68), (\"Delta Global Group\", 54696.96), (\"Apex Summit Solutions\", 54682.39), (\"Prime Prime Inc.\", 54669.7), (\"Elite Global Ltd.\", 54608.35), (\"Apex Next Corp.\", 54369.79), (\"Elite Next Ltd.\", 53944.15), (\"Alpha Global Ltd.\", 53381.31), (\"Gamma Gamma Inc.\", 53270.16), (\"Beta Gamma Inc.\", 53016.12), (\"Gamma Delta Ltd.\", 52945.78), (\"Beta Alpha Ltd.\", 52890.8), (\"Elite Alpha Ltd.\", 52735.77), (\"Gamma Beta Inc.\", 52427.5), (\"Alpha Summit Ltd.\", 52218.35), (\"Next Elite Ltd.\", 51973.89), (\"Gamma Summit Systems\", 51964.840000000004), (\"Next Gamma Ltd.\", 51232.79), (\"Prime Gamma Ltd.\", 51159.42), (\"Next Elite Group\", 51128.14), (\"Prime Prime Group\", 50578.659999999996), (\"Elite Gamma Systems\", 50547.45), (\"Delta Delta Group\", 50506.08), (\"Global Summit Solutions\", 50419.32), (\"Gamma Global Systems\", 50337.84), (\"Next Summit Solutions\", 50237.58), (\"Gamma Next Ltd.\", 50165.17), (\"Prime Delta Systems\", 50133.53), (\"Summit Apex Ltd.\", 49443.16), (\"Global Global Systems\", 48957.5), (\"Beta Alpha Systems\", 48566.97), (\"Elite Elite Ltd.\", 47769.13), (\"Global Beta Group\", 47449.91), (\"Elite Summit Solutions\", 47046.83), (\"Elite Alpha Inc.\", 46582.409999999996), (\"Prime Global Corp.\", 45855.8), (\"Elite Next Systems\", 45767.76), (\"Prime Alpha Corp.\", 45544.26), (\"Delta Alpha Inc.\", 45370.51), (\"Beta Prime Inc.\", 44978.6), (\"Next Gamma Systems\", 44830.409999999996), (\"Alpha Next Systems\", 44179.25), (\"Elite Global Solutions\", 43835.36), (\"Global Next Inc.\", 43828.979999999996), (\"Apex Apex Corp.\", 43703.21), (\"Delta Apex Inc.\", 43442.11), (\"Elite Alpha Solutions\", 43414.159999999996), (\"Apex Apex Inc.\", 42899.52), (\"Next Gamma Inc.\", 42756.4), (\"Alpha Summit Inc.\", 42740.8), (\"Alpha Global Group\", 42541.909999999996), (\"Delta Alpha Systems\", 42298.75), (\"Prime Apex Corp.\", 41970.13), (\"Delta Apex Group\", 41877.19), (\"Global Delta Ltd.\", 41723.88), (\"Global Apex Ltd.\", 41689.53), (\"Summit Summit Ltd.\", 41555.8), (\"Delta Summit Solutions\", 41390.97), (\"Next Summit Corp.\", 41232.36), (\"Beta Apex Ltd.\", 40683.81), (\"Global Beta Solutions\", 40623.49), (\"Gamma Prime Solutions\", 40595.14), (\"Prime Beta Ltd.\", 40273.06), (\"Apex Beta Group\", 39826.67), (\"Next Delta Systems\", 39214.71), (\"Gamma Beta Systems\", 39122.03), (\"Beta Prime Group\", 38865.3), (\"Apex Elite Ltd.\", 38635.85), (\"Alpha Apex Inc.\", 38549.130000000005), (\"Global Beta Systems\", 37903.15), (\"Delta Summit Group\", 37867.93), (\"Delta Summit Systems\", 37372.6), (\"Next Prime Solutions\", 37132.59), (\"Gamma Global Inc.\", 36617.68), (\"Next Alpha Solutions\", 36079.61), (\"Next Elite Inc.\", 35946.7), (\"Beta Apex Corp.\", 35762.2), (\"Next Alpha Inc.\", 34983.18), (\"Gamma Apex Group\", 34868.83), (\"Prime Prime Solutions\", 34358.89), (\"Alpha Prime Group\", 34106.060000000005), (\"Prime Beta Group\", 34045.5), (\"Global Gamma Systems\", 34021.92), (\"Summit Summit Systems\", 33838.72), (\"Global Next Solutions\", 33039.15), (\"Global Summit Ltd.\", 32560.75), (\"Gamma Summit Inc.\", 32315.17), (\"Prime Delta Corp.\", 31069.73), (\"Gamma Alpha Solutions\", 31029.29), (\"Delta Beta Ltd.\", 30954.989999999998), (\"Summit Alpha Inc.\", 30580.539999999997), (\"Apex Gamma Corp.\", 30574.24), (\"Apex Next Solutions\", 30551.41), (\"Alpha Apex Group\", 30323.64), (\"Alpha Delta Corp.\", 30305.8), (\"Alpha Elite Corp.\", 30145.36), (\"Global Gamma Solutions\", 29939.55), (\"Beta Gamma Group\", 29904.28), (\"Prime Beta Solutions\", 29195.1), (\"Prime Summit Ltd.\", 28925.710000000003), (\"Global Global Inc.\", 28823.36), (\"Next Summit Inc.\", 28685.47), (\"Next Next Group\", 28675.02), (\"Gamma Alpha Systems\", 28573.48), (\"Prime Prime Corp.\", 28122.49), (\"Beta Summit Solutions\", 27703.31), (\"Gamma Summit Group\", 27585.6), (\"Global Apex Corp.\", 27463.56), (\"Alpha Gamma Ltd.\", 27146.29), (\"Gamma Apex Inc.\", 27134.170000000002), (\"Gamma Elite Systems\", 26918.58), (\"Alpha Beta Corp.\", 26803.920000000002), (\"Next Next Inc.\", 26739.329999999998), (\"Apex Beta Ltd.\", 26724.35), (\"Next Gamma Group\", 26658.52), (\"Beta Elite Corp.\", 26515.95), (\"Summit Beta Ltd.\", 26157.25), (\"Apex Prime Systems\", 26144.120000000003), (\"Gamma Summit Corp.\", 25998.36), (\"Alpha Global Corp.\", 25773.5), (\"Beta Beta Inc.\", 25568.37), (\"Delta Next Systems\", 25478.08), (\"Beta Delta Ltd.\", 25374.09), (\"Apex Gamma Systems\", 25120.489999999998), (\"Next Alpha Ltd.\", 24716.06), (\"Apex Global Systems\", 24652.899999999998), (\"Global Elite Inc.\", 24365.89), (\"Apex Prime Solutions\", 24271.67), (\"Elite Elite Inc.\", 23843.93), (\"Summit Next Systems\", 23843.33), (\"Gamma Next Solutions\", 23578.14), (\"Apex Prime Ltd.\", 23297.24), (\"Beta Global Systems\", 22996.73), (\"Global Gamma Inc.\", 22347.26), (\"Apex Beta Solutions\", 21437.38), (\"Prime Delta Group\", 21370.87), (\"Elite Beta Solutions\", 21368.989999999998), (\"Apex Delta Ltd.\", 21237.75), (\"Apex Global Corp.\", 21099.37), (\"Elite Beta Systems\", 21015.54), (\"Summit Apex Solutions\", 20996.52), (\"Delta Alpha Ltd.\", 20833.36), (\"Next Delta Group\", 20516.51), (\"Alpha Alpha Inc.\", 20435.45), (\"Summit Elite Inc.\", 20419.61), (\"Apex Global Ltd.\", 20318.87), (\"Elite Apex Systems\", 19295.28), (\"Summit Next Corp.\", 19121.12), (\"Prime Summit Corp.\", 18900.52), (\"Alpha Delta Solutions\", 18879.149999999998), (\"Alpha Beta Systems\", 18483.66), (\"Gamma Delta Solutions\", 18096.23), (\"Global Elite Solutions\", 18045.45), (\"Apex Apex Systems\", 18018.079999999998), (\"Beta Summit Group\", 18001.91), (\"Elite Delta Systems\", 17946.71), (\"Prime Alpha Ltd.\", 17416.34), (\"Gamma Apex Solutions\", 17306.42), (\"Apex Gamma Inc.\", 17139.26), (\"Next Prime Systems\", 16872.02), (\"Elite Summit Group\", 16566.47), (\"Next Gamma Corp.\", 15934.57), (\"Gamma Gamma Ltd.\", 15862.529999999999), (\"Alpha Prime Corp.\", 15729.28), (\"Elite Next Solutions\", 15560.98), (\"Delta Prime Solutions\", 15499.59), (\"Prime Elite Ltd.\", 15488.94), (\"Elite Prime Group\", 15485.220000000001), (\"Elite Alpha Group\", 15383.08), (\"Delta Gamma Ltd.\", 15195.85), (\"Apex Gamma Group\", 15145.18), (\"Alpha Global Solutions\", 14875.33), (\"Alpha Elite Group\", 14665.53), (\"Elite Elite Corp.\", 14570.35), (\"Beta Delta Solutions\", 14294.869999999999), (\"Summit Next Inc.\", 13825.41), (\"Global Elite Systems\", 13712.35), (\"Alpha Next Inc.\", 13559.119999999999), (\"Prime Elite Group\", 13520.48), (\"Summit Delta Group\", 13183.18), (\"Alpha Alpha Systems\", 13160.74), (\"Delta Apex Solutions\", 12977.83), (\"Delta Apex Systems\", 12958.61), (\"Delta Beta Group\", 12935.89), (\"Next Prime Corp.\", 12880.5), (\"Prime Apex Ltd.\", 12760.88), (\"Gamma Alpha Ltd.\", 12726.65), (\"Global Next Corp.\", 12713.49), (\"Delta Beta Solutions\", 12702.26), (\"Alpha Beta Inc.\", 12548.210000000001), (\"Alpha Delta Group\", 12407.050000000001), (\"Delta Global Inc.\", 12324.470000000001), (\"Apex Next Systems\", 12303.35), (\"Prime Summit Systems\", 12289.27), (\"Gamma Next Corp.\", 12276.27), (\"Next Apex Ltd.\", 12242.37), (\"Alpha Delta Inc.\", 12208.0), (\"Elite Next Corp.\", 12114.66), (\"Alpha Elite Solutions\", 12049.62), (\"Summit Summit Group\", 11964.59), (\"Global Prime Solutions\", 11883.68), (\"Delta Summit Corp.\", 11842.46), (\"Delta Delta Inc.\", 11412.87), (\"Summit Next Group\", 11398.26), (\"Elite Summit Inc.\", 10929.82), (\"Beta Gamma Solutions\", 10669.15), (\"Gamma Prime Group\", 10357.81), (\"Summit Alpha Group\", 10334.07), (\"Gamma Alpha Group\", 9850.58), (\"Beta Apex Group\", 9037.69), (\"Next Elite Solutions\", 9035.61), (\"Prime Gamma Corp.\", 8797.810000000001), (\"Summit Summit Corp.\", 8635.11), (\"Alpha Delta Ltd.\", 8333.56), (\"Delta Beta Corp.\", 7363.14), (\"Next Apex Systems\", 6928.08), (\"Alpha Alpha Ltd.\", 6164.42), (\"Prime Delta Ltd.\", 6147.27), (\"Next Alpha Group\", 5312.73), (\"Beta Prime Systems\", 4557.05), (\"Global Next Group\", 2829.97)]\"}",
+        "planned_agent_v3_sql_result":"[('Summit Prime Systems', 1396098.55), ('Summit Beta Solutions', 1381510.77), ('Global Prime Inc.', 1168292.52), ('Next Beta Inc.', 1115157.41), ('Apex Elite Solutions', 1043337.08), ('Beta Next Systems', 1036708.41), ('Delta Elite Inc.', 993777.47), ('Apex Apex Ltd.', 990927.72), ('Prime Delta Solutions', 959868.83), ('Beta Next Group', 931841.51), ('Apex Alpha Corp.', 924637.22), ('Next Beta Group', 906313.11), ('Prime Apex Solutions', 901600.77), ('Beta Global Inc.', 899313.9), ('Global Next Ltd.', 887552.48), ('Prime Alpha Systems', 854921.74), ('Elite Apex Group', 854360.66), ('Next Beta Ltd.', 830912.31), ('Summit Alpha Corp.', 817991.09), ('Gamma Beta Group', 816000.06), ('Apex Prime Corp.', 799005.91), ('Global Apex Inc.', 781889.99), ('Next Delta Solutions', 767000.3), ('Gamma Beta Ltd.', 758513.08), ('Elite Delta Group', 741698.56), ('Next Apex Group', 700475.05), ('Global Beta Ltd.', 689986.89), ('Delta Global Systems', 670070.36), ('Delta Elite Systems', 648457.51), ('Next Apex Corp.', 638662.75), ('Summit Global Ltd.', 633335.04), ('Apex Global Solutions', 606929.23), ('Summit Elite Solutions', 605678.11), ('Summit Prime Ltd.', 603463.14), ('Global Beta Corp.', 584937.93), ('Apex Next Group', 578342.8), ('Elite Alpha Systems', 576936.3), ('Next Apex Solutions', 569289.8), ('Global Gamma Corp.', 566523.67), ('Prime Prime Ltd.', 562859.66), ('Apex Elite Systems', 559027.7), ('Beta Beta Group', 553828.77), ('Alpha Alpha Corp.', 552103.29), ('Next Prime Group', 551300.88), ('Global Next Systems', 547321.59), ('Apex Alpha Group', 543498.39), ('Next Delta Ltd.', 535952.32), ('Apex Delta Group', 534995.39), ('Beta Apex Solutions', 525920.84), ('Delta Prime Inc.', 523683.08999999997), ('Next Summit Group', 522830.68), ('Summit Summit Solutions', 520437.43), ('Summit Alpha Solutions', 514186.58), ('Alpha Apex Solutions', 511185.63), ('Prime Next Ltd.', 501882.93), ('Elite Delta Solutions', 497085.23), ('Gamma Gamma Corp.', 493562.81), ('Summit Gamma Systems', 493001.34), ('Gamma Global Solutions', 491919.24), ('Elite Gamma Corp.', 491621.62), ('Apex Delta Corp.', 491401.61), ('Delta Gamma Systems', 490987.3), ('Alpha Apex Corp.', 490174.92), ('Global Alpha Ltd.', 490051.4), ('Beta Prime Corp.', 489657.27999999997), ('Apex Alpha Ltd.', 488015.77), ('Beta Gamma Ltd.', 487087.54), ('Gamma Next Inc.', 486821.68), ('Beta Delta Inc.', 486352.42), ('Beta Next Solutions', 484354.66), ('Summit Delta Solutions', 482543.25), ('Next Gamma Solutions', 481894.59), ('Beta Elite Systems', 481295.02999999997), ('Beta Next Ltd.', 475895.45), ('Alpha Beta Group', 473243.94), ('Alpha Prime Solutions', 466154.9), ('Beta Apex Systems', 465413.25), ('Apex Prime Inc.', 465236.22), ('Alpha Summit Corp.', 464912.26), ('Alpha Summit Group', 460668.71), ('Elite Delta Corp.', 459449.73), ('Alpha Delta Systems', 456881.51), ('Apex Alpha Inc.', 452019.02), ('Apex Next Inc.', 450142.41), ('Elite Summit Corp.', 447842.1), ('Beta Beta Solutions', 446951.85), ('Prime Elite Solutions', 444728.11), ('Global Prime Ltd.', 442765.37), ('Summit Next Solutions', 438647.83999999997), ('Delta Delta Systems', 437150.56), ('Next Alpha Corp.', 433478.68), ('Gamma Summit Ltd.', 431748.56), ('Alpha Gamma Inc.', 431598.82), ('Beta Alpha Corp.', 425597.58), ('Delta Next Inc.', 423806.45), ('Apex Gamma Ltd.', 420817.51), ('Elite Global Group', 417136.55), ('Global Global Group', 416774.77999999997), ('Summit Global Group', 413045.0), ('Summit Prime Solutions', 410694.32), ('Elite Beta Corp.', 408366.59), ('Beta Summit Corp.', 407421.42), ('Summit Delta Systems', 405112.87), ('Beta Next Corp.', 405054.36), ('Global Delta Solutions', 404955.91), ('Gamma Elite Group', 403001.93), ('Next Beta Solutions', 401833.83), ('Summit Global Inc.', 398957.36), ('Apex Summit Systems', 397896.45), ('Summit Beta Group', 397357.09), ('Gamma Alpha Inc.', 397015.6), ('Global Prime Group', 396906.02), ('Gamma Next Group', 395242.66), ('Apex Summit Inc.', 388173.97000000003), ('Elite Global Systems', 386777.25), ('Gamma Apex Systems', 385693.17), ('Gamma Prime Systems', 382815.4), ('Gamma Elite Inc.', 382248.79), ('Summit Global Corp.', 379929.5), ('Beta Prime Solutions', 379670.17), ('Apex Summit Corp.', 376553.34), ('Prime Global Ltd.', 375806.27), ('Summit Elite Systems', 374121.36), ('Beta Gamma Corp.', 373350.86), ('Gamma Elite Corp.', 372138.47000000003), ('Alpha Elite Ltd.', 367839.93), ('Elite Apex Ltd.', 367496.31), ('Summit Alpha Ltd.', 367066.46), ('Summit Beta Corp.', 367060.48), ('Elite Prime Ltd.', 366972.62), ('Next Prime Inc.', 363292.06), ('Elite Gamma Solutions', 358700.17), ('Next Global Ltd.', 353325.8), ('Global Elite Ltd.', 352621.96), ('Delta Elite Ltd.', 351550.62), ('Prime Apex Inc.', 351185.41), ('Apex Delta Solutions', 347436.13), ('Apex Alpha Solutions', 342485.3), ('Gamma Beta Solutions', 342021.04), ('Elite Elite Group', 338957.43), ('Delta Gamma Group', 335769.52), ('Apex Global Inc.', 331672.39), ('Gamma Delta Systems', 331241.78), ('Elite Elite Systems', 330905.75), ('Global Summit Group', 330486.22), ('Alpha Gamma Solutions', 326244.0), ('Global Apex Solutions', 323229.5), ('Global Elite Group', 322601.16), ('Alpha Global Inc.', 322353.0), ('Delta Prime Systems', 319713.32), ('Beta Delta Systems', 307598.83), ('Summit Elite Corp.', 297913.38), ('Gamma Prime Ltd.', 297829.69), ('Apex Prime Group', 293939.38), ('Beta Summit Systems', 292972.04), ('Beta Global Ltd.', 290275.91), ('Apex Delta Inc.', 288262.12), ('Next Global Solutions', 282866.05), ('Next Delta Inc.', 281175.46), ('Prime Next Solutions', 280242.46), ('Summit Global Systems', 274982.25), ('Alpha Alpha Solutions', 273857.26), ('Beta Elite Solutions', 268721.83), ('Next Beta Corp.', 267122.84), ('Prime Gamma Solutions', 261739.01), ('Beta Alpha Solutions', 260086.18), ('Beta Summit Ltd.', 259924.46000000002), ('Global Summit Systems', 251958.74), ('Alpha Summit Systems', 217128.72), ('Prime Alpha Group', 187231.41999999998), ('Elite Next Inc.', 186842.56), ('Gamma Alpha Corp.', 170305.52), ('Next Global Corp.', 167392.61000000002), ('Beta Delta Group', 165042.18), ('Apex Beta Inc.', 160701.41), ('Global Apex Group', 151333.91), ('Next Prime Ltd.', 150181.52), ('Elite Gamma Ltd.', 149409.33000000002), ('Apex Delta Systems', 147783.87), ('Next Summit Systems', 147291.87), ('Summit Elite Group', 143750.5), ('Delta Prime Ltd.', 128842.28), ('Summit Prime Inc.', 128595.76000000001), ('Next Next Systems', 121190.58), ('Summit Gamma Corp.', 120990.08), ('Beta Beta Ltd.', 117080.4), ('Alpha Beta Solutions', 116205.17), ('Gamma Gamma Group', 115600.67), ('Alpha Gamma Group', 112044.77), ('Prime Global Solutions', 109579.77), ('Summit Gamma Inc.', 108662.29), ('Beta Elite Inc.', 107907.02), ('Delta Elite Corp.', 106170.11), ('Prime Elite Corp.', 105328.66), ('Alpha Gamma Systems', 101989.12), ('Prime Alpha Inc.', 100905.5), ('Prime Gamma Group', 98619.12), ('Summit Delta Corp.', 95779.03), ('Beta Elite Group', 94149.74), ('Summit Apex Inc.', 93983.84), ('Beta Alpha Inc.', 93903.65), ('Gamma Global Ltd.', 91816.52), ('Prime Apex Group', 91314.85), ('Elite Global Corp.', 90199.99), ('Elite Prime Solutions', 89864.52), ('Prime Next Inc.', 89810.28), ('Prime Prime Systems', 89003.4), ('Summit Global Solutions', 88812.03), ('Elite Prime Corp.', 88566.45), ('Gamma Global Group', 88000.46), ('Global Elite Corp.', 87264.78), ('Global Global Corp.', 86430.94), ('Elite Next Group', 85223.55), ('Delta Elite Solutions', 85207.76), ('Delta Next Ltd.', 85074.16), ('Beta Beta Corp.', 82215.85), ('Global Delta Inc.', 81455.91), ('Gamma Apex Corp.', 79584.2), ('Gamma Delta Inc.', 76429.19), ('Prime Elite Systems', 75703.59), ('Summit Beta Inc.', 74959.26), ('Prime Gamma Systems', 74623.82), ('Beta Next Inc.', 73002.17), ('Delta Gamma Solutions', 71601.79), ('Global Global Solutions', 71480.8), ('Summit Gamma Group', 70700.76), ('Summit Beta Systems', 70639.7), ('Next Elite Corp.', 66364.81), ('Gamma Global Corp.', 65736.85), ('Global Delta Corp.', 65687.04000000001), ('Elite Summit Systems', 65184.58), ('Delta Apex Ltd.', 64924.77), ('Next Delta Corp.', 64787.05), ('Next Next Corp.', 63823.21), ('Gamma Beta Corp.', 62290.33), ('Prime Global Systems', 62056.93), ('Prime Beta Systems', 62017.840000000004), ('Prime Alpha Solutions', 61475.55), ('Apex Apex Solutions', 60954.15), ('Summit Apex Systems', 60776.72), ('Apex Beta Corp.', 60318.01), ('Next Global Group', 60278.61), ('Prime Next Corp.', 59758.0), ('Elite Alpha Corp.', 59623.9), ('Delta Prime Corp.', 59293.6), ('Summit Delta Inc.', 58618.24), ('Apex Beta Systems', 58442.09), ('Global Global Ltd.', 58296.78), ('Summit Gamma Solutions', 58085.12), ('Global Summit Corp.', 57903.99), ('Beta Alpha Group', 57259.29), ('Prime Summit Solutions', 56836.04), ('Delta Global Ltd.', 56016.35), ('Elite Gamma Group', 55373.479999999996), ('Apex Gamma Solutions', 55216.68), ('Delta Global Group', 54696.96), ('Apex Summit Solutions', 54682.39), ('Prime Prime Inc.', 54669.7), ('Elite Global Ltd.', 54608.35), ('Apex Next Corp.', 54369.79), ('Elite Next Ltd.', 53944.15), ('Alpha Global Ltd.', 53381.31), ('Gamma Gamma Inc.', 53270.16), ('Beta Gamma Inc.', 53016.12), ('Gamma Delta Ltd.', 52945.78), ('Beta Alpha Ltd.', 52890.8), ('Elite Alpha Ltd.', 52735.77), ('Gamma Beta Inc.', 52427.5), ('Alpha Summit Ltd.', 52218.35), ('Next Elite Ltd.', 51973.89), ('Gamma Summit Systems', 51964.840000000004), ('Next Gamma Ltd.', 51232.79), ('Prime Gamma Ltd.', 51159.42), ('Next Elite Group', 51128.14), ('Prime Prime Group', 50578.659999999996), ('Elite Gamma Systems', 50547.45), ('Delta Delta Group', 50506.08), ('Global Summit Solutions', 50419.32), ('Gamma Global Systems', 50337.84), ('Next Summit Solutions', 50237.58), ('Gamma Next Ltd.', 50165.17), ('Prime Delta Systems', 50133.53), ('Summit Apex Ltd.', 49443.16), ('Global Global Systems', 48957.5), ('Beta Alpha Systems', 48566.97), ('Elite Elite Ltd.', 47769.13), ('Global Beta Group', 47449.91), ('Elite Summit Solutions', 47046.83), ('Elite Alpha Inc.', 46582.409999999996), ('Prime Global Corp.', 45855.8), ('Elite Next Systems', 45767.76), ('Prime Alpha Corp.', 45544.26), ('Delta Alpha Inc.', 45370.51), ('Beta Prime Inc.', 44978.6), ('Next Gamma Systems', 44830.409999999996), ('Alpha Next Systems', 44179.25), ('Elite Global Solutions', 43835.36), ('Global Next Inc.', 43828.979999999996), ('Apex Apex Corp.', 43703.21), ('Delta Apex Inc.', 43442.11), ('Elite Alpha Solutions', 43414.159999999996), ('Apex Apex Inc.', 42899.52), ('Next Gamma Inc.', 42756.4), ('Alpha Summit Inc.', 42740.8), ('Alpha Global Group', 42541.909999999996), ('Delta Alpha Systems', 42298.75), ('Prime Apex Corp.', 41970.13), ('Delta Apex Group', 41877.19), ('Global Delta Ltd.', 41723.88), ('Global Apex Ltd.', 41689.53), ('Summit Summit Ltd.', 41555.8), ('Delta Summit Solutions', 41390.97), ('Next Summit Corp.', 41232.36), ('Beta Apex Ltd.', 40683.81), ('Global Beta Solutions', 40623.49), ('Gamma Prime Solutions', 40595.14), ('Prime Beta Ltd.', 40273.06), ('Apex Beta Group', 39826.67), ('Next Delta Systems', 39214.71), ('Gamma Beta Systems', 39122.03), ('Beta Prime Group', 38865.3), ('Apex Elite Ltd.', 38635.85), ('Alpha Apex Inc.', 38549.130000000005), ('Global Beta Systems', 37903.15), ('Delta Summit Group', 37867.93), ('Delta Summit Systems', 37372.6), ('Next Prime Solutions', 37132.59), ('Gamma Global Inc.', 36617.68), ('Next Alpha Solutions', 36079.61), ('Next Elite Inc.', 35946.7), ('Beta Apex Corp.', 35762.2), ('Next Alpha Inc.', 34983.18), ('Gamma Apex Group', 34868.83), ('Prime Prime Solutions', 34358.89), ('Alpha Prime Group', 34106.060000000005), ('Prime Beta Group', 34045.5), ('Global Gamma Systems', 34021.92), ('Summit Summit Systems', 33838.72), ('Global Next Solutions', 33039.15), ('Global Summit Ltd.', 32560.75), ('Gamma Summit Inc.', 32315.17), ('Prime Delta Corp.', 31069.73), ('Gamma Alpha Solutions', 31029.29), ('Delta Beta Ltd.', 30954.989999999998), ('Summit Alpha Inc.', 30580.539999999997), ('Apex Gamma Corp.', 30574.24), ('Apex Next Solutions', 30551.41), ('Alpha Apex Group', 30323.64), ('Alpha Delta Corp.', 30305.8), ('Alpha Elite Corp.', 30145.36), ('Global Gamma Solutions', 29939.55), ('Beta Gamma Group', 29904.28), ('Prime Beta Solutions', 29195.1), ('Prime Summit Ltd.', 28925.710000000003), ('Global Global Inc.', 28823.36), ('Next Summit Inc.', 28685.47), ('Next Next Group', 28675.02), ('Gamma Alpha Systems', 28573.48), ('Prime Prime Corp.', 28122.49), ('Beta Summit Solutions', 27703.31), ('Gamma Summit Group', 27585.6), ('Global Apex Corp.', 27463.56), ('Alpha Gamma Ltd.', 27146.29), ('Gamma Apex Inc.', 27134.170000000002), ('Gamma Elite Systems', 26918.58), ('Alpha Beta Corp.', 26803.920000000002), ('Next Next Inc.', 26739.329999999998), ('Apex Beta Ltd.', 26724.35), ('Next Gamma Group', 26658.52), ('Beta Elite Corp.', 26515.95), ('Summit Beta Ltd.', 26157.25), ('Apex Prime Systems', 26144.120000000003), ('Gamma Summit Corp.', 25998.36), ('Alpha Global Corp.', 25773.5), ('Beta Beta Inc.', 25568.37), ('Delta Next Systems', 25478.08), ('Beta Delta Ltd.', 25374.09), ('Apex Gamma Systems', 25120.489999999998), ('Next Alpha Ltd.', 24716.06), ('Apex Global Systems', 24652.899999999998), ('Global Elite Inc.', 24365.89), ('Apex Prime Solutions', 24271.67), ('Elite Elite Inc.', 23843.93), ('Summit Next Systems', 23843.33), ('Gamma Next Solutions', 23578.14), ('Apex Prime Ltd.', 23297.24), ('Beta Global Systems', 22996.73), ('Global Gamma Inc.', 22347.26), ('Apex Beta Solutions', 21437.38), ('Prime Delta Group', 21370.87), ('Elite Beta Solutions', 21368.989999999998), ('Apex Delta Ltd.', 21237.75), ('Apex Global Corp.', 21099.37), ('Elite Beta Systems', 21015.54), ('Summit Apex Solutions', 20996.52), ('Delta Alpha Ltd.', 20833.36), ('Next Delta Group', 20516.51), ('Alpha Alpha Inc.', 20435.45), ('Summit Elite Inc.', 20419.61), ('Apex Global Ltd.', 20318.87), ('Elite Apex Systems', 19295.28), ('Summit Next Corp.', 19121.12), ('Prime Summit Corp.', 18900.52), ('Alpha Delta Solutions', 18879.149999999998), ('Alpha Beta Systems', 18483.66), ('Gamma Delta Solutions', 18096.23), ('Global Elite Solutions', 18045.45), ('Apex Apex Systems', 18018.079999999998), ('Beta Summit Group', 18001.91), ('Elite Delta Systems', 17946.71), ('Prime Alpha Ltd.', 17416.34), ('Gamma Apex Solutions', 17306.42), ('Apex Gamma Inc.', 17139.26), ('Next Prime Systems', 16872.02), ('Elite Summit Group', 16566.47), ('Next Gamma Corp.', 15934.57), ('Gamma Gamma Ltd.', 15862.529999999999), ('Alpha Prime Corp.', 15729.28), ('Elite Next Solutions', 15560.98), ('Delta Prime Solutions', 15499.59), ('Prime Elite Ltd.', 15488.94), ('Elite Prime Group', 15485.220000000001), ('Elite Alpha Group', 15383.08), ('Delta Gamma Ltd.', 15195.85), ('Apex Gamma Group', 15145.18), ('Alpha Global Solutions', 14875.33), ('Alpha Elite Group', 14665.53), ('Elite Elite Corp.', 14570.35), ('Beta Delta Solutions', 14294.869999999999), ('Summit Next Inc.', 13825.41), ('Global Elite Systems', 13712.35), ('Alpha Next Inc.', 13559.119999999999), ('Prime Elite Group', 13520.48), ('Summit Delta Group', 13183.18), ('Alpha Alpha Systems', 13160.74), ('Delta Apex Solutions', 12977.83), ('Delta Apex Systems', 12958.61), ('Delta Beta Group', 12935.89), ('Next Prime Corp.', 12880.5), ('Prime Apex Ltd.', 12760.88), ('Gamma Alpha Ltd.', 12726.65), ('Global Next Corp.', 12713.49), ('Delta Beta Solutions', 12702.26), ('Alpha Beta Inc.', 12548.210000000001), ('Alpha Delta Group', 12407.050000000001), ('Delta Global Inc.', 12324.470000000001), ('Apex Next Systems', 12303.35), ('Prime Summit Systems', 12289.27), ('Gamma Next Corp.', 12276.27), ('Next Apex Ltd.', 12242.37), ('Alpha Delta Inc.', 12208.0), ('Elite Next Corp.', 12114.66), ('Alpha Elite Solutions', 12049.62), ('Summit Summit Group', 11964.59), ('Global Prime Solutions', 11883.68), ('Delta Summit Corp.', 11842.46), ('Delta Delta Inc.', 11412.87), ('Summit Next Group', 11398.26), ('Elite Summit Inc.', 10929.82), ('Beta Gamma Solutions', 10669.15), ('Gamma Prime Group', 10357.81), ('Summit Alpha Group', 10334.07), ('Gamma Alpha Group', 9850.58), ('Beta Apex Group', 9037.69), ('Next Elite Solutions', 9035.61), ('Prime Gamma Corp.', 8797.810000000001), ('Summit Summit Corp.', 8635.11), ('Alpha Delta Ltd.', 8333.56), ('Delta Beta Corp.', 7363.14), ('Next Apex Systems', 6928.08), ('Alpha Alpha Ltd.', 6164.42), ('Prime Delta Ltd.', 6147.27), ('Next Alpha Group', 5312.73), ('Beta Prime Systems', 4557.05), ('Global Next Group', 2829.97)]",
+        "planned_agent_v3_correct":true,
+        "problematic":false
+    },
+    {
+        "id":28,
+        "question":"產品類別 Electronics 的最大購買客戶是誰？",
+        "expected":"Summit Beta Solutions",
+        "type":"string",
+        "planned_agent_v3_actual":"{\n  \"sql_query\": \"SELECT \\\"Customer Name\\\" FROM sales_data WHERE \\\"Product Category\\\" = 'Electronics' GROUP BY \\\"Customer Name\\\" ORDER BY SUM(\\\"Quantity\\\") DESC LIMIT 1;\",\n  \"results\": [\n    [\n      \"Summit Beta Solutions\"\n    ]\n  ]\n}",
+        "planned_agent_v3_sql_result":"[('Summit Beta Solutions',)]",
+        "planned_agent_v3_correct":true,
+        "problematic":false
+    },
+    {
+        "id":29,
+        "question":"哪一個產品的平均單價 (ASP) 最高？",
+        "expected":"Cloud License (Annual)",
+        "type":"string",
+        "planned_agent_v3_actual":"{\"sql_query\": \"SELECT MAX(ASP) FROM sales_data;\", \"results\": [[\"5783.08\"]]}",
+        "planned_agent_v3_sql_result":"[(5783.08,)]",
+        "planned_agent_v3_correct":false,
+        "problematic":true
+    },
+    {
+        "id":30,
+        "question":"各個區域 (Region) 最偏好（銷售額最高）的產品類別分別為何？",
+        "expected":"{'APAC': 'Electronics', 'EMEA': 'Electronics', 'LATAM': 'Electronics', 'North America': 'Electronics'}",
+        "type":"dataframe",
+        "planned_agent_v3_actual":"```sql\nSELECT Region, \"Product Category\", SUM(\"Total Revenue\") as total_revenue \nFROM sales_data \nGROUP BY Region, \"Product Category\" \nORDER BY total_revenue DESC;\n```\n[('North America', 'Electronics', 23839311.54), ('EMEA', 'Electronics', 17194037.3), ('APAC', 'Electronics', 14729441.51), ('North America', 'Software', 10776363.8), ('EMEA', 'Software', 7770392.3), ('APAC', 'Software', 7288014.71), ('North America', 'Office Supplies', 5316688.94), ('EMEA', 'Office Supplies', 3890098.57), ('LATAM', 'Electronics', 3495783.58), ('APAC', 'Office Supplies', 3269243.93), ('LATAM', 'Software', 1329216.17), ('LATAM', 'Office Supplies', 570770.83)]",
+        "planned_agent_v3_sql_result":"[('North America', 'Electronics', 23839311.54), ('EMEA', 'Electronics', 17194037.3), ('APAC', 'Electronics', 14729441.51), ('North America', 'Software', 10776363.8), ('EMEA', 'Software', 7770392.3), ('APAC', 'Software', 7288014.71), ('North America', 'Office Supplies', 5316688.94), ('EMEA', 'Office Supplies', 3890098.57), ('LATAM', 'Electronics', 3495783.58), ('APAC', 'Office Supplies', 3269243.93), ('LATAM', 'Software', 1329216.17), ('LATAM', 'Office Supplies', 570770.83)]",
+        "planned_agent_v3_correct":false,
+        "problematic":true
+    }
+]
