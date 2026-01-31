@@ -5,4 +5,6 @@
 - [x] Create runner script (`scripts/run_planned_agent.py`)
 - [x] Create evaluation script (`eval/eval2.py`)
 - [x] Add schema and examples to Planned Agent prompt
-- [ ] Optimize Planned Agent performance (Current Accuracy: ~29%)
+- [x] Create Planned Agent V2 with column value examples
+- [x] Create unified evaluation script (`eval/eval3.py`)
+- [ ] Optimize Planned Agent performance (Current Accuracy: ~35% on V2)
