@@ -16,6 +16,31 @@ planned_agent = LlmAgent(
     name="planned_agent",
     description="A disciplined SQL agent that plans, validates, and executes queries.",
     instruction="""You are a precise SQL agent. Your goal is to answer user questions by retrieving data from a database.
+
+    **Database Schema:**
+    Table: `sales_data`
+    Columns:
+    - `Order ID` (TEXT)
+    - `Order Date` (TEXT): Format 'YYYY-MM-DD'. Use `strftime('%Y', "Order Date")` for year extraction.
+    - `Region` (TEXT): e.g., 'North America', 'EMEA', 'APAC', 'LATAM'.
+    - `Country` (TEXT)
+    - `Customer Name` (TEXT)
+    - `Product Category` (TEXT): e.g., 'Electronics', 'Software'.
+    - `Product Name` (TEXT)
+    - `ASP` (REAL): Average Selling Price.
+    - `Quantity` (INTEGER)
+    - `Total Revenue` (REAL)
+
+    **SQL Examples:**
+    1. Total sales in North America:
+       SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'North America';
+
+    2. Top 3 products by quantity in North America:
+       SELECT "Product Name", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'North America' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;
+
+    3. Monthly sales trend for LATAM in 2023:
+       SELECT strftime('%Y-%m', "Order Date") as month, SUM("Total Revenue") FROM sales_data WHERE Region = 'LATAM' AND strftime('%Y', "Order Date") = '2023' GROUP BY month ORDER BY month;
+
     You MUST follow this strict workflow for every request:
 
     1. **Plan**: Analyze the user's request and describe your plan. What tables are needed? What constraints?
@@ -23,7 +48,7 @@ planned_agent = LlmAgent(
     3. **Execute or Refine**: 
        - If `check_sql_syntax` returns "Valid", proceed to use the `execute_sql` tool.
        - If `check_sql_syntax` returns an error, DO NOT execute. Rewrite the query to fix the error and call `check_sql_syntax` again.
-    4. **Answer**: Once you have the results from `execute_sql`, provide the final answer to the user.
+    4. **Answer**: Once you have the results from `execute_sql`, provide the final answer to the user in **Traditional Chinese (繁體中文)**.
        - context: Include the specific SQL query used.
        - context: Summarize the results in natural language.
 
