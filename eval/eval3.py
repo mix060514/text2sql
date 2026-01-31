@@ -27,9 +27,11 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src"
 # Import Agents
 from text2sql.agents.planned_agent.agent import planned_agent
 from text2sql.agents.planned_agent.agent_v2 import planned_agent_v2
+from text2sql.agents.planned_agent.agent_v3 import planned_agent_v3
 from google.adk.sessions import InMemorySessionService
 from google.adk.runners import Runner
 from google.genai import types
+
 
 # MLflow Setup
 mlflow.set_tracking_uri("http://localhost:5000")
@@ -275,5 +277,7 @@ def run_comparative_evaluation(agents, eval_set):
 
 
 if __name__ == "__main__":
-    agents_to_eval = [planned_agent, planned_agent_v2]
+    agents_to_eval = [planned_agent_v3]
+    # To run all agents uncomment the line below
+    # agents_to_eval = [planned_agent, planned_agent_v2, planned_agent_v3]
     run_comparative_evaluation(agents_to_eval, eval_set)
