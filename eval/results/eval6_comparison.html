@@ -1,0 +1,1002 @@
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>id</th>
+      <th>question</th>
+      <th>expected</th>
+      <th>type</th>
+      <th>planned_agent_v6_actual</th>
+      <th>planned_agent_v6_sql_query</th>
+      <th>planned_agent_v6_sql_result</th>
+      <th>planned_agent_v6_correct</th>
+      <th>problematic</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>North America 的總銷售額是多少？</td>
+      <td>39932364.28</td>
+      <td>number</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'North America';</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>北美 的總銷售額是多少？</td>
+      <td>39932364.28</td>
+      <td>number</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'North America'</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>北美洲 的總銷售額是多少？</td>
+      <td>39932364.28</td>
+      <td>number</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'North America'</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
+      <td>NA 的總銷售額是多少？</td>
+      <td>39932364.28</td>
+      <td>number</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'North America'</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>4</td>
+      <td>LATAM 的總銷售額是多少？</td>
+      <td>5395770.58</td>
+      <td>number</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'LATAM'</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>5</td>
+      <td>拉美 的總銷售額是多少？</td>
+      <td>5395770.58</td>
+      <td>number</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'LATAM'</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>6</td>
+      <td>南美 的總銷售額是多少？</td>
+      <td>5395770.58</td>
+      <td>number</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'LATAM'</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>7</td>
+      <td>拉丁美洲 的總銷售額是多少？</td>
+      <td>5395770.58</td>
+      <td>number</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'LATAM'</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>8</td>
+      <td>Latin America 的總銷售額是多少？</td>
+      <td>5395770.58</td>
+      <td>number</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'LATAM'</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>9</td>
+      <td>EMEA 的總銷售額是多少？</td>
+      <td>28854528.17</td>
+      <td>number</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'EMEA'</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>10</td>
+      <td>歐洲中東非洲 的總銷售額是多少？</td>
+      <td>28854528.17</td>
+      <td>number</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'EMEA'</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>11</td>
+      <td>歐非中東 的總銷售額是多少？</td>
+      <td>28854528.17</td>
+      <td>number</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'EMEA'</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>12</td>
+      <td>Europe, Middle East, and Africa 的總銷售額是多少？</td>
+      <td>28854528.17</td>
+      <td>number</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'EMEA'</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>13</td>
+      <td>APAC 的總銷售額是多少？</td>
+      <td>25286700.15</td>
+      <td>number</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'APAC'</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>14</td>
+      <td>亞太區 的總銷售額是多少？</td>
+      <td>25286700.15</td>
+      <td>number</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'APAC'</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>15</td>
+      <td>亞太地區 的總銷售額是多少？</td>
+      <td>25286700.15</td>
+      <td>number</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'APAC'</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>16</td>
+      <td>Asia Pacific 的總銷售額是多少？</td>
+      <td>25286700.15</td>
+      <td>number</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'APAC'</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>17</td>
+      <td>North America 銷售量最高的前三個產品是什麼？</td>
+      <td>['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27"']</td>
+      <td>list</td>
+      <td>SELECT "Product Name", SUM("Quantity") as total_qty FROM sales_data WHERE Region = 'North America' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>18</td>
+      <td>北美 銷售量最高的前三個產品是什麼？</td>
+      <td>['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27"']</td>
+      <td>list</td>
+      <td>SELECT "Product Name", SUM("Quantity") as total_qty FROM sales_data WHERE Region = 'North America' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>19</td>
+      <td>北美洲 銷售量最高的前三個產品是什麼？</td>
+      <td>['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27"']</td>
+      <td>list</td>
+      <td>SELECT "Product Name", SUM("Quantity") as total_qty FROM sales_data WHERE Region = 'North America' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>20</td>
+      <td>NA 銷售量最高的前三個產品是什麼？</td>
+      <td>['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27"']</td>
+      <td>list</td>
+      <td>SELECT "Product Name", SUM("Quantity") as total_qty FROM sales_data WHERE Region = 'North America' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>21</th>
+      <td>21</td>
+      <td>LATAM 銷售量最高的前三個產品是什麼？</td>
+      <td>['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27"']</td>
+      <td>list</td>
+      <td>SELECT "Product Name", SUM("Quantity") as total_qty FROM sales_data WHERE Region = 'LATAM' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <td>22</td>
+      <td>拉美 銷售量最高的前三個產品是什麼？</td>
+      <td>['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27"']</td>
+      <td>list</td>
+      <td>SELECT "Product Name", SUM("Quantity") as total_qty FROM sales_data WHERE Region = 'LATAM' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>23</th>
+      <td>23</td>
+      <td>南美 銷售量最高的前三個產品是什麼？</td>
+      <td>['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27"']</td>
+      <td>list</td>
+      <td>SELECT "Product Name", SUM("Quantity") as total_qty FROM sales_data WHERE Region = 'LATAM' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>24</td>
+      <td>拉丁美洲 銷售量最高的前三個產品是什麼？</td>
+      <td>['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27"']</td>
+      <td>list</td>
+      <td>SELECT "Product Name", SUM("Quantity") as total_qty FROM sales_data WHERE Region = 'LATAM' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>25</th>
+      <td>25</td>
+      <td>Latin America 銷售量最高的前三個產品是什麼？</td>
+      <td>['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27"']</td>
+      <td>list</td>
+      <td>SELECT "Product Name", SUM("Quantity") as total_qty FROM sales_data WHERE Region = 'LATAM' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>26</th>
+      <td>26</td>
+      <td>EMEA 銷售量最高的前三個產品是什麼？</td>
+      <td>['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']</td>
+      <td>list</td>
+      <td>SELECT "Product Name", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'EMEA' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>27</th>
+      <td>27</td>
+      <td>歐洲中東非洲 銷售量最高的前三個產品是什麼？</td>
+      <td>['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']</td>
+      <td>list</td>
+      <td>SELECT "Product Name", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'EMEA' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>28</th>
+      <td>28</td>
+      <td>歐非中東 銷售量最高的前三個產品是什麼？</td>
+      <td>['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']</td>
+      <td>list</td>
+      <td>SELECT "Product Name", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'EMEA' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <td>29</td>
+      <td>Europe, Middle East, and Africa 銷售量最高的前三個產品是什麼？</td>
+      <td>['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']</td>
+      <td>list</td>
+      <td>SELECT "Product Name", SUM("Quantity") as total_qty FROM sales_data WHERE Region = 'EMEA' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>30</th>
+      <td>30</td>
+      <td>APAC 銷售量最高的前三個產品是什麼？</td>
+      <td>['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']</td>
+      <td>list</td>
+      <td>SELECT "Product Name", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'APAC' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>31</th>
+      <td>31</td>
+      <td>亞太區 銷售量最高的前三個產品是什麼？</td>
+      <td>['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']</td>
+      <td>list</td>
+      <td>SELECT "Product Name", SUM("Quantity") as total_qty FROM sales_data WHERE Region = 'APAC' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>32</th>
+      <td>32</td>
+      <td>亞太地區 銷售量最高的前三個產品是什麼？</td>
+      <td>['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']</td>
+      <td>list</td>
+      <td>SELECT "Product Name", SUM("Quantity") as total_qty FROM sales_data WHERE Region = 'APAC' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>33</th>
+      <td>33</td>
+      <td>Asia Pacific 銷售量最高的前三個產品是什麼？</td>
+      <td>['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']</td>
+      <td>list</td>
+      <td>SELECT "Product Name", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'APAC' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>34</th>
+      <td>34</td>
+      <td>請列出 Electronics 類別在各年份的銷售額總計。</td>
+      <td>{'2023': 30090351.27, '2024': 29168222.66}</td>
+      <td>dataframe</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE "Product Category" = 'Electronics' GROUP BY strftime('%Y', "Order Date");</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>35</th>
+      <td>35</td>
+      <td>請列出 Software 類別在各年份的銷售額總計。</td>
+      <td>{'2023': 13178975.35, '2024': 13985011.63}</td>
+      <td>dataframe</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE "Product Category" = 'Software' GROUP BY strftime('%Y', "Order Date");</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>36</th>
+      <td>36</td>
+      <td>請列出 Office Supplies 類別在各年份的銷售額總計。</td>
+      <td>{'2023': 6769810.67, '2024': 6276991.6}</td>
+      <td>dataframe</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE "Product Category" = 'Office Supplies' GROUP BY strftime('%Y', "Order Date");</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>37</th>
+      <td>37</td>
+      <td>Canada 訂單數量最多的客戶是誰？</td>
+      <td>Summit Beta Solutions</td>
+      <td>string</td>
+      <td>SELECT Customer Name, COUNT("Order ID") as order_count FROM sales_data WHERE Country = 'Canada' GROUP BY "Customer Name" ORDER BY order_count DESC LIMIT 1;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>38</th>
+      <td>38</td>
+      <td>加拿大 訂單數量最多的客戶是誰？</td>
+      <td>Summit Beta Solutions</td>
+      <td>string</td>
+      <td>SELECT Customer Name, COUNT("Order ID") as order_count FROM sales_data WHERE Country = 'Canada' GROUP BY "Customer Name" ORDER BY order_count DESC LIMIT 1;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>39</th>
+      <td>39</td>
+      <td>India 訂單數量最多的客戶是誰？</td>
+      <td>Delta Global Systems</td>
+      <td>string</td>
+      <td>SELECT "Customer Name" FROM sales_data WHERE "Country" = 'India' ORDER BY COUNT("Order ID") DESC LIMIT 1;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>40</th>
+      <td>40</td>
+      <td>印度 訂單數量最多的客戶是誰？</td>
+      <td>Delta Global Systems</td>
+      <td>string</td>
+      <td>SELECT "Customer Name" FROM sales_data WHERE Country = 'India' ORDER BY COUNT("Order ID") DESC LIMIT 1;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>41</th>
+      <td>41</td>
+      <td>Germany 訂單數量最多的客戶是誰？</td>
+      <td>Summit Beta Solutions</td>
+      <td>string</td>
+      <td>SELECT Customer Name, COUNT("Order ID") as order_count FROM sales_data WHERE Country = 'Germany' GROUP BY "Customer Name" ORDER BY order_count DESC LIMIT 1;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>42</th>
+      <td>42</td>
+      <td>德國 訂單數量最多的客戶是誰？</td>
+      <td>Summit Beta Solutions</td>
+      <td>string</td>
+      <td>SELECT Customer Name, COUNT("Order ID") as order_count FROM sales_data WHERE Country = 'Germany' GROUP BY "Customer Name" ORDER BY order_count DESC LIMIT 1;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>43</th>
+      <td>43</td>
+      <td>德意志 訂單數量最多的客戶是誰？</td>
+      <td>Summit Beta Solutions</td>
+      <td>string</td>
+      <td>SELECT Customer Name, COUNT("Order ID") as order_count FROM sales_data WHERE Country = 'Germany' GROUP BY "Customer Name" ORDER BY order_count DESC LIMIT 1;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>44</th>
+      <td>44</td>
+      <td>Australia 訂單數量最多的客戶是誰？</td>
+      <td>Global Next Ltd.</td>
+      <td>string</td>
+      <td>SELECT Customer Name, COUNT("Order ID") as order_count FROM sales_data WHERE Country = 'Australia' GROUP BY "Customer Name" ORDER BY order_count DESC LIMIT 1;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>45</th>
+      <td>45</td>
+      <td>澳洲 訂單數量最多的客戶是誰？</td>
+      <td>Global Next Ltd.</td>
+      <td>string</td>
+      <td>SELECT Customer Name, COUNT("Order ID") as order_count FROM sales_data WHERE Country = 'Australia' GROUP BY "Customer Name" ORDER BY order_count DESC LIMIT 1;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>46</th>
+      <td>46</td>
+      <td>澳大利亞 訂單數量最多的客戶是誰？</td>
+      <td>Global Next Ltd.</td>
+      <td>string</td>
+      <td>SELECT Customer Name, COUNT("Order ID") as order_count FROM sales_data WHERE Country = 'Australia' GROUP BY "Customer Name" ORDER BY order_count DESC LIMIT 1;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>47</th>
+      <td>47</td>
+      <td>China 訂單數量最多的客戶是誰？</td>
+      <td>Apex Prime Corp.</td>
+      <td>string</td>
+      <td>SELECT Customer Name, COUNT("Order ID") as order_count FROM sales_data WHERE Country = 'China' GROUP BY "Customer Name" ORDER BY order_count DESC LIMIT 1;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>48</th>
+      <td>48</td>
+      <td>中國 訂單數量最多的客戶是誰？</td>
+      <td>Apex Prime Corp.</td>
+      <td>string</td>
+      <td>SELECT Customer Name, COUNT("Order ID") as order_count FROM sales_data WHERE Country = 'China' GROUP BY "Customer Name" ORDER BY order_count DESC LIMIT 1;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>49</th>
+      <td>49</td>
+      <td>大陸 訂單數量最多的客戶是誰？</td>
+      <td>Apex Prime Corp.</td>
+      <td>string</td>
+      <td>SELECT Customer Name, COUNT("Order ID") as order_count FROM sales_data WHERE Country = 'China' GROUP BY "Customer Name" ORDER BY order_count DESC LIMIT 1;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>50</th>
+      <td>50</td>
+      <td>PRC 訂單數量最多的客戶是誰？</td>
+      <td>Apex Prime Corp.</td>
+      <td>string</td>
+      <td>SELECT Customer Name, COUNT("Order ID") as order_count FROM sales_data WHERE Country = 'China' GROUP BY "Customer Name" ORDER BY order_count DESC LIMIT 1;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>51</th>
+      <td>51</td>
+      <td>2023 年哪一個季度的總銷售額表現最好？</td>
+      <td>Q4</td>
+      <td>string</td>
+      <td>SELECT \n  CASE \n    WHEN CAST(strftime('%m', "Order Date") AS INTEGER) BETWEEN 1 AND 3 THEN 'Q1'\n    WHEN CAST(strftime('%m', "Order Date") AS INTEGER) BETWEEN 4 AND 6 THEN 'Q2'\n    WHEN CAST(strftime('%m', "Order Date") AS INTEGER) BETWEEN 7 AND 9 THEN 'Q3'\n    ELSE 'Q4'\n  END as quarter,\n  SUM("Total Revenue") as revenue\nFROM sales_data\nWHERE strftime('%Y', "Order Date") = '2023'\nGROUP BY quarter \nORDER BY revenue DESC \nLIMIT 1;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>True</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>52</th>
+      <td>52</td>
+      <td>2024 年哪一個季度的總銷售額表現最好？</td>
+      <td>Q4</td>
+      <td>string</td>
+      <td>SELECT \n  CASE \n    WHEN CAST(strftime('%m', "Order Date") AS INTEGER) BETWEEN 1 AND 3 THEN 'Q1'\n    WHEN CAST(strftime('%m', "Order Date") AS INTEGER) BETWEEN 4 AND 6 THEN 'Q2'\n    WHEN CAST(strftime('%m', "Order Date") AS INTEGER) BETWEEN 7 AND 9 THEN 'Q3'\n    ELSE 'Q4'\n  END as quarter,\n  SUM("Total Revenue") as revenue\nFROM sales_data\nWHERE strftime('%Y', "Order Date") = '2024'\nGROUP BY quarter ORDER BY revenue DESC LIMIT 1;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>True</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>53</th>
+      <td>53</td>
+      <td>Electronics 類別在 2024 年相對於 2023 年的銷售額年增率 (YoY) 是多少？(請以百分比表示)</td>
+      <td>-3.06</td>
+      <td>number</td>
+      <td>SELECT (SUM(CASE WHEN strftime('%Y', "Order Date") = '2024' THEN "Total Revenue" ELSE 0 END) - SUM(CASE WHEN strftime('%Y', "Order Date") = '2023' THEN "Total Revenue" ELSE 0 END)) * 100.0 / NULLIF(SUM(CASE WHEN strftime('%Y', "Order Date") = '2023' THEN "Total Revenue" ELSE 0 END), 0) AS yoy_growth_percentage FROM sales_data WHERE "Product Category" = 'Electronics';</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>54</th>
+      <td>54</td>
+      <td>Office Supplies 類別在 2024 年相對於 2023 年的銷售額年增率 (YoY) 是多少？(請以百分比表示)</td>
+      <td>-7.28</td>
+      <td>number</td>
+      <td>SELECT (SUM(CASE WHEN strftime('%Y', "Order Date") = '2024' THEN "Total Revenue" ELSE 0 END) - SUM(CASE WHEN strftime('%Y', "Order Date") = '2023' THEN "Total Revenue" ELSE 0 END)) * 100.0 / NULLIF(SUM(CASE WHEN strftime('%Y', "Order Date") = '2023' THEN "Total Revenue" ELSE 0 END), 0) AS yoy_growth_percentage FROM sales_data WHERE "Product Category" = 'Office Supplies'</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>55</th>
+      <td>55</td>
+      <td>Software 類別在 2024 年相對於 2023 年的銷售額年增率 (YoY) 是多少？(請以百分比表示)</td>
+      <td>6.12</td>
+      <td>number</td>
+      <td>SELECT (SUM(CASE WHEN strftime('%Y', "Order Date") = '2024' THEN "Total Revenue" ELSE 0 END) - SUM(CASE WHEN strftime('%Y', "Order Date") = '2023' THEN "Total Revenue" ELSE 0 END)) * 100.0 / NULLIF(SUM(CASE WHEN strftime('%Y', "Order Date") = '2023' THEN "Total Revenue" ELSE 0 END), 0) AS yoy_growth_percentage FROM sales_data WHERE "Product Category" = 'Software'</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>56</th>
+      <td>56</td>
+      <td>請列出 North America 區域在 2023 至 2024 年每個月的銷售趨勢數據。</td>
+      <td>{'2023-01': 1501225.0, '2023-02': 1298301.23, '2023-03': 1560968.94, '2023-04': 1569450.64, '2023-05': 1239067.23, '2023-06': 1486196.84, '2023-07': 1447348.91, '2023-08': 1640436.4, '2023-09': 1673169.96, '2023-10': 2373057.31, '2023-11': 2117893.69, '2023-12': 2379353.47, '2024-01': 1516790.82, '2024-02': 1431760.02, '2024-03': 1736514.22, '2024-04': 1387412.77, '2024-05': 1535990.27, '2024-06': 1539895.94, '2024-07': 1464171.52, '2024-08': 1338957.31, '2024-09': 1074612.67, '2024-10': 2294689.2, '2024-11': 2018162.44, '2024-12': 2306937.48}</td>
+      <td>dataframe</td>
+      <td>SELECT strftime('%Y-%m', "Order Date") as month, SUM("Total Revenue") as revenue FROM sales_data WHERE Region = 'North America' AND strftime('%Y', "Order Date") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>57</th>
+      <td>57</td>
+      <td>請列出 北美 區域在 2023 至 2024 年每個月的銷售趨勢數據。</td>
+      <td>{'2023-01': 1501225.0, '2023-02': 1298301.23, '2023-03': 1560968.94, '2023-04': 1569450.64, '2023-05': 1239067.23, '2023-06': 1486196.84, '2023-07': 1447348.91, '2023-08': 1640436.4, '2023-09': 1673169.96, '2023-10': 2373057.31, '2023-11': 2117893.69, '2023-12': 2379353.47, '2024-01': 1516790.82, '2024-02': 1431760.02, '2024-03': 1736514.22, '2024-04': 1387412.77, '2024-05': 1535990.27, '2024-06': 1539895.94, '2024-07': 1464171.52, '2024-08': 1338957.31, '2024-09': 1074612.67, '2024-10': 2294689.2, '2024-11': 2018162.44, '2024-12': 2306937.48}</td>
+      <td>dataframe</td>
+      <td>SELECT strftime('%Y-%m', "Order Date") as month, SUM("Total Revenue") as revenue FROM sales_data WHERE Region = 'North America' AND strftime('%Y', "Order Date") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>58</th>
+      <td>58</td>
+      <td>請列出 北美洲 區域在 2023 至 2024 年每個月的銷售趨勢數據。</td>
+      <td>{'2023-01': 1501225.0, '2023-02': 1298301.23, '2023-03': 1560968.94, '2023-04': 1569450.64, '2023-05': 1239067.23, '2023-06': 1486196.84, '2023-07': 1447348.91, '2023-08': 1640436.4, '2023-09': 1673169.96, '2023-10': 2373057.31, '2023-11': 2117893.69, '2023-12': 2379353.47, '2024-01': 1516790.82, '2024-02': 1431760.02, '2024-03': 1736514.22, '2024-04': 1387412.77, '2024-05': 1535990.27, '2024-06': 1539895.94, '2024-07': 1464171.52, '2024-08': 1338957.31, '2024-09': 1074612.67, '2024-10': 2294689.2, '2024-11': 2018162.44, '2024-12': 2306937.48}</td>
+      <td>dataframe</td>
+      <td>SELECT strftime('%Y-%m', "Order Date") as month, SUM("Total Revenue") as revenue FROM sales_data WHERE Region = 'North America' AND strftime('%Y', "Order Date") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>59</th>
+      <td>59</td>
+      <td>請列出 NA 區域在 2023 至 2024 年每個月的銷售趨勢數據。</td>
+      <td>{'2023-01': 1501225.0, '2023-02': 1298301.23, '2023-03': 1560968.94, '2023-04': 1569450.64, '2023-05': 1239067.23, '2023-06': 1486196.84, '2023-07': 1447348.91, '2023-08': 1640436.4, '2023-09': 1673169.96, '2023-10': 2373057.31, '2023-11': 2117893.69, '2023-12': 2379353.47, '2024-01': 1516790.82, '2024-02': 1431760.02, '2024-03': 1736514.22, '2024-04': 1387412.77, '2024-05': 1535990.27, '2024-06': 1539895.94, '2024-07': 1464171.52, '2024-08': 1338957.31, '2024-09': 1074612.67, '2024-10': 2294689.2, '2024-11': 2018162.44, '2024-12': 2306937.48}</td>
+      <td>dataframe</td>
+      <td>SELECT strftime('%Y-%m', "Order Date") as month, SUM("Total Revenue") as revenue FROM sales_data WHERE Region = 'North America' AND strftime('%Y', "Order Date") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>60</th>
+      <td>60</td>
+      <td>請列出 LATAM 區域在 2023 至 2024 年每個月的銷售趨勢數據。</td>
+      <td>{'2023-01': 223713.48, '2023-02': 175948.62, '2023-03': 214276.38, '2023-04': 153375.98, '2023-05': 324390.47, '2023-06': 200221.42, '2023-07': 116414.84, '2023-08': 175005.51, '2023-09': 267708.42, '2023-10': 349280.05, '2023-11': 304090.41, '2023-12': 347328.27, '2024-01': 145904.33, '2024-02': 153470.14, '2024-03': 417749.45, '2024-04': 171977.2, '2024-05': 173912.15, '2024-06': 207575.73, '2024-07': 203863.23, '2024-08': 159882.9, '2024-09': 143958.6, '2024-10': 270168.5, '2024-11': 315395.29, '2024-12': 180159.21}</td>
+      <td>dataframe</td>
+      <td>SELECT strftime('%Y-%m', "Order Date") as month, SUM("Total Revenue") as revenue FROM sales_data WHERE Region = 'LATAM' AND strftime('%Y', "Order Date") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>61</th>
+      <td>61</td>
+      <td>請列出 拉美 區域在 2023 至 2024 年每個月的銷售趨勢數據。</td>
+      <td>{'2023-01': 223713.48, '2023-02': 175948.62, '2023-03': 214276.38, '2023-04': 153375.98, '2023-05': 324390.47, '2023-06': 200221.42, '2023-07': 116414.84, '2023-08': 175005.51, '2023-09': 267708.42, '2023-10': 349280.05, '2023-11': 304090.41, '2023-12': 347328.27, '2024-01': 145904.33, '2024-02': 153470.14, '2024-03': 417749.45, '2024-04': 171977.2, '2024-05': 173912.15, '2024-06': 207575.73, '2024-07': 203863.23, '2024-08': 159882.9, '2024-09': 143958.6, '2024-10': 270168.5, '2024-11': 315395.29, '2024-12': 180159.21}</td>
+      <td>dataframe</td>
+      <td>SELECT strftime('%Y-%m', "Order Date") as month, SUM("Total Revenue") as revenue FROM sales_data WHERE Region = 'LATAM' AND strftime('%Y', "Order Date") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>62</th>
+      <td>62</td>
+      <td>請列出 南美 區域在 2023 至 2024 年每個月的銷售趨勢數據。</td>
+      <td>{'2023-01': 223713.48, '2023-02': 175948.62, '2023-03': 214276.38, '2023-04': 153375.98, '2023-05': 324390.47, '2023-06': 200221.42, '2023-07': 116414.84, '2023-08': 175005.51, '2023-09': 267708.42, '2023-10': 349280.05, '2023-11': 304090.41, '2023-12': 347328.27, '2024-01': 145904.33, '2024-02': 153470.14, '2024-03': 417749.45, '2024-04': 171977.2, '2024-05': 173912.15, '2024-06': 207575.73, '2024-07': 203863.23, '2024-08': 159882.9, '2024-09': 143958.6, '2024-10': 270168.5, '2024-11': 315395.29, '2024-12': 180159.21}</td>
+      <td>dataframe</td>
+      <td>SELECT strftime('%Y-%m', "Order Date") as month, SUM("Total Revenue") as revenue FROM sales_data WHERE Region = 'LATAM' AND strftime('%Y', "Order Date") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>63</th>
+      <td>63</td>
+      <td>請列出 拉丁美洲 區域在 2023 至 2024 年每個月的銷售趨勢數據。</td>
+      <td>{'2023-01': 223713.48, '2023-02': 175948.62, '2023-03': 214276.38, '2023-04': 153375.98, '2023-05': 324390.47, '2023-06': 200221.42, '2023-07': 116414.84, '2023-08': 175005.51, '2023-09': 267708.42, '2023-10': 349280.05, '2023-11': 304090.41, '2023-12': 347328.27, '2024-01': 145904.33, '2024-02': 153470.14, '2024-03': 417749.45, '2024-04': 171977.2, '2024-05': 173912.15, '2024-06': 207575.73, '2024-07': 203863.23, '2024-08': 159882.9, '2024-09': 143958.6, '2024-10': 270168.5, '2024-11': 315395.29, '2024-12': 180159.21}</td>
+      <td>dataframe</td>
+      <td>SELECT strftime('%Y-%m', "Order Date") as month, SUM("Total Revenue") as revenue FROM sales_data WHERE Region = 'LATAM' AND strftime('%Y', "Order Date") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>64</th>
+      <td>64</td>
+      <td>請列出 Latin America 區域在 2023 至 2024 年每個月的銷售趨勢數據。</td>
+      <td>{'2023-01': 223713.48, '2023-02': 175948.62, '2023-03': 214276.38, '2023-04': 153375.98, '2023-05': 324390.47, '2023-06': 200221.42, '2023-07': 116414.84, '2023-08': 175005.51, '2023-09': 267708.42, '2023-10': 349280.05, '2023-11': 304090.41, '2023-12': 347328.27, '2024-01': 145904.33, '2024-02': 153470.14, '2024-03': 417749.45, '2024-04': 171977.2, '2024-05': 173912.15, '2024-06': 207575.73, '2024-07': 203863.23, '2024-08': 159882.9, '2024-09': 143958.6, '2024-10': 270168.5, '2024-11': 315395.29, '2024-12': 180159.21}</td>
+      <td>dataframe</td>
+      <td>SELECT strftime('%Y-%m', "Order Date") as month, SUM("Total Revenue") as revenue FROM sales_data WHERE Region = 'LATAM' AND strftime('%Y', "Order Date") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>65</th>
+      <td>65</td>
+      <td>請列出 EMEA 區域在 2023 至 2024 年每個月的銷售趨勢數據。</td>
+      <td>{'2023-01': 942448.1, '2023-02': 883639.02, '2023-03': 1285595.76, '2023-04': 883185.84, '2023-05': 1185861.27, '2023-06': 1484438.38, '2023-07': 1016786.45, '2023-08': 1020389.97, '2023-09': 1059744.44, '2023-10': 1654875.41, '2023-11': 1624625.45, '2023-12': 1634231.28, '2024-01': 1133643.54, '2024-02': 1062111.55, '2024-03': 1012640.24, '2024-04': 992568.9, '2024-05': 1040289.1, '2024-06': 880005.25, '2024-07': 1208996.95, '2024-08': 1059911.19, '2024-09': 1059862.75, '2024-10': 1679514.33, '2024-11': 1766008.98, '2024-12': 1283154.02}</td>
+      <td>dataframe</td>
+      <td>SELECT strftime('%Y-%m', "Order Date") as month, SUM("Total Revenue") as revenue FROM sales_data WHERE Region = 'EMEA' AND strftime('%Y', "Order Date") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>66</th>
+      <td>66</td>
+      <td>請列出 歐洲中東非洲 區域在 2023 至 2024 年每個月的銷售趨勢數據。</td>
+      <td>{'2023-01': 942448.1, '2023-02': 883639.02, '2023-03': 1285595.76, '2023-04': 883185.84, '2023-05': 1185861.27, '2023-06': 1484438.38, '2023-07': 1016786.45, '2023-08': 1020389.97, '2023-09': 1059744.44, '2023-10': 1654875.41, '2023-11': 1624625.45, '2023-12': 1634231.28, '2024-01': 1133643.54, '2024-02': 1062111.55, '2024-03': 1012640.24, '2024-04': 992568.9, '2024-05': 1040289.1, '2024-06': 880005.25, '2024-07': 1208996.95, '2024-08': 1059911.19, '2024-09': 1059862.75, '2024-10': 1679514.33, '2024-11': 1766008.98, '2024-12': 1283154.02}</td>
+      <td>dataframe</td>
+      <td>SELECT strftime('%Y-%m', "Order Date") as month, SUM("Total Revenue") as revenue FROM sales_data WHERE Region = 'EMEA' AND strftime('%Y', "Order Date") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>67</th>
+      <td>67</td>
+      <td>請列出 歐非中東 區域在 2023 至 2024 年每個月的銷售趨勢數據。</td>
+      <td>{'2023-01': 942448.1, '2023-02': 883639.02, '2023-03': 1285595.76, '2023-04': 883185.84, '2023-05': 1185861.27, '2023-06': 1484438.38, '2023-07': 1016786.45, '2023-08': 1020389.97, '2023-09': 1059744.44, '2023-10': 1654875.41, '2023-11': 1624625.45, '2023-12': 1634231.28, '2024-01': 1133643.54, '2024-02': 1062111.55, '2024-03': 1012640.24, '2024-04': 992568.9, '2024-05': 1040289.1, '2024-06': 880005.25, '2024-07': 1208996.95, '2024-08': 1059911.19, '2024-09': 1059862.75, '2024-10': 1679514.33, '2024-11': 1766008.98, '2024-12': 1283154.02}</td>
+      <td>dataframe</td>
+      <td>SELECT strftime('%Y-%m', "Order Date") as month, SUM("Total Revenue") as revenue FROM sales_data WHERE Region = 'EMEA' AND strftime('%Y', "Order Date") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>68</th>
+      <td>68</td>
+      <td>請列出 Europe, Middle East, and Africa 區域在 2023 至 2024 年每個月的銷售趨勢數據。</td>
+      <td>{'2023-01': 942448.1, '2023-02': 883639.02, '2023-03': 1285595.76, '2023-04': 883185.84, '2023-05': 1185861.27, '2023-06': 1484438.38, '2023-07': 1016786.45, '2023-08': 1020389.97, '2023-09': 1059744.44, '2023-10': 1654875.41, '2023-11': 1624625.45, '2023-12': 1634231.28, '2024-01': 1133643.54, '2024-02': 1062111.55, '2024-03': 1012640.24, '2024-04': 992568.9, '2024-05': 1040289.1, '2024-06': 880005.25, '2024-07': 1208996.95, '2024-08': 1059911.19, '2024-09': 1059862.75, '2024-10': 1679514.33, '2024-11': 1766008.98, '2024-12': 1283154.02}</td>
+      <td>dataframe</td>
+      <td>SELECT strftime('%Y-%m', "Order Date") as month, SUM("Total Revenue") as revenue FROM sales_data WHERE Region = 'EMEA' AND strftime('%Y', "Order Date") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>69</th>
+      <td>69</td>
+      <td>請列出 APAC 區域在 2023 至 2024 年每個月的銷售趨勢數據。</td>
+      <td>{'2023-01': 973776.02, '2023-02': 763996.82, '2023-03': 1005437.21, '2023-04': 1085883.84, '2023-05': 999851.05, '2023-06': 825946.06, '2023-07': 897312.68, '2023-08': 805145.36, '2023-09': 984447.16, '2023-10': 1189276.6, '2023-11': 1336621.74, '2023-12': 1357397.91, '2024-01': 933316.4, '2024-02': 1075906.73, '2024-03': 971237.02, '2024-04': 1076606.9, '2024-05': 1015613.24, '2024-06': 827017.19, '2024-07': 1053949.91, '2024-08': 888200.25, '2024-09': 757630.84, '2024-10': 1724426.36, '2024-11': 1436229.04, '2024-12': 1301473.82}</td>
+      <td>dataframe</td>
+      <td>SELECT strftime('%Y-%m', "Order Date") as month, SUM("Total Revenue") as revenue FROM sales_data WHERE Region = 'APAC' AND strftime('%Y', "Order Date") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>70</th>
+      <td>70</td>
+      <td>請列出 亞太區 區域在 2023 至 2024 年每個月的銷售趨勢數據。</td>
+      <td>{'2023-01': 973776.02, '2023-02': 763996.82, '2023-03': 1005437.21, '2023-04': 1085883.84, '2023-05': 999851.05, '2023-06': 825946.06, '2023-07': 897312.68, '2023-08': 805145.36, '2023-09': 984447.16, '2023-10': 1189276.6, '2023-11': 1336621.74, '2023-12': 1357397.91, '2024-01': 933316.4, '2024-02': 1075906.73, '2024-03': 971237.02, '2024-04': 1076606.9, '2024-05': 1015613.24, '2024-06': 827017.19, '2024-07': 1053949.91, '2024-08': 888200.25, '2024-09': 757630.84, '2024-10': 1724426.36, '2024-11': 1436229.04, '2024-12': 1301473.82}</td>
+      <td>dataframe</td>
+      <td>SELECT strftime('%Y-%m', "Order Date") as month, SUM("Total Revenue") as revenue FROM sales_data WHERE Region = 'APAC' AND strftime('%Y', "Order Date") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>71</th>
+      <td>71</td>
+      <td>請列出 亞太地區 區域在 2023 至 2024 年每個月的銷售趨勢數據。</td>
+      <td>{'2023-01': 973776.02, '2023-02': 763996.82, '2023-03': 1005437.21, '2023-04': 1085883.84, '2023-05': 999851.05, '2023-06': 825946.06, '2023-07': 897312.68, '2023-08': 805145.36, '2023-09': 984447.16, '2023-10': 1189276.6, '2023-11': 1336621.74, '2023-12': 1357397.91, '2024-01': 933316.4, '2024-02': 1075906.73, '2024-03': 971237.02, '2024-04': 1076606.9, '2024-05': 1015613.24, '2024-06': 827017.19, '2024-07': 1053949.91, '2024-08': 888200.25, '2024-09': 757630.84, '2024-10': 1724426.36, '2024-11': 1436229.04, '2024-12': 1301473.82}</td>
+      <td>dataframe</td>
+      <td>SELECT strftime('%Y-%m', "Order Date") as month, SUM("Total Revenue") as revenue FROM sales_data WHERE Region = 'APAC' AND strftime('%Y', "Order Date") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>72</th>
+      <td>72</td>
+      <td>請列出 Asia Pacific 區域在 2023 至 2024 年每個月的銷售趨勢數據。</td>
+      <td>{'2023-01': 973776.02, '2023-02': 763996.82, '2023-03': 1005437.21, '2023-04': 1085883.84, '2023-05': 999851.05, '2023-06': 825946.06, '2023-07': 897312.68, '2023-08': 805145.36, '2023-09': 984447.16, '2023-10': 1189276.6, '2023-11': 1336621.74, '2023-12': 1357397.91, '2024-01': 933316.4, '2024-02': 1075906.73, '2024-03': 971237.02, '2024-04': 1076606.9, '2024-05': 1015613.24, '2024-06': 827017.19, '2024-07': 1053949.91, '2024-08': 888200.25, '2024-09': 757630.84, '2024-10': 1724426.36, '2024-11': 1436229.04, '2024-12': 1301473.82}</td>
+      <td>dataframe</td>
+      <td>SELECT strftime('%Y-%m', "Order Date") as month, SUM("Total Revenue") as revenue FROM sales_data WHERE Region = 'APAC' AND strftime('%Y', "Order Date") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>73</th>
+      <td>73</td>
+      <td>2024 年第四季相較於 2023 年第四季，總銷售額增加了多少？</td>
+      <td>-91712.92</td>
+      <td>number</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE strftime('%Y', "Order Date") = '2024' AND strftime('%m', "Order Date") BETWEEN 7 AND 12 MINUS SELECT SUM("Total Revenue") FROM sales_data WHERE strftime('%Y', "Order Date") = '2023' AND strftime('%m', "Order Date") BETWEEN 7 AND 12</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>74</th>
+      <td>74</td>
+      <td>在 North America 區域，2023 年前五大客戶購買各產品類別的金額占比為何？</td>
+      <td>{'Delta Elite Systems': {'Electronics': 0.225, 'Office Supplies': 0.096, 'Software': 0.679}, 'Global Beta Corp.': {'Electronics': 0.3834, 'Office Supplies': 0.0513, 'Software': 0.5654}, 'Next Beta Ltd.': {'Electronics': 0.5828, 'Office Supplies': 0.1038, 'Software': 0.3134}, 'Prime Delta Solutions': {'Electronics': 0.6316, 'Office Supplies': 0.1253, 'Software': 0.243}, 'Summit Prime Systems': {'Electronics': 0.5044, 'Office Supplies': 0.1148, 'Software': 0.3809}}</td>
+      <td>dataframe</td>
+      <td>SELECT SUM("Total Revenue") / SUM(SUM("Total Revenue") OVER (PARTITION BY "Product Category")) AS revenue_ratio FROM sales_data WHERE Region = 'North America' AND strftime('%Y', "Order Date") = '2023' GROUP BY "Product Category" ORDER BY revenue_ratio DESC LIMIT 5;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>75</th>
+      <td>75</td>
+      <td>在 北美 區域，2023 年前五大客戶購買各產品類別的金額占比為何？</td>
+      <td>{'Delta Elite Systems': {'Electronics': 0.225, 'Office Supplies': 0.096, 'Software': 0.679}, 'Global Beta Corp.': {'Electronics': 0.3834, 'Office Supplies': 0.0513, 'Software': 0.5654}, 'Next Beta Ltd.': {'Electronics': 0.5828, 'Office Supplies': 0.1038, 'Software': 0.3134}, 'Prime Delta Solutions': {'Electronics': 0.6316, 'Office Supplies': 0.1253, 'Software': 0.243}, 'Summit Prime Systems': {'Electronics': 0.5044, 'Office Supplies': 0.1148, 'Software': 0.3809}}</td>
+      <td>dataframe</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'North America' AND strftime('%Y', "Order Date") = '2023' GROUP BY "Customer Name", "Product Category" ORDER BY SUM("Total Revenue") DESC LIMIT 5</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>76</th>
+      <td>76</td>
+      <td>在 北美洲 區域，2023 年前五大客戶購買各產品類別的金額占比為何？</td>
+      <td>{'Delta Elite Systems': {'Electronics': 0.225, 'Office Supplies': 0.096, 'Software': 0.679}, 'Global Beta Corp.': {'Electronics': 0.3834, 'Office Supplies': 0.0513, 'Software': 0.5654}, 'Next Beta Ltd.': {'Electronics': 0.5828, 'Office Supplies': 0.1038, 'Software': 0.3134}, 'Prime Delta Solutions': {'Electronics': 0.6316, 'Office Supplies': 0.1253, 'Software': 0.243}, 'Summit Prime Systems': {'Electronics': 0.5044, 'Office Supplies': 0.1148, 'Software': 0.3809}}</td>
+      <td>dataframe</td>
+      <td>SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'North America' AND strftime('%Y', "Order Date") = '2023' GROUP BY "Customer Name", "Product Category" ORDER BY SUM("Total Revenue") DESC LIMIT 5</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>77</th>
+      <td>77</td>
+      <td>在 NA 區域，2023 年前五大客戶購買各產品類別的金額占比為何？</td>
+      <td>{'Delta Elite Systems': {'Electronics': 0.225, 'Office Supplies': 0.096, 'Software': 0.679}, 'Global Beta Corp.': {'Electronics': 0.3834, 'Office Supplies': 0.0513, 'Software': 0.5654}, 'Next Beta Ltd.': {'Electronics': 0.5828, 'Office Supplies': 0.1038, 'Software': 0.3134}, 'Prime Delta Solutions': {'Electronics': 0.6316, 'Office Supplies': 0.1253, 'Software': 0.243}, 'Summit Prime Systems': {'Electronics': 0.5044, 'Office Supplies': 0.1148, 'Software': 0.3809}}</td>
+      <td>dataframe</td>
+      <td>SELECT SUM("Total Revenue") / SUM(SUM("Total Revenue")) OVER () AS revenue_ratio FROM sales_data WHERE Region = 'North America' AND strftime('%Y', "Order Date") = '2023' GROUP BY "Customer Name", "Product Category" ORDER BY revenue_ratio DESC LIMIT 5</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>78</th>
+      <td>78</td>
+      <td>在 2023 到 2024 年間，哪位客戶的購買總額變動幅度（絕對值）最大？</td>
+      <td>Elite Apex Group</td>
+      <td>string</td>
+      <td>SELECT Customer Name, SUM("Total Revenue") as total_revenue FROM sales_data WHERE strftime('%Y', "Order Date") BETWEEN '2023' AND '2024' GROUP BY "Customer Name" ORDER BY ABS(total_revenue - LAG(total_revenue) OVER (ORDER BY total_revenue)) DESC LIMIT 1;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>79</th>
+      <td>79</td>
+      <td>產品類別 Electronics 的最大購買客戶是誰？</td>
+      <td>Summit Beta Solutions</td>
+      <td>string</td>
+      <td>SELECT "Customer Name" FROM sales_data WHERE "Product Category" = 'Electronics' ORDER BY SUM("Quantity") DESC LIMIT 1;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>80</th>
+      <td>80</td>
+      <td>哪一個產品的平均單價 (ASP) 最高？</td>
+      <td>Cloud License (Annual)</td>
+      <td>string</td>
+      <td>SELECT MAX(ASP) FROM sales_data;</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>81</th>
+      <td>81</td>
+      <td>各個區域 (Region) 最偏好（銷售額最高）的產品類別分別為何？</td>
+      <td>{'APAC': 'Electronics', 'EMEA': 'Electronics', 'LATAM': 'Electronics', 'North America': 'Electronics'}</td>
+      <td>dataframe</td>
+      <td>SELECT "Product Category", SUM("Total Revenue") as total_revenue FROM sales_data GROUP BY "Product Category" ORDER BY total_revenue DESC</td>
+      <td>None</td>
+      <td>None</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
