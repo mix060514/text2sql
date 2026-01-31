@@ -7,4 +7,5 @@
 - [x] Add schema and examples to Planned Agent prompt
 - [x] Create Planned Agent V2 with column value examples
 - [x] Create unified evaluation script (`eval/eval3.py`)
-- [ ] Optimize Planned Agent performance (Current Accuracy: ~35% on V2)
+- [x] Implement Planned Agent V3 with Sub-Agent Architecture
+- [ ] Optimize Planned Agent performance (Current Accuracy: ~35% on V3)
