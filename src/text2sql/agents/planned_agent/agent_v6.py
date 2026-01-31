@@ -1,34 +1,12 @@
-from google.adk.agents import LlmAgent, LoopAgent, SequentialAgent
+from google.adk.agents import LlmAgent
 from google.adk.models.lite_llm import LiteLlm
-from google.adk.tools.tool_context import ToolContext
-from src.text2sql.agents.planned_agent.tools import check_sql_syntax, execute_sql
+from .tools import check_sql_syntax, execute_sql
 
 # ------------------------------------------------------------------------------
 # Configuration
 # ------------------------------------------------------------------------------
 MAX_RETRIES = 3
-
-# ------------------------------------------------------------------------------
-# State Keys for LoopAgent
-# ------------------------------------------------------------------------------
-STATE_SQL_QUERY = "sql_query"
-STATE_SQL_RESULT = "sql_result"
-STATE_RETRY_COUNT = "retry_count"
-
-
-# ------------------------------------------------------------------------------
-# Exit Loop Tool
-# ------------------------------------------------------------------------------
-def exit_retry_loop(tool_context: ToolContext):
-    """Call this function when SQL execution succeeds with valid results."""
-    print(f" [Tool Call] exit_retry_loop triggered by {tool_context.agent_name}")
-    tool_context.actions.escalate = True
-    tool_context.actions.skip_summarization = True
-    return {
-        "status": "success",
-        "message": "SQL execution successful, exiting retry loop",
-    }
-
+ENABLE_SELF_CORRECTION = True
 
 # ------------------------------------------------------------------------------
 # Region and Country Aliases
@@ -81,166 +59,125 @@ SCHEMA_DESCRIPTION = f"""
 """
 
 # ------------------------------------------------------------------------------
-# STEP 1: Initial SQL Generator (runs ONCE to initialize state)
+# SQL Subagent with Retry Logic (V5 Design)
 # ------------------------------------------------------------------------------
-initial_sql_generator = LlmAgent(
+
+sql_subagent_v6 = LlmAgent(
     model=LiteLlm(
         model="openai/qwen3-4b-instruct-2507",
         api_key="aaa",
         api_base="http://localhost:8081",
     ),
-    name="initial_sql_generator_v6",
-    description="Generates the initial SQL query",
-    include_contents="none",
-    instruction=f"""You are a SQL query generator.
+    name="sql_specialist_v6",
+    description="A SQL specialist with self-correction capabilities. Can retry queries up to 3 times if errors occur.",
+    instruction=f"""You are a precise SQL specialist using SQLite with SELF-CORRECTION capabilities.
 
-{SCHEMA_DESCRIPTION}
+    {SCHEMA_DESCRIPTION}
 
-**Key Definitions:**
-- "銷售額" (Sales / Revenue) → Use `SUM("Total Revenue")`
-- "銷售量" (Sales Volume / Quantity) → Use `SUM("Quantity")`
-- "訂單數量" (Order Count) → Use `COUNT("Order ID")`
+    **Key Definitions for User Questions:**
+    - "銷售額" (Sales / Revenue) → Use `SUM("Total Revenue")`
+    - "銷售量" (Sales Volume / Quantity) → Use `SUM("Quantity")`
+    - "訂單數量" (Order Count) → Use `COUNT("Order ID")`
+    - "ASP" / "單價" → Use `ASP` column.
 
-**Your Task:**
-1. Read the user's question
-2. Map region/country names using the mapping table above
-3. Generate a syntactically correct SQLite query
-4. Use `check_sql_syntax` tool to verify
-5. Output ONLY the SQL query as plain text
+    **SQL Examples:**
+    1. Total sales in North America:
+       SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'North America';
 
-**CRITICAL**: 
-- ALWAYS map region/country aliases correctly
-- Return ONLY the SQL query, no explanations
-""",
-    tools=[check_sql_syntax],
-    output_key=STATE_SQL_QUERY,
+    2. Top 3 products by QUANTITY in EMEA (even if user says "Europe, Middle East, and Africa"):
+       SELECT "Product Name", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'EMEA' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;
+
+    3. Monthly sales trend for a region:
+       SELECT strftime('%Y-%m', "Order Date") as month, SUM("Total Revenue") as revenue 
+       FROM sales_data WHERE Region = 'North America' 
+       AND strftime('%Y', "Order Date") BETWEEN '2023' AND '2024'
+       GROUP BY month ORDER BY month;
+
+    4. Quarter extraction (SQLite doesn't have %q, use CASE):
+       SELECT 
+         CASE 
+           WHEN CAST(strftime('%m', "Order Date") AS INTEGER) BETWEEN 1 AND 3 THEN 'Q1'
+           WHEN CAST(strftime('%m', "Order Date") AS INTEGER) BETWEEN 4 AND 6 THEN 'Q2'
+           WHEN CAST(strftime('%m', "Order Date") AS INTEGER) BETWEEN 7 AND 9 THEN 'Q3'
+           ELSE 'Q4'
+         END as quarter,
+         SUM("Total Revenue") as revenue
+       FROM sales_data
+       WHERE strftime('%Y', "Order Date") = '2023'
+       GROUP BY quarter
+       ORDER BY revenue DESC
+       LIMIT 1;
+
+    **Workflow with Self-Correction:**
+    1. **Analyze**: Understand the data request. Map region/country aliases to database values.
+    2. **Plan**: Write the SQL query.
+    3. **Validate**: MUST use `check_sql_syntax` to verify.
+    4. **Execute**: Use `execute_sql`.
+    5. **Check Result**:
+       - If result is EMPTY or NULL:
+         * Check if you used the correct region/country name (refer to mappings above)
+         * Example: If user said "Europe, Middle East, and Africa", did you use 'EMEA'?
+         * If error detected, RETRY with corrected query
+       - If result looks valid: Return structured JSON
+    6. **Return**: Always return in this JSON format:
+       {{
+         "sql_query": "SELECT ...",
+         "sql_result": [...],
+         "retry_count": 0,
+         "error_log": []
+       }}
+    
+    **CRITICAL RULES**:
+    - ALWAYS map user's region/country names using the mapping table above
+    - If you get an empty result, CHECK if you used the wrong region/country name
+    - You can retry up to {MAX_RETRIES} times if you detect an error
+    - ALWAYS return structured JSON format
+    """,
+    tools=[check_sql_syntax, execute_sql],
 )
 
 # ------------------------------------------------------------------------------
-# STEP 2a: SQL Executor (inside loop)
+# Root Agent: Dispatcher & Responder
 # ------------------------------------------------------------------------------
-sql_executor_in_loop = LlmAgent(
+
+planned_agent_v6 = LlmAgent(
     model=LiteLlm(
         model="openai/qwen3-4b-instruct-2507",
         api_key="aaa",
         api_base="http://localhost:8081",
     ),
-    name="sql_executor_v6",
-    description="Executes SQL and validates results",
-    include_contents="none",
-    instruction=f"""You are a SQL executor and validator.
-
-**SQL Query to Execute:**
-{{{{sql_query}}}}
-
-**Your Task:**
-1. Execute the SQL using `execute_sql` tool
-2. Check the result:
-   - If result is NOT empty (has data): Call `exit_retry_loop` tool to stop the loop
-   - If result is EMPTY: Output "RETRY" to trigger another iteration
-
-**How to Exit Loop:**
-When you get valid results, you MUST call the `exit_retry_loop` tool.
-
-Output either:
-- Call `exit_retry_loop` if successful
-- "RETRY" if empty (to trigger retry)
-""",
-    tools=[execute_sql, exit_retry_loop],
-    output_key=STATE_SQL_RESULT,
-)
-
-# ------------------------------------------------------------------------------
-# STEP 2b: SQL Refiner (inside loop, only runs if executor said RETRY)
-# ------------------------------------------------------------------------------
-sql_refiner_in_loop = LlmAgent(
-    model=LiteLlm(
-        model="openai/qwen3-4b-instruct-2507",
-        api_key="aaa",
-        api_base="http://localhost:8081",
-    ),
-    name="sql_refiner_v6",
-    description="Refines SQL query based on empty results",
-    include_contents="none",
-    instruction=f"""You are a SQL query refiner.
-
-{SCHEMA_DESCRIPTION}
-
-**Previous SQL Query:**
-{{{{sql_query}}}}
-
-**Previous Result:**
-{{{{sql_result}}}}
-
-**Your Task:**
-Analyze why the previous query returned empty results.
-
-IF the result says "RETRY":
-1. Check if region/country mapping is correct
-2. Generate a corrected SQL query
-3. Output ONLY the corrected SQL query
-
-ELSE (result is not "RETRY", meaning we have data):
-Output the same SQL query (don't change it)
-
-Output ONLY the SQL query.
-""",
-    tools=[check_sql_syntax],
-    output_key=STATE_SQL_QUERY,  # Overwrites the SQL query for next iteration
-)
-
-# ------------------------------------------------------------------------------
-# STEP 2: Refinement Loop
-# ------------------------------------------------------------------------------
-refinement_loop = LoopAgent(
-    name="sql_refinement_loop_v6",
-    description=f"Retry loop for SQL execution (max {MAX_RETRIES} attempts)",
-    sub_agents=[
-        sql_executor_in_loop,  # Execute first
-        sql_refiner_in_loop,  # Then refine if needed
-    ],
-    max_iterations=MAX_RETRIES,
-)
-
-# ------------------------------------------------------------------------------
-# STEP 3: Response Formatter
-# ------------------------------------------------------------------------------
-response_formatter = LlmAgent(
-    model=LiteLlm(
-        model="openai/qwen3-4b-instruct-2507",
-        api_key="aaa",
-        api_base="http://localhost:8081",
-    ),
-    name="response_formatter_v6",
-    description="Formats the final answer in Traditional Chinese",
-    include_contents="none",
-    instruction=f"""You are a helpful assistant formatting SQL query results.
-
-**SQL Query:**
-{{{{sql_query}}}}
-
-**SQL Result:**
-{{{{sql_result}}}}
-
-**Your Task:**
-Format a clear answer in **Traditional Chinese (繁體中文)**:
-- Summarize the data in a user-friendly way
-- If the result contains data, present it clearly
-- If there was an error or empty result, explain what might be wrong
-
-**Output Format**: Natural language answer in Traditional Chinese.
-""",
-)
-
-# ------------------------------------------------------------------------------
-# STEP 4: Sequential Pipeline (Initialize → Loop → Format)
-# ------------------------------------------------------------------------------
-planned_agent_v6 = SequentialAgent(
     name="planned_agent_v6",
-    description="Text-to-SQL agent with LoopAgent-based retry mechanism",
-    sub_agents=[
-        initial_sql_generator,  # Step 1: Initialize state
-        refinement_loop,  # Step 2: Retry loop
-        response_formatter,  # Step 3: Format response
-    ],
+    description="Root agent with retry loop and structured output. Dispatches SQL tasks to a self-correcting subagent.",
+    instruction=f"""You are a helpful assistant with access to a SQL database.
+    
+    **Your goal**: Answer user questions accurately using the database.
+    
+    **Workflow:**
+    1. **Dispatch**: Delegate data retrieval to `sql_specialist_v6`.
+       - Be very specific about what the user is asking for
+       - The subagent will handle region/country name mapping automatically
+       
+    2. **Receive & Parse**: The subagent will return structured JSON:
+       {{
+         "sql_query": "...",
+         "sql_result": [...],
+         "retry_count": 0,
+         "error_log": []
+       }}
+       
+    3. **Answer**: Format your response in **Traditional Chinese (繁體中文)**:
+       - Provide a clear, concise answer based on the data
+       - If the result is a LIST, format it clearly
+       - If the result is a DATAFRAME/TREND, present it in a readable format
+       - You MAY include the SQL query if it helps explain the answer
+       
+    4. **Error Handling**:
+       - If the subagent reports errors after retries, explain to the user what went wrong
+       - Suggest possible reasons (e.g., data not available, ambiguous question)
+    
+    **Output Format**: 
+    Your final answer should be conversational and user-friendly in Traditional Chinese.
+    You don't need to return JSON to the user, just a natural language answer.
+    """,
+    sub_agents=[sql_subagent_v6],
 )

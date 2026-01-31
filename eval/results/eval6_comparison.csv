@@ -1,105 +1,1974 @@
 id,question,expected,type,planned_agent_v6_actual,planned_agent_v6_sql_query,planned_agent_v6_sql_result,planned_agent_v6_correct,problematic
-0,North America 的總銷售額是多少？,39932364.28,number,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'North America';",,,False,True
-1,北美 的總銷售額是多少？,39932364.28,number,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'North America'",,,False,True
-2,北美洲 的總銷售額是多少？,39932364.28,number,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'North America'",,,False,True
-3,NA 的總銷售額是多少？,39932364.28,number,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'North America'",,,False,True
-4,LATAM 的總銷售額是多少？,5395770.58,number,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'LATAM'",,,False,True
-5,拉美 的總銷售額是多少？,5395770.58,number,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'LATAM'",,,False,True
-6,南美 的總銷售額是多少？,5395770.58,number,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'LATAM'",,,False,True
-7,拉丁美洲 的總銷售額是多少？,5395770.58,number,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'LATAM'",,,False,True
-8,Latin America 的總銷售額是多少？,5395770.58,number,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'LATAM'",,,False,True
-9,EMEA 的總銷售額是多少？,28854528.17,number,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'EMEA'",,,False,True
-10,歐洲中東非洲 的總銷售額是多少？,28854528.17,number,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'EMEA'",,,False,True
-11,歐非中東 的總銷售額是多少？,28854528.17,number,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'EMEA'",,,False,True
-12,"Europe, Middle East, and Africa 的總銷售額是多少？",28854528.17,number,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'EMEA'",,,False,True
-13,APAC 的總銷售額是多少？,25286700.15,number,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'APAC'",,,False,True
-14,亞太區 的總銷售額是多少？,25286700.15,number,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'APAC'",,,False,True
-15,亞太地區 的總銷售額是多少？,25286700.15,number,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'APAC'",,,False,True
-16,Asia Pacific 的總銷售額是多少？,25286700.15,number,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'APAC'",,,False,True
-17,North America 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27""']",list,"SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'North America' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;",,,False,True
-18,北美 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27""']",list,"SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'North America' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;",,,False,True
-19,北美洲 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27""']",list,"SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'North America' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;",,,False,True
-20,NA 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27""']",list,"SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'North America' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;",,,False,True
-21,LATAM 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27""']",list,"SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'LATAM' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;",,,False,True
-22,拉美 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27""']",list,"SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'LATAM' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;",,,False,True
-23,南美 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27""']",list,"SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'LATAM' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;",,,False,True
-24,拉丁美洲 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27""']",list,"SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'LATAM' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;",,,False,True
-25,Latin America 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27""']",list,"SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'LATAM' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;",,,False,True
-26,EMEA 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']",list,"SELECT ""Product Name"", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'EMEA' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;",,,False,True
-27,歐洲中東非洲 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']",list,"SELECT ""Product Name"", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'EMEA' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;",,,False,True
-28,歐非中東 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']",list,"SELECT ""Product Name"", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'EMEA' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;",,,False,True
-29,"Europe, Middle East, and Africa 銷售量最高的前三個產品是什麼？","['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']",list,"SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'EMEA' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;",,,False,True
-30,APAC 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']",list,"SELECT ""Product Name"", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'APAC' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;",,,False,True
-31,亞太區 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']",list,"SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'APAC' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;",,,False,True
-32,亞太地區 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']",list,"SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'APAC' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;",,,False,True
-33,Asia Pacific 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']",list,"SELECT ""Product Name"", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'APAC' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;",,,False,True
-34,請列出 Electronics 類別在各年份的銷售額總計。,"{'2023': 30090351.27, '2024': 29168222.66}",dataframe,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE ""Product Category"" = 'Electronics' GROUP BY strftime('%Y', ""Order Date"");",,,False,True
-35,請列出 Software 類別在各年份的銷售額總計。,"{'2023': 13178975.35, '2024': 13985011.63}",dataframe,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE ""Product Category"" = 'Software' GROUP BY strftime('%Y', ""Order Date"");",,,False,True
-36,請列出 Office Supplies 類別在各年份的銷售額總計。,"{'2023': 6769810.67, '2024': 6276991.6}",dataframe,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE ""Product Category"" = 'Office Supplies' GROUP BY strftime('%Y', ""Order Date"");",,,False,True
-37,Canada 訂單數量最多的客戶是誰？,Summit Beta Solutions,string,"SELECT Customer Name, COUNT(""Order ID"") as order_count FROM sales_data WHERE Country = 'Canada' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;",,,False,True
-38,加拿大 訂單數量最多的客戶是誰？,Summit Beta Solutions,string,"SELECT Customer Name, COUNT(""Order ID"") as order_count FROM sales_data WHERE Country = 'Canada' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;",,,False,True
-39,India 訂單數量最多的客戶是誰？,Delta Global Systems,string,"SELECT ""Customer Name"" FROM sales_data WHERE ""Country"" = 'India' ORDER BY COUNT(""Order ID"") DESC LIMIT 1;",,,False,True
-40,印度 訂單數量最多的客戶是誰？,Delta Global Systems,string,"SELECT ""Customer Name"" FROM sales_data WHERE Country = 'India' ORDER BY COUNT(""Order ID"") DESC LIMIT 1;",,,False,True
-41,Germany 訂單數量最多的客戶是誰？,Summit Beta Solutions,string,"SELECT Customer Name, COUNT(""Order ID"") as order_count FROM sales_data WHERE Country = 'Germany' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;",,,False,True
-42,德國 訂單數量最多的客戶是誰？,Summit Beta Solutions,string,"SELECT Customer Name, COUNT(""Order ID"") as order_count FROM sales_data WHERE Country = 'Germany' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;",,,False,True
-43,德意志 訂單數量最多的客戶是誰？,Summit Beta Solutions,string,"SELECT Customer Name, COUNT(""Order ID"") as order_count FROM sales_data WHERE Country = 'Germany' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;",,,False,True
-44,Australia 訂單數量最多的客戶是誰？,Global Next Ltd.,string,"SELECT Customer Name, COUNT(""Order ID"") as order_count FROM sales_data WHERE Country = 'Australia' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;",,,False,True
-45,澳洲 訂單數量最多的客戶是誰？,Global Next Ltd.,string,"SELECT Customer Name, COUNT(""Order ID"") as order_count FROM sales_data WHERE Country = 'Australia' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;",,,False,True
-46,澳大利亞 訂單數量最多的客戶是誰？,Global Next Ltd.,string,"SELECT Customer Name, COUNT(""Order ID"") as order_count FROM sales_data WHERE Country = 'Australia' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;",,,False,True
-47,China 訂單數量最多的客戶是誰？,Apex Prime Corp.,string,"SELECT Customer Name, COUNT(""Order ID"") as order_count FROM sales_data WHERE Country = 'China' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;",,,False,True
-48,中國 訂單數量最多的客戶是誰？,Apex Prime Corp.,string,"SELECT Customer Name, COUNT(""Order ID"") as order_count FROM sales_data WHERE Country = 'China' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;",,,False,True
-49,大陸 訂單數量最多的客戶是誰？,Apex Prime Corp.,string,"SELECT Customer Name, COUNT(""Order ID"") as order_count FROM sales_data WHERE Country = 'China' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;",,,False,True
-50,PRC 訂單數量最多的客戶是誰？,Apex Prime Corp.,string,"SELECT Customer Name, COUNT(""Order ID"") as order_count FROM sales_data WHERE Country = 'China' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;",,,False,True
-51,2023 年哪一個季度的總銷售額表現最好？,Q4,string,"SELECT 
+0,North America 的總銷售額是多少？,39932364.28,number,"{
+  ""sql_query"": ""SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE Region = 'North America';"",
+  ""sql_result"": [
+    [
+      39932364.28
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'North America';","[(39932364.28,)]",True,False
+1,北美 的總銷售額是多少？,39932364.28,number,"{
+  ""sql_query"": ""SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE Region = 'North America'"",
+  ""sql_result"": [
+    [
+      39932364.28
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'North America'","[(39932364.28,)]",True,False
+2,北美洲 的總銷售額是多少？,39932364.28,number,"{
+  ""sql_query"": ""SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE Region = 'North America'"",
+  ""sql_result"": [
+    [
+      39932364.28
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'North America'","[(39932364.28,)]",True,False
+3,NA 的總銷售額是多少？,39932364.28,number,"{
+  ""sql_query"": ""SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE Region = 'North America';"",
+  ""sql_result"": [
+    [39932364.28]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'North America';","[(39932364.28,)]",True,False
+4,LATAM 的總銷售額是多少？,5395770.58,number,"{
+  ""sql_query"": ""SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE Region = 'LATAM'"",
+  ""sql_result"": [
+    [5395770.58]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'LATAM'","[(5395770.58,)]",True,False
+5,拉美 的總銷售額是多少？,5395770.58,number,"{
+  ""sql_query"": ""SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE Region = 'LATAM'"",
+  ""sql_result"": [
+    [
+      5395770.58
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'LATAM'","[(5395770.58,)]",True,False
+6,南美 的總銷售額是多少？,5395770.58,number,"{
+  ""sql_query"": ""SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE Region = 'LATAM'"",
+  ""sql_result"": [
+    [5395770.58]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'LATAM'","[(5395770.58,)]",True,False
+7,拉丁美洲 的總銷售額是多少？,5395770.58,number,"{
+  ""sql_query"": ""SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE Region = 'LATAM'"",
+  ""sql_result"": [
+    [5395770.58]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'LATAM'","[(5395770.58,)]",True,False
+8,Latin America 的總銷售額是多少？,5395770.58,number,"{
+  ""sql_query"": ""SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE Region = 'LATAM'"",
+  ""sql_result"": [
+    [
+      5395770.58
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'LATAM'","[(5395770.58,)]",True,False
+9,EMEA 的總銷售額是多少？,28854528.17,number,"{
+  ""sql_query"": ""SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE Region = 'EMEA'"",
+  ""sql_result"": [
+    [
+      28854528.17
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'EMEA'","[(28854528.17,)]",True,False
+10,歐洲中東非洲 的總銷售額是多少？,28854528.17,number,"{
+  ""sql_query"": ""SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE Region = 'EMEA'"",
+  ""sql_result"": [
+    [
+      28854528.17
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'EMEA'","[(28854528.17,)]",True,False
+11,歐非中東 的總銷售額是多少？,28854528.17,number,"{
+  ""sql_query"": ""SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE Region = 'EMEA'"",
+  ""sql_result"": [
+    [28854528.17]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'EMEA'","[(28854528.17,)]",True,False
+12,"Europe, Middle East, and Africa 的總銷售額是多少？",28854528.17,number,"{
+  ""sql_query"": ""SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE Region = 'EMEA'"",
+  ""sql_result"": [
+    [28854528.17]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'EMEA'","[(28854528.17,)]",True,False
+13,APAC 的總銷售額是多少？,25286700.15,number,"{
+  ""sql_query"": ""SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE Region = 'APAC'"",
+  ""sql_result"": [
+    [
+      25286700.15
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'APAC'","[(25286700.15,)]",True,False
+14,亞太區 的總銷售額是多少？,25286700.15,number,"{
+  ""sql_query"": ""SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE Region = 'APAC'"",
+  ""sql_result"": [
+    [25286700.15]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'APAC'","[(25286700.15,)]",True,False
+15,亞太地區 的總銷售額是多少？,25286700.15,number,"{
+  ""sql_query"": ""SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE Region = 'APAC'"",
+  ""sql_result"": [
+    [25286700.15]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'APAC'","[(25286700.15,)]",True,False
+16,Asia Pacific 的總銷售額是多少？,25286700.15,number,"{
+  ""sql_query"": ""SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE Region = 'APAC'"",
+  ""sql_result"": [
+    [25286700.15]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'APAC'","[(25286700.15,)]",True,False
+17,North America 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27""']",list,"{
+  ""sql_query"": ""SELECT \""Product Name\"", SUM(\""Quantity\"") as total_qty FROM sales_data WHERE Region = 'North America' GROUP BY \""Product Name\"" ORDER BY total_qty DESC LIMIT 3;"",
+  ""sql_result"": [
+    [
+      ""Enterprise Laptop X1"",
+      10419
+    ],
+    [
+      ""Pro Smartphone 15"",
+      8442
+    ],
+    [
+      ""4K Monitor 27\"""",
+      7055
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'North America' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;","[('Enterprise Laptop X1', 10419), ('Pro Smartphone 15', 8442), ('4K Monitor 27""', 7055)]",True,False
+18,北美 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27""']",list,"{
+  ""sql_query"": ""SELECT \""Product Name\"", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'North America' GROUP BY \""Product Name\"" ORDER BY total_qty DESC LIMIT 3;"",
+  ""sql_result"": [
+    [
+      ""Enterprise Laptop X1"",
+      10419
+    ],
+    [
+      ""Pro Smartphone 15"",
+      8442
+    ],
+    [
+      ""4K Monitor 27\"""",
+      7055
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Name"", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'North America' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;","[('Enterprise Laptop X1', 10419), ('Pro Smartphone 15', 8442), ('4K Monitor 27""', 7055)]",True,False
+19,北美洲 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27""']",list,"{
+  ""sql_query"": ""SELECT \""Product Name\"", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'North America' GROUP BY \""Product Name\"" ORDER BY total_qty DESC LIMIT 3;"",
+  ""sql_result"": [
+    [
+      ""Enterprise Laptop X1"",
+      10419
+    ],
+    [
+      ""Pro Smartphone 15"",
+      8442
+    ],
+    [
+      ""4K Monitor 27\"""",
+      7055
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Name"", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'North America' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;","[('Enterprise Laptop X1', 10419), ('Pro Smartphone 15', 8442), ('4K Monitor 27""', 7055)]",True,False
+20,NA 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27""']",list,"{
+  ""sql_query"": ""SELECT \""Product Name\"", SUM(\""Quantity\"") as total_qty FROM sales_data WHERE Region = 'North America' GROUP BY \""Product Name\"" ORDER BY total_qty DESC LIMIT 3;"",
+  ""sql_result"": [
+    [
+      ""Enterprise Laptop X1"",
+      10419
+    ],
+    [
+      ""Pro Smartphone 15"",
+      8442
+    ],
+    [
+      ""4K Monitor 27\"""",
+      7055
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'North America' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;","[('Enterprise Laptop X1', 10419), ('Pro Smartphone 15', 8442), ('4K Monitor 27""', 7055)]",True,False
+21,LATAM 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27""']",list,"{
+  ""sql_query"": ""SELECT \""Product Name\"", SUM(\""Quantity\"") as total_qty FROM sales_data WHERE Region = 'LATAM' GROUP BY \""Product Name\"" ORDER BY total_qty DESC LIMIT 3;"",
+  ""sql_result"": [
+    [
+      ""Enterprise Laptop X1"",
+      1661
+    ],
+    [
+      ""Pro Smartphone 15"",
+      1092
+    ],
+    [
+      ""4K Monitor 27\"""",
+      941
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'LATAM' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;","[('Enterprise Laptop X1', 1661), ('Pro Smartphone 15', 1092), ('4K Monitor 27""', 941)]",True,False
+22,拉美 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27""']",list,"{
+  ""sql_query"": ""SELECT \""Product Name\"", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'LATAM' GROUP BY \""Product Name\"" ORDER BY total_qty DESC LIMIT 3;"",
+  ""sql_result"": [
+    {
+      ""Product Name"": ""Enterprise Laptop X1"",
+      ""total_qty"": 1661
+    },
+    {
+      ""Product Name"": ""Pro Smartphone 15"",
+      ""total_qty"": 1092
+    },
+    {
+      ""Product Name"": ""4K Monitor 27\"""",
+      ""total_qty"": 941
+    }
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Name"", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'LATAM' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;","[('Enterprise Laptop X1', 1661), ('Pro Smartphone 15', 1092), ('4K Monitor 27""', 941)]",True,False
+23,南美 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27""']",list,"{
+  ""sql_query"": ""SELECT \""Product Name\"", SUM(\""Quantity\"") as total_qty FROM sales_data WHERE Region = 'LATAM' GROUP BY \""Product Name\"" ORDER BY total_qty DESC LIMIT 3;"",
+  ""sql_result"": [
+    {
+      ""Product Name"": ""Enterprise Laptop X1"",
+      ""total_qty"": 1661
+    },
+    {
+      ""Product Name"": ""Pro Smartphone 15"",
+      ""total_qty"": 1092
+    },
+    {
+      ""Product Name"": ""4K Monitor 27\"""",
+      ""total_qty"": 941
+    }
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'LATAM' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;","[('Enterprise Laptop X1', 1661), ('Pro Smartphone 15', 1092), ('4K Monitor 27""', 941)]",True,False
+24,拉丁美洲 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27""']",list,"{
+  ""sql_query"": ""SELECT \""Product Name\"", SUM(\""Quantity\"") as total_qty FROM sales_data WHERE Region = 'LATAM' GROUP BY \""Product Name\"" ORDER BY total_qty DESC LIMIT 3;"",
+  ""sql_result"": [
+    {
+      ""Product Name"": ""Enterprise Laptop X1"",
+      ""total_qty"": 1661
+    },
+    {
+      ""Product Name"": ""Pro Smartphone 15"",
+      ""total_qty"": 1092
+    },
+    {
+      ""Product Name"": ""4K Monitor 27\"""",
+      ""total_qty"": 941
+    }
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'LATAM' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;","[('Enterprise Laptop X1', 1661), ('Pro Smartphone 15', 1092), ('4K Monitor 27""', 941)]",True,False
+25,Latin America 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', '4K Monitor 27""']",list,"{
+  ""sql_query"": ""SELECT \""Product Name\"", SUM(\""Quantity\"") as total_qty FROM sales_data WHERE Region = 'LATAM' GROUP BY \""Product Name\"" ORDER BY total_qty DESC LIMIT 3;"",
+  ""sql_result"": [
+    [
+      ""Enterprise Laptop X1"",
+      1661
+    ],
+    [
+      ""Pro Smartphone 15"",
+      1092
+    ],
+    [
+      ""4K Monitor 27\"""",
+      941
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'LATAM' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;","[('Enterprise Laptop X1', 1661), ('Pro Smartphone 15', 1092), ('4K Monitor 27""', 941)]",True,False
+26,EMEA 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']",list,"{
+  ""sql_query"": ""SELECT \""Product Name\"", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'EMEA' GROUP BY \""Product Name\"" ORDER BY total_qty DESC LIMIT 3;"",
+  ""sql_result"": [
+    [
+      ""Enterprise Laptop X1"",
+      7513
+    ],
+    [
+      ""Pro Smartphone 15"",
+      6210
+    ],
+    [
+      ""Team Collaboration Tool"",
+      5003
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Name"", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'EMEA' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;","[('Enterprise Laptop X1', 7513), ('Pro Smartphone 15', 6210), ('Team Collaboration Tool', 5003)]",True,False
+27,歐洲中東非洲 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']",list,"{
+  ""sql_query"": ""SELECT \""Product Name\"", SUM(\""Quantity\"") as total_qty FROM sales_data WHERE Region = 'EMEA' GROUP BY \""Product Name\"" ORDER BY total_qty DESC LIMIT 3;"",
+  ""sql_result"": [
+    {
+      ""Product Name"": ""Enterprise Laptop X1"",
+      ""total_qty"": 7513
+    },
+    {
+      ""Product Name"": ""Pro Smartphone 15"",
+      ""total_qty"": 6210
+    },
+    {
+      ""Product Name"": ""Team Collaboration Tool"",
+      ""total_qty"": 5003
+    }
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'EMEA' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;","[('Enterprise Laptop X1', 7513), ('Pro Smartphone 15', 6210), ('Team Collaboration Tool', 5003)]",True,False
+28,歐非中東 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']",list,"{
+  ""sql_query"": ""SELECT \""Product Name\"", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'EMEA' GROUP BY \""Product Name\"" ORDER BY total_qty DESC LIMIT 3;"",
+  ""sql_result"": [
+    {
+      ""Product Name"": ""Enterprise Laptop X1"",
+      ""total_qty"": 7513
+    },
+    {
+      ""Product Name"": ""Pro Smartphone 15"",
+      ""total_qty"": 6210
+    },
+    {
+      ""Product Name"": ""Team Collaboration Tool"",
+      ""total_qty"": 5003
+    }
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Name"", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'EMEA' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;","[('Enterprise Laptop X1', 7513), ('Pro Smartphone 15', 6210), ('Team Collaboration Tool', 5003)]",True,False
+29,"Europe, Middle East, and Africa 銷售量最高的前三個產品是什麼？","['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']",list,"{
+  ""sql_query"": ""SELECT \""Product Name\"", SUM(\""Quantity\"") as total_qty FROM sales_data WHERE Region = 'EMEA' GROUP BY \""Product Name\"" ORDER BY total_qty DESC LIMIT 3;"",
+  ""sql_result"": [
+    [
+      ""Enterprise Laptop X1"",
+      7513
+    ],
+    [
+      ""Pro Smartphone 15"",
+      6210
+    ],
+    [
+      ""Team Collaboration Tool"",
+      5003
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'EMEA' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;","[('Enterprise Laptop X1', 7513), ('Pro Smartphone 15', 6210), ('Team Collaboration Tool', 5003)]",True,False
+30,APAC 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']",list,"{
+  ""sql_query"": ""SELECT \""Product Name\"", SUM(\""Quantity\"") as total_qty FROM sales_data WHERE Region = 'APAC' GROUP BY \""Product Name\"" ORDER BY total_qty DESC LIMIT 3;"",
+  ""sql_result"": [
+    {
+      ""Product Name"": ""Enterprise Laptop X1"",
+      ""total_qty"": 6547
+    },
+    {
+      ""Product Name"": ""Pro Smartphone 15"",
+      ""total_qty"": 5332
+    },
+    {
+      ""Product Name"": ""Team Collaboration Tool"",
+      ""total_qty"": 3858
+    }
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'APAC' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;","[('Enterprise Laptop X1', 6547), ('Pro Smartphone 15', 5332), ('Team Collaboration Tool', 3858)]",True,False
+31,亞太區 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']",list,"{
+  ""sql_query"": ""SELECT \""Product Name\"", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'APAC' GROUP BY \""Product Name\"" ORDER BY total_qty DESC LIMIT 3;"",
+  ""sql_result"": [
+    [
+      ""Enterprise Laptop X1"",
+      6547
+    ],
+    [
+      ""Pro Smartphone 15"",
+      5332
+    ],
+    [
+      ""Team Collaboration Tool"",
+      3858
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Name"", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'APAC' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;","[('Enterprise Laptop X1', 6547), ('Pro Smartphone 15', 5332), ('Team Collaboration Tool', 3858)]",True,False
+32,亞太地區 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']",list,"{
+  ""sql_query"": ""SELECT \""Product Name\"", SUM(\""Quantity\"") as total_qty FROM sales_data WHERE Region = 'APAC' GROUP BY \""Product Name\"" ORDER BY total_qty DESC LIMIT 3;"",
+  ""sql_result"": [
+    [
+      ""Enterprise Laptop X1"",
+      6547
+    ],
+    [
+      ""Pro Smartphone 15"",
+      5332
+    ],
+    [
+      ""Team Collaboration Tool"",
+      3858
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'APAC' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;","[('Enterprise Laptop X1', 6547), ('Pro Smartphone 15', 5332), ('Team Collaboration Tool', 3858)]",True,False
+33,Asia Pacific 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']",list,"{
+  ""sql_query"": ""SELECT \""Product Name\"", SUM(\""Quantity\"") as total_qty FROM sales_data WHERE Region = 'APAC' GROUP BY \""Product Name\"" ORDER BY total_qty DESC LIMIT 3;"",
+  ""sql_result"": [
+    [
+      ""Enterprise Laptop X1"",
+      6547
+    ],
+    [
+      ""Pro Smartphone 15"",
+      5332
+    ],
+    [
+      ""Team Collaboration Tool"",
+      3858
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Name"", SUM(""Quantity"") as total_qty FROM sales_data WHERE Region = 'APAC' GROUP BY ""Product Name"" ORDER BY total_qty DESC LIMIT 3;","[('Enterprise Laptop X1', 6547), ('Pro Smartphone 15', 5332), ('Team Collaboration Tool', 3858)]",True,False
+34,請列出 Electronics 類別在各年份的銷售額總計。,"{'2023': 30090351.27, '2024': 29168222.66}",dataframe,"{
+  ""sql_query"": ""SELECT strftime('%Y', \""Order Date\"") as year, SUM(\""Total Revenue\"") as total_revenue FROM sales_data WHERE \""Product Category\"" = 'Electronics' GROUP BY year ORDER BY year;"",
+  ""sql_result"": [
+    {
+      ""year"": ""2023"",
+      ""total_revenue"": 30090351.27
+    },
+    {
+      ""year"": ""2024"",
+      ""total_revenue"": 29168222.66
+    }
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT strftime('%Y', ""Order Date"") as year, SUM(""Total Revenue"") as total_revenue FROM sales_data WHERE ""Product Category"" = 'Electronics' GROUP BY year ORDER BY year;","[('2023', 30090351.27), ('2024', 29168222.66)]",True,False
+35,請列出 Software 類別在各年份的銷售額總計。,"{'2023': 13178975.35, '2024': 13985011.63}",dataframe,"{
+  ""sql_query"": ""SELECT strftime('%Y', \""Order Date\"") as year, SUM(\""Total Revenue\"") as total_revenue FROM sales_data WHERE \""Product Category\"" = 'Software' GROUP BY year ORDER BY year;"",
+  ""sql_result"": [
+    {
+      ""year"": ""2023"",
+      ""total_revenue"": 13178975.35
+    },
+    {
+      ""year"": ""2024"",
+      ""total_revenue"": 13985011.63
+    }
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT strftime('%Y', ""Order Date"") as year, SUM(""Total Revenue"") as total_revenue FROM sales_data WHERE ""Product Category"" = 'Software' GROUP BY year ORDER BY year;","[('2023', 13178975.35), ('2024', 13985011.63)]",True,False
+36,請列出 Office Supplies 類別在各年份的銷售額總計。,"{'2023': 6769810.67, '2024': 6276991.6}",dataframe,"{
+  ""sql_query"": ""SELECT strftime('%Y', \""Order Date\"") as year, SUM(\""Total Revenue\"") as total_revenue FROM sales_data WHERE \""Product Category\"" = 'Office Supplies' GROUP BY year ORDER BY year;"",
+  ""sql_result"": [
+    {
+      ""year"": ""2023"",
+      ""total_revenue"": 6769810.67
+    },
+    {
+      ""year"": ""2024"",
+      ""total_revenue"": 6276991.6
+    }
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT strftime('%Y', ""Order Date"") as year, SUM(""Total Revenue"") as total_revenue FROM sales_data WHERE ""Product Category"" = 'Office Supplies' GROUP BY year ORDER BY year;","[('2023', 6769810.67), ('2024', 6276991.6)]",True,False
+37,Canada 訂單數量最多的客戶是誰？,Summit Beta Solutions,string,"{
+  ""sql_query"": ""SELECT \""Customer Name\"", COUNT(\""Order ID\"") as order_count FROM sales_data WHERE \""Country\"" = 'Canada' GROUP BY \""Customer Name\"" ORDER BY order_count DESC LIMIT 1;"",
+  ""sql_result"": [
+    {
+      ""Customer Name"": ""Summit Beta Solutions"",
+      ""order_count"": 79
+    }
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Customer Name"", COUNT(""Order ID"") as order_count FROM sales_data WHERE ""Country"" = 'Canada' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;","[('Summit Beta Solutions', 79)]",True,False
+38,加拿大 訂單數量最多的客戶是誰？,Summit Beta Solutions,string,"{
+  ""sql_query"": ""SELECT \""Customer Name\"", COUNT(\""Order ID\"") as order_count FROM sales_data WHERE \""Country\"" = 'Canada' GROUP BY \""Customer Name\"" ORDER BY order_count DESC LIMIT 1;"",
+  ""sql_result"": [
+    [
+      ""Summit Beta Solutions"",
+      79
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Customer Name"", COUNT(""Order ID"") as order_count FROM sales_data WHERE ""Country"" = 'Canada' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;","[('Summit Beta Solutions', 79)]",True,False
+39,India 訂單數量最多的客戶是誰？,Delta Global Systems,string,"{
+  ""sql_query"": ""SELECT \""Customer Name\"", COUNT(\""Order ID\"") as order_count FROM sales_data WHERE \""Country\"" = 'India' GROUP BY \""Customer Name\"" ORDER BY order_count DESC LIMIT 1;"",
+  ""sql_result"": [
+    [
+      ""Summit Beta Solutions"",
+      20
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Customer Name"", COUNT(""Order ID"") as order_count FROM sales_data WHERE ""Country"" = 'India' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;","[('Summit Beta Solutions', 20)]",False,True
+40,印度 訂單數量最多的客戶是誰？,Delta Global Systems,string,"{
+  ""sql_query"": ""SELECT \""Customer Name\"", COUNT(\""Order ID\"") as order_count FROM sales_data WHERE \""Country\"" = 'India' GROUP BY \""Customer Name\"" ORDER BY order_count DESC LIMIT 1;"",
+  ""sql_result"": [
+    {
+      ""Customer Name"": ""Summit Beta Solutions"",
+      ""order_count"": 20
+    }
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Customer Name"", COUNT(""Order ID"") as order_count FROM sales_data WHERE ""Country"" = 'India' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;","[('Summit Beta Solutions', 20)]",False,True
+41,Germany 訂單數量最多的客戶是誰？,Summit Beta Solutions,string,"{
+  ""sql_query"": ""SELECT \""Customer Name\"", COUNT(\""Order ID\"") as order_count FROM sales_data WHERE Region = 'EMEA' AND \""Country\"" = 'Germany' GROUP BY \""Customer Name\"" ORDER BY order_count DESC LIMIT 1;"",
+  ""sql_result"": [
+    [
+      ""Summit Prime Systems"",
+      32
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Customer Name"", COUNT(""Order ID"") as order_count FROM sales_data WHERE Region = 'EMEA' AND ""Country"" = 'Germany' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;","[('Summit Prime Systems', 32)]",False,True
+42,德國 訂單數量最多的客戶是誰？,Summit Beta Solutions,string,"{
+  ""sql_query"": ""SELECT \""Customer Name\"", COUNT(\""Order ID\"") as order_count FROM sales_data WHERE \""Country\"" = 'Germany' GROUP BY \""Customer Name\"" ORDER BY order_count DESC LIMIT 1;"",
+  ""sql_result"": [
+    {
+      ""Customer Name"": ""Summit Prime Systems"",
+      ""order_count"": 32
+    }
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Customer Name"", COUNT(""Order ID"") as order_count FROM sales_data WHERE ""Country"" = 'Germany' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;","[('Summit Prime Systems', 32)]",False,True
+43,德意志 訂單數量最多的客戶是誰？,Summit Beta Solutions,string,"{
+  ""sql_query"": ""SELECT \""Customer Name\"", COUNT(\""Order ID\"") as order_count FROM sales_data WHERE \""Country\"" = 'Germany' GROUP BY \""Customer Name\"" ORDER BY order_count DESC LIMIT 1;"",
+  ""sql_result"": [
+    [
+      ""Summit Prime Systems"",
+      32
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Customer Name"", COUNT(""Order ID"") as order_count FROM sales_data WHERE ""Country"" = 'Germany' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;","[('Summit Prime Systems', 32)]",False,True
+44,Australia 訂單數量最多的客戶是誰？,Global Next Ltd.,string,"{
+  ""sql_query"": ""SELECT \""Customer Name\"", COUNT(\""Order ID\"") as order_count FROM sales_data WHERE \""Country\"" = 'Australia' GROUP BY \""Customer Name\"" ORDER BY order_count DESC LIMIT 1;"",
+  ""sql_result"": [
+    [
+      ""Global Next Ltd."",
+      21
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Customer Name"", COUNT(""Order ID"") as order_count FROM sales_data WHERE ""Country"" = 'Australia' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;","[('Global Next Ltd.', 21)]",True,False
+45,澳洲 訂單數量最多的客戶是誰？,Global Next Ltd.,string,"{
+  ""sql_query"": ""SELECT \""Customer Name\"", COUNT(\""Order ID\"") as order_count FROM sales_data WHERE Country = 'Australia' GROUP BY \""Customer Name\"" ORDER BY order_count DESC LIMIT 1;"",
+  ""sql_result"": [
+    [
+      ""Global Next Ltd."",
+      21
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Customer Name"", COUNT(""Order ID"") as order_count FROM sales_data WHERE Country = 'Australia' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;","[('Global Next Ltd.', 21)]",True,False
+46,澳大利亞 訂單數量最多的客戶是誰？,Global Next Ltd.,string,"{
+  ""sql_query"": ""SELECT \""Customer Name\"", COUNT(\""Order ID\"") as order_count FROM sales_data WHERE Country = 'Australia' GROUP BY \""Customer Name\"" ORDER BY order_count DESC LIMIT 1;"",
+  ""sql_result"": [
+    [
+      ""Global Next Ltd."",
+      21
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Customer Name"", COUNT(""Order ID"") as order_count FROM sales_data WHERE Country = 'Australia' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;","[('Global Next Ltd.', 21)]",True,False
+47,China 訂單數量最多的客戶是誰？,Apex Prime Corp.,string,"{
+  ""sql_query"": ""SELECT \""Customer Name\"", COUNT(\""Order ID\"") as order_count FROM sales_data WHERE \""Country\"" = 'China' GROUP BY \""Customer Name\"" ORDER BY order_count DESC LIMIT 1;"",
+  ""sql_result"": [
+    [
+      ""Apex Prime Corp."",
+      21
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Customer Name"", COUNT(""Order ID"") as order_count FROM sales_data WHERE ""Country"" = 'China' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;","[('Apex Prime Corp.', 21)]",True,False
+48,中國 訂單數量最多的客戶是誰？,Apex Prime Corp.,string,"{
+  ""sql_query"": ""SELECT \""Customer Name\"", COUNT(\""Order ID\"") as order_count FROM sales_data WHERE \""Country\"" = 'China' GROUP BY \""Customer Name\"" ORDER BY order_count DESC LIMIT 1;"",
+  ""sql_result"": [
+    [
+      ""Apex Prime Corp."",
+      21
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Customer Name"", COUNT(""Order ID"") as order_count FROM sales_data WHERE ""Country"" = 'China' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;","[('Apex Prime Corp.', 21)]",True,False
+49,大陸 訂單數量最多的客戶是誰？,Apex Prime Corp.,string,"{
+  ""sql_query"": ""SELECT \""Customer Name\"", COUNT(\""Order ID\"") as order_count FROM sales_data WHERE \""Country\"" = 'China' GROUP BY \""Customer Name\"" ORDER BY order_count DESC LIMIT 1;"",
+  ""sql_result"": [
+    [
+      ""Apex Prime Corp."",
+      21
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Customer Name"", COUNT(""Order ID"") as order_count FROM sales_data WHERE ""Country"" = 'China' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;","[('Apex Prime Corp.', 21)]",True,False
+50,PRC 訂單數量最多的客戶是誰？,Apex Prime Corp.,string,"{
+  ""sql_query"": ""SELECT \""Customer Name\"", COUNT(\""Order ID\"") as order_count FROM sales_data WHERE Country = 'China' GROUP BY \""Customer Name\"" ORDER BY order_count DESC LIMIT 1;"",
+  ""sql_result"": [
+    [
+      ""Apex Prime Corp."",
+      21
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Customer Name"", COUNT(""Order ID"") as order_count FROM sales_data WHERE Country = 'China' GROUP BY ""Customer Name"" ORDER BY order_count DESC LIMIT 1;","[('Apex Prime Corp.', 21)]",True,False
+51,2023 年哪一個季度的總銷售額表現最好？,Q4,string,"{
+  ""sql_query"": ""SELECT \n  CASE \n    WHEN CAST(strftime('%m', \""Order Date\"") AS INTEGER) BETWEEN 1 AND 3 THEN 'Q1'\n    WHEN CAST(strftime('%m', \""Order Date\"") AS INTEGER) BETWEEN 4 AND 6 THEN 'Q2'\n    WHEN CAST(strftime('%m', \""Order Date\"") AS INTEGER) BETWEEN 7 AND 9 THEN 'Q3'\n    ELSE 'Q4'\n  END as quarter,\n SUM(\""Total Revenue\"") as revenue\nFROM sales_data\nWHERE strftime('%Y', \""Order Date\"") = '2023'\nGROUP BY quarter\nORDER BY revenue DESC\nLIMIT 1;"",
+  ""sql_result"": [
+    [
+      ""Q4"",
+      16668031.59
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT 
   CASE 
     WHEN CAST(strftime('%m', ""Order Date"") AS INTEGER) BETWEEN 1 AND 3 THEN 'Q1'
     WHEN CAST(strftime('%m', ""Order Date"") AS INTEGER) BETWEEN 4 AND 6 THEN 'Q2'
     WHEN CAST(strftime('%m', ""Order Date"") AS INTEGER) BETWEEN 7 AND 9 THEN 'Q3'
     ELSE 'Q4'
   END as quarter,
-  SUM(""Total Revenue"") as revenue
+ SUM(""Total Revenue"") as revenue
 FROM sales_data
 WHERE strftime('%Y', ""Order Date"") = '2023'
-GROUP BY quarter 
-ORDER BY revenue DESC 
-LIMIT 1;",,,True,False
-52,2024 年哪一個季度的總銷售額表現最好？,Q4,string,"SELECT 
+GROUP BY quarter
+ORDER BY revenue DESC
+LIMIT 1;","[('Q4', 16668031.59)]",True,False
+52,2024 年哪一個季度的總銷售額表現最好？,Q4,string,"{
+  ""sql_query"": ""SELECT \n  CASE \n    WHEN CAST(strftime('%m', \""Order Date\"") AS INTEGER) BETWEEN 1 AND 3 THEN 'Q1'\n    WHEN CAST(strftime('%m', \""Order Date\"") AS INTEGER) BETWEEN 4 AND 6 THEN 'Q2'\n    WHEN CAST(strftime('%m', \""Order Date\"") AS INTEGER) BETWEEN 7 AND 9 THEN 'Q3'\n    ELSE 'Q4'\n  END as quarter,\n SUM(\""Total Revenue\"") as revenue\nFROM sales_data\nWHERE strftime('%Y', \""Order Date\"") = '2024'\nGROUP BY quarter\nORDER BY revenue DESC\nLIMIT 1;"",
+  ""sql_result"": [
+    [
+      ""Q4"",
+      16576318.67
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT 
   CASE 
     WHEN CAST(strftime('%m', ""Order Date"") AS INTEGER) BETWEEN 1 AND 3 THEN 'Q1'
     WHEN CAST(strftime('%m', ""Order Date"") AS INTEGER) BETWEEN 4 AND 6 THEN 'Q2'
     WHEN CAST(strftime('%m', ""Order Date"") AS INTEGER) BETWEEN 7 AND 9 THEN 'Q3'
     ELSE 'Q4'
   END as quarter,
-  SUM(""Total Revenue"") as revenue
+ SUM(""Total Revenue"") as revenue
 FROM sales_data
 WHERE strftime('%Y', ""Order Date"") = '2024'
-GROUP BY quarter ORDER BY revenue DESC LIMIT 1;",,,True,False
-53,Electronics 類別在 2024 年相對於 2023 年的銷售額年增率 (YoY) 是多少？(請以百分比表示),-3.06,number,"SELECT (SUM(CASE WHEN strftime('%Y', ""Order Date"") = '2024' THEN ""Total Revenue"" ELSE 0 END) - SUM(CASE WHEN strftime('%Y', ""Order Date"") = '2023' THEN ""Total Revenue"" ELSE 0 END)) * 100.0 / NULLIF(SUM(CASE WHEN strftime('%Y', ""Order Date"") = '2023' THEN ""Total Revenue"" ELSE 0 END), 0) AS yoy_growth_percentage FROM sales_data WHERE ""Product Category"" = 'Electronics';",,,False,True
-54,Office Supplies 類別在 2024 年相對於 2023 年的銷售額年增率 (YoY) 是多少？(請以百分比表示),-7.28,number,"SELECT (SUM(CASE WHEN strftime('%Y', ""Order Date"") = '2024' THEN ""Total Revenue"" ELSE 0 END) - SUM(CASE WHEN strftime('%Y', ""Order Date"") = '2023' THEN ""Total Revenue"" ELSE 0 END)) * 100.0 / NULLIF(SUM(CASE WHEN strftime('%Y', ""Order Date"") = '2023' THEN ""Total Revenue"" ELSE 0 END), 0) AS yoy_growth_percentage FROM sales_data WHERE ""Product Category"" = 'Office Supplies'",,,False,True
-55,Software 類別在 2024 年相對於 2023 年的銷售額年增率 (YoY) 是多少？(請以百分比表示),6.12,number,"SELECT (SUM(CASE WHEN strftime('%Y', ""Order Date"") = '2024' THEN ""Total Revenue"" ELSE 0 END) - SUM(CASE WHEN strftime('%Y', ""Order Date"") = '2023' THEN ""Total Revenue"" ELSE 0 END)) * 100.0 / NULLIF(SUM(CASE WHEN strftime('%Y', ""Order Date"") = '2023' THEN ""Total Revenue"" ELSE 0 END), 0) AS yoy_growth_percentage FROM sales_data WHERE ""Product Category"" = 'Software'",,,False,True
-56,請列出 North America 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 1501225.0, '2023-02': 1298301.23, '2023-03': 1560968.94, '2023-04': 1569450.64, '2023-05': 1239067.23, '2023-06': 1486196.84, '2023-07': 1447348.91, '2023-08': 1640436.4, '2023-09': 1673169.96, '2023-10': 2373057.31, '2023-11': 2117893.69, '2023-12': 2379353.47, '2024-01': 1516790.82, '2024-02': 1431760.02, '2024-03': 1736514.22, '2024-04': 1387412.77, '2024-05': 1535990.27, '2024-06': 1539895.94, '2024-07': 1464171.52, '2024-08': 1338957.31, '2024-09': 1074612.67, '2024-10': 2294689.2, '2024-11': 2018162.44, '2024-12': 2306937.48}",dataframe,"SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'North America' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;",,,False,True
-57,請列出 北美 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 1501225.0, '2023-02': 1298301.23, '2023-03': 1560968.94, '2023-04': 1569450.64, '2023-05': 1239067.23, '2023-06': 1486196.84, '2023-07': 1447348.91, '2023-08': 1640436.4, '2023-09': 1673169.96, '2023-10': 2373057.31, '2023-11': 2117893.69, '2023-12': 2379353.47, '2024-01': 1516790.82, '2024-02': 1431760.02, '2024-03': 1736514.22, '2024-04': 1387412.77, '2024-05': 1535990.27, '2024-06': 1539895.94, '2024-07': 1464171.52, '2024-08': 1338957.31, '2024-09': 1074612.67, '2024-10': 2294689.2, '2024-11': 2018162.44, '2024-12': 2306937.48}",dataframe,"SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'North America' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;",,,False,True
-58,請列出 北美洲 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 1501225.0, '2023-02': 1298301.23, '2023-03': 1560968.94, '2023-04': 1569450.64, '2023-05': 1239067.23, '2023-06': 1486196.84, '2023-07': 1447348.91, '2023-08': 1640436.4, '2023-09': 1673169.96, '2023-10': 2373057.31, '2023-11': 2117893.69, '2023-12': 2379353.47, '2024-01': 1516790.82, '2024-02': 1431760.02, '2024-03': 1736514.22, '2024-04': 1387412.77, '2024-05': 1535990.27, '2024-06': 1539895.94, '2024-07': 1464171.52, '2024-08': 1338957.31, '2024-09': 1074612.67, '2024-10': 2294689.2, '2024-11': 2018162.44, '2024-12': 2306937.48}",dataframe,"SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'North America' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;",,,False,True
-59,請列出 NA 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 1501225.0, '2023-02': 1298301.23, '2023-03': 1560968.94, '2023-04': 1569450.64, '2023-05': 1239067.23, '2023-06': 1486196.84, '2023-07': 1447348.91, '2023-08': 1640436.4, '2023-09': 1673169.96, '2023-10': 2373057.31, '2023-11': 2117893.69, '2023-12': 2379353.47, '2024-01': 1516790.82, '2024-02': 1431760.02, '2024-03': 1736514.22, '2024-04': 1387412.77, '2024-05': 1535990.27, '2024-06': 1539895.94, '2024-07': 1464171.52, '2024-08': 1338957.31, '2024-09': 1074612.67, '2024-10': 2294689.2, '2024-11': 2018162.44, '2024-12': 2306937.48}",dataframe,"SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'North America' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;",,,False,True
-60,請列出 LATAM 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 223713.48, '2023-02': 175948.62, '2023-03': 214276.38, '2023-04': 153375.98, '2023-05': 324390.47, '2023-06': 200221.42, '2023-07': 116414.84, '2023-08': 175005.51, '2023-09': 267708.42, '2023-10': 349280.05, '2023-11': 304090.41, '2023-12': 347328.27, '2024-01': 145904.33, '2024-02': 153470.14, '2024-03': 417749.45, '2024-04': 171977.2, '2024-05': 173912.15, '2024-06': 207575.73, '2024-07': 203863.23, '2024-08': 159882.9, '2024-09': 143958.6, '2024-10': 270168.5, '2024-11': 315395.29, '2024-12': 180159.21}",dataframe,"SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'LATAM' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;",,,False,True
-61,請列出 拉美 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 223713.48, '2023-02': 175948.62, '2023-03': 214276.38, '2023-04': 153375.98, '2023-05': 324390.47, '2023-06': 200221.42, '2023-07': 116414.84, '2023-08': 175005.51, '2023-09': 267708.42, '2023-10': 349280.05, '2023-11': 304090.41, '2023-12': 347328.27, '2024-01': 145904.33, '2024-02': 153470.14, '2024-03': 417749.45, '2024-04': 171977.2, '2024-05': 173912.15, '2024-06': 207575.73, '2024-07': 203863.23, '2024-08': 159882.9, '2024-09': 143958.6, '2024-10': 270168.5, '2024-11': 315395.29, '2024-12': 180159.21}",dataframe,"SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'LATAM' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;",,,False,True
-62,請列出 南美 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 223713.48, '2023-02': 175948.62, '2023-03': 214276.38, '2023-04': 153375.98, '2023-05': 324390.47, '2023-06': 200221.42, '2023-07': 116414.84, '2023-08': 175005.51, '2023-09': 267708.42, '2023-10': 349280.05, '2023-11': 304090.41, '2023-12': 347328.27, '2024-01': 145904.33, '2024-02': 153470.14, '2024-03': 417749.45, '2024-04': 171977.2, '2024-05': 173912.15, '2024-06': 207575.73, '2024-07': 203863.23, '2024-08': 159882.9, '2024-09': 143958.6, '2024-10': 270168.5, '2024-11': 315395.29, '2024-12': 180159.21}",dataframe,"SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'LATAM' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;",,,False,True
-63,請列出 拉丁美洲 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 223713.48, '2023-02': 175948.62, '2023-03': 214276.38, '2023-04': 153375.98, '2023-05': 324390.47, '2023-06': 200221.42, '2023-07': 116414.84, '2023-08': 175005.51, '2023-09': 267708.42, '2023-10': 349280.05, '2023-11': 304090.41, '2023-12': 347328.27, '2024-01': 145904.33, '2024-02': 153470.14, '2024-03': 417749.45, '2024-04': 171977.2, '2024-05': 173912.15, '2024-06': 207575.73, '2024-07': 203863.23, '2024-08': 159882.9, '2024-09': 143958.6, '2024-10': 270168.5, '2024-11': 315395.29, '2024-12': 180159.21}",dataframe,"SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'LATAM' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;",,,False,True
-64,請列出 Latin America 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 223713.48, '2023-02': 175948.62, '2023-03': 214276.38, '2023-04': 153375.98, '2023-05': 324390.47, '2023-06': 200221.42, '2023-07': 116414.84, '2023-08': 175005.51, '2023-09': 267708.42, '2023-10': 349280.05, '2023-11': 304090.41, '2023-12': 347328.27, '2024-01': 145904.33, '2024-02': 153470.14, '2024-03': 417749.45, '2024-04': 171977.2, '2024-05': 173912.15, '2024-06': 207575.73, '2024-07': 203863.23, '2024-08': 159882.9, '2024-09': 143958.6, '2024-10': 270168.5, '2024-11': 315395.29, '2024-12': 180159.21}",dataframe,"SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'LATAM' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;",,,False,True
-65,請列出 EMEA 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 942448.1, '2023-02': 883639.02, '2023-03': 1285595.76, '2023-04': 883185.84, '2023-05': 1185861.27, '2023-06': 1484438.38, '2023-07': 1016786.45, '2023-08': 1020389.97, '2023-09': 1059744.44, '2023-10': 1654875.41, '2023-11': 1624625.45, '2023-12': 1634231.28, '2024-01': 1133643.54, '2024-02': 1062111.55, '2024-03': 1012640.24, '2024-04': 992568.9, '2024-05': 1040289.1, '2024-06': 880005.25, '2024-07': 1208996.95, '2024-08': 1059911.19, '2024-09': 1059862.75, '2024-10': 1679514.33, '2024-11': 1766008.98, '2024-12': 1283154.02}",dataframe,"SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'EMEA' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;",,,False,True
-66,請列出 歐洲中東非洲 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 942448.1, '2023-02': 883639.02, '2023-03': 1285595.76, '2023-04': 883185.84, '2023-05': 1185861.27, '2023-06': 1484438.38, '2023-07': 1016786.45, '2023-08': 1020389.97, '2023-09': 1059744.44, '2023-10': 1654875.41, '2023-11': 1624625.45, '2023-12': 1634231.28, '2024-01': 1133643.54, '2024-02': 1062111.55, '2024-03': 1012640.24, '2024-04': 992568.9, '2024-05': 1040289.1, '2024-06': 880005.25, '2024-07': 1208996.95, '2024-08': 1059911.19, '2024-09': 1059862.75, '2024-10': 1679514.33, '2024-11': 1766008.98, '2024-12': 1283154.02}",dataframe,"SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'EMEA' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;",,,False,True
-67,請列出 歐非中東 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 942448.1, '2023-02': 883639.02, '2023-03': 1285595.76, '2023-04': 883185.84, '2023-05': 1185861.27, '2023-06': 1484438.38, '2023-07': 1016786.45, '2023-08': 1020389.97, '2023-09': 1059744.44, '2023-10': 1654875.41, '2023-11': 1624625.45, '2023-12': 1634231.28, '2024-01': 1133643.54, '2024-02': 1062111.55, '2024-03': 1012640.24, '2024-04': 992568.9, '2024-05': 1040289.1, '2024-06': 880005.25, '2024-07': 1208996.95, '2024-08': 1059911.19, '2024-09': 1059862.75, '2024-10': 1679514.33, '2024-11': 1766008.98, '2024-12': 1283154.02}",dataframe,"SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'EMEA' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;",,,False,True
-68,"請列出 Europe, Middle East, and Africa 區域在 2023 至 2024 年每個月的銷售趨勢數據。","{'2023-01': 942448.1, '2023-02': 883639.02, '2023-03': 1285595.76, '2023-04': 883185.84, '2023-05': 1185861.27, '2023-06': 1484438.38, '2023-07': 1016786.45, '2023-08': 1020389.97, '2023-09': 1059744.44, '2023-10': 1654875.41, '2023-11': 1624625.45, '2023-12': 1634231.28, '2024-01': 1133643.54, '2024-02': 1062111.55, '2024-03': 1012640.24, '2024-04': 992568.9, '2024-05': 1040289.1, '2024-06': 880005.25, '2024-07': 1208996.95, '2024-08': 1059911.19, '2024-09': 1059862.75, '2024-10': 1679514.33, '2024-11': 1766008.98, '2024-12': 1283154.02}",dataframe,"SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'EMEA' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;",,,False,True
-69,請列出 APAC 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 973776.02, '2023-02': 763996.82, '2023-03': 1005437.21, '2023-04': 1085883.84, '2023-05': 999851.05, '2023-06': 825946.06, '2023-07': 897312.68, '2023-08': 805145.36, '2023-09': 984447.16, '2023-10': 1189276.6, '2023-11': 1336621.74, '2023-12': 1357397.91, '2024-01': 933316.4, '2024-02': 1075906.73, '2024-03': 971237.02, '2024-04': 1076606.9, '2024-05': 1015613.24, '2024-06': 827017.19, '2024-07': 1053949.91, '2024-08': 888200.25, '2024-09': 757630.84, '2024-10': 1724426.36, '2024-11': 1436229.04, '2024-12': 1301473.82}",dataframe,"SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'APAC' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;",,,False,True
-70,請列出 亞太區 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 973776.02, '2023-02': 763996.82, '2023-03': 1005437.21, '2023-04': 1085883.84, '2023-05': 999851.05, '2023-06': 825946.06, '2023-07': 897312.68, '2023-08': 805145.36, '2023-09': 984447.16, '2023-10': 1189276.6, '2023-11': 1336621.74, '2023-12': 1357397.91, '2024-01': 933316.4, '2024-02': 1075906.73, '2024-03': 971237.02, '2024-04': 1076606.9, '2024-05': 1015613.24, '2024-06': 827017.19, '2024-07': 1053949.91, '2024-08': 888200.25, '2024-09': 757630.84, '2024-10': 1724426.36, '2024-11': 1436229.04, '2024-12': 1301473.82}",dataframe,"SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'APAC' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;",,,False,True
-71,請列出 亞太地區 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 973776.02, '2023-02': 763996.82, '2023-03': 1005437.21, '2023-04': 1085883.84, '2023-05': 999851.05, '2023-06': 825946.06, '2023-07': 897312.68, '2023-08': 805145.36, '2023-09': 984447.16, '2023-10': 1189276.6, '2023-11': 1336621.74, '2023-12': 1357397.91, '2024-01': 933316.4, '2024-02': 1075906.73, '2024-03': 971237.02, '2024-04': 1076606.9, '2024-05': 1015613.24, '2024-06': 827017.19, '2024-07': 1053949.91, '2024-08': 888200.25, '2024-09': 757630.84, '2024-10': 1724426.36, '2024-11': 1436229.04, '2024-12': 1301473.82}",dataframe,"SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'APAC' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;",,,False,True
-72,請列出 Asia Pacific 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 973776.02, '2023-02': 763996.82, '2023-03': 1005437.21, '2023-04': 1085883.84, '2023-05': 999851.05, '2023-06': 825946.06, '2023-07': 897312.68, '2023-08': 805145.36, '2023-09': 984447.16, '2023-10': 1189276.6, '2023-11': 1336621.74, '2023-12': 1357397.91, '2024-01': 933316.4, '2024-02': 1075906.73, '2024-03': 971237.02, '2024-04': 1076606.9, '2024-05': 1015613.24, '2024-06': 827017.19, '2024-07': 1053949.91, '2024-08': 888200.25, '2024-09': 757630.84, '2024-10': 1724426.36, '2024-11': 1436229.04, '2024-12': 1301473.82}",dataframe,"SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'APAC' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;",,,False,True
-73,2024 年第四季相較於 2023 年第四季，總銷售額增加了多少？,-91712.92,number,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE strftime('%Y', ""Order Date"") = '2024' AND strftime('%m', ""Order Date"") BETWEEN 7 AND 12 MINUS SELECT SUM(""Total Revenue"") FROM sales_data WHERE strftime('%Y', ""Order Date"") = '2023' AND strftime('%m', ""Order Date"") BETWEEN 7 AND 12",,,False,True
-74,在 North America 區域，2023 年前五大客戶購買各產品類別的金額占比為何？,"{'Delta Elite Systems': {'Electronics': 0.225, 'Office Supplies': 0.096, 'Software': 0.679}, 'Global Beta Corp.': {'Electronics': 0.3834, 'Office Supplies': 0.0513, 'Software': 0.5654}, 'Next Beta Ltd.': {'Electronics': 0.5828, 'Office Supplies': 0.1038, 'Software': 0.3134}, 'Prime Delta Solutions': {'Electronics': 0.6316, 'Office Supplies': 0.1253, 'Software': 0.243}, 'Summit Prime Systems': {'Electronics': 0.5044, 'Office Supplies': 0.1148, 'Software': 0.3809}}",dataframe,"SELECT SUM(""Total Revenue"") / SUM(SUM(""Total Revenue"") OVER (PARTITION BY ""Product Category"")) AS revenue_ratio FROM sales_data WHERE Region = 'North America' AND strftime('%Y', ""Order Date"") = '2023' GROUP BY ""Product Category"" ORDER BY revenue_ratio DESC LIMIT 5;",,,False,True
-75,在 北美 區域，2023 年前五大客戶購買各產品類別的金額占比為何？,"{'Delta Elite Systems': {'Electronics': 0.225, 'Office Supplies': 0.096, 'Software': 0.679}, 'Global Beta Corp.': {'Electronics': 0.3834, 'Office Supplies': 0.0513, 'Software': 0.5654}, 'Next Beta Ltd.': {'Electronics': 0.5828, 'Office Supplies': 0.1038, 'Software': 0.3134}, 'Prime Delta Solutions': {'Electronics': 0.6316, 'Office Supplies': 0.1253, 'Software': 0.243}, 'Summit Prime Systems': {'Electronics': 0.5044, 'Office Supplies': 0.1148, 'Software': 0.3809}}",dataframe,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'North America' AND strftime('%Y', ""Order Date"") = '2023' GROUP BY ""Customer Name"", ""Product Category"" ORDER BY SUM(""Total Revenue"") DESC LIMIT 5",,,False,True
-76,在 北美洲 區域，2023 年前五大客戶購買各產品類別的金額占比為何？,"{'Delta Elite Systems': {'Electronics': 0.225, 'Office Supplies': 0.096, 'Software': 0.679}, 'Global Beta Corp.': {'Electronics': 0.3834, 'Office Supplies': 0.0513, 'Software': 0.5654}, 'Next Beta Ltd.': {'Electronics': 0.5828, 'Office Supplies': 0.1038, 'Software': 0.3134}, 'Prime Delta Solutions': {'Electronics': 0.6316, 'Office Supplies': 0.1253, 'Software': 0.243}, 'Summit Prime Systems': {'Electronics': 0.5044, 'Office Supplies': 0.1148, 'Software': 0.3809}}",dataframe,"SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'North America' AND strftime('%Y', ""Order Date"") = '2023' GROUP BY ""Customer Name"", ""Product Category"" ORDER BY SUM(""Total Revenue"") DESC LIMIT 5",,,False,True
-77,在 NA 區域，2023 年前五大客戶購買各產品類別的金額占比為何？,"{'Delta Elite Systems': {'Electronics': 0.225, 'Office Supplies': 0.096, 'Software': 0.679}, 'Global Beta Corp.': {'Electronics': 0.3834, 'Office Supplies': 0.0513, 'Software': 0.5654}, 'Next Beta Ltd.': {'Electronics': 0.5828, 'Office Supplies': 0.1038, 'Software': 0.3134}, 'Prime Delta Solutions': {'Electronics': 0.6316, 'Office Supplies': 0.1253, 'Software': 0.243}, 'Summit Prime Systems': {'Electronics': 0.5044, 'Office Supplies': 0.1148, 'Software': 0.3809}}",dataframe,"SELECT SUM(""Total Revenue"") / SUM(SUM(""Total Revenue"")) OVER () AS revenue_ratio FROM sales_data WHERE Region = 'North America' AND strftime('%Y', ""Order Date"") = '2023' GROUP BY ""Customer Name"", ""Product Category"" ORDER BY revenue_ratio DESC LIMIT 5",,,False,True
-78,在 2023 到 2024 年間，哪位客戶的購買總額變動幅度（絕對值）最大？,Elite Apex Group,string,"SELECT Customer Name, SUM(""Total Revenue"") as total_revenue FROM sales_data WHERE strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY ""Customer Name"" ORDER BY ABS(total_revenue - LAG(total_revenue) OVER (ORDER BY total_revenue)) DESC LIMIT 1;",,,False,True
-79,產品類別 Electronics 的最大購買客戶是誰？,Summit Beta Solutions,string,"SELECT ""Customer Name"" FROM sales_data WHERE ""Product Category"" = 'Electronics' ORDER BY SUM(""Quantity"") DESC LIMIT 1;",,,False,True
-80,哪一個產品的平均單價 (ASP) 最高？,Cloud License (Annual),string,SELECT MAX(ASP) FROM sales_data;,,,False,True
-81,各個區域 (Region) 最偏好（銷售額最高）的產品類別分別為何？,"{'APAC': 'Electronics', 'EMEA': 'Electronics', 'LATAM': 'Electronics', 'North America': 'Electronics'}",dataframe,"SELECT ""Product Category"", SUM(""Total Revenue"") as total_revenue FROM sales_data GROUP BY ""Product Category"" ORDER BY total_revenue DESC",,,False,True
+GROUP BY quarter
+ORDER BY revenue DESC
+LIMIT 1;","[('Q4', 16576318.67)]",True,False
+53,Electronics 類別在 2024 年相對於 2023 年的銷售額年增率 (YoY) 是多少？(請以百分比表示),-3.06,number,"{
+  ""sql_query"": ""SELECT (SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE \""Product Category\"" = 'Electronics' AND strftime('%Y', \""Order Date\"") = '2024') - (SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE \""Product Category\"" = 'Electronics' AND strftime('%Y', \""Order Date\"") = '2023') as revenue_diff, (SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE \""Product Category\"" = 'Electronics' AND strftime('%Y', \""Order Date\"") = '2023') as base_revenue"",
+  ""sql_result"": [
+    [
+      -922128.61,
+      30090351.27
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT (SELECT SUM(""Total Revenue"") FROM sales_data WHERE ""Product Category"" = 'Electronics' AND strftime('%Y', ""Order Date"") = '2024') - (SELECT SUM(""Total Revenue"") FROM sales_data WHERE ""Product Category"" = 'Electronics' AND strftime('%Y', ""Order Date"") = '2023') as revenue_diff, (SELECT SUM(""Total Revenue"") FROM sales_data WHERE ""Product Category"" = 'Electronics' AND strftime('%Y', ""Order Date"") = '2023') as base_revenue","[(-922128.6099999994, 30090351.27)]",False,True
+54,Office Supplies 類別在 2024 年相對於 2023 年的銷售額年增率 (YoY) 是多少？(請以百分比表示),-7.28,number,"{
+  ""sql_query"": ""SELECT (SUM(CASE WHEN strftime('%Y', \""Order Date\"") = '2024' THEN \""Total Revenue\"" ELSE 0 END) - SUM(CASE WHEN strftime('%Y', \""Order Date\"") = '2023' THEN \""Total Revenue\"" ELSE 0 END)) * 100.0 / NULLIF(SUM(CASE WHEN strftime('%Y', \""Order Date\"") = '2023' THEN \""Total Revenue\"" ELSE 0 END), 0) AS yoy_growth_percentage FROM sales_data WHERE \""Product Category\"" = 'Office Supplies'"",
+  ""sql_result"": [
+    -7.279658088281519
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT (SUM(CASE WHEN strftime('%Y', ""Order Date"") = '2024' THEN ""Total Revenue"" ELSE 0 END) - SUM(CASE WHEN strftime('%Y', ""Order Date"") = '2023' THEN ""Total Revenue"" ELSE 0 END)) * 100.0 / NULLIF(SUM(CASE WHEN strftime('%Y', ""Order Date"") = '2023' THEN ""Total Revenue"" ELSE 0 END), 0) AS yoy_growth_percentage FROM sales_data WHERE ""Product Category"" = 'Office Supplies'","[(-7.279658088281519,)]",True,False
+55,Software 類別在 2024 年相對於 2023 年的銷售額年增率 (YoY) 是多少？(請以百分比表示),6.12,number,"{
+  ""sql_query"": ""SELECT (SUM(CASE WHEN strftime('%Y', \""Order Date\"") = '2024' THEN \""Total Revenue\"" ELSE 0 END) - SUM(CASE WHEN strftime('%Y', \""Order Date\"") = '2023' THEN \""Total Revenue\"" ELSE 0 END)) * 100.0 / NULLIF(SUM(CASE WHEN strftime('%Y', \""Order Date\"") = '2023' THEN \""Total Revenue\"" ELSE 0 END), 0) AS yoy_growth_percentage FROM sales_data WHERE \""Product Category\"" = 'Software'"",
+  ""sql_result"": [
+    [
+      6.116076998353299
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT (SUM(CASE WHEN strftime('%Y', ""Order Date"") = '2024' THEN ""Total Revenue"" ELSE 0 END) - SUM(CASE WHEN strftime('%Y', ""Order Date"") = '2023' THEN ""Total Revenue"" ELSE 0 END)) * 100.0 / NULLIF(SUM(CASE WHEN strftime('%Y', ""Order Date"") = '2023' THEN ""Total Revenue"" ELSE 0 END), 0) AS yoy_growth_percentage FROM sales_data WHERE ""Product Category"" = 'Software'","[(6.116076998353299,)]",True,False
+56,請列出 North America 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 1501225.0, '2023-02': 1298301.23, '2023-03': 1560968.94, '2023-04': 1569450.64, '2023-05': 1239067.23, '2023-06': 1486196.84, '2023-07': 1447348.91, '2023-08': 1640436.4, '2023-09': 1673169.96, '2023-10': 2373057.31, '2023-11': 2117893.69, '2023-12': 2379353.47, '2024-01': 1516790.82, '2024-02': 1431760.02, '2024-03': 1736514.22, '2024-04': 1387412.77, '2024-05': 1535990.27, '2024-06': 1539895.94, '2024-07': 1464171.52, '2024-08': 1338957.31, '2024-09': 1074612.67, '2024-10': 2294689.2, '2024-11': 2018162.44, '2024-12': 2306937.48}",dataframe,"{
+  ""sql_query"": ""SELECT strftime('%Y-%m', \""Order Date\"") as month, SUM(\""Total Revenue\"") as revenue FROM sales_data WHERE Region = 'North America' AND strftime('%Y', \""Order Date\"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;"",
+  ""sql_result"": [
+    {
+      ""month"": ""2023-01"",
+      ""revenue"": 1501225.0
+    },
+    {
+      ""month"": ""2023-02"",
+      ""revenue"": 1298301.23
+    },
+    {
+      ""month"": ""2023-03"",
+      ""revenue"": 1560968.94
+    },
+    {
+      ""month"": ""2023-04"",
+      ""revenue"": 1569450.64
+    },
+    {
+      ""month"": ""2023-05"",
+      ""revenue"": 1239067.23
+    },
+    {
+      ""month"": ""2023-06"",
+      ""revenue"": 1486196.84
+    },
+    {
+      ""month"": ""2023-07"",
+      ""revenue"": 1447348.91
+    },
+    {
+      ""month"": ""2023-08"",
+      ""revenue"": 1640436.4
+    },
+    {
+      ""month"": ""2023-09"",
+      ""revenue"": 1673169.96
+    },
+    {
+      ""month"": ""2023-10"",
+      ""revenue"": 2373057.31
+    },
+    {
+      ""month"": ""2023-11"",
+      ""revenue"": 2117893.69
+    },
+    {
+      ""month"": ""2023-12"",
+      ""revenue"": 2379353.47
+    },
+    {
+      ""month"": ""2024-01"",
+      ""revenue"": 1516790.82
+    },
+    {
+      ""month"": ""2024-02"",
+      ""revenue"": 1431760.02
+    },
+    {
+      ""month"": ""2024-03"",
+      ""revenue"": 1736514.22
+    },
+    {
+      ""month"": ""2024-04"",
+      ""revenue"": 1387412.77
+    },
+    {
+      ""month"": ""2024-05"",
+      ""revenue"": 1535990.27
+    },
+    {
+      ""month"": ""2024-06"",
+      ""revenue"": 1539895.94
+    },
+    {
+      ""month"": ""2024-07"",
+      ""revenue"": 1464171.52
+    },
+    {
+      ""month"": ""2024-08"",
+      ""revenue"": 1338957.31
+    },
+    {
+      ""month"": ""2024-09"",
+      ""revenue"": 1074612.67
+    },
+    {
+      ""month"": ""2024-10"",
+      ""revenue"": 2294689.2
+    },
+    {
+      ""month"": ""2024-11"",
+      ""revenue"": 2018162.44
+    },
+    {
+      ""month"": ""2024-12"",
+      ""revenue"": 2306937.48
+    }
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'North America' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;","[('2023-01', 1501225.0), ('2023-02', 1298301.23), ('2023-03', 1560968.94), ('2023-04', 1569450.64), ('2023-05', 1239067.23), ('2023-06', 1486196.84), ('2023-07', 1447348.91), ('2023-08', 1640436.4), ('2023-09', 1673169.96), ('2023-10', 2373057.31), ('2023-11', 2117893.69), ('2023-12', 2379353.47), ('2024-01', 1516790.82), ('2024-02', 1431760.02), ('2024-03', 1736514.22), ('2024-04', 1387412.77), ('2024-05', 1535990.27), ('2024-06', 1539895.94), ('2024-07', 1464171.52), ('2024-08', 1338957.31), ('2024-09', 1074612.67), ('2024-10', 2294689.2), ('2024-11', 2018162.44), ('2024-12', 2306937.48)]",True,False
+57,請列出 北美 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 1501225.0, '2023-02': 1298301.23, '2023-03': 1560968.94, '2023-04': 1569450.64, '2023-05': 1239067.23, '2023-06': 1486196.84, '2023-07': 1447348.91, '2023-08': 1640436.4, '2023-09': 1673169.96, '2023-10': 2373057.31, '2023-11': 2117893.69, '2023-12': 2379353.47, '2024-01': 1516790.82, '2024-02': 1431760.02, '2024-03': 1736514.22, '2024-04': 1387412.77, '2024-05': 1535990.27, '2024-06': 1539895.94, '2024-07': 1464171.52, '2024-08': 1338957.31, '2024-09': 1074612.67, '2024-10': 2294689.2, '2024-11': 2018162.44, '2024-12': 2306937.48}",dataframe,"{
+  ""sql_query"": ""SELECT strftime('%Y-%m', \""Order Date\"") as month, SUM(\""Total Revenue\"") as revenue FROM sales_data WHERE Region = 'North America' AND strftime('%Y', \""Order Date\"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;"",
+  ""sql_result"": [
+    {
+      ""month"": ""2023-01"",
+      ""revenue"": 1501225.0
+    },
+    {
+      ""month"": ""2023-02"",
+      ""revenue"": 1298301.23
+    },
+    {
+      ""month"": ""2023-03"",
+      ""revenue"": 1560968.94
+    },
+    {
+      ""month"": ""2023-04"",
+      ""revenue"": 1569450.64
+    },
+    {
+      ""month"": ""2023-05"",
+      ""revenue"": 1239067.23
+    },
+    {
+      ""month"": ""2023-06"",
+      ""revenue"": 1486196.84
+    },
+    {
+      ""month"": ""2023-07"",
+      ""revenue"": 1447348.91
+    },
+    {
+      ""month"": ""2023-08"",
+      ""revenue"": 1640436.4
+    },
+    {
+      ""month"": ""2023-09"",
+      ""revenue"": 1673169.96
+    },
+    {
+      ""month"": ""2023-10"",
+      ""revenue"": 2373057.31
+    },
+    {
+      ""month"": ""2023-11"",
+      ""revenue"": 2117893.69
+    },
+    {
+      ""month"": ""2023-12"",
+      ""revenue"": 2379353.47
+    },
+    {
+      ""month"": ""2024-01"",
+      ""revenue"": 1516790.82
+    },
+    {
+      ""month"": ""2024-02"",
+      ""revenue"": 1431760.02
+    },
+    {
+      ""month"": ""2024-03"",
+      ""revenue"": 1736514.22
+    },
+    {
+      ""month"": ""2024-04"",
+      ""revenue"": 1387412.77
+    },
+    {
+      ""month"": ""2024-05"",
+      ""revenue"": 1535990.27
+    },
+    {
+      ""month"": ""2024-06"",
+      ""revenue"": 1539895.94
+    },
+    {
+      ""month"": ""2024-07"",
+      ""revenue"": 1464171.52
+    },
+    {
+      ""month"": ""2024-08"",
+      ""revenue"": 1338957.31
+    },
+    {
+      ""month"": ""2024-09"",
+      ""revenue"": 1074612.67
+    },
+    {
+      ""month"": ""2024-10"",
+      ""revenue"": 2294689.2
+    },
+    {
+      ""month"": ""2024-11"",
+      ""revenue"": 2018162.44
+    },
+    {
+      ""month"": ""2024-12"",
+      ""revenue"": 2306937.48
+    }
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'North America' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;","[('2023-01', 1501225.0), ('2023-02', 1298301.23), ('2023-03', 1560968.94), ('2023-04', 1569450.64), ('2023-05', 1239067.23), ('2023-06', 1486196.84), ('2023-07', 1447348.91), ('2023-08', 1640436.4), ('2023-09', 1673169.96), ('2023-10', 2373057.31), ('2023-11', 2117893.69), ('2023-12', 2379353.47), ('2024-01', 1516790.82), ('2024-02', 1431760.02), ('2024-03', 1736514.22), ('2024-04', 1387412.77), ('2024-05', 1535990.27), ('2024-06', 1539895.94), ('2024-07', 1464171.52), ('2024-08', 1338957.31), ('2024-09', 1074612.67), ('2024-10', 2294689.2), ('2024-11', 2018162.44), ('2024-12', 2306937.48)]",True,False
+58,請列出 北美洲 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 1501225.0, '2023-02': 1298301.23, '2023-03': 1560968.94, '2023-04': 1569450.64, '2023-05': 1239067.23, '2023-06': 1486196.84, '2023-07': 1447348.91, '2023-08': 1640436.4, '2023-09': 1673169.96, '2023-10': 2373057.31, '2023-11': 2117893.69, '2023-12': 2379353.47, '2024-01': 1516790.82, '2024-02': 1431760.02, '2024-03': 1736514.22, '2024-04': 1387412.77, '2024-05': 1535990.27, '2024-06': 1539895.94, '2024-07': 1464171.52, '2024-08': 1338957.31, '2024-09': 1074612.67, '2024-10': 2294689.2, '2024-11': 2018162.44, '2024-12': 2306937.48}",dataframe,"{
+  ""sql_query"": ""SELECT strftime('%Y-%m', \""Order Date\"") as month, SUM(\""Total Revenue\"") as revenue FROM sales_data WHERE Region = 'North America' AND strftime('%Y', \""Order Date\"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;"",
+  ""sql_result"": [
+    {
+      ""month"": ""2023-01"",
+      ""revenue"": 1501225.0
+    },
+    {
+      ""month"": ""2023-02"",
+      ""revenue"": 1298301.23
+    },
+    {
+      ""month"": ""2023-03"",
+      ""revenue"": 1560968.94
+    },
+    {
+      ""month"": ""2023-04"",
+      ""revenue"": 1569450.64
+    },
+    {
+      ""month"": ""2023-05"",
+      ""revenue"": 1239067.23
+    },
+    {
+      ""month"": ""2023-06"",
+      ""revenue"": 1486196.84
+    },
+    {
+      ""month"": ""2023-07"",
+      ""revenue"": 1447348.91
+    },
+    {
+      ""month"": ""2023-08"",
+      ""revenue"": 1640436.4
+    },
+    {
+      ""month"": ""2023-09"",
+      ""revenue"": 1673169.96
+    },
+    {
+      ""month"": ""2023-10"",
+      ""revenue"": 2373057.31
+    },
+    {
+      ""month"": ""2023-11"",
+      ""revenue"": 2117893.69
+    },
+    {
+      ""month"": ""2023-12"",
+      ""revenue"": 2379353.47
+    },
+    {
+      ""month"": ""2024-01"",
+      ""revenue"": 1516790.82
+    },
+    {
+      ""month"": ""2024-02"",
+      ""revenue"": 1431760.02
+    },
+    {
+      ""month"": ""2024-03"",
+      ""revenue"": 1736514.22
+    },
+    {
+      ""month"": ""2024-04"",
+      ""revenue"": 1387412.77
+    },
+    {
+      ""month"": ""2024-05"",
+      ""revenue"": 1535990.27
+    },
+    {
+      ""month"": ""2024-06"",
+      ""revenue"": 1539895.94
+    },
+    {
+      ""month"": ""2024-07"",
+      ""revenue"": 1464171.52
+    },
+    {
+      ""month"": ""2024-08"",
+      ""revenue"": 1338957.31
+    },
+    {
+      ""month"": ""2024-09"",
+      ""revenue"": 1074612.67
+    },
+    {
+      ""month"": ""2024-10"",
+      ""revenue"": 2294689.2
+    },
+    {
+      ""month"": ""2024-11"",
+      ""revenue"": 2018162.44
+    },
+    {
+      ""month"": ""2024-12"",
+      ""revenue"": 2306937.48
+    }
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'North America' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;","[('2023-01', 1501225.0), ('2023-02', 1298301.23), ('2023-03', 1560968.94), ('2023-04', 1569450.64), ('2023-05', 1239067.23), ('2023-06', 1486196.84), ('2023-07', 1447348.91), ('2023-08', 1640436.4), ('2023-09', 1673169.96), ('2023-10', 2373057.31), ('2023-11', 2117893.69), ('2023-12', 2379353.47), ('2024-01', 1516790.82), ('2024-02', 1431760.02), ('2024-03', 1736514.22), ('2024-04', 1387412.77), ('2024-05', 1535990.27), ('2024-06', 1539895.94), ('2024-07', 1464171.52), ('2024-08', 1338957.31), ('2024-09', 1074612.67), ('2024-10', 2294689.2), ('2024-11', 2018162.44), ('2024-12', 2306937.48)]",True,False
+59,請列出 NA 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 1501225.0, '2023-02': 1298301.23, '2023-03': 1560968.94, '2023-04': 1569450.64, '2023-05': 1239067.23, '2023-06': 1486196.84, '2023-07': 1447348.91, '2023-08': 1640436.4, '2023-09': 1673169.96, '2023-10': 2373057.31, '2023-11': 2117893.69, '2023-12': 2379353.47, '2024-01': 1516790.82, '2024-02': 1431760.02, '2024-03': 1736514.22, '2024-04': 1387412.77, '2024-05': 1535990.27, '2024-06': 1539895.94, '2024-07': 1464171.52, '2024-08': 1338957.31, '2024-09': 1074612.67, '2024-10': 2294689.2, '2024-11': 2018162.44, '2024-12': 2306937.48}",dataframe,"{
+  ""sql_query"": ""SELECT strftime('%Y-%m', \""Order Date\"") as month, SUM(\""Total Revenue\"") as revenue FROM sales_data WHERE Region = 'North America' AND strftime('%Y', \""Order Date\"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;"",
+  ""sql_result"": [
+    [
+      ""2023-01"",
+      1501225.0
+    ],
+    [
+      ""2023-02"",
+      1298301.23
+    ],
+    [
+      ""2023-03"",
+      1560968.94
+    ],
+    [
+      ""2023-04"",
+      1569450.64
+    ],
+    [
+      ""2023-05"",
+      1239067.23
+    ],
+    [
+      ""2023-06"",
+      1486196.84
+    ],
+    [
+      ""2023-07"",
+      1447348.91
+    ],
+    [
+      ""2023-08"",
+      1640436.4
+    ],
+    [
+      ""2023-09"",
+      1673169.96
+    ],
+    [
+      ""2023-10"",
+      2373057.31
+    ],
+    [
+      ""2023-11"",
+      2117893.69
+    ],
+    [
+      ""2023-12"",
+      2379353.47
+    ],
+    [
+      ""2024-01"",
+      1516790.82
+    ],
+    [
+      ""2024-02"",
+      1431760.02
+    ],
+    [
+      ""2024-03"",
+      1736514.22
+    ],
+    [
+      ""2024-04"",
+      1387412.77
+    ],
+    [
+      ""2024-05"",
+      1535990.27
+    ],
+    [
+      ""2024-06"",
+      1539895.94
+    ],
+    [
+      ""2024-07"",
+      1464171.52
+    ],
+    [
+      ""2024-08"",
+      1338957.31
+    ],
+    [
+      ""2024-09"",
+      1074612.67
+    ],
+    [
+      ""2024-10"",
+      2294689.2
+    ],
+    [
+      ""2024-11"",
+      2018162.44
+    ],
+    [
+      ""2024-12"",
+      2306937.48
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'North America' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;","[('2023-01', 1501225.0), ('2023-02', 1298301.23), ('2023-03', 1560968.94), ('2023-04', 1569450.64), ('2023-05', 1239067.23), ('2023-06', 1486196.84), ('2023-07', 1447348.91), ('2023-08', 1640436.4), ('2023-09', 1673169.96), ('2023-10', 2373057.31), ('2023-11', 2117893.69), ('2023-12', 2379353.47), ('2024-01', 1516790.82), ('2024-02', 1431760.02), ('2024-03', 1736514.22), ('2024-04', 1387412.77), ('2024-05', 1535990.27), ('2024-06', 1539895.94), ('2024-07', 1464171.52), ('2024-08', 1338957.31), ('2024-09', 1074612.67), ('2024-10', 2294689.2), ('2024-11', 2018162.44), ('2024-12', 2306937.48)]",True,False
+60,請列出 LATAM 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 223713.48, '2023-02': 175948.62, '2023-03': 214276.38, '2023-04': 153375.98, '2023-05': 324390.47, '2023-06': 200221.42, '2023-07': 116414.84, '2023-08': 175005.51, '2023-09': 267708.42, '2023-10': 349280.05, '2023-11': 304090.41, '2023-12': 347328.27, '2024-01': 145904.33, '2024-02': 153470.14, '2024-03': 417749.45, '2024-04': 171977.2, '2024-05': 173912.15, '2024-06': 207575.73, '2024-07': 203863.23, '2024-08': 159882.9, '2024-09': 143958.6, '2024-10': 270168.5, '2024-11': 315395.29, '2024-12': 180159.21}",dataframe,"{
+  ""sql_query"": ""SELECT strftime('%Y-%m', \""Order Date\"") as month, SUM(\""Total Revenue\"") as revenue FROM sales_data WHERE Region = 'LATAM' AND strftime('%Y', \""Order Date\"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;"",
+  ""sql_result"": [
+    [""2023-01"", 223713.48],
+    [""2023-02"", 175948.62],
+    [""2023-03"", 214276.38],
+    [""2023-04"", 153375.98],
+    [""2023-05"", 324390.47000000003],
+    [""2023-06"", 200221.42],
+    [""2023-07"", 116414.84],
+    [""2023-08"", 175005.51],
+    [""2023-09"", 267708.42],
+    [""2023-10"", 349280.05],
+    [""2023-11"", 304090.41],
+    [""2023-12"", 347328.27],
+    [""2024-01"", 145904.33],
+    [""2024-02"", 153470.13999999998],
+    [""2024-03"", 417749.45],
+    [""2024-04"", 171977.2],
+    [""2024-05"", 173912.15],
+    [""2024-06"", 207575.73],
+    [""2024-07"", 203863.23],
+    [""2024-08"", 159882.9],
+    [""2024-09"", 143958.6],
+    [""2024-10"", 270168.5],
+    [""2024-11"", 315395.29],
+    [""2024-12"", 180159.21]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'LATAM' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;","[('2023-01', 223713.48), ('2023-02', 175948.62), ('2023-03', 214276.38), ('2023-04', 153375.98), ('2023-05', 324390.47000000003), ('2023-06', 200221.42), ('2023-07', 116414.84), ('2023-08', 175005.51), ('2023-09', 267708.42), ('2023-10', 349280.05), ('2023-11', 304090.41), ('2023-12', 347328.27), ('2024-01', 145904.33), ('2024-02', 153470.13999999998), ('2024-03', 417749.45), ('2024-04', 171977.2), ('2024-05', 173912.15), ('2024-06', 207575.73), ('2024-07', 203863.23), ('2024-08', 159882.9), ('2024-09', 143958.6), ('2024-10', 270168.5), ('2024-11', 315395.29), ('2024-12', 180159.21)]",True,False
+61,請列出 拉美 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 223713.48, '2023-02': 175948.62, '2023-03': 214276.38, '2023-04': 153375.98, '2023-05': 324390.47, '2023-06': 200221.42, '2023-07': 116414.84, '2023-08': 175005.51, '2023-09': 267708.42, '2023-10': 349280.05, '2023-11': 304090.41, '2023-12': 347328.27, '2024-01': 145904.33, '2024-02': 153470.14, '2024-03': 417749.45, '2024-04': 171977.2, '2024-05': 173912.15, '2024-06': 207575.73, '2024-07': 203863.23, '2024-08': 159882.9, '2024-09': 143958.6, '2024-10': 270168.5, '2024-11': 315395.29, '2024-12': 180159.21}",dataframe,"{
+  ""sql_query"": ""SELECT strftime('%Y-%m', \""Order Date\"") as month, SUM(\""Total Revenue\"") as revenue FROM sales_data WHERE Region = 'LATAM' AND strftime('%Y', \""Order Date\"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;"",
+  ""sql_result"": [
+    {
+      ""month"": ""2023-01"",
+      ""revenue"": 223713.48
+    },
+    {
+      ""month"": ""2023-02"",
+      ""revenue"": 175948.62
+    },
+    {
+      ""month"": ""2023-03"",
+      ""revenue"": 214276.38
+    },
+    {
+      ""month"": ""2023-04"",
+      ""revenue"": 153375.98
+    },
+    {
+      ""month"": ""2023-05"",
+      ""revenue"": 324390.47
+    },
+    {
+      ""month"": ""2023-06"",
+      ""revenue"": 200221.42
+    },
+    {
+      ""month"": ""2023-07"",
+      ""revenue"": 116414.84
+    },
+    {
+      ""month"": ""2023-08"",
+      ""revenue"": 175005.51
+    },
+    {
+      ""month"": ""2023-09"",
+      ""revenue"": 267708.42
+    },
+    {
+      ""month"": ""2023-10"",
+      ""revenue"": 349280.05
+    },
+    {
+      ""month"": ""2023-11"",
+      ""revenue"": 304090.41
+    },
+    {
+      ""month"": ""2023-12"",
+      ""revenue"": 347328.27
+    },
+    {
+      ""month"": ""2024-01"",
+      ""revenue"": 145904.33
+    },
+    {
+      ""month"": ""2024-02"",
+      ""revenue"": 153470.14
+    },
+    {
+      ""month"": ""2024-03"",
+      ""revenue"": 417749.45
+    },
+    {
+      ""month"": ""2024-04"",
+      ""revenue"": 171977.2
+    },
+    {
+      ""month"": ""2024-05"",
+      ""revenue"": 173912.15
+    },
+    {
+      ""month"": ""2024-06"",
+      ""revenue"": 207575.73
+    },
+    {
+      ""month"": ""2024-07"",
+      ""revenue"": 203863.23
+    },
+    {
+      ""month"": ""2024-08"",
+      ""revenue"": 159882.9
+    },
+    {
+      ""month"": ""2024-09"",
+      ""revenue"": 143958.6
+    },
+    {
+      ""month"": ""2024-10"",
+      ""revenue"": 270168.5
+    },
+    {
+      ""month"": ""2024-11"",
+      ""revenue"": 315395.29
+    },
+    {
+      ""month"": ""2024-12"",
+      ""revenue"": 180159.21
+    }
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'LATAM' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;","[('2023-01', 223713.48), ('2023-02', 175948.62), ('2023-03', 214276.38), ('2023-04', 153375.98), ('2023-05', 324390.47000000003), ('2023-06', 200221.42), ('2023-07', 116414.84), ('2023-08', 175005.51), ('2023-09', 267708.42), ('2023-10', 349280.05), ('2023-11', 304090.41), ('2023-12', 347328.27), ('2024-01', 145904.33), ('2024-02', 153470.13999999998), ('2024-03', 417749.45), ('2024-04', 171977.2), ('2024-05', 173912.15), ('2024-06', 207575.73), ('2024-07', 203863.23), ('2024-08', 159882.9), ('2024-09', 143958.6), ('2024-10', 270168.5), ('2024-11', 315395.29), ('2024-12', 180159.21)]",True,False
+62,請列出 南美 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 223713.48, '2023-02': 175948.62, '2023-03': 214276.38, '2023-04': 153375.98, '2023-05': 324390.47, '2023-06': 200221.42, '2023-07': 116414.84, '2023-08': 175005.51, '2023-09': 267708.42, '2023-10': 349280.05, '2023-11': 304090.41, '2023-12': 347328.27, '2024-01': 145904.33, '2024-02': 153470.14, '2024-03': 417749.45, '2024-04': 171977.2, '2024-05': 173912.15, '2024-06': 207575.73, '2024-07': 203863.23, '2024-08': 159882.9, '2024-09': 143958.6, '2024-10': 270168.5, '2024-11': 315395.29, '2024-12': 180159.21}",dataframe,"{
+  ""sql_query"": ""SELECT strftime('%Y-%m', \""Order Date\"") as month, SUM(\""Total Revenue\"") as revenue FROM sales_data WHERE Region = 'LATAM' AND strftime('%Y', \""Order Date\"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;"",
+  ""sql_result"": [
+    {
+      ""month"": ""2023-01"",
+      ""revenue"": 223713.48
+    },
+    {
+      ""month"": ""2023-02"",
+      ""revenue"": 175948.62
+    },
+    {
+      ""month"": ""2023-03"",
+      ""revenue"": 214276.38
+    },
+    {
+      ""month"": ""2023-04"",
+      ""revenue"": 153375.98
+    },
+    {
+      ""month"": ""2023-05"",
+      ""revenue"": 324390.47
+    },
+    {
+      ""month"": ""2023-06"",
+      ""revenue"": 200221.42
+    },
+    {
+      ""month"": ""2023-07"",
+      ""revenue"": 116414.84
+    },
+    {
+      ""month"": ""2023-08"",
+      ""revenue"": 175005.51
+    },
+    {
+      ""month"": ""2023-09"",
+      ""revenue"": 267708.42
+    },
+    {
+      ""month"": ""2023-10"",
+      ""revenue"": 349280.05
+    },
+    {
+      ""month"": ""2023-11"",
+      ""revenue"": 304090.41
+    },
+    {
+      ""month"": ""2023-12"",
+      ""revenue"": 347328.27
+    },
+    {
+      ""month"": ""2024-01"",
+      ""revenue"": 145904.33
+    },
+    {
+      ""month"": ""2024-02"",
+      ""revenue"": 153470.14
+    },
+    {
+      ""month"": ""2024-03"",
+      ""revenue"": 417749.45
+    },
+    {
+      ""month"": ""2024-04"",
+      ""revenue"": 171977.2
+    },
+    {
+      ""month"": ""2024-05"",
+      ""revenue"": 173912.15
+    },
+    {
+      ""month"": ""2024-06"",
+      ""revenue"": 207575.73
+    },
+    {
+      ""month"": ""2024-07"",
+      ""revenue"": 203863.23
+    },
+    {
+      ""month"": ""2024-08"",
+      ""revenue"": 159882.9
+    },
+    {
+      ""month"": ""2024-09"",
+      ""revenue"": 143958.6
+    },
+    {
+      ""month"": ""2024-10"",
+      ""revenue"": 270168.5
+    },
+    {
+      ""month"": ""2024-11"",
+      ""revenue"": 315395.29
+    },
+    {
+      ""month"": ""2024-12"",
+      ""revenue"": 180159.21
+    }
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'LATAM' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;","[('2023-01', 223713.48), ('2023-02', 175948.62), ('2023-03', 214276.38), ('2023-04', 153375.98), ('2023-05', 324390.47000000003), ('2023-06', 200221.42), ('2023-07', 116414.84), ('2023-08', 175005.51), ('2023-09', 267708.42), ('2023-10', 349280.05), ('2023-11', 304090.41), ('2023-12', 347328.27), ('2024-01', 145904.33), ('2024-02', 153470.13999999998), ('2024-03', 417749.45), ('2024-04', 171977.2), ('2024-05', 173912.15), ('2024-06', 207575.73), ('2024-07', 203863.23), ('2024-08', 159882.9), ('2024-09', 143958.6), ('2024-10', 270168.5), ('2024-11', 315395.29), ('2024-12', 180159.21)]",True,False
+63,請列出 拉丁美洲 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 223713.48, '2023-02': 175948.62, '2023-03': 214276.38, '2023-04': 153375.98, '2023-05': 324390.47, '2023-06': 200221.42, '2023-07': 116414.84, '2023-08': 175005.51, '2023-09': 267708.42, '2023-10': 349280.05, '2023-11': 304090.41, '2023-12': 347328.27, '2024-01': 145904.33, '2024-02': 153470.14, '2024-03': 417749.45, '2024-04': 171977.2, '2024-05': 173912.15, '2024-06': 207575.73, '2024-07': 203863.23, '2024-08': 159882.9, '2024-09': 143958.6, '2024-10': 270168.5, '2024-11': 315395.29, '2024-12': 180159.21}",dataframe,"{
+  ""sql_query"": ""SELECT strftime('%Y-%m', \""Order Date\"") as month, SUM(\""Total Revenue\"") as revenue FROM sales_data WHERE Region = 'LATAM' AND strftime('%Y', \""Order Date\"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;"",
+  ""sql_result"": [
+    [""2023-01"", 223713.48],
+    [""2023-02"", 175948.62],
+    [""2023-03"", 214276.38],
+    [""2023-04"", 153375.98],
+    [""2023-05"", 324390.47000000003],
+    [""2023-06"", 200221.42],
+    [""2023-07"", 116414.84],
+    [""2023-08"", 175005.51],
+    [""2023-09"", 267708.42],
+    [""2023-10"", 349280.05],
+    [""2023-11"", 304090.41],
+    [""2023-12"", 347328.27],
+    [""2024-01"", 145904.33],
+    [""2024-02"", 153470.13999999998],
+    [""2024-03"", 417749.45],
+    [""2024-04"", 171977.2],
+    [""2024-05"", 173912.15],
+    [""2024-06"", 207575.73],
+    [""2024-07"", 203863.23],
+    [""2024-08"", 159882.9],
+    [""2024-09"", 143958.6],
+    [""2024-10"", 270168.5],
+    [""2024-11"", 315395.29],
+    [""2024-12"", 180159.21]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'LATAM' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;","[('2023-01', 223713.48), ('2023-02', 175948.62), ('2023-03', 214276.38), ('2023-04', 153375.98), ('2023-05', 324390.47000000003), ('2023-06', 200221.42), ('2023-07', 116414.84), ('2023-08', 175005.51), ('2023-09', 267708.42), ('2023-10', 349280.05), ('2023-11', 304090.41), ('2023-12', 347328.27), ('2024-01', 145904.33), ('2024-02', 153470.13999999998), ('2024-03', 417749.45), ('2024-04', 171977.2), ('2024-05', 173912.15), ('2024-06', 207575.73), ('2024-07', 203863.23), ('2024-08', 159882.9), ('2024-09', 143958.6), ('2024-10', 270168.5), ('2024-11', 315395.29), ('2024-12', 180159.21)]",True,False
+64,請列出 Latin America 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 223713.48, '2023-02': 175948.62, '2023-03': 214276.38, '2023-04': 153375.98, '2023-05': 324390.47, '2023-06': 200221.42, '2023-07': 116414.84, '2023-08': 175005.51, '2023-09': 267708.42, '2023-10': 349280.05, '2023-11': 304090.41, '2023-12': 347328.27, '2024-01': 145904.33, '2024-02': 153470.14, '2024-03': 417749.45, '2024-04': 171977.2, '2024-05': 173912.15, '2024-06': 207575.73, '2024-07': 203863.23, '2024-08': 159882.9, '2024-09': 143958.6, '2024-10': 270168.5, '2024-11': 315395.29, '2024-12': 180159.21}",dataframe,"{
+  ""sql_query"": ""SELECT strftime('%Y-%m', \""Order Date\"") as month, SUM(\""Total Revenue\"") as revenue FROM sales_data WHERE Region = 'LATAM' AND strftime('%Y', \""Order Date\"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;"",
+  ""sql_result"": [
+    [""2023-01"", 223713.48],
+    [""2023-02"", 175948.62],
+    [""2023-03"", 214276.38],
+    [""2023-04"", 153375.98],
+    [""2023-05"", 324390.47000000003],
+    [""2023-06"", 200221.42],
+    [""2023-07"", 116414.84],
+    [""2023-08"", 175005.51],
+    [""2023-09"", 267708.42],
+    [""2023-10"", 349280.05],
+    [""2023-11"", 304090.41],
+    [""2023-12"", 347328.27],
+    [""2024-01"", 145904.33],
+    [""2024-02"", 153470.13999999998],
+    [""2024-03"", 417749.45],
+    [""2024-04"", 171977.2],
+    [""2024-05"", 173912.15],
+    [""2024-06"", 207575.73],
+    [""2024-07"", 203863.23],
+    [""2024-08"", 159882.9],
+    [""2024-09"", 143958.6],
+    [""2024-10"", 270168.5],
+    [""2024-11"", 315395.29],
+    [""2024-12"", 180159.21]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'LATAM' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;","[('2023-01', 223713.48), ('2023-02', 175948.62), ('2023-03', 214276.38), ('2023-04', 153375.98), ('2023-05', 324390.47000000003), ('2023-06', 200221.42), ('2023-07', 116414.84), ('2023-08', 175005.51), ('2023-09', 267708.42), ('2023-10', 349280.05), ('2023-11', 304090.41), ('2023-12', 347328.27), ('2024-01', 145904.33), ('2024-02', 153470.13999999998), ('2024-03', 417749.45), ('2024-04', 171977.2), ('2024-05', 173912.15), ('2024-06', 207575.73), ('2024-07', 203863.23), ('2024-08', 159882.9), ('2024-09', 143958.6), ('2024-10', 270168.5), ('2024-11', 315395.29), ('2024-12', 180159.21)]",True,False
+65,請列出 EMEA 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 942448.1, '2023-02': 883639.02, '2023-03': 1285595.76, '2023-04': 883185.84, '2023-05': 1185861.27, '2023-06': 1484438.38, '2023-07': 1016786.45, '2023-08': 1020389.97, '2023-09': 1059744.44, '2023-10': 1654875.41, '2023-11': 1624625.45, '2023-12': 1634231.28, '2024-01': 1133643.54, '2024-02': 1062111.55, '2024-03': 1012640.24, '2024-04': 992568.9, '2024-05': 1040289.1, '2024-06': 880005.25, '2024-07': 1208996.95, '2024-08': 1059911.19, '2024-09': 1059862.75, '2024-10': 1679514.33, '2024-11': 1766008.98, '2024-12': 1283154.02}",dataframe,"{
+  ""sql_query"": ""SELECT strftime('%Y-%m', \""Order Date\"") as month, SUM(\""Total Revenue\"") as revenue FROM sales_data WHERE Region = 'EMEA' AND strftime('%Y', \""Order Date\"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;"",
+  ""sql_result"": [
+    [""2023-01"", 942448.1],
+    [""2023-02"", 883639.02],
+    [""2023-03"", 1285595.76],
+    [""2023-04"", 883185.84],
+    [""2023-05"", 1185861.27],
+    [""2023-06"", 1484438.38],
+    [""2023-07"", 1016786.45],
+    [""2023-08"", 1020389.97],
+    [""2023-09"", 1059744.44],
+    [""2023-10"", 1654875.41],
+    [""2023-11"", 1624625.45],
+    [""2023-12"", 1634231.28],
+    [""2024-01"", 1133643.54],
+    [""2024-02"", 1062111.55],
+    [""2024-03"", 1012640.24],
+    [""2024-04"", 992568.9],
+    [""2024-05"", 1040289.1],
+    [""2024-06"", 880005.25],
+    [""2024-07"", 1208996.95],
+    [""2024-08"", 1059911.19],
+    [""2024-09"", 1059862.75],
+    [""2024-10"", 1679514.33],
+    [""2024-11"", 1766008.98],
+    [""2024-12"", 1283154.02]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'EMEA' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;","[('2023-01', 942448.1), ('2023-02', 883639.02), ('2023-03', 1285595.76), ('2023-04', 883185.84), ('2023-05', 1185861.27), ('2023-06', 1484438.38), ('2023-07', 1016786.45), ('2023-08', 1020389.97), ('2023-09', 1059744.44), ('2023-10', 1654875.41), ('2023-11', 1624625.45), ('2023-12', 1634231.28), ('2024-01', 1133643.54), ('2024-02', 1062111.55), ('2024-03', 1012640.24), ('2024-04', 992568.9), ('2024-05', 1040289.1), ('2024-06', 880005.25), ('2024-07', 1208996.95), ('2024-08', 1059911.19), ('2024-09', 1059862.75), ('2024-10', 1679514.33), ('2024-11', 1766008.98), ('2024-12', 1283154.02)]",True,False
+66,請列出 歐洲中東非洲 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 942448.1, '2023-02': 883639.02, '2023-03': 1285595.76, '2023-04': 883185.84, '2023-05': 1185861.27, '2023-06': 1484438.38, '2023-07': 1016786.45, '2023-08': 1020389.97, '2023-09': 1059744.44, '2023-10': 1654875.41, '2023-11': 1624625.45, '2023-12': 1634231.28, '2024-01': 1133643.54, '2024-02': 1062111.55, '2024-03': 1012640.24, '2024-04': 992568.9, '2024-05': 1040289.1, '2024-06': 880005.25, '2024-07': 1208996.95, '2024-08': 1059911.19, '2024-09': 1059862.75, '2024-10': 1679514.33, '2024-11': 1766008.98, '2024-12': 1283154.02}",dataframe,"{
+  ""sql_query"": ""SELECT strftime('%Y-%m', \""Order Date\"") as month, SUM(\""Total Revenue\"") as revenue FROM sales_data WHERE Region = 'EMEA' AND strftime('%Y', \""Order Date\"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;"",
+  ""sql_result"": [
+    [""2023-01"", 942448.1],
+    [""2023-02"", 883639.02],
+    [""2023-03"", 1285595.76],
+    [""2023-04"", 883185.84],
+    [""2023-05"", 1185861.27],
+    [""2023-06"", 1484438.38],
+    [""2023-07"", 1016786.45],
+    [""2023-08"", 1020389.97],
+    [""2023-09"", 1059744.44],
+    [""2023-10"", 1654875.41],
+    [""2023-11"", 1624625.45],
+    [""2023-12"", 1634231.28],
+    [""2024-01"", 1133643.54],
+    [""2024-02"", 1062111.55],
+    [""2024-03"", 1012640.24],
+    [""2024-04"", 992568.9],
+    [""2024-05"", 1040289.1],
+    [""2024-06"", 880005.25],
+    [""2024-07"", 1208996.95],
+    [""2024-08"", 1059911.19],
+    [""2024-09"", 1059862.75],
+    [""2024-10"", 1679514.33],
+    [""2024-11"", 1766008.98],
+    [""2024-12"", 1283154.02]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'EMEA' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;","[('2023-01', 942448.1), ('2023-02', 883639.02), ('2023-03', 1285595.76), ('2023-04', 883185.84), ('2023-05', 1185861.27), ('2023-06', 1484438.38), ('2023-07', 1016786.45), ('2023-08', 1020389.97), ('2023-09', 1059744.44), ('2023-10', 1654875.41), ('2023-11', 1624625.45), ('2023-12', 1634231.28), ('2024-01', 1133643.54), ('2024-02', 1062111.55), ('2024-03', 1012640.24), ('2024-04', 992568.9), ('2024-05', 1040289.1), ('2024-06', 880005.25), ('2024-07', 1208996.95), ('2024-08', 1059911.19), ('2024-09', 1059862.75), ('2024-10', 1679514.33), ('2024-11', 1766008.98), ('2024-12', 1283154.02)]",True,False
+67,請列出 歐非中東 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 942448.1, '2023-02': 883639.02, '2023-03': 1285595.76, '2023-04': 883185.84, '2023-05': 1185861.27, '2023-06': 1484438.38, '2023-07': 1016786.45, '2023-08': 1020389.97, '2023-09': 1059744.44, '2023-10': 1654875.41, '2023-11': 1624625.45, '2023-12': 1634231.28, '2024-01': 1133643.54, '2024-02': 1062111.55, '2024-03': 1012640.24, '2024-04': 992568.9, '2024-05': 1040289.1, '2024-06': 880005.25, '2024-07': 1208996.95, '2024-08': 1059911.19, '2024-09': 1059862.75, '2024-10': 1679514.33, '2024-11': 1766008.98, '2024-12': 1283154.02}",dataframe,"{
+  ""sql_query"": ""SELECT strftime('%Y-%m', \""Order Date\"") as month, SUM(\""Total Revenue\"") as revenue FROM sales_data WHERE Region = 'EMEA' AND strftime('%Y', \""Order Date\"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;"",
+  ""sql_result"": [
+    [""2023-01"", 942448.1],
+    [""2023-02"", 883639.02],
+    [""2023-03"", 1285595.76],
+    [""2023-04"", 883185.84],
+    [""2023-05"", 1185861.27],
+    [""2023-06"", 1484438.38],
+    [""2023-07"", 1016786.45],
+    [""2023-08"", 1020389.97],
+    [""2023-09"", 1059744.44],
+    [""2023-10"", 1654875.41],
+    [""2023-11"", 1624625.45],
+    [""2023-12"", 1634231.28],
+    [""2024-01"", 1133643.54],
+    [""2024-02"", 1062111.55],
+    [""2024-03"", 1012640.24],
+    [""2024-04"", 992568.9],
+    [""2024-05"", 1040289.1],
+    [""2024-06"", 880005.25],
+    [""2024-07"", 1208996.95],
+    [""2024-08"", 1059911.19],
+    [""2024-09"", 1059862.75],
+    [""2024-10"", 1679514.33],
+    [""2024-11"", 1766008.98],
+    [""2024-12"", 1283154.02]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'EMEA' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;","[('2023-01', 942448.1), ('2023-02', 883639.02), ('2023-03', 1285595.76), ('2023-04', 883185.84), ('2023-05', 1185861.27), ('2023-06', 1484438.38), ('2023-07', 1016786.45), ('2023-08', 1020389.97), ('2023-09', 1059744.44), ('2023-10', 1654875.41), ('2023-11', 1624625.45), ('2023-12', 1634231.28), ('2024-01', 1133643.54), ('2024-02', 1062111.55), ('2024-03', 1012640.24), ('2024-04', 992568.9), ('2024-05', 1040289.1), ('2024-06', 880005.25), ('2024-07', 1208996.95), ('2024-08', 1059911.19), ('2024-09', 1059862.75), ('2024-10', 1679514.33), ('2024-11', 1766008.98), ('2024-12', 1283154.02)]",True,False
+68,"請列出 Europe, Middle East, and Africa 區域在 2023 至 2024 年每個月的銷售趨勢數據。","{'2023-01': 942448.1, '2023-02': 883639.02, '2023-03': 1285595.76, '2023-04': 883185.84, '2023-05': 1185861.27, '2023-06': 1484438.38, '2023-07': 1016786.45, '2023-08': 1020389.97, '2023-09': 1059744.44, '2023-10': 1654875.41, '2023-11': 1624625.45, '2023-12': 1634231.28, '2024-01': 1133643.54, '2024-02': 1062111.55, '2024-03': 1012640.24, '2024-04': 992568.9, '2024-05': 1040289.1, '2024-06': 880005.25, '2024-07': 1208996.95, '2024-08': 1059911.19, '2024-09': 1059862.75, '2024-10': 1679514.33, '2024-11': 1766008.98, '2024-12': 1283154.02}",dataframe,"{
+  ""sql_query"": ""SELECT strftime('%Y-%m', \""Order Date\"") as month, SUM(\""Total Revenue\"") as revenue FROM sales_data WHERE Region = 'EMEA' AND strftime('%Y', \""Order Date\"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;"",
+  ""sql_result"": [
+    [""2023-01"", 942448.1],
+    [""2023-02"", 883639.02],
+    [""2023-03"", 1285595.76],
+    [""2023-04"", 883185.84],
+    [""2023-05"", 1185861.27],
+    [""2023-06"", 1484438.38],
+    [""2023-07"", 1016786.45],
+    [""2023-08"", 1020389.97],
+    [""2023-09"", 1059744.44],
+    [""2023-10"", 1654875.41],
+    [""2023-11"", 1624625.45],
+    [""2023-12"", 1634231.28],
+    [""2024-01"", 1133643.54],
+    [""2024-02"", 1062111.55],
+    [""2024-03"", 1012640.24],
+    [""2024-04"", 992568.9],
+    [""2024-05"", 1040289.1],
+    [""2024-06"", 880005.25],
+    [""2024-07"", 1208996.95],
+    [""2024-08"", 1059911.19],
+    [""2024-09"", 1059862.75],
+    [""2024-10"", 1679514.33],
+    [""2024-11"", 1766008.98],
+    [""2024-12"", 1283154.02]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'EMEA' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;","[('2023-01', 942448.1), ('2023-02', 883639.02), ('2023-03', 1285595.76), ('2023-04', 883185.84), ('2023-05', 1185861.27), ('2023-06', 1484438.38), ('2023-07', 1016786.45), ('2023-08', 1020389.97), ('2023-09', 1059744.44), ('2023-10', 1654875.41), ('2023-11', 1624625.45), ('2023-12', 1634231.28), ('2024-01', 1133643.54), ('2024-02', 1062111.55), ('2024-03', 1012640.24), ('2024-04', 992568.9), ('2024-05', 1040289.1), ('2024-06', 880005.25), ('2024-07', 1208996.95), ('2024-08', 1059911.19), ('2024-09', 1059862.75), ('2024-10', 1679514.33), ('2024-11', 1766008.98), ('2024-12', 1283154.02)]",True,False
+69,請列出 APAC 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 973776.02, '2023-02': 763996.82, '2023-03': 1005437.21, '2023-04': 1085883.84, '2023-05': 999851.05, '2023-06': 825946.06, '2023-07': 897312.68, '2023-08': 805145.36, '2023-09': 984447.16, '2023-10': 1189276.6, '2023-11': 1336621.74, '2023-12': 1357397.91, '2024-01': 933316.4, '2024-02': 1075906.73, '2024-03': 971237.02, '2024-04': 1076606.9, '2024-05': 1015613.24, '2024-06': 827017.19, '2024-07': 1053949.91, '2024-08': 888200.25, '2024-09': 757630.84, '2024-10': 1724426.36, '2024-11': 1436229.04, '2024-12': 1301473.82}",dataframe,"{
+  ""sql_query"": ""SELECT strftime('%Y-%m', \""Order Date\"") as month, SUM(\""Total Revenue\"") as revenue FROM sales_data WHERE Region = 'APAC' AND strftime('%Y', \""Order Date\"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;"",
+  ""sql_result"": [
+    [""2023-01"", 973776.02],
+    [""2023-02"", 763996.82],
+    [""2023-03"", 1005437.21],
+    [""2023-04"", 1085883.84],
+    [""2023-05"", 999851.05],
+    [""2023-06"", 825946.06],
+    [""2023-07"", 897312.68],
+    [""2023-08"", 805145.36],
+    [""2023-09"", 984447.16],
+    [""2023-10"", 1189276.6],
+    [""2023-11"", 1336621.74],
+    [""2023-12"", 1357397.91],
+    [""2024-01"", 933316.4],
+    [""2024-02"", 1075906.73],
+    [""2024-03"", 971237.02],
+    [""2024-04"", 1076606.9],
+    [""2024-05"", 1015613.24],
+    [""2024-06"", 827017.19],
+    [""2024-07"", 1053949.91],
+    [""2024-08"", 888200.25],
+    [""2024-09"", 757630.84],
+    [""2024-10"", 1724426.36],
+    [""2024-11"", 1436229.04],
+    [""2024-12"", 1301473.82]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'APAC' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;","[('2023-01', 973776.02), ('2023-02', 763996.82), ('2023-03', 1005437.21), ('2023-04', 1085883.84), ('2023-05', 999851.05), ('2023-06', 825946.06), ('2023-07', 897312.68), ('2023-08', 805145.36), ('2023-09', 984447.16), ('2023-10', 1189276.6), ('2023-11', 1336621.74), ('2023-12', 1357397.91), ('2024-01', 933316.4), ('2024-02', 1075906.73), ('2024-03', 971237.02), ('2024-04', 1076606.9), ('2024-05', 1015613.24), ('2024-06', 827017.19), ('2024-07', 1053949.91), ('2024-08', 888200.25), ('2024-09', 757630.84), ('2024-10', 1724426.36), ('2024-11', 1436229.04), ('2024-12', 1301473.82)]",True,False
+70,請列出 亞太區 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 973776.02, '2023-02': 763996.82, '2023-03': 1005437.21, '2023-04': 1085883.84, '2023-05': 999851.05, '2023-06': 825946.06, '2023-07': 897312.68, '2023-08': 805145.36, '2023-09': 984447.16, '2023-10': 1189276.6, '2023-11': 1336621.74, '2023-12': 1357397.91, '2024-01': 933316.4, '2024-02': 1075906.73, '2024-03': 971237.02, '2024-04': 1076606.9, '2024-05': 1015613.24, '2024-06': 827017.19, '2024-07': 1053949.91, '2024-08': 888200.25, '2024-09': 757630.84, '2024-10': 1724426.36, '2024-11': 1436229.04, '2024-12': 1301473.82}",dataframe,"{
+  ""sql_query"": ""SELECT strftime('%Y-%m', \""Order Date\"") as month, SUM(\""Total Revenue\"") as revenue FROM sales_data WHERE Region = 'APAC' AND strftime('%Y', \""Order Date\"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;"",
+  ""sql_result"": [
+    {
+      ""month"": ""2023-01"",
+      ""revenue"": 973776.02
+    },
+    {
+      ""month"": ""2023-02"",
+      ""revenue"": 763996.82
+    },
+    {
+      ""month"": ""2023-03"",
+      ""revenue"": 1005437.21
+    },
+    {
+      ""month"": ""2023-04"",
+      ""revenue"": 1085883.84
+    },
+    {
+      ""month"": ""2023-05"",
+      ""revenue"": 999851.05
+    },
+    {
+      ""month"": ""2023-06"",
+      ""revenue"": 825946.06
+    },
+    {
+      ""month"": ""2023-07"",
+      ""revenue"": 897312.68
+    },
+    {
+      ""month"": ""2023-08"",
+      ""revenue"": 805145.36
+    },
+    {
+      ""month"": ""2023-09"",
+      ""revenue"": 984447.16
+    },
+    {
+      ""month"": ""2023-10"",
+      ""revenue"": 1189276.6
+    },
+    {
+      ""month"": ""2023-11"",
+      ""revenue"": 1336621.74
+    },
+    {
+      ""month"": ""2023-12"",
+      ""revenue"": 1357397.91
+    },
+    {
+      ""month"": ""2024-01"",
+      ""revenue"": 933316.4
+    },
+    {
+      ""month"": ""2024-02"",
+      ""revenue"": 1075906.73
+    },
+    {
+      ""month"": ""2024-03"",
+      ""revenue"": 971237.02
+    },
+    {
+      ""month"": ""2024-04"",
+      ""revenue"": 1076606.9
+    },
+    {
+      ""month"": ""2024-05"",
+      ""revenue"": 1015613.24
+    },
+    {
+      ""month"": ""2024-06"",
+      ""revenue"": 827017.19
+    },
+    {
+      ""month"": ""2024-07"",
+      ""revenue"": 1053949.91
+    },
+    {
+      ""month"": ""2024-08"",
+      ""revenue"": 888200.25
+    },
+    {
+      ""month"": ""2024-09"",
+      ""revenue"": 757630.84
+    },
+    {
+      ""month"": ""2024-10"",
+      ""revenue"": 1724426.36
+    },
+    {
+      ""month"": ""2024-11"",
+      ""revenue"": 1436229.04
+    },
+    {
+      ""month"": ""2024-12"",
+      ""revenue"": 1301473.82
+    }
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'APAC' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;","[('2023-01', 973776.02), ('2023-02', 763996.82), ('2023-03', 1005437.21), ('2023-04', 1085883.84), ('2023-05', 999851.05), ('2023-06', 825946.06), ('2023-07', 897312.68), ('2023-08', 805145.36), ('2023-09', 984447.16), ('2023-10', 1189276.6), ('2023-11', 1336621.74), ('2023-12', 1357397.91), ('2024-01', 933316.4), ('2024-02', 1075906.73), ('2024-03', 971237.02), ('2024-04', 1076606.9), ('2024-05', 1015613.24), ('2024-06', 827017.19), ('2024-07', 1053949.91), ('2024-08', 888200.25), ('2024-09', 757630.84), ('2024-10', 1724426.36), ('2024-11', 1436229.04), ('2024-12', 1301473.82)]",True,False
+71,請列出 亞太地區 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 973776.02, '2023-02': 763996.82, '2023-03': 1005437.21, '2023-04': 1085883.84, '2023-05': 999851.05, '2023-06': 825946.06, '2023-07': 897312.68, '2023-08': 805145.36, '2023-09': 984447.16, '2023-10': 1189276.6, '2023-11': 1336621.74, '2023-12': 1357397.91, '2024-01': 933316.4, '2024-02': 1075906.73, '2024-03': 971237.02, '2024-04': 1076606.9, '2024-05': 1015613.24, '2024-06': 827017.19, '2024-07': 1053949.91, '2024-08': 888200.25, '2024-09': 757630.84, '2024-10': 1724426.36, '2024-11': 1436229.04, '2024-12': 1301473.82}",dataframe,"{
+  ""sql_query"": ""SELECT strftime('%Y-%m', \""Order Date\"") as month, SUM(\""Total Revenue\"") as revenue FROM sales_data WHERE Region = 'APAC' AND strftime('%Y', \""Order Date\"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;"",
+  ""sql_result"": [
+    [""2023-01"", 973776.02],
+    [""2023-02"", 763996.82],
+    [""2023-03"", 1005437.21],
+    [""2023-04"", 1085883.84],
+    [""2023-05"", 999851.05],
+    [""2023-06"", 825946.06],
+    [""2023-07"", 897312.68],
+    [""2023-08"", 805145.36],
+    [""2023-09"", 984447.16],
+    [""2023-10"", 1189276.6],
+    [""2023-11"", 1336621.74],
+    [""2023-12"", 1357397.91],
+    [""2024-01"", 933316.4],
+    [""2024-02"", 1075906.73],
+    [""2024-03"", 971237.02],
+    [""2024-04"", 1076606.9],
+    [""2024-05"", 1015613.24],
+    [""2024-06"", 827017.19],
+    [""2024-07"", 1053949.91],
+    [""2024-08"", 888200.25],
+    [""2024-09"", 757630.84],
+    [""2024-10"", 1724426.36],
+    [""2024-11"", 1436229.04],
+    [""2024-12"", 1301473.82]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'APAC' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;","[('2023-01', 973776.02), ('2023-02', 763996.82), ('2023-03', 1005437.21), ('2023-04', 1085883.84), ('2023-05', 999851.05), ('2023-06', 825946.06), ('2023-07', 897312.68), ('2023-08', 805145.36), ('2023-09', 984447.16), ('2023-10', 1189276.6), ('2023-11', 1336621.74), ('2023-12', 1357397.91), ('2024-01', 933316.4), ('2024-02', 1075906.73), ('2024-03', 971237.02), ('2024-04', 1076606.9), ('2024-05', 1015613.24), ('2024-06', 827017.19), ('2024-07', 1053949.91), ('2024-08', 888200.25), ('2024-09', 757630.84), ('2024-10', 1724426.36), ('2024-11', 1436229.04), ('2024-12', 1301473.82)]",True,False
+72,請列出 Asia Pacific 區域在 2023 至 2024 年每個月的銷售趨勢數據。,"{'2023-01': 973776.02, '2023-02': 763996.82, '2023-03': 1005437.21, '2023-04': 1085883.84, '2023-05': 999851.05, '2023-06': 825946.06, '2023-07': 897312.68, '2023-08': 805145.36, '2023-09': 984447.16, '2023-10': 1189276.6, '2023-11': 1336621.74, '2023-12': 1357397.91, '2024-01': 933316.4, '2024-02': 1075906.73, '2024-03': 971237.02, '2024-04': 1076606.9, '2024-05': 1015613.24, '2024-06': 827017.19, '2024-07': 1053949.91, '2024-08': 888200.25, '2024-09': 757630.84, '2024-10': 1724426.36, '2024-11': 1436229.04, '2024-12': 1301473.82}",dataframe,"{
+  ""sql_query"": ""SELECT strftime('%Y-%m', \""Order Date\"") as month, SUM(\""Total Revenue\"") as revenue FROM sales_data WHERE Region = 'APAC' AND strftime('%Y', \""Order Date\"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;"",
+  ""sql_result"": [
+    [""2023-01"", 973776.02],
+    [""2023-02"", 763996.82],
+    [""2023-03"", 1005437.21],
+    [""2023-04"", 1085883.84],
+    [""2023-05"", 999851.05],
+    [""2023-06"", 825946.06],
+    [""2023-07"", 897312.68],
+    [""2023-08"", 805145.36],
+    [""2023-09"", 984447.16],
+    [""2023-10"", 1189276.6],
+    [""2023-11"", 1336621.74],
+    [""2023-12"", 1357397.91],
+    [""2024-01"", 933316.4],
+    [""2024-02"", 1075906.73],
+    [""2024-03"", 971237.02],
+    [""2024-04"", 1076606.9],
+    [""2024-05"", 1015613.24],
+    [""2024-06"", 827017.19],
+    [""2024-07"", 1053949.91],
+    [""2024-08"", 888200.25],
+    [""2024-09"", 757630.84],
+    [""2024-10"", 1724426.36],
+    [""2024-11"", 1436229.04],
+    [""2024-12"", 1301473.82]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT strftime('%Y-%m', ""Order Date"") as month, SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'APAC' AND strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY month ORDER BY month;","[('2023-01', 973776.02), ('2023-02', 763996.82), ('2023-03', 1005437.21), ('2023-04', 1085883.84), ('2023-05', 999851.05), ('2023-06', 825946.06), ('2023-07', 897312.68), ('2023-08', 805145.36), ('2023-09', 984447.16), ('2023-10', 1189276.6), ('2023-11', 1336621.74), ('2023-12', 1357397.91), ('2024-01', 933316.4), ('2024-02', 1075906.73), ('2024-03', 971237.02), ('2024-04', 1076606.9), ('2024-05', 1015613.24), ('2024-06', 827017.19), ('2024-07', 1053949.91), ('2024-08', 888200.25), ('2024-09', 757630.84), ('2024-10', 1724426.36), ('2024-11', 1436229.04), ('2024-12', 1301473.82)]",True,False
+73,2024 年第四季相較於 2023 年第四季，總銷售額增加了多少？,-91712.92,number,"{
+  ""sql_query"": ""SELECT (SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE strftime('%Y', \""Order Date\"") = '2024' AND strftime('%m', \""Order Date\"") BETWEEN 10 AND 12) - (SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE strftime('%Y', \""Order Date\"") = '2023' AND strftime('%m', \""Order Date\"") BETWEEN 10 AND 12);"",
+  ""sql_result"": [],
+  ""retry_count"": 3,
+  ""error_log"": [
+    ""Execution Error: near \""MINUS\"": syntax error"",
+    ""Query result is empty or null. Possibly no data exists for Q4 2023 or Q4 2024. Retrying with alternative syntax.""
+  ]
+}","SELECT (SELECT SUM(""Total Revenue"") FROM sales_data WHERE strftime('%Y', ""Order Date"") = '2024' AND strftime('%m', ""Order Date"") BETWEEN 10 AND 12) - (SELECT SUM(""Total Revenue"") FROM sales_data WHERE strftime('%Y', ""Order Date"") = '2023' AND strftime('%m', ""Order Date"") BETWEEN 10 AND 12);","[(None,)]",False,True
+74,在 North America 區域，2023 年前五大客戶購買各產品類別的金額占比為何？,"{'Delta Elite Systems': {'Electronics': 0.225, 'Office Supplies': 0.096, 'Software': 0.679}, 'Global Beta Corp.': {'Electronics': 0.3834, 'Office Supplies': 0.0513, 'Software': 0.5654}, 'Next Beta Ltd.': {'Electronics': 0.5828, 'Office Supplies': 0.1038, 'Software': 0.3134}, 'Prime Delta Solutions': {'Electronics': 0.6316, 'Office Supplies': 0.1253, 'Software': 0.243}, 'Summit Prime Systems': {'Electronics': 0.5044, 'Office Supplies': 0.1148, 'Software': 0.3809}}",dataframe,"{
+  ""sql_query"": ""SELECT \""Product Category\"", SUM(\""Total Revenue\"") as revenue FROM sales_data WHERE Region = 'North America' AND strftime('%Y', \""Order Date\"") = '2023' GROUP BY \""Product Category\"" ORDER BY revenue DESC LIMIT 5;"",
+  ""sql_result"": [
+    [
+      ""Electronics"",
+      12224324.19
+    ],
+    [
+      ""Software"",
+      5254904.84
+    ],
+    [
+      ""Office Supplies"",
+      2807240.59
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Category"", SUM(""Total Revenue"") as revenue FROM sales_data WHERE Region = 'North America' AND strftime('%Y', ""Order Date"") = '2023' GROUP BY ""Product Category"" ORDER BY revenue DESC LIMIT 5;","[('Electronics', 12224324.19), ('Software', 5254904.84), ('Office Supplies', 2807240.59)]",False,True
+75,在 北美 區域，2023 年前五大客戶購買各產品類別的金額占比為何？,"{'Delta Elite Systems': {'Electronics': 0.225, 'Office Supplies': 0.096, 'Software': 0.679}, 'Global Beta Corp.': {'Electronics': 0.3834, 'Office Supplies': 0.0513, 'Software': 0.5654}, 'Next Beta Ltd.': {'Electronics': 0.5828, 'Office Supplies': 0.1038, 'Software': 0.3134}, 'Prime Delta Solutions': {'Electronics': 0.6316, 'Office Supplies': 0.1253, 'Software': 0.243}, 'Summit Prime Systems': {'Electronics': 0.5044, 'Office Supplies': 0.1148, 'Software': 0.3809}}",dataframe,"{
+  ""sql_query"": ""SELECT \""Product Category\"", SUM(\""Total Revenue\"") as total_revenue, SUM(\""Quantity\"") as total_quantity FROM sales_data WHERE Region = 'North America' AND strftime('%Y', \""Order Date\"") = '2023' GROUP BY \""Product Category\"" ORDER BY total_revenue DESC LIMIT 5;"",
+  ""sql_result"": [
+    [
+      ""Electronics"",
+      12224324.19,
+      17349
+    ],
+    [
+      ""Software"",
+      5254904.84,
+      5145
+    ],
+    [
+      ""Office Supplies"",
+      2807240.59,
+      6055
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Category"", SUM(""Total Revenue"") as total_revenue, SUM(""Quantity"") as total_quantity FROM sales_data WHERE Region = 'North America' AND strftime('%Y', ""Order Date"") = '2023' GROUP BY ""Product Category"" ORDER BY total_revenue DESC LIMIT 5;","[('Electronics', 12224324.19, 17349), ('Software', 5254904.84, 5145), ('Office Supplies', 2807240.59, 6055)]",False,True
+76,在 北美洲 區域，2023 年前五大客戶購買各產品類別的金額占比為何？,"{'Delta Elite Systems': {'Electronics': 0.225, 'Office Supplies': 0.096, 'Software': 0.679}, 'Global Beta Corp.': {'Electronics': 0.3834, 'Office Supplies': 0.0513, 'Software': 0.5654}, 'Next Beta Ltd.': {'Electronics': 0.5828, 'Office Supplies': 0.1038, 'Software': 0.3134}, 'Prime Delta Solutions': {'Electronics': 0.6316, 'Office Supplies': 0.1253, 'Software': 0.243}, 'Summit Prime Systems': {'Electronics': 0.5044, 'Office Supplies': 0.1148, 'Software': 0.3809}}",dataframe,"{
+  ""sql_query"": ""SELECT \""Product Category\"", SUM(\""Total Revenue\"") as total_revenue, SUM(\""Quantity\"") as total_quantity FROM sales_data WHERE Region = 'North America' AND strftime('%Y', \""Order Date\"") = '2023' GROUP BY \""Product Category\"" ORDER BY total_revenue DESC LIMIT 5;"",
+  ""sql_result"": [
+    {
+      ""Product Category"": ""Electronics"",
+      ""total_revenue"": 12224324.19,
+      ""total_quantity"": 17349
+    },
+    {
+      ""Product Category"": ""Software"",
+      ""total_revenue"": 5254904.84,
+      ""total_quantity"": 5145
+    },
+    {
+      ""Product Category"": ""Office Supplies"",
+      ""total_revenue"": 2807240.59,
+      ""total_quantity"": 6055
+    }
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Category"", SUM(""Total Revenue"") as total_revenue, SUM(""Quantity"") as total_quantity FROM sales_data WHERE Region = 'North America' AND strftime('%Y', ""Order Date"") = '2023' GROUP BY ""Product Category"" ORDER BY total_revenue DESC LIMIT 5;","[('Electronics', 12224324.19, 17349), ('Software', 5254904.84, 5145), ('Office Supplies', 2807240.59, 6055)]",False,True
+77,在 NA 區域，2023 年前五大客戶購買各產品類別的金額占比為何？,"{'Delta Elite Systems': {'Electronics': 0.225, 'Office Supplies': 0.096, 'Software': 0.679}, 'Global Beta Corp.': {'Electronics': 0.3834, 'Office Supplies': 0.0513, 'Software': 0.5654}, 'Next Beta Ltd.': {'Electronics': 0.5828, 'Office Supplies': 0.1038, 'Software': 0.3134}, 'Prime Delta Solutions': {'Electronics': 0.6316, 'Office Supplies': 0.1253, 'Software': 0.243}, 'Summit Prime Systems': {'Electronics': 0.5044, 'Office Supplies': 0.1148, 'Software': 0.3809}}",dataframe,"{
+  ""sql_query"": ""SELECT \""Product Category\"", SUM(\""Total Revenue\"") as total_revenue, SUM(\""Quantity\"") as total_quantity FROM sales_data WHERE Region = 'North America' AND strftime('%Y', \""Order Date\"") = '2023' GROUP BY \""Product Category\"" ORDER BY total_revenue DESC LIMIT 5;"",
+  ""sql_result"": [
+    [
+      ""Electronics"",
+      12224324.19,
+      17349
+    ],
+    [
+      ""Software"",
+      5254904.84,
+      5145
+    ],
+    [
+      ""Office Supplies"",
+      2807240.59,
+      6055
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Category"", SUM(""Total Revenue"") as total_revenue, SUM(""Quantity"") as total_quantity FROM sales_data WHERE Region = 'North America' AND strftime('%Y', ""Order Date"") = '2023' GROUP BY ""Product Category"" ORDER BY total_revenue DESC LIMIT 5;","[('Electronics', 12224324.19, 17349), ('Software', 5254904.84, 5145), ('Office Supplies', 2807240.59, 6055)]",False,True
+78,在 2023 到 2024 年間，哪位客戶的購買總額變動幅度（絕對值）最大？,Elite Apex Group,string,"{
+  ""sql_query"": ""SELECT \""Customer Name\"", SUM(\""Total Revenue\"") as total_revenue FROM sales_data WHERE strftime('%Y', \""Order Date\"") BETWEEN '2023' AND '2024' GROUP BY \""Customer Name\"" ORDER BY total_revenue DESC LIMIT 1;"",
+  ""sql_result"": [
+    {
+      ""Customer Name"": ""Summit Prime Systems"",
+      ""total_revenue"": 1396098.55
+    }
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Customer Name"", SUM(""Total Revenue"") as total_revenue FROM sales_data WHERE strftime('%Y', ""Order Date"") BETWEEN '2023' AND '2024' GROUP BY ""Customer Name"" ORDER BY total_revenue DESC LIMIT 1;","[('Summit Prime Systems', 1396098.55)]",False,True
+79,產品類別 Electronics 的最大購買客戶是誰？,Summit Beta Solutions,string,"{
+  ""sql_query"": ""SELECT \""Customer Name\"" FROM sales_data WHERE \""Product Category\"" = 'Electronics' GROUP BY \""Customer Name\"" ORDER BY SUM(\""Quantity\"") DESC LIMIT 1;"",
+  ""sql_result"": [
+    ""Summit Beta Solutions""
+  ],
+  ""retry_count"": 1,
+  ""error_log"": [
+    ""Execution Error: misuse of aggregate: SUM()""
+  ]
+}","SELECT ""Customer Name"" FROM sales_data WHERE ""Product Category"" = 'Electronics' GROUP BY ""Customer Name"" ORDER BY SUM(""Quantity"") DESC LIMIT 1;","[('Summit Beta Solutions',)]",True,False
+80,哪一個產品的平均單價 (ASP) 最高？,Cloud License (Annual),string,"{
+  ""sql_query"": ""SELECT \""Product Name\"", ASP FROM sales_data ORDER BY ASP DESC LIMIT 1;"",
+  ""sql_result"": [
+    [
+      ""Cloud License (Annual)"",
+      5783.08
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT ""Product Name"", ASP FROM sales_data ORDER BY ASP DESC LIMIT 1;","[('Cloud License (Annual)', 5783.08)]",True,False
+81,各個區域 (Region) 最偏好（銷售額最高）的產品類別分別為何？,"{'APAC': 'Electronics', 'EMEA': 'Electronics', 'LATAM': 'Electronics', 'North America': 'Electronics'}",dataframe,"{
+  ""sql_query"": ""SELECT Region, \""Product Category\"", SUM(\""Total Revenue\"") as total_revenue FROM sales_data GROUP BY Region, \""Product Category\"" ORDER BY total_revenue DESC"",
+  ""sql_result"": [
+    [
+      ""North America"",
+      ""Electronics"",
+      23839311.54
+    ],
+    [
+      ""EMEA"",
+      ""Electronics"",
+      17194037.3
+    ],
+    [
+      ""APAC"",
+      ""Electronics"",
+      14729441.51
+    ],
+    [
+      ""North America"",
+      ""Software"",
+      10776363.8
+    ],
+    [
+      ""EMEA"",
+      ""Software"",
+      7770392.3
+    ],
+    [
+      ""APAC"",
+      ""Software"",
+      7288014.71
+    ],
+    [
+      ""North America"",
+      ""Office Supplies"",
+      5316688.94
+    ],
+    [
+      ""EMEA"",
+      ""Office Supplies"",
+      3890098.57
+    ],
+    [
+      ""LATAM"",
+      ""Electronics"",
+      3495783.58
+    ],
+    [
+      ""APAC"",
+      ""Office Supplies"",
+      3269243.93
+    ],
+    [
+      ""LATAM"",
+      ""Software"",
+      1329216.17
+    ],
+    [
+      ""LATAM"",
+      ""Office Supplies"",
+      570770.83
+    ]
+  ],
+  ""retry_count"": 0,
+  ""error_log"": []
+}","SELECT Region, ""Product Category"", SUM(""Total Revenue"") as total_revenue FROM sales_data GROUP BY Region, ""Product Category"" ORDER BY total_revenue DESC","[('North America', 'Electronics', 23839311.54), ('EMEA', 'Electronics', 17194037.3), ('APAC', 'Electronics', 14729441.51), ('North America', 'Software', 10776363.8), ('EMEA', 'Software', 7770392.3), ('APAC', 'Software', 7288014.71), ('North America', 'Office Supplies', 5316688.94), ('EMEA', 'Office Supplies', 3890098.57), ('LATAM', 'Electronics', 3495783.58), ('APAC', 'Office Supplies', 3269243.93), ('LATAM', 'Software', 1329216.17), ('LATAM', 'Office Supplies', 570770.83)]",False,True

@@ -1,7 +1,7 @@
 from google.adk.agents import LlmAgent
 from google.adk.models.lite_llm import LiteLlm
 from google.adk import tools
-from text2sql.agents.planned_agent.tools import check_sql_syntax, execute_sql
+from .tools import check_sql_syntax, execute_sql
 
 # Check syntax and execute SQL
 # We pass the functions directly to the LlmAgent
