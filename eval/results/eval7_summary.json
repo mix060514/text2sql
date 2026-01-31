@@ -1,0 +1,21 @@
+{
+    "timestamp": "2026-01-31 14:50:34",
+    "total_questions": 82,
+    "agents": {
+        "planned_agent_v7": {
+            "data_accuracy": 0.8170731707317073,
+            "sql_validity": 1.0,
+            "faithfulness": 0.9085365853658537,
+            "question_relevance": 0.8829268292682928,
+            "expression_accuracy": 0.8914634146341462
+        }
+    },
+    "error_categories": {
+        "region_alias_error": 0,
+        "sql_syntax_error": 0,
+        "empty_result_error": 1,
+        "dataframe_format_mismatch": 5,
+        "faithfulness_error": 0,
+        "other_error": 9
+    }
+}
