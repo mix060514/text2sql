@@ -11,6 +11,7 @@ import asyncio
 import logging
 import uuid
 import re
+import ast
 
 # Ignore warnings
 import warnings
@@ -63,9 +64,40 @@ def extract_numbers(text):
     return cleaned
 
 
-def compare_answers_smart(actual_text, expected, eval_type, eps=1e-2):
+def compare_answers_smart(actual_text, expected, eval_type, eps=1e-2, sql_result=None):
     try:
         if eval_type == "number":
+            # 1. Try to find number in sql_result if available
+            if sql_result:
+                try:
+                    # Parse string representation of list like "[(39932364.28,)]"
+                    raw_data = ast.literal_eval(sql_result)
+                    # Flatten/extract all numbers from the structure
+                    candidates = []
+
+                    def extract_from_struct(data):
+                        if isinstance(data, (list, tuple)):
+                            for item in data:
+                                extract_from_struct(item)
+                        elif isinstance(data, (int, float)):
+                            candidates.append(data)
+                        elif isinstance(data, str):
+                            # Try to convert string to float if it looks like a number
+                            try:
+                                candidates.append(float(data))
+                            except:
+                                pass
+
+                    extract_from_struct(raw_data)
+
+                    expected_val = float(expected)
+                    for n in candidates:
+                        if abs(n - expected_val) < eps:
+                            return True
+                except:
+                    pass
+
+            # 2. Fallback to extracting from text
             nums = extract_numbers(actual_text)
             expected_val = float(expected)
             for n in nums:
@@ -112,11 +144,26 @@ async def run_agent_once(agent, question):
 
     content = types.Content(role="user", parts=[types.Part(text=question)])
     final_text = "No response"
+    executed_sql_result = None
 
     try:
         async for event in runner.run_async(
             user_id=USER_ID, session_id=session_id, new_message=content
         ):
+            # Capture tool results
+            if event.content and event.content.parts:
+                for part in event.content.parts:
+                    if (
+                        part.function_response
+                        and part.function_response.name == "execute_sql"
+                    ):
+                        # part.function_response.response is a dict {'result': '...'}
+                        resp = part.function_response.response
+                        if isinstance(resp, dict) and "result" in resp:
+                            executed_sql_result = resp["result"]
+                        else:
+                            executed_sql_result = str(resp)
+
             if event.is_final_response():
                 if event.content and event.content.parts:
                     final_text = event.content.parts[0].text
@@ -126,7 +173,7 @@ async def run_agent_once(agent, question):
     except Exception as e:
         final_text = f"Agent Error: {str(e)}"
 
-    return final_text
+    return final_text, executed_sql_result
 
 
 def agent_inference(agent, question):
@@ -166,13 +213,17 @@ def run_comparative_evaluation(agents, eval_set):
 
             for agent in agents:
                 try:
-                    actual = agent_inference(agent, question)
-                    is_correct = compare_answers_smart(actual, gt, e_type)
+                    actual, sql_res = agent_inference(agent, question)
+                    is_correct = compare_answers_smart(
+                        actual, gt, e_type, sql_result=sql_res
+                    )
                 except Exception as e:
                     actual = f"Error: {e}"
+                    sql_res = "Error"
                     is_correct = False
 
                 row[f"{agent.name}_actual"] = actual
+                row[f"{agent.name}_sql_result"] = sql_res
                 row[f"{agent.name}_correct"] = is_correct
 
                 if is_correct:
@@ -194,21 +245,30 @@ def run_comparative_evaluation(agents, eval_set):
         # Create Comparison Table
         df = pd.DataFrame(results_matrix)
 
+        # Create output directory
+        output_dir = PROJECT_DIR / "eval" / "results"
+        output_dir.mkdir(parents=True, exist_ok=True)
+
         # Save detailed CSV
-        csv_path = "eval3_comparison.csv"
+        csv_path = output_dir / "eval3_comparison.csv"
         df.to_csv(csv_path, index=False)
-        mlflow.log_artifact(csv_path)
+        mlflow.log_artifact(str(csv_path))
 
         # Save HTML view for easier reading
-        html_path = "eval3_comparison.html"
+        html_path = output_dir / "eval3_comparison.html"
         df.to_html(html_path)
-        mlflow.log_artifact(html_path)
+        mlflow.log_artifact(str(html_path))
+
+        # Save JSON results
+        json_path = output_dir / "eval3_comparison.json"
+        df.to_json(json_path, orient="records", indent=4, force_ascii=False)
+        mlflow.log_artifact(str(json_path))
 
         # Filter strictly problematic questions (where at least one agent failed)
         prob_df = df[df["problematic"] == True]
-        prob_csv_path = "eval3_problematic.csv"
+        prob_csv_path = output_dir / "eval3_problematic.csv"
         prob_df.to_csv(prob_csv_path, index=False)
-        mlflow.log_artifact(prob_csv_path)
+        mlflow.log_artifact(str(prob_csv_path))
 
         print(f"Saved comparison results to {csv_path}")
         print(f"Identify problematic questions in {prob_csv_path}")
