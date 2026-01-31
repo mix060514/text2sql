@@ -8,9 +8,9 @@ print("Attempting to connect to Ollama via LiteLLM with gpt-oss:20b...")
 try:
     response = completion(
         model="openai/gpt-oss:20b",
-        messages=[{"role": "user", "content": "Hello"}],
+        messages=[{"role": "user", "content": "Hello, what's your name?"}],
         api_key="aaa",
-        api_base="http://localhost:8081",
+        api_base="http://localhost:8082",
     )
     print("Response received:")
     print(response.choices[0].message.content)
