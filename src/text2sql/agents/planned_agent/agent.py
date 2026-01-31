@@ -218,5 +218,4 @@ root_agent = LlmAgent(
     - Be honest about confidence level
     """,
     sub_agents=[sql_subagent_v7],
-    output_schema=Text2SQLOutput,
 )
