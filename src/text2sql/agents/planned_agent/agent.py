@@ -1,4 +1,5 @@
 from typing import List, Dict, Any, Optional
+import os
 
 from pydantic import BaseModel, Field
 from google.adk.agents import LlmAgent, LoopAgent, SequentialAgent
@@ -15,7 +16,7 @@ ENABLE_SELF_CORRECTION = True
 LLAMA_CPP_MODEL = "openai/qwen3-4b-instruct-2507"
 # LLAMA_CPP_MODEL = "openai/qwen3-14b-Q4_K_M"
 LLAMA_CPP_API_KEY = "aaa"
-LLAMA_CPP_API_BASE = "http://localhost:8081"
+LLAMA_CPP_API_BASE = os.getenv("LLAMA_CPP_API_BASE", "http://localhost:8081")
 
 
 # ------------------------------------------------------------------------------
