@@ -1,15 +1,16 @@
 """
-Eval V7: Multi-dimensional Evaluation with Structured Output Support
-- Direct reading of Pydantic structured output
-- SQL syntax validation
-- LLM-as-Judge for faithfulness evaluation
-- Three scoring dimensions: data_accuracy, faithfulness, sql_validity
+Eval V8: LLM-as-Judge Evaluation with Confidence Scoring (0-10)
+- Works with SequentialAgent + LoopAgent architecture
+- LLM-as-Judge for holistic evaluation
+- Confidence scoring on 0-10 scale
+- Extracts SQL and results from event stream
 """
 
 # %%
 import json
 import pathlib
 import time
+import random
 import numpy as np
 import mlflow
 import pandas as pd
@@ -34,7 +35,7 @@ logging.basicConfig(level=logging.ERROR)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 # Import Agents
-from text2sql.agents.planned_agent.agent_v7 import planned_agent_v7, Text2SQLOutput
+from text2sql.agents.planned_agent.agent import root_agent
 from text2sql.agents.planned_agent.tools import check_sql_syntax
 from google.adk.sessions import InMemorySessionService
 from google.adk.runners import Runner
@@ -45,7 +46,7 @@ from google.adk.models.lite_llm import LiteLlm
 
 # MLflow Setup
 mlflow.set_tracking_uri("http://localhost:5000")
-experiment_name = "Text-to-SQL-Comparison-v7"
+experiment_name = "Text-to-SQL-Eval-v8"
 mlflow.set_experiment(experiment_name)
 
 PROJECT_DIR = pathlib.Path(__file__).parent.parent.resolve()
@@ -54,63 +55,74 @@ ground_truth_set = DATA_DIR / "eval_set_v2.jsonl"
 
 # Load Eval Set
 with open(ground_truth_set, "r", encoding="utf-8") as f:
-    eval_set = [json.loads(line) for line in f]
+    all_eval_set = [json.loads(line) for line in f]
 
-# Global Session Service
+# 隨機選取 5 個測試案例（測試完成後手動改回全部）
+random.seed(42)  # 固定種子以便重現
+eval_set = all_eval_set
+eval_set = random.sample(all_eval_set, min(5, len(all_eval_set)))
+print(f"Selected {len(eval_set)} test cases from {len(all_eval_set)} total")
 session_service = InMemorySessionService()
 APP_NAME = "text2sql_eval_v7"
 USER_ID = "eval_runner_v7"
 
 
-# %% LLM-as-Judge Configuration
-
-JUDGE_MODEL = LiteLlm(
-    model="openai/qwen3-4b-instruct-2507",
-    api_key="aaa",
-    api_base="http://localhost:8081",
-)
+# %% LLM-as-Judge Configuration (0-10 Confidence Score)
 
 
-async def judge_faithfulness(
-    question: str, raw_data: List[Any], answer: str
+async def judge_confidence(
+    question: str,
+    expected_answer: Any,
+    actual_answer: str,
+    sql_query: str = None,
+    sql_result: Any = None,
 ) -> Dict[str, Any]:
     """
-    使用 LLM 判斷回答是否忠實反映數據。
+    使用 LLM 評估回答的信心分數 (0-10)。
+
+    評估維度：
+    1. 答案正確性：回答是否與預期答案一致
+    2. 數據準確性：數據是否正確無誤
+    3. 回答完整性：是否完整回答問題
+
     Returns:
         {
-            "score": float (0.0-1.0),
+            "confidence_score": int (0-10),
             "reasoning": str,
+            "is_correct": bool,
             "issues": List[str]
         }
     """
-    prompt = f"""你是一個評估專家。請判斷以下「回答」是否忠實反映了「原始數據」，並正確回答了「問題」。
+    prompt = f"""你是一個專業的 Text-to-SQL 系統評估專家。請評估以下回答的品質。
 
-**問題**: {question}
+**使用者問題**: {question}
 
-**原始數據**: {json.dumps(raw_data, ensure_ascii=False)}
+**預期正確答案**: {json.dumps(expected_answer, ensure_ascii=False)}
 
-**回答**: {answer}
+**SQL 查詢**: {sql_query if sql_query else "無法取得"}
 
-請從以下三個維度評分（每個 0-1 分）：
-1. **數據忠實度**: 回答中的數據是否與原始數據一致？沒有捏造或誤報？
-2. **問題相關度**: 回答是否直接回應了問題？沒有答非所問？
-3. **表達準確度**: 回答的表達是否清晰且沒有歧義？
+**SQL 結果**: {json.dumps(sql_result, ensure_ascii=False) if sql_result else "無法取得"}
 
-請以 JSON 格式回覆：
+**Agent 回答**: {actual_answer}
+
+請根據以下標準給出 0-10 的信心分數：
+- 10分：完全正確，數據精確匹配
+- 8-9分：基本正確，有微小格式或表達差異
+- 6-7分：大致正確，但有部分數據偏差
+- 4-5分：部分正確，有明顯錯誤
+- 2-3分：大部分錯誤
+- 0-1分：完全錯誤或無法回答
+
+請以 JSON 格式回覆（不要有其他文字）：
 {{
-    "data_faithfulness": 0.0-1.0,
-    "question_relevance": 0.0-1.0,
-    "expression_accuracy": 0.0-1.0,
-    "overall_score": 0.0-1.0,
-    "reasoning": "簡短說明評分理由",
-    "issues": ["問題1", "問題2"] 或 []
+    "confidence_score": 0-10 的整數,
+    "is_correct": true/false (分數>=7視為正確),
+    "reasoning": "簡短說明評分理由（一句話）",
+    "issues": ["問題1", "問題2"] 或空陣列
 }}
-
-只輸出 JSON，不要有其他文字。
 """
 
     try:
-        # Use LiteLLM to call the judge model
         import litellm
 
         response = await asyncio.to_thread(
@@ -123,25 +135,29 @@ async def judge_faithfulness(
 
         result_text = response.choices[0].message.content
 
-        # Try to extract JSON from the response
-        # Handle potential markdown code blocks
+        # Extract JSON from response (handle markdown code blocks)
         if "```json" in result_text:
             result_text = result_text.split("```json")[1].split("```")[0]
         elif "```" in result_text:
             result_text = result_text.split("```")[1].split("```")[0]
 
         result = json.loads(result_text.strip())
+
+        # Ensure confidence_score is int and in range
+        score = int(result.get("confidence_score", 5))
+        score = max(0, min(10, score))
+        result["confidence_score"] = score
+        result["is_correct"] = score >= 7
+
         return result
 
     except Exception as e:
         logging.error(f"Judge error: {e}")
         return {
-            "data_faithfulness": 0.5,
-            "question_relevance": 0.5,
-            "expression_accuracy": 0.5,
-            "overall_score": 0.5,
+            "confidence_score": 5,
+            "is_correct": False,
             "reasoning": f"Judge error: {str(e)}",
-            "issues": ["Judge evaluation failed"],
+            "issues": ["LLM Judge 評估失敗"],
         }
 
 
@@ -330,13 +346,15 @@ def compare_data_accuracy(
 
 # %% Async Agent Wrapper
 
+AGENT_TIMEOUT_SECONDS = 120  # 單個問題的超時時間
 
-async def run_agent_once(agent, question: str) -> Dict[str, Any]:
-    """
-    執行 Agent 並返回結構化結果。
-    """
-    session_id = f"eval7_{agent.name}_{int(time.time()*1000)}_{uuid.uuid4().hex[:6]}"
 
+async def _run_agent_impl(agent, question: str, session_id: str) -> Dict[str, Any]:
+    """
+    Expert V8 Implementation:
+    從 Event Stream 中攔截 Sub-agent 的 SQL、Result 與 Answer，
+    無視 Root Agent 的包裝干擾。
+    """
     await session_service.create_session(
         app_name=APP_NAME, user_id=USER_ID, session_id=session_id
     )
@@ -349,373 +367,294 @@ async def run_agent_once(agent, question: str) -> Dict[str, Any]:
 
     content = types.Content(role="user", parts=[types.Part(text=question)])
 
-    result = {
-        "final_text": "No response",
-        "structured_output": None,
-        "executed_sql": None,
-        "sql_result": None,
+    # 1. 初始化狀態容器
+    result_context = {
+        "final_text": "",  # 這是給 User 看的最終回答 (Answer Agent)
+        "executed_sql": None,  # 這是給 Eval 比對的 SQL (SQL Gen Agent)
+        "sql_result": None,  # 這是給 Eval 比對的 Data (Execute SQL Agent)
         "raw_events": [],
     }
 
-    try:
-        async for event in runner.run_async(
-            user_id=USER_ID, session_id=session_id, new_message=content
-        ):
-            # Record raw events for debugging
-            event_info = {
-                "author": getattr(event, "author", "unknown"),
-                "is_final": (
-                    event.is_final_response()
-                    if hasattr(event, "is_final_response")
-                    else False
-                ),
-            }
+    # 用來追蹤當前的對話狀態
+    candidate_answer = ""
 
-            # Capture tool results
-            if event.content and event.content.parts:
-                for part in event.content.parts:
-                    # Capture function call (The Query)
-                    if part.function_call and part.function_call.name == "execute_sql":
-                        args = part.function_call.args
-                        if args:
-                            result["executed_sql"] = args.get("sql_query") or args.get(
-                                "sql"
-                            )
+    # 2. 啟動事件流監聽
+    async for event in runner.run_async(
+        user_id=USER_ID, session_id=session_id, new_message=content
+    ):
+        # 紀錄原始事件以便 Debug
+        result_context["raw_events"].append(str(event))
 
-                    # Capture function response (The Result)
+        if event.content and event.content.parts:
+            for part in event.content.parts:
+
+                # --- A. 攔截 SQL (當 Tool 被呼叫時) ---
+                if part.function_call and "execute_sql" in part.function_call.name:
+                    args = part.function_call.args
+                    # 支援多種參數命名慣例，防止 Prompt 飄移
+                    sql = args.get("sql_query") or args.get("sql") or args.get("query")
+                    if sql:
+                        result_context["executed_sql"] = sql
+
+                # --- B. 攔截 Result (當 Tool 回傳結果時) ---
+                if (
+                    part.function_response
+                    and "execute_sql" in part.function_response.name
+                ):
+                    resp = part.function_response.response
+                    # 強壯的解析邏輯：處理 ADK 包裝的 Dict 或原始 List
+                    if isinstance(resp, dict):
+                        # 優先拿 'result' 或 'content'，如果都沒有就拿整個 dict
+                        result_context["sql_result"] = (
+                            resp.get("result") or resp.get("content") or resp
+                        )
+                    else:
+                        result_context["sql_result"] = resp
+
+                # --- C. 攔截 Answer (Answer Agent 的發言) ---
+                # 邏輯：
+                # 1. 必須是純文字 (has text)
+                # 2. 不能是 SQL 代碼塊 (過濾掉 SQL Gen Agent 的思考)
+                # 3. 必須是在我們拿到 SQL Result 之後產生的 (過濾掉開場白)
+                if hasattr(part, "text") and part.text:
+                    text = part.text.strip()
+
+                    # 過濾條件：不要 SQL，不要空白
                     if (
-                        part.function_response
-                        and part.function_response.name == "execute_sql"
+                        text
+                        and "```sql" not in text
+                        and "SELECT" not in text[:20].upper()
                     ):
-                        resp = part.function_response.response
-                        if isinstance(resp, dict) and "result" in resp:
-                            result["sql_result"] = resp["result"]
-                        else:
-                            result["sql_result"] = str(resp)
+                        # 更新候選答案。
+                        # 因為 Answer Agent 是在 SQL 執行完後才發言，
+                        # 所以它會覆蓋掉前面的對話，成為最後的 candidate_answer
+                        candidate_answer = text
 
-            result["raw_events"].append(event_info)
+    # 3. 最終組裝
+    # 如果我們有抓到候選答案（Answer Agent 的發言），就優先使用它
+    # 這樣可以避開 Root Agent 最後可能加上的 "I have delegated..." 廢話
+    if candidate_answer:
+        result_context["final_text"] = candidate_answer
+    else:
+        # 萬一真的沒抓到，只好回傳空字串或錯誤提示
+        result_context["final_text"] = "No answer generated."
 
-            if event.is_final_response():
-                if event.content and event.content.parts:
-                    final_part = event.content.parts[0]
+    # 4. 針對 Eval 的最後防線：如果 SQL 沒抓到，標記為 Error
+    if not result_context["executed_sql"]:
+        result_context["executed_sql"] = "Error: No SQL executed"
 
-                    # Try to get structured output first
-                    if hasattr(final_part, "text"):
-                        result["final_text"] = final_part.text
+    return result_context
 
-                        # Try to parse as structured output
-                        try:
-                            parsed = json.loads(final_part.text)
-                            if isinstance(parsed, dict):
-                                result["structured_output"] = parsed
-                                # Extract fields if they match Text2SQLOutput
-                                if "executed_sql" in parsed:
-                                    result["executed_sql"] = parsed["executed_sql"]
-                                if "raw_results" in parsed:
-                                    result["sql_result"] = parsed["raw_results"]
-                        except json.JSONDecodeError:
-                            pass
 
-                elif event.actions and event.actions.escalate:
-                    result["final_text"] = f"Escalated: {event.error_message}"
-                break
+async def run_agent_once(agent, question: str) -> Dict[str, Any]:
+    """
+    執行 Agent 並返回結構化結果，帶有超時機制。
+    """
+    session_id = f"eval8_{agent.name}_{int(time.time()*1000)}_{uuid.uuid4().hex[:6]}"
 
+    try:
+        # 使用 asyncio.wait_for 加入超時
+        result = await asyncio.wait_for(
+            _run_agent_impl(agent, question, session_id), timeout=AGENT_TIMEOUT_SECONDS
+        )
+        return result
+    except asyncio.TimeoutError:
+        return {
+            "final_text": f"Timeout after {AGENT_TIMEOUT_SECONDS}s",
+            "structured_output": None,
+            "executed_sql": None,
+            "sql_result": None,
+            "raw_events": [],
+        }
     except Exception as e:
-        result["final_text"] = f"Agent Error: {str(e)}"
-
-    return result
+        return {
+            "final_text": f"Agent Error: {str(e)}",
+            "structured_output": None,
+            "executed_sql": None,
+            "sql_result": None,
+            "raw_events": [],
+        }
 
 
 def agent_inference(agent, question: str) -> Dict[str, Any]:
     return asyncio.run(run_agent_once(agent, question))
 
 
-# %% Multi-dimensional Scoring
+# %% Simplified Evaluation Metrics (0-10 Confidence Score)
 
 
 class EvalMetrics:
-    """評估指標容器"""
+    """評估指標容器 - 簡化版，專注於信心分數"""
 
     def __init__(self):
-        self.data_accuracy_scores: List[float] = []
-        self.sql_validity_scores: List[float] = []
-        self.faithfulness_scores: List[float] = []
-        self.question_relevance_scores: List[float] = []
-        self.expression_accuracy_scores: List[float] = []
+        self.confidence_scores: List[int] = []
+        self.correct_count: int = 0
+        self.total_count: int = 0
 
-    def add_result(
-        self,
-        data_accuracy: float,
-        sql_validity: float,
-        faithfulness: float = 0.0,
-        question_relevance: float = 0.0,
-        expression_accuracy: float = 0.0,
-    ):
-        self.data_accuracy_scores.append(data_accuracy)
-        self.sql_validity_scores.append(sql_validity)
-        self.faithfulness_scores.append(faithfulness)
-        self.question_relevance_scores.append(question_relevance)
-        self.expression_accuracy_scores.append(expression_accuracy)
+    def add_result(self, confidence_score: int, is_correct: bool):
+        self.confidence_scores.append(confidence_score)
+        self.total_count += 1
+        if is_correct:
+            self.correct_count += 1
 
-    def get_averages(self) -> Dict[str, float]:
+    def get_summary(self) -> Dict[str, Any]:
         return {
-            "data_accuracy": (
-                np.mean(self.data_accuracy_scores) if self.data_accuracy_scores else 0.0
+            "avg_confidence": (
+                np.mean(self.confidence_scores) if self.confidence_scores else 0.0
             ),
-            "sql_validity": (
-                np.mean(self.sql_validity_scores) if self.sql_validity_scores else 0.0
+            "accuracy": (
+                self.correct_count / self.total_count if self.total_count > 0 else 0.0
             ),
-            "faithfulness": (
-                np.mean(self.faithfulness_scores) if self.faithfulness_scores else 0.0
-            ),
-            "question_relevance": (
-                np.mean(self.question_relevance_scores)
-                if self.question_relevance_scores
-                else 0.0
-            ),
-            "expression_accuracy": (
-                np.mean(self.expression_accuracy_scores)
-                if self.expression_accuracy_scores
-                else 0.0
-            ),
+            "correct_count": self.correct_count,
+            "total_count": self.total_count,
         }
 
 
 # %% Evaluation Loop
 
 
-async def run_comprehensive_evaluation(
-    agents: List, eval_set: List[Dict], enable_judge: bool = True
-):
+async def run_evaluation_v8(agents: List, eval_set: List[Dict]):
     """
-    執行完整的多維度評估。
+    執行 V8 評估 - 使用 LLM-as-Judge 給出 0-10 信心分數
     """
-    run_name = f"comprehensive_v7_{int(time.time())}"
+    run_name = f"eval_v8_{int(time.time())}"
 
     # Output directory
     output_dir = PROJECT_DIR / "eval" / "results"
     output_dir.mkdir(parents=True, exist_ok=True)
-    json_path = output_dir / "eval7_comparison.json"
+    json_path = output_dir / "eval8_results.json"
 
     with mlflow.start_run(run_name=run_name):
-        results_matrix = []
+        results = []
         metrics_by_agent = {agent.name: EvalMetrics() for agent in agents}
 
-        print(
-            f"Starting V7 comprehensive evaluation for {len(agents)} agents on {len(eval_set)} questions..."
-        )
-        print(f"LLM-as-Judge: {'Enabled' if enable_judge else 'Disabled'}")
+        print(f"\n{'='*60}")
+        print(f"Text-to-SQL Eval V8 (LLM-as-Judge, 0-10 Confidence)")
+        print(f"Agents: {[a.name for a in agents]}")
+        print(f"Questions: {len(eval_set)}")
+        print(f"{'='*60}\n")
 
-        agent_names = [a.name for a in agents]
-        mlflow.log_param("agents", agent_names)
-        mlflow.log_param("enable_judge", enable_judge)
-
-        # Error categorization
-        error_categories = {
-            "region_alias_error": [],
-            "sql_syntax_error": [],
-            "empty_result_error": [],
-            "dataframe_format_mismatch": [],
-            "faithfulness_error": [],
-            "other_error": [],
-        }
+        mlflow.log_param("agents", [a.name for a in agents])
+        mlflow.log_param("num_questions", len(eval_set))
 
         for i, entry in enumerate(eval_set):
             question = entry["question"]
-            gt = entry["ground_truth"]
-            e_type = entry["eval_type"]
+            expected = entry["ground_truth"]
+            eval_type = entry.get("eval_type", "unknown")
 
-            print(f"\n[{i+1}/{len(eval_set)}] Q: {question[:40]}...")
-
-            row = {
-                "id": i,
-                "question": question,
-                "expected": str(gt),
-                "type": e_type,
-            }
+            print(f"[{i+1}/{len(eval_set)}] {question[:50]}...")
 
             for agent in agents:
-                print(f"  Running {agent.name}...", end=" ")
+                print(f"  → {agent.name}: ", end="", flush=True)
 
                 try:
-                    # Run agent (use await since we're already in async context)
-                    inference_result = await run_agent_once(agent, question)
+                    # Run agent
+                    result = await run_agent_once(agent, question)
 
-                    actual_text = inference_result["final_text"]
-                    sql_query = inference_result["executed_sql"]
-                    sql_result = inference_result["sql_result"]
-                    structured_output = inference_result["structured_output"]
+                    actual_answer = result["final_text"]
+                    sql_query = result["executed_sql"]
+                    sql_result = result["sql_result"]
 
-                    # Parse sql_result as list if possible
-                    actual_data = []
-                    if sql_result:
-                        try:
-                            actual_data = ast.literal_eval(str(sql_result))
-                        except:
-                            actual_data = [sql_result]
+                    # LLM-as-Judge evaluation
+                    judge_result = await judge_confidence(
+                        question=question,
+                        expected_answer=expected,
+                        actual_answer=actual_answer,
+                        sql_query=sql_query,
+                        sql_result=sql_result,
+                    )
 
-                    # 1. SQL Validity Check
-                    sql_validity = validate_sql_syntax(sql_query)
-                    sql_score = 1.0 if sql_validity["is_valid"] else 0.0
-
-                    # 2. Data Accuracy Check
-                    data_accuracy = compare_data_accuracy(actual_data, gt, e_type)
-                    data_score = 1.0 if data_accuracy["is_correct"] else 0.0
-
-                    # 3. LLM-as-Judge (Faithfulness)
-                    judge_result = {
-                        "data_faithfulness": 0.5,
-                        "question_relevance": 0.5,
-                        "expression_accuracy": 0.5,
-                        "overall_score": 0.5,
-                        "reasoning": "Judge disabled",
-                        "issues": [],
-                    }
-
-                    if enable_judge and data_score > 0:
-                        # Only judge if data is correct
-                        judge_result = await judge_faithfulness(
-                            question, actual_data, actual_text
-                        )
+                    confidence = judge_result["confidence_score"]
+                    is_correct = judge_result["is_correct"]
+                    reasoning = judge_result.get("reasoning", "")
 
                     # Record metrics
-                    metrics_by_agent[agent.name].add_result(
-                        data_accuracy=data_score,
-                        sql_validity=sql_score,
-                        faithfulness=judge_result.get("data_faithfulness", 0.5),
-                        question_relevance=judge_result.get("question_relevance", 0.5),
-                        expression_accuracy=judge_result.get(
-                            "expression_accuracy", 0.5
-                        ),
-                    )
+                    metrics_by_agent[agent.name].add_result(confidence, is_correct)
 
-                    # Overall correctness (weighted)
-                    is_correct = data_score > 0.5
+                    # Store result with clean format
+                    row = {
+                        "id": i,
+                        "question": question,
+                        "expected": expected,
+                        "eval_type": eval_type,
+                        "final_answer": actual_answer or "",
+                        "sql_query": sql_query or "",
+                        "execute_result": sql_result if sql_result else "",
+                        "llm_judge_score": confidence,
+                        "llm_judge_reasoning": reasoning,
+                    }
+                    results.append(row)
 
-                    # Store results
-                    row[f"{agent.name}_actual"] = (
-                        actual_text[:500] if actual_text else ""
-                    )
-                    row[f"{agent.name}_sql_query"] = sql_query
-                    row[f"{agent.name}_sql_result"] = (
-                        str(sql_result)[:500] if sql_result else ""
-                    )
-                    row[f"{agent.name}_data_correct"] = data_accuracy["is_correct"]
-                    row[f"{agent.name}_data_details"] = data_accuracy["details"]
-                    row[f"{agent.name}_sql_valid"] = sql_validity["is_valid"]
-                    row[f"{agent.name}_sql_error"] = sql_validity["error"]
-                    row[f"{agent.name}_judge_score"] = judge_result.get(
-                        "overall_score", 0.5
-                    )
-                    row[f"{agent.name}_judge_reasoning"] = judge_result.get(
-                        "reasoning", ""
-                    )
-                    row[f"{agent.name}_judge_issues"] = str(
-                        judge_result.get("issues", [])
-                    )
-
-                    print(
-                        f"Data: {'✓' if data_accuracy['is_correct'] else '✗'}, SQL: {'✓' if sql_validity['is_valid'] else '✗'}, Judge: {judge_result.get('overall_score', 0.5):.2f}"
-                    )
-
-                    # Categorize errors
-                    if not is_correct:
-                        if not sql_validity["is_valid"]:
-                            error_categories["sql_syntax_error"].append(i)
-                        elif sql_result == "[]" or sql_result == "[(None,)]":
-                            error_categories["empty_result_error"].append(i)
-                        elif "EMEA" in question or "歐非中東" in question:
-                            error_categories["region_alias_error"].append(i)
-                        elif e_type == "dataframe":
-                            error_categories["dataframe_format_mismatch"].append(i)
-                        elif judge_result.get("overall_score", 1.0) < 0.5:
-                            error_categories["faithfulness_error"].append(i)
-                        else:
-                            error_categories["other_error"].append(i)
+                    # Print result
+                    status = "✓" if is_correct else "✗"
+                    print(f"{status} Confidence: {confidence}/10 - {reasoning[:50]}...")
 
                 except Exception as e:
-                    print(f"Error: {e}")
-                    row[f"{agent.name}_actual"] = f"Error: {e}"
-                    row[f"{agent.name}_sql_query"] = "Error"
-                    row[f"{agent.name}_sql_result"] = "Error"
-                    row[f"{agent.name}_data_correct"] = False
-                    row[f"{agent.name}_data_details"] = str(e)
-                    row[f"{agent.name}_sql_valid"] = False
-                    row[f"{agent.name}_sql_error"] = str(e)
-                    row[f"{agent.name}_judge_score"] = 0.0
-                    row[f"{agent.name}_judge_reasoning"] = f"Error: {e}"
-                    row[f"{agent.name}_judge_issues"] = "[]"
+                    print(f"❌ Error: {e}")
+                    row = {
+                        "id": i,
+                        "question": question,
+                        "expected": expected,
+                        "eval_type": eval_type,
+                        "final_answer": f"Error: {e}",
+                        "sql_query": "",
+                        "execute_result": "",
+                        "llm_judge_score": 0,
+                        "llm_judge_reasoning": str(e),
+                    }
+                    results.append(row)
+                    metrics_by_agent[agent.name].add_result(0, False)
 
-                    metrics_by_agent[agent.name].add_result(0.0, 0.0, 0.0, 0.0, 0.0)
-                    error_categories["other_error"].append(i)
+            # Save intermediate results
+            with open(json_path, "w", encoding="utf-8") as f:
+                json.dump(results, f, indent=2, ensure_ascii=False)
 
-            results_matrix.append(row)
-
-            # Dynamic output
-            try:
-                with open(json_path, "w", encoding="utf-8") as f:
-                    json.dump(results_matrix, f, indent=4, ensure_ascii=False)
-            except Exception as e:
-                print(f"Warning: Failed to write intermediate JSON: {e}")
-
-        print("\n" + "=" * 60)
+        # Final summary
+        print(f"\n{'='*60}")
         print("Evaluation Complete!")
-        print("=" * 60)
+        print(f"{'='*60}\n")
 
-        # Log metrics per agent
-        for agent_name, metrics in metrics_by_agent.items():
-            averages = metrics.get_averages()
-            print(f"\n{agent_name}:")
-            for metric_name, value in averages.items():
-                print(f"  {metric_name}: {value:.2%}")
-                mlflow.log_metric(f"{agent_name}_{metric_name}", value)
-
-        # Log error categories
-        print("\n=== Error Categories ===")
-        for category, ids in error_categories.items():
-            if ids:
-                unique_ids = list(set(ids))
-                print(f"{category}: {len(unique_ids)} errors")
-                mlflow.log_metric(f"error_{category}_count", len(unique_ids))
-
-        # Save results
-        df = pd.DataFrame(results_matrix)
-
-        csv_path = output_dir / "eval7_comparison.csv"
-        df.to_csv(csv_path, index=False)
-        mlflow.log_artifact(str(csv_path))
-
-        html_path = output_dir / "eval7_comparison.html"
-        df.to_html(html_path)
-        mlflow.log_artifact(str(html_path))
-
-        df.to_json(json_path, orient="records", indent=4, force_ascii=False)
-        mlflow.log_artifact(str(json_path))
-
-        # Summary report
-        summary_path = output_dir / "eval7_summary.json"
         summary = {
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
             "total_questions": len(eval_set),
             "agents": {},
-            "error_categories": {k: len(set(v)) for k, v in error_categories.items()},
         }
-        for agent_name, metrics in metrics_by_agent.items():
-            summary["agents"][agent_name] = metrics.get_averages()
 
+        for agent_name, metrics in metrics_by_agent.items():
+            agent_summary = metrics.get_summary()
+            summary["agents"][agent_name] = agent_summary
+
+            print(f"{agent_name}:")
+            print(
+                f"  準確率: {agent_summary['accuracy']:.1%} ({agent_summary['correct_count']}/{agent_summary['total_count']})"
+            )
+            print(f"  平均信心分數: {agent_summary['avg_confidence']:.1f}/10")
+
+            mlflow.log_metric(f"{agent_name}_accuracy", agent_summary["accuracy"])
+            mlflow.log_metric(
+                f"{agent_name}_avg_confidence", agent_summary["avg_confidence"]
+            )
+
+        # Save final results
+        df = pd.DataFrame(results)
+
+        csv_path = output_dir / "eval8_results.csv"
+        df.to_csv(csv_path, index=False)
+        mlflow.log_artifact(str(csv_path))
+
+        summary_path = output_dir / "eval8_summary.json"
         with open(summary_path, "w", encoding="utf-8") as f:
-            json.dump(summary, f, indent=4, ensure_ascii=False)
+            json.dump(summary, f, indent=2, ensure_ascii=False)
         mlflow.log_artifact(str(summary_path))
 
-        print(f"\nSaved results to {output_dir}")
+        print(f"\n結果已儲存至 {output_dir}")
 
 
-def run_evaluation(agents, eval_set, enable_judge=True):
-    asyncio.run(run_comprehensive_evaluation(agents, eval_set, enable_judge))
+def run_evaluation(agents, eval_set):
+    """入口函數"""
+    asyncio.run(run_evaluation_v8(agents, eval_set))
 
 
 if __name__ == "__main__":
-    agents_to_eval = [planned_agent_v7]
-
-    # Set enable_judge=False for faster evaluation without LLM-as-Judge
-    run_evaluation(agents_to_eval, eval_set, enable_judge=True)
+    agents_to_eval = [root_agent]
+    run_evaluation(agents_to_eval, eval_set)

@@ -1,14 +1,10 @@
-"""
-Agent V7: Full Structured Output with Pydantic
-- Sub-agent returns structured SQLExecutionResult
-- Root agent returns structured Text2SQLOutput
-- Enables precise evaluation without regex parsing
-"""
+from typing import List, Dict, Any, Optional
 
 from pydantic import BaseModel, Field
-from typing import List, Dict, Any, Optional
-from google.adk.agents import LlmAgent
+from google.adk.agents import LlmAgent, LoopAgent, SequentialAgent
+from google.adk.tools import ToolContext
 from google.adk.models.lite_llm import LiteLlm
+
 from .tools import check_sql_syntax, execute_sql
 
 # ------------------------------------------------------------------------------
@@ -16,31 +12,6 @@ from .tools import check_sql_syntax, execute_sql
 # ------------------------------------------------------------------------------
 MAX_RETRIES = 3
 ENABLE_SELF_CORRECTION = True
-
-# ------------------------------------------------------------------------------
-# Pydantic Output Schemas
-# ------------------------------------------------------------------------------
-
-
-class SQLExecutionResult(BaseModel):
-    """Sub-agent 回傳的結構化 SQL 執行結果"""
-
-    sql_query: str = Field(description="執行的 SQL 語句")
-    sql_result: List[Any] = Field(description="SQL 執行結果（原始數據）")
-    retry_count: int = Field(default=0, description="重試次數")
-    error_log: List[str] = Field(default_factory=list, description="錯誤紀錄")
-    is_success: bool = Field(default=True, description="執行是否成功")
-
-
-class Text2SQLOutput(BaseModel):
-    """Root Agent 回傳的完整結構化輸出"""
-
-    thought_process: str = Field(description="思考過程與邏輯說明")
-    executed_sql: str = Field(description="最終執行的 SQL 語句")
-    raw_results: List[Any] = Field(description="SQL 執行的原始結果數據")
-    answer: str = Field(description="最終的繁體中文自然語言回答")
-    confidence: str = Field(default="high", description="回答信心程度: high/medium/low")
-    data_source: str = Field(default="database", description="數據來源說明")
 
 
 # ------------------------------------------------------------------------------
@@ -73,102 +44,229 @@ REGION_ALIASES = """
 # Database Schema Definition
 # ------------------------------------------------------------------------------
 SCHEMA_DESCRIPTION = f"""
-    **Database Schema:**
-    Table: `sales_data`
-    Columns:
-    - `Order ID` (TEXT): Unique identifier for each order.
-    - `Order Date` (TEXT): Format 'YYYY-MM-DD'. Use `strftime('%Y', "Order Date")` for year extraction.
-    - `Region` (TEXT): Geographic region.
-      * Database values: 'North America', 'EMEA', 'APAC', 'LATAM'
-    - `Country` (TEXT): Country of the order.
-      * Examples: 'United States', 'Mexico', 'United Kingdom', 'Germany', 'China', 'India', 'Australia', 'Canada', 'Brazil'
-    - `Customer Name` (TEXT): Name of the customer company.
-    - `Product Category` (TEXT): Category of the product.
-      * Examples: 'Electronics', 'Software', 'Office Supplies'
-    - `Product Name` (TEXT): Specific name of the product.
-    - `ASP` (REAL): Average Selling Price per unit.
-    - `Quantity` (INTEGER): Number of units sold.
-    - `Total Revenue` (REAL): Total sales amount (ASP * Quantity).
+    **Database Schema Information:**
     
-    {REGION_ALIASES}
+    [CRITICAL] TABLE NAME: `sales_data` (DO NOT use 'sales', 'orders', or any other name)
+    
+    **Columns in `sales_data`:**
+    - `Order ID` (TEXT): Unique transaction ID.
+      * RULE: For "Order Count" (訂單數), usage: `COUNT(DISTINCT "Order ID")`.
+      
+    - `Order Date` (TEXT): Format 'YYYY-MM-DD'.
+    
+    - `Region` (TEXT):
+      * Values: 'North America', 'EMEA', 'APAC', 'LATAM'
+      
+    - `Country` (TEXT): e.g., 'United States', 'Germany', 'China', 'India'.
+    - `Customer Name` (TEXT): Name of the customer company.
+    - `Product Category` (TEXT): e.g., 'Electronics', 'Software'.
+    - `Product Name` (TEXT): Specific product name.
+    
+    - `Quantity` (INTEGER): Units sold.
+      * RULE: For "Sales Volume" (銷售量), usage: `SUM("Quantity")`.
+      
+    - `Total Revenue` (REAL): Sales amount.
+      * RULE: For "Revenue" (銷售額), usage: `SUM("Total Revenue")`.
 """
 
-# ------------------------------------------------------------------------------
-# SQL Subagent with Structured Output (V7)
-# ------------------------------------------------------------------------------
 
-sql_subagent_v7 = LlmAgent(
+region_country_check_agent = LlmAgent(
     model=LiteLlm(
         model="openai/qwen3-4b-instruct-2507",
         api_key="aaa",
         api_base="http://localhost:8081",
     ),
-    name="sql_specialist_v7",
+    name="region_country_check",
+    description="A region and country check agent that checks the region and country from the user question is in database or not.",
+    instruction=f"""You are a region and country check agent that checks the region and country from the user question.
+    
+    {REGION_ALIASES}
+
+    return what region and country should use in sql query, if not related with region and country, return None""
+    """,
+    output_key="region_country",
+)
+
+
+sql_gen_agent = LlmAgent(
+    model=LiteLlm(
+        model="openai/qwen3-4b-instruct-2507",
+        api_key="aaa",
+        api_base="http://localhost:8081",
+    ),
+    name="sql_gen",
     description="A SQL specialist with structured output and self-correction capabilities.",
-    instruction=f"""You are a precise SQL specialist using SQLite with SELF-CORRECTION capabilities.
+    instruction=f"""You are a precise SQL specialist using SQLite.
 
     {SCHEMA_DESCRIPTION}
 
-    **Key Definitions for User Questions:**
-    - "銷售額" (Sales / Revenue) → Use `SUM("Total Revenue")`
-    - "銷售量" (Sales Volume / Quantity) → Use `SUM("Quantity")`
-    - "訂單數量" (Order Count) → Use `COUNT("Order ID")`
-    - "ASP" / "單價" → Use `ASP` column.
+    **CRITICAL CONCEPT MAPPING (MUST FOLLOW):**
+    
+    1. **"訂單數量" (Order Count / How many orders)**
+       - Concept: Counting unique transactions.
+       - Keyword matches: 訂單數, 幾筆, 多少單, Transaction count.
+       - SQL Action: `COUNT(DISTINCT "Order ID")`
+       - ❌ WRONG: SUM("Quantity")
+       
+    2. **"銷售量" (Sales Volume / How many units)**
+       - Concept: Summing physical items sold.
+       - Keyword matches: 銷售量, 賣出多少個, 銷量, Units sold.
+       - SQL Action: `SUM("Quantity")`
+       - ❌ WRONG: COUNT("Order ID")
+
+    3. **"銷售額" (Revenue / Sales Amount)**
+       - Concept: Total money earned.
+       - SQL Action: `SUM("Total Revenue")`
+       
+    4. **"YoY Growth Rate %" (Year over Year Growth Rate %)**
+       - Concept: Year over year growth rate, the xx% not 0.xx.
+       - SQL Action: `SELECT 
+        ((SUM(CASE WHEN strftime('%Y', "Order Date") = '2024' THEN "Total Revenue" ELSE 0 END) - 
+          SUM(CASE WHEN strftime('%Y', "Order Date") = '2023' THEN "Total Revenue" ELSE 0 END)) * 100.0 / 
+          NULLIF(SUM(CASE WHEN strftime('%Y', "Order Date") = '2023' THEN "Total Revenue" ELSE 0 END), 0)) 
+        as yoy_growth_pct`
+       - Output: YoY growth rate.
 
     **SQL Examples:**
-    1. Total sales in North America:
+    1. [Revenue] Total sales in North America:
        SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'North America';
 
-    2. Top 3 products by QUANTITY in EMEA (even if user says "Europe, Middle East, and Africa"):
-       SELECT "Product Name", SUM(Quantity) as total_qty FROM sales_data WHERE Region = 'EMEA' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;
-
-    3. Monthly sales trend for a region:
-       SELECT strftime('%Y-%m', "Order Date") as month, SUM("Total Revenue") as revenue 
-       FROM sales_data WHERE Region = 'North America' 
-       AND strftime('%Y', "Order Date") BETWEEN '2023' AND '2024'
-       GROUP BY month ORDER BY month;
-
-    4. Quarter extraction (SQLite doesn't have %q, use CASE):
-       SELECT 
-         CASE 
-           WHEN CAST(strftime('%m', "Order Date") AS INTEGER) BETWEEN 1 AND 3 THEN 'Q1'
-           WHEN CAST(strftime('%m', "Order Date") AS INTEGER) BETWEEN 4 AND 6 THEN 'Q2'
-           WHEN CAST(strftime('%m', "Order Date") AS INTEGER) BETWEEN 7 AND 9 THEN 'Q3'
-           ELSE 'Q4'
-         END as quarter,
-         SUM("Total Revenue") as revenue
-       FROM sales_data
-       WHERE strftime('%Y', "Order Date") = '2023'
-       GROUP BY quarter
-       ORDER BY revenue DESC
-       LIMIT 1;
-
-    **Workflow with Self-Correction:**
-    1. **Analyze**: Understand the data request. Map region/country aliases to database values.
-    2. **Plan**: Write the SQL query.
-    3. **Validate**: MUST use `check_sql_syntax` to verify.
-    4. **Execute**: Use `execute_sql`.
-    5. **Check Result**:
-       - If result is EMPTY or NULL:
-         * Check if you used the correct region/country name (refer to mappings above)
-         * Example: If user said "Europe, Middle East, and Africa", did you use 'EMEA'?
-         * If error detected, RETRY with corrected query
-       - If result looks valid: Return structured output
-    6. **Return**: Your output will be automatically structured.
-    
-    **CRITICAL RULES**:
-    - ALWAYS map user's region/country names using the mapping table above
-    - If you get an empty result, CHECK if you used the wrong region/country name
-    - You can retry up to {MAX_RETRIES} times if you detect an error
-    - Track your retry count and any errors encountered
+    2. [Sales Volume] Top 3 products by QUANTITY (銷售量) in EMEA:
+       SELECT "Product Name", SUM("Quantity") as total_qty FROM sales_data WHERE Region = 'EMEA' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;
+       
+    3. [Order Count] How many orders (訂單數量) in 2023?
+       SELECT COUNT(DISTINCT "Order ID") FROM sales_data WHERE strftime('%Y', "Order Date") = '2023';
+       
+    the country or region should be used: {{region_country?}}
+    critic_result: {{critic_result?}}
     """,
-    tools=[check_sql_syntax, execute_sql],
-    output_schema=SQLExecutionResult,
+    output_key="sql_query",
 )
+
+sql_gen_sequential_agent = SequentialAgent(
+    name="sql_gen_sequential",
+    description="agent that gen sql query for further use",
+    sub_agents=[region_country_check_agent, sql_gen_agent],
+)
+
+check_sql_agent = LlmAgent(
+    model=LiteLlm(
+        model="openai/qwen3-4b-instruct-2507",
+        api_key="aaa",
+        api_base="http://localhost:8081",
+    ),
+    name="check_sql",
+    description="A SQL checker that checks the SQL query for errors.",
+    instruction="""You are a SQL checker that checks the SQL query for errors.
+    use the tool check_sql_syntax to use sql parser to check the SQL query for errors.
+    
+    {sql_query}
+    """,
+    tools=[check_sql_syntax],
+)
+
+execute_sql_agent = LlmAgent(
+    model=LiteLlm(
+        model="openai/qwen3-4b-instruct-2507",
+        api_key="aaa",
+        api_base="http://localhost:8081",
+    ),
+    name="execute_sql",
+    description="A SQL executor that executes the SQL query against the SQLite database.",
+    instruction="""You are a SQL executor that executes the SQL query against the SQLite database.
+    execute this:
+    {sql_query}
+    """,
+    tools=[execute_sql],
+    include_contents="none",
+    output_key="query_result",
+)
+
+
+def exit_loop(tool_context: ToolContext):
+    """Call this function ONLY when the critique indicates no further changes are needed, signaling the iterative process should end."""
+    #  print(f"  [Tool Call] exit_loop triggered by {tool_context.agent_name}")
+    tool_context.actions.escalate = True
+    tool_context.actions.skip_summarization = True
+    # Return empty dict as tools should typically return JSON-serializable output
+    return {}
+
+
+critic_agent = LlmAgent(
+    model=LiteLlm(
+        model="openai/qwen3-4b-instruct-2507",
+        api_key="aaa",
+        api_base="http://localhost:8081",
+    ),
+    name="critic",
+    description="You are a Constructive Critic AI reviewing query result whether it can answer the user question (typically 2-6 sentences).",
+    instruction="""You are a critic that checks the SQL query for errors.
+
+    query: {sql_query}
+    query_result: {query_result}
+    is query correct and can answer user question?
+    if yes, you must call exit_loop tool.
+    if no, return what should be fixed and give the feedback to the next round sql gen agent.
+    """,
+    output_key="critic_result",
+    tools=[exit_loop],
+)
+
+
+sql_critic_sequential_agent = SequentialAgent(
+    name="sql_critic",
+    description="A SQL critic that checks the SQL query for errors. execute sql and check is the result can answer the user question, if not, return the error message and the corrected sql query",
+    sub_agents=[check_sql_agent, execute_sql_agent, critic_agent],
+)
+
+
+get_data_agent = LoopAgent(
+    name="get_data_agent",
+    sub_agents=[sql_gen_sequential_agent, sql_critic_sequential_agent],
+    max_iterations=MAX_RETRIES,
+)
+
+answer_agent = LlmAgent(
+    model=LiteLlm(
+        model="openai/qwen3-4b-instruct-2507",
+        api_key="aaa",
+        api_base="http://localhost:8081",
+    ),
+    name="answer",
+    #  description="你是一個商業專家，回答使用者的問題",
+    #  instruction="根據查詢的結果，回答使用者的問題, 請用繁體中文回答總結，但是產品類別、產品名稱資訊，請用英文回答。",
+    description="你是一個商業專家，回答使用者的問題",
+    instruction="""
+    請根據查詢結果 {query_result}，以商業專家的口吻回答使用者問題。
+
+    **回答規範**：
+    1. **語言**：核心敘述使用**繁體中文**，但「產品類別」與「產品名稱」請保留**英文原文**。
+    2. **拒絕幻覺**：**嚴禁**列出結果中不存在的欄位（若結果只有金額，不要強行加上「產品名稱」）。
+
+    **數字呈現規則 (重要)**：
+    針對金額或銷售量等大數字，請**同時**提供以下兩種格式：
+    1. **精確數值**：務必加上千分位符號 (e.g., 25,286,700.15)。
+    2. **概略縮寫**：使用 K/M/B 進行縮寫，並加上波浪號 (e.g., ~25.3M)。
+    
+    **回答範例**：
+    - 正確：「亞太區的總銷售額為 25,286,700.15 (~25.3M)。」
+    - 錯誤：「銷售額是 25286700。」(未格式化)
+    - 錯誤：「產品名稱：N/A，金額：25M。」(出現不存在的欄位)
+    """,
+    output_key="final_answer",
+)
+
+
+query_and_answer_agent = SequentialAgent(
+    name="query_and_answer_agent",
+    sub_agents=[get_data_agent, answer_agent],
+)
+
 
 # ------------------------------------------------------------------------------
 # Root Agent: Dispatcher & Responder with Structured Output (V7)
 # ------------------------------------------------------------------------------
+
 
 root_agent = LlmAgent(
     model=LiteLlm(
@@ -177,45 +275,20 @@ root_agent = LlmAgent(
         api_base="http://localhost:8081",
     ),
     name="root_agent",
-    description="Root agent that dispatches SQL tasks to a structured-output subagent.",
-    instruction=f"""You are a helpful assistant with access to a SQL database.
-    
-    **Your goal**: Answer user questions accurately using the database, with full traceability.
-    
-    **Workflow:**
-    1. **Dispatch**: Delegate data retrieval to `sql_specialist_v7`.
-       - Be very specific about what the user is asking for
-       - The subagent will handle region/country name mapping automatically
-       
-    2. **Receive & Parse**: The subagent will return a structured result containing:
-       - sql_query: The executed SQL
-       - sql_result: The raw data
-       - retry_count: How many retries were needed
-       - error_log: Any errors encountered
-       - is_success: Whether the query succeeded
-       
-    3. **Construct Your Output** - You MUST respond in this exact JSON format:
-       ```json
-       {{
-         "thought_process": "Explain your reasoning and what you asked the subagent",
-         "executed_sql": "The SQL query that was executed",
-         "raw_results": [...the raw data from subagent...],
-         "answer": "用繁體中文回答使用者的問題",
-         "confidence": "high/medium/low",
-         "data_source": "database"
-       }}
-       ```
-       
-    4. **Error Handling**:
-       - If the subagent reports errors after retries, set confidence to "low"
-       - Explain what went wrong in the answer field
-       - Include the error details in thought_process
-    
-    **CRITICAL**: 
-    - You MUST always respond with valid JSON in the format above
-    - The answer field should be conversational and user-friendly in Traditional Chinese
-    - Always include the raw_results so evaluation can verify the data
-    - Be honest about confidence level
+    description="Root agent that delegates SQL query tasks to query_and_answer_agent.",
+    instruction="""You are a helpful assistant that delegates SQL database queries to a specialized sub-agent.
+
+**Your only job**: Delegate the user's question to `query_and_answer_agent` and let it handle everything.
+
+**Workflow:**
+1. When user asks a question about data, immediately transfer to `query_and_answer_agent`
+2. The sub-agent will:
+   - Generate SQL query
+   - Execute and validate the query
+   - Return the final answer
+3. After the sub-agent completes, return its answer to the user
+
+**CRITICAL**: Do NOT try to answer data questions yourself. Always delegate to the sub-agent.
     """,
-    sub_agents=[sql_subagent_v7],
+    sub_agents=[query_and_answer_agent],
 )

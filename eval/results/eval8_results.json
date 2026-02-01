@@ -1,0 +1,69 @@
+[
+  {
+    "id": 0,
+    "question": "各個區域 (Region) 最偏好（銷售額最高）的產品類別分別為何？",
+    "expected": {
+      "APAC": "Electronics",
+      "EMEA": "Electronics",
+      "LATAM": "Electronics",
+      "North America": "Electronics"
+    },
+    "eval_type": "dataframe",
+    "final_answer": "Agent Error: litellm.InternalServerError: InternalServerError: OpenAIException - Connection error.",
+    "sql_query": "",
+    "execute_result": "",
+    "llm_judge_score": 5,
+    "llm_judge_reasoning": "Judge error: litellm.InternalServerError: InternalServerError: OpenAIException - Connection error."
+  },
+  {
+    "id": 1,
+    "question": "亞太區 的總銷售額是多少？",
+    "expected": 25286700.15,
+    "eval_type": "number",
+    "final_answer": "Agent Error: litellm.InternalServerError: InternalServerError: OpenAIException - Connection error.",
+    "sql_query": "",
+    "execute_result": "",
+    "llm_judge_score": 5,
+    "llm_judge_reasoning": "Judge error: litellm.InternalServerError: InternalServerError: OpenAIException - Connection error."
+  },
+  {
+    "id": 2,
+    "question": "NA 的總銷售額是多少？",
+    "expected": 39932364.28,
+    "eval_type": "number",
+    "final_answer": "Agent Error: litellm.InternalServerError: InternalServerError: OpenAIException - Connection error.",
+    "sql_query": "",
+    "execute_result": "",
+    "llm_judge_score": 5,
+    "llm_judge_reasoning": "Judge error: litellm.InternalServerError: InternalServerError: OpenAIException - Connection error."
+  },
+  {
+    "id": 3,
+    "question": "請列出 Software 類別在各年份的銷售額總計。",
+    "expected": {
+      "2023": 13178975.35,
+      "2024": 13985011.63
+    },
+    "eval_type": "dataframe",
+    "final_answer": "Agent Error: litellm.InternalServerError: InternalServerError: OpenAIException - Connection error.",
+    "sql_query": "",
+    "execute_result": "",
+    "llm_judge_score": 5,
+    "llm_judge_reasoning": "Judge error: litellm.InternalServerError: InternalServerError: OpenAIException - Connection error."
+  },
+  {
+    "id": 4,
+    "question": "亞太區 銷售量最高的前三個產品是什麼？",
+    "expected": [
+      "Enterprise Laptop X1",
+      "Pro Smartphone 15",
+      "Team Collaboration Tool"
+    ],
+    "eval_type": "list",
+    "final_answer": "Agent Error: litellm.InternalServerError: InternalServerError: OpenAIException - Connection error.",
+    "sql_query": "",
+    "execute_result": "",
+    "llm_judge_score": 5,
+    "llm_judge_reasoning": "Judge error: litellm.InternalServerError: InternalServerError: OpenAIException - Connection error."
+  }
+]

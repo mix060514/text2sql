@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-02-01 03:11:32",
+  "total_questions": 5,
+  "agents": {
+    "root_agent": {
+      "avg_confidence": 5.0,
+      "accuracy": 0.0,
+      "correct_count": 0,
+      "total_count": 5
+    }
+  }
+}
