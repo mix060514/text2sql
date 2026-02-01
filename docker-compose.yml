@@ -1,0 +1,12 @@
+
+services:
+  webui:
+    build: .
+    restart: always
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+      - /app/.venv
+    environment:
+      - WATCH_FILES=true

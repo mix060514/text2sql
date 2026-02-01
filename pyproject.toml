@@ -15,4 +15,5 @@ dependencies = [
     "pandas<3",
     "protobuf<5",
     "setuptools>=80.10.2",
+    "streamlit",
 ]
