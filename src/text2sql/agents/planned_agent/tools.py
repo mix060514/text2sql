@@ -2,7 +2,13 @@ import sqlite3
 import sqlparse
 import logging
 
-DB_PATH = "/home/mix060514/pj/text2sql/data/global_sales_data.sqlite"
+from pathlib import Path
+
+# Resolve project root relative to this file:
+# .../src/text2sql/agents/planned_agent/tools.py -> .../text2sql (project root)
+# parents[0]=planned_agent, [1]=agents, [2]=text2sql, [3]=src, [4]=project_root
+PROJECT_ROOT = Path(__file__).resolve().parents[4]
+DB_PATH = str(PROJECT_ROOT / "data" / "global_sales_data.sqlite")
 
 logger = logging.getLogger(__name__)
 

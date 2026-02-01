@@ -14,8 +14,10 @@ st.markdown(
 Welcome to the Text2SQL Agent Workspace.
 
 ### Navigation
-- **Chat**: Interact with the agent, view sub-agent thought processes, and get suggested questions.
-- **Eval**: View the results of the latest evaluation runs and detailed judge reasoning.
+- **Chat**: 與 Agent 互動，查看子 Agent 的思考過程，並獲取建議問題。
+- **Eval**: 查看最新的評估結果和詳細的評判推理。
+- **System Monitor**: 監控系統狀態和日誌。
+- **Data Dashboard**: 探索銷售數據和視覺化圖表。
 
 Select a page from the sidebar to get started.
 
