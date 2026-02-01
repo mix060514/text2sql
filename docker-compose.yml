@@ -11,6 +11,7 @@ services:
     environment:
       - WATCH_FILES=true
       - LLAMA_CPP_API_BASE=http://llama-cpp:8080
+      - LLAMA_CPP_VL_API_BASE=http://llama-cpp-vl:8080
     networks:
       - default
       - ai-stack_default
