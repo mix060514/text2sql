@@ -10,3 +10,11 @@ services:
       - /app/.venv
     environment:
       - WATCH_FILES=true
+      - LLAMA_CPP_API_BASE=http://llama-cpp:8080
+    networks:
+      - default
+      - ai-stack_default
+
+networks:
+  ai-stack_default:
+    external: true
