@@ -10,3 +10,6 @@ wheels/
 .venv
 
 .history
+
+# Eval results
+eval/results/
