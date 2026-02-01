@@ -3,9 +3,9 @@ import pandas as pd
 import altair as alt
 import pathlib
 
-st.set_page_config(page_title="Data Dashboard (Dynamic)", page_icon="📈", layout="wide")
+st.set_page_config(page_title="Data Dashboard", page_icon="📈", layout="wide")
 
-st.title("📈 Data Dashboard (Dynamic)")
+st.title("📈 Data Dashboard")
 
 # Paths
 project_root = pathlib.Path(__file__).parent.parent.parent.resolve()
