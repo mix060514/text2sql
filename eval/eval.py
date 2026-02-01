@@ -12,36 +12,30 @@ import os
 import asyncio
 import logging
 import uuid
-import re
-import ast
-from typing import Optional, Dict, Any, List
-
-# Ignore warnings
+from typing import Dict, Any, List
 import warnings
 
 warnings.filterwarnings("ignore")
 
-# Configure Logging
-logging.basicConfig(level=logging.ERROR)
+# MLflow Setup
+mlflow.set_tracking_uri("http://localhost:5000")
+experiment_name = "Text-to-SQL-Eval"
+mlflow.set_experiment(experiment_name)
 
-# Setup path to import local src
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
-# Import Agents
-from text2sql.agents.planned_agent.agent import root_agent
-from text2sql.agents.planned_agent.tools import check_sql_syntax
 from google.adk.sessions import InMemorySessionService
 from google.adk.agents import Agent
 from google.adk.runners import Runner
 from google.genai import types
 
-# For LLM-as-Judge
-from google.adk.models.lite_llm import LiteLlm
+# Setup path to import local src
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../eval")))
 
-# MLflow Setup
-mlflow.set_tracking_uri("http://localhost:5000")
-experiment_name = "Text-to-SQL-Eval-v8"
-mlflow.set_experiment(experiment_name)
+# Import Agents
+from text2sql.agents.planned_agent.agent import root_agent
+from judge.agent import judge_agent
+
 
 PROJECT_DIR = pathlib.Path(__file__).parent.parent.resolve()
 DATA_DIR = PROJECT_DIR / "data"
@@ -57,11 +51,16 @@ eval_set = all_eval_set
 eval_set = random.sample(all_eval_set, min(5, len(all_eval_set)))
 print(f"Selected {len(eval_set)} test cases from {len(all_eval_set)} total")
 session_service = InMemorySessionService()
-APP_NAME = "text2sql_eval_v7"
-USER_ID = "eval_runner_v7"
+APP_NAME = "text2sql_eval"
+USER_ID = "eval_runner"
 
 
-# %% LLM-as-Judge Configuration (0-10 Confidence Score)
+# %% LLM-as-Judge Configuration (Using Judge Agent)
+
+# Judge Agent Session Service
+judge_session_service = InMemorySessionService()
+JUDGE_APP_NAME = "judge_eval"
+JUDGE_USER_ID = "judge_runner"
 
 
 async def judge_confidence(
@@ -72,13 +71,7 @@ async def judge_confidence(
     sql_result: Any = None,
 ) -> Dict[str, Any]:
     """
-    使用 LLM 評估回答正確性的信心分數 (0-10)。
-
-    評估維度：
-    1. 答案正確性：回答是否與預期答案一致
-    2. 數據準確性：數據是否正確無誤
-    3. 回答完整性：是否完整回答問題
-
+    使用 Judge Agent 評估回答正確性的信心分數 (0-10)。
     Returns:
         {
             "confidence_score": int (0-10),
@@ -87,7 +80,8 @@ async def judge_confidence(
             "issues": List[str]
         }
     """
-    prompt = f"""你是一個專業的商業資料分析師。請評估以下回答的品質。
+    # 構造評估請求
+    eval_prompt = f"""請評估以下 Text-to-SQL Agent 的回答品質：
 
 **使用者問題**: {question}
 
@@ -98,244 +92,77 @@ async def judge_confidence(
 **SQL 結果**: {json.dumps(sql_result, ensure_ascii=False) if sql_result else "無法取得"}
 
 **Agent 回答**: {actual_answer}
-
-請根據以下標準給出 0-10 的信心分數：
-- 10分：完全正確，數據精確匹配
-- 8-9分：基本正確，有微小格式或表達差異
-- 6-7分：大致正確，但有部分數據偏差
-- 4-5分：部分正確，有明顯錯誤
-- 2-3分：大部分錯誤
-- 0-1分：完全錯誤或無法回答
-
-請以 JSON 格式回覆（不要有其他文字）：
-{{
-    "confidence_score": 0-10 的整數,
-    "is_correct": true/false (分數>=7視為正確),
-    "reasoning": "簡短說明評分理由（一句話）",
-    "issues": ["問題1", "問題2"] 或空陣列
-}}
 """
 
     try:
-        import litellm
-
-        response = await asyncio.to_thread(
-            litellm.completion,
-            model="openai/qwen3-4b-instruct-2507",
-            messages=[{"role": "user", "content": prompt}],
-            api_key="aaa",
-            api_base="http://localhost:8081",
+        judge_session_id = f"judge_{int(time.time()*1000)}_{uuid.uuid4().hex[:6]}"
+        await judge_session_service.create_session(
+            app_name=JUDGE_APP_NAME, user_id=JUDGE_USER_ID, session_id=judge_session_id
         )
 
-        result_text = response.choices[0].message.content
+        runner = Runner(
+            agent=judge_agent,
+            app_name=JUDGE_APP_NAME,
+            session_service=judge_session_service,
+        )
 
-        # Extract JSON from response (handle markdown code blocks)
-        if "```json" in result_text:
-            result_text = result_text.split("```json")[1].split("```")[0]
-        elif "```" in result_text:
-            result_text = result_text.split("```")[1].split("```")[0]
+        content = types.Content(role="user", parts=[types.Part(text=eval_prompt)])
 
-        result = json.loads(result_text.strip())
+        result_text = ""
 
-        # Ensure confidence_score is int and in range
-        score = int(result.get("confidence_score", 5))
-        score = max(0, min(10, score))
-        result["confidence_score"] = score
-        result["is_correct"] = score >= 7
+        async for event in runner.run_async(
+            user_id=JUDGE_USER_ID, session_id=judge_session_id, new_message=content
+        ):
+            if event.content and event.content.parts:
+                for part in event.content.parts:
+                    if hasattr(part, "text") and part.text:
+                        result_text += part.text
 
-        return result
+        # 從 session state 取得 structured output
+        session = await judge_session_service.get_session(
+            app_name=JUDGE_APP_NAME, user_id=JUDGE_USER_ID, session_id=judge_session_id
+        )
+        structured_output = (
+            session.state.get("judge_result") if session and session.state else None
+        )
+
+        # 驗證 structured output 是否完整
+        structured_output_success = False
+        if structured_output:
+            required_keys = ["confidence_score", "is_correct", "reasoning"]
+            missing_keys = [k for k in required_keys if k not in structured_output]
+
+            if missing_keys:
+                # 缺少欄位 = 失敗
+                score = 0
+                is_correct = False
+                reasoning = f"Structured output 缺少欄位: {missing_keys}"
+            else:
+                structured_output_success = True
+                score = structured_output["confidence_score"]
+                is_correct = structured_output["is_correct"]
+                reasoning = structured_output["reasoning"]
+        else:
+            score = 0
+            is_correct = False
+            reasoning = f"無法解析 Judge Agent 輸出: {result_text[:100]}"
+
+        score = max(0, min(10, int(score)))
+
+        return {
+            "confidence_score": score,
+            "is_correct": is_correct,
+            "reasoning": reasoning,
+            "structured_output_success": structured_output_success,
+        }
 
     except Exception as e:
         logging.error(f"Judge error: {e}")
         return {
-            "confidence_score": 5,
+            "confidence_score": 0,
             "is_correct": False,
             "reasoning": f"Judge error: {str(e)}",
-            "issues": ["LLM Judge 評估失敗"],
         }
-
-
-# %% Helper Functions
-
-
-def extract_numbers(text):
-    matches = re.findall(r"-?\d{1,3}(?:,\d{3})*(?:\.\d+)?|-?\d+(?:\.\d+)?", str(text))
-    cleaned = []
-    for m in matches:
-        try:
-            val = float(m.replace(",", ""))
-            cleaned.append(val)
-        except:
-            pass
-    return cleaned
-
-
-def normalize_string(s):
-    """Remove punctuation and lowercase."""
-    return re.sub(r"[^\w\s]", "", str(s).lower())
-
-
-def normalize_month_key(key):
-    """Normalize month keys: '2023-1' and '2023-01' should be treated as equal."""
-    if isinstance(key, str) and "-" in key:
-        parts = key.split("-")
-        if len(parts) == 2:
-            try:
-                year, month = parts
-                return f"{int(year)}-{int(month)}"
-            except:
-                pass
-    return str(key)
-
-
-def validate_sql_syntax(sql_query: str) -> Dict[str, Any]:
-    """
-    驗證 SQL 語法並返回詳細結果。
-    """
-    if not sql_query or sql_query == "Error" or sql_query == "None":
-        return {"is_valid": False, "error": "No SQL query provided"}
-
-    result = check_sql_syntax(sql_query)
-    if result == "Valid":
-        return {"is_valid": True, "error": None}
-    else:
-        return {"is_valid": False, "error": result}
-
-
-def compare_data_accuracy(
-    actual_data: List[Any], expected: Any, eval_type: str, eps: float = 1e-2
-) -> Dict[str, Any]:
-    """
-    比對數據準確性，返回詳細結果。
-    """
-    result = {
-        "is_correct": False,
-        "match_type": "none",
-        "details": "",
-    }
-
-    try:
-        if eval_type == "number":
-            expected_val = float(expected)
-            for item in actual_data:
-                if isinstance(item, (list, tuple)):
-                    for sub_item in item:
-                        if isinstance(sub_item, (int, float)):
-                            if abs(sub_item - expected_val) < eps:
-                                result["is_correct"] = True
-                                result["match_type"] = "exact_number"
-                                result["details"] = (
-                                    f"Found {sub_item}, expected {expected_val}"
-                                )
-                                return result
-                elif isinstance(item, (int, float)):
-                    if abs(item - expected_val) < eps:
-                        result["is_correct"] = True
-                        result["match_type"] = "exact_number"
-                        result["details"] = f"Found {item}, expected {expected_val}"
-                        return result
-
-            result["details"] = (
-                f"No matching number found. Expected {expected_val}, got {actual_data}"
-            )
-            return result
-
-        elif eval_type == "string":
-            norm_expected = normalize_string(expected)
-            norm_actual = normalize_string(str(actual_data))
-
-            if norm_expected in norm_actual:
-                result["is_correct"] = True
-                result["match_type"] = "string_contains"
-                result["details"] = f"Found '{expected}' in result"
-            else:
-                result["details"] = f"'{expected}' not found in '{actual_data}'"
-            return result
-
-        elif eval_type == "list":
-            if not isinstance(expected, (list, tuple)):
-                result["details"] = "Expected is not a list"
-                return result
-
-            norm_actual = normalize_string(str(actual_data))
-            all_found = True
-            missing = []
-
-            for item in expected:
-                norm_item = normalize_string(item)
-                if norm_item not in norm_actual:
-                    all_found = False
-                    missing.append(item)
-
-            if all_found:
-                result["is_correct"] = True
-                result["match_type"] = "list_complete"
-                result["details"] = f"All {len(expected)} items found"
-            else:
-                result["details"] = f"Missing items: {missing}"
-            return result
-
-        elif eval_type == "dataframe":
-            expected_dict = (
-                ast.literal_eval(str(expected))
-                if isinstance(expected, str)
-                else expected
-            )
-            if not isinstance(expected_dict, dict):
-                result["details"] = "Expected is not a dict"
-                return result
-
-            # Normalize expected dict keys
-            normalized_expected = {
-                normalize_month_key(k): v for k, v in expected_dict.items()
-            }
-
-            # Extract key-value pairs from actual data
-            result_dict = {}
-            if isinstance(actual_data, list):
-                for row in actual_data:
-                    if isinstance(row, (list, tuple)) and len(row) >= 2:
-                        key = normalize_month_key(row[0])
-                        value = row[1]
-                        result_dict[key] = value
-
-            # Compare
-            all_match = True
-            mismatches = []
-
-            for exp_key, exp_val in normalized_expected.items():
-                if exp_key not in result_dict:
-                    all_match = False
-                    mismatches.append(f"Missing key: {exp_key}")
-                    continue
-
-                result_val = result_dict[exp_key]
-                if isinstance(exp_val, (int, float)) and isinstance(
-                    result_val, (int, float)
-                ):
-                    if abs(float(exp_val) - float(result_val)) >= eps:
-                        all_match = False
-                        mismatches.append(
-                            f"{exp_key}: expected {exp_val}, got {result_val}"
-                        )
-                else:
-                    if normalize_string(exp_val) != normalize_string(result_val):
-                        all_match = False
-                        mismatches.append(
-                            f"{exp_key}: expected {exp_val}, got {result_val}"
-                        )
-
-            if all_match:
-                result["is_correct"] = True
-                result["match_type"] = "dataframe_complete"
-                result["details"] = f"All {len(normalized_expected)} entries match"
-            else:
-                result["details"] = "; ".join(mismatches)
-            return result
-
-    except Exception as e:
-        result["details"] = f"Comparison error: {str(e)}"
-        return result
 
 
 # %% Async Agent Wrapper

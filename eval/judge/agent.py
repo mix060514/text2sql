@@ -31,6 +31,8 @@ class JudgeResult(BaseModel):
     )
 
 
+JUDGE_OUTPUT_KEY = "judge_result"  # 用於從 session state 取得結果
+
 judge_agent = LlmAgent(
     model=LiteLlm(
         model=LLAMA_CPP_MODEL,
@@ -39,6 +41,7 @@ judge_agent = LlmAgent(
     ),
     name="judge_agent",
     description="專業的商業資料分析評估員，評估 Agent 回答的正確性與品質",
+    output_key=JUDGE_OUTPUT_KEY,  # structured output 會存到 session state
     instruction="""你是一位專業的商業資料分析評估員。你的任務是評估一個 Text-to-SQL Agent 的回答品質。
 
 ## 評估維度
