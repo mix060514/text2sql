@@ -71,7 +71,7 @@ with open(ground_truth_set, "r", encoding="utf-8") as f:
 # 隨機選取 5 個測試案例（測試完成後手動改回全部）
 random.seed(42)  # 固定種子以便重現
 eval_set = all_eval_set
-eval_set = random.sample(all_eval_set, min(5, len(all_eval_set)))
+# eval_set = random.sample(all_eval_set, min(5, len(all_eval_set)))
 print(f"Selected {len(eval_set)} test cases from {len(all_eval_set)} total")
 
 
