@@ -1,14 +1,7 @@
-"""
-Eval V8: LLM-as-Judge Evaluation with Confidence Scoring (0-10)
-- Works with SequentialAgent + LoopAgent architecture
-- LLM-as-Judge for holistic evaluation
-- Confidence scoring on 0-10 scale
-- Extracts SQL and results from event stream
-"""
-
 # %%
 import json
 import pathlib
+from datetime import datetime
 import time
 import random
 import numpy as np
@@ -38,6 +31,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src"
 from text2sql.agents.planned_agent.agent import root_agent
 from text2sql.agents.planned_agent.tools import check_sql_syntax
 from google.adk.sessions import InMemorySessionService
+from google.adk.agents import Agent
 from google.adk.runners import Runner
 from google.genai import types
 
@@ -60,7 +54,7 @@ with open(ground_truth_set, "r", encoding="utf-8") as f:
 # 隨機選取 5 個測試案例（測試完成後手動改回全部）
 random.seed(42)  # 固定種子以便重現
 eval_set = all_eval_set
-eval_set = random.sample(all_eval_set, min(10, len(all_eval_set)))
+eval_set = random.sample(all_eval_set, min(5, len(all_eval_set)))
 print(f"Selected {len(eval_set)} test cases from {len(all_eval_set)} total")
 session_service = InMemorySessionService()
 APP_NAME = "text2sql_eval_v7"
@@ -78,7 +72,7 @@ async def judge_confidence(
     sql_result: Any = None,
 ) -> Dict[str, Any]:
     """
-    使用 LLM 評估回答的信心分數 (0-10)。
+    使用 LLM 評估回答正確性的信心分數 (0-10)。
 
     評估維度：
     1. 答案正確性：回答是否與預期答案一致
@@ -93,7 +87,7 @@ async def judge_confidence(
             "issues": List[str]
         }
     """
-    prompt = f"""你是一個專業的 Text-to-SQL 系統評估專家。請評估以下回答的品質。
+    prompt = f"""你是一個專業的商業資料分析師。請評估以下回答的品質。
 
 **使用者問題**: {question}
 
@@ -514,28 +508,95 @@ class EvalMetrics:
 # %% Evaluation Loop
 
 
-async def run_evaluation_v8(agents: List, eval_set: List[Dict]):
+async def run_one_question(
+    i, agent, question, expected, eval_type, results, metrics_by_agent
+):
+    print(f"  → {agent.name}: ", end="", flush=True)
+
+    try:
+        # Run agent
+        result = await run_agent_once(agent, question)
+
+        actual_answer = result["final_text"]
+        sql_query = result["executed_sql"]
+        sql_result = result["sql_result"]
+
+        # LLM-as-Judge evaluation
+        judge_result = await judge_confidence(
+            question=question,
+            expected_answer=expected,
+            actual_answer=actual_answer,
+            sql_query=sql_query,
+            sql_result=sql_result,
+        )
+
+        confidence = judge_result["confidence_score"]
+        is_correct = judge_result["is_correct"]
+        reasoning = judge_result.get("reasoning", "")
+
+        # Record metrics
+        metrics_by_agent.add_result(confidence, is_correct)
+
+        # Store result with clean format
+        row = {
+            "id": i,
+            "question": question,
+            "expected": expected,
+            "eval_type": eval_type,
+            "final_answer": actual_answer or "",
+            "sql_query": sql_query or "",
+            "execute_result": sql_result if sql_result else "",
+            "llm_judge_score": confidence,
+            "llm_judge_reasoning": reasoning,
+        }
+        results.append(row)
+
+        # Print result
+        status = "✓" if is_correct else "✗"
+        print(f"{status} Confidence: {confidence}/10 - {reasoning[:50]}...")
+
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        row = {
+            "id": i,
+            "question": question,
+            "expected": expected,
+            "eval_type": eval_type,
+            "final_answer": f"Error: {e}",
+            "sql_query": "",
+            "execute_result": "",
+            "llm_judge_score": 0,
+            "llm_judge_reasoning": str(e),
+        }
+        results.append(row)
+        metrics_by_agent.add_result(0, False)
+
+
+async def run_evaluation(agent: Agent, eval_set: List[Dict]):
     """
     執行 V8 評估 - 使用 LLM-as-Judge 給出 0-10 信心分數
     """
-    run_name = f"eval_v8_{int(time.time())}"
+    run_name = f"eval_{int(time.time())}"
 
     # Output directory
-    output_dir = PROJECT_DIR / "eval" / "results"
+    output_dir = (
+        PROJECT_DIR / "eval" / "results" / datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    )
     output_dir.mkdir(parents=True, exist_ok=True)
-    json_path = output_dir / "eval8_results.json"
+    json_path = output_dir / "eval_results.json"
 
     with mlflow.start_run(run_name=run_name):
         results = []
-        metrics_by_agent = {agent.name: EvalMetrics() for agent in agents}
+        metrics_by_agent = EvalMetrics()
 
         print(f"\n{'='*60}")
         print(f"Text-to-SQL Eval V8 (LLM-as-Judge, 0-10 Confidence)")
-        print(f"Agents: {[a.name for a in agents]}")
+        print(f"Agent: {agent.name}")
         print(f"Questions: {len(eval_set)}")
         print(f"{'='*60}\n")
 
-        mlflow.log_param("agents", [a.name for a in agents])
+        # experimen params
+        mlflow.log_param("agent", agent.name)
         mlflow.log_param("num_questions", len(eval_set))
 
         for i, entry in enumerate(eval_set):
@@ -545,66 +606,9 @@ async def run_evaluation_v8(agents: List, eval_set: List[Dict]):
 
             print(f"[{i+1}/{len(eval_set)}] {question[:50]}...")
 
-            for agent in agents:
-                print(f"  → {agent.name}: ", end="", flush=True)
-
-                try:
-                    # Run agent
-                    result = await run_agent_once(agent, question)
-
-                    actual_answer = result["final_text"]
-                    sql_query = result["executed_sql"]
-                    sql_result = result["sql_result"]
-
-                    # LLM-as-Judge evaluation
-                    judge_result = await judge_confidence(
-                        question=question,
-                        expected_answer=expected,
-                        actual_answer=actual_answer,
-                        sql_query=sql_query,
-                        sql_result=sql_result,
-                    )
-
-                    confidence = judge_result["confidence_score"]
-                    is_correct = judge_result["is_correct"]
-                    reasoning = judge_result.get("reasoning", "")
-
-                    # Record metrics
-                    metrics_by_agent[agent.name].add_result(confidence, is_correct)
-
-                    # Store result with clean format
-                    row = {
-                        "id": i,
-                        "question": question,
-                        "expected": expected,
-                        "eval_type": eval_type,
-                        "final_answer": actual_answer or "",
-                        "sql_query": sql_query or "",
-                        "execute_result": sql_result if sql_result else "",
-                        "llm_judge_score": confidence,
-                        "llm_judge_reasoning": reasoning,
-                    }
-                    results.append(row)
-
-                    # Print result
-                    status = "✓" if is_correct else "✗"
-                    print(f"{status} Confidence: {confidence}/10 - {reasoning[:50]}...")
-
-                except Exception as e:
-                    print(f"❌ Error: {e}")
-                    row = {
-                        "id": i,
-                        "question": question,
-                        "expected": expected,
-                        "eval_type": eval_type,
-                        "final_answer": f"Error: {e}",
-                        "sql_query": "",
-                        "execute_result": "",
-                        "llm_judge_score": 0,
-                        "llm_judge_reasoning": str(e),
-                    }
-                    results.append(row)
-                    metrics_by_agent[agent.name].add_result(0, False)
+            await run_one_question(
+                i, agent, question, expected, eval_type, results, metrics_by_agent
+            )
 
             # Save intermediate results
             with open(json_path, "w", encoding="utf-8") as f:
@@ -621,29 +625,26 @@ async def run_evaluation_v8(agents: List, eval_set: List[Dict]):
             "agents": {},
         }
 
-        for agent_name, metrics in metrics_by_agent.items():
-            agent_summary = metrics.get_summary()
-            summary["agents"][agent_name] = agent_summary
+        agent_summary = metrics_by_agent.get_summary()
+        summary["agents"] = agent_summary
 
-            print(f"{agent_name}:")
-            print(
-                f"  準確率: {agent_summary['accuracy']:.1%} ({agent_summary['correct_count']}/{agent_summary['total_count']})"
-            )
-            print(f"  平均信心分數: {agent_summary['avg_confidence']:.1f}/10")
+        print(f"{agent.name}:")
+        print(
+            f"  準確率: {agent_summary['accuracy']:.1%} ({agent_summary['correct_count']}/{agent_summary['total_count']})"
+        )
+        print(f"  平均信心分數: {agent_summary['avg_confidence']:.1f}/10")
 
-            mlflow.log_metric(f"{agent_name}_accuracy", agent_summary["accuracy"])
-            mlflow.log_metric(
-                f"{agent_name}_avg_confidence", agent_summary["avg_confidence"]
-            )
+        mlflow.log_metric(f"accuracy", agent_summary["accuracy"])
+        mlflow.log_metric(f"avg_confidence", agent_summary["avg_confidence"])
 
         # Save final results
         df = pd.DataFrame(results)
 
-        csv_path = output_dir / "eval8_results.csv"
+        csv_path = output_dir / "eval_results.csv"
         df.to_csv(csv_path, index=False)
         mlflow.log_artifact(str(csv_path))
 
-        summary_path = output_dir / "eval8_summary.json"
+        summary_path = output_dir / "eval_summary.json"
         with open(summary_path, "w", encoding="utf-8") as f:
             json.dump(summary, f, indent=2, ensure_ascii=False)
         mlflow.log_artifact(str(summary_path))
@@ -651,11 +652,10 @@ async def run_evaluation_v8(agents: List, eval_set: List[Dict]):
         print(f"\n結果已儲存至 {output_dir}")
 
 
-def run_evaluation(agents, eval_set):
+def main(agent, eval_set):
     """入口函數"""
-    asyncio.run(run_evaluation_v8(agents, eval_set))
+    asyncio.run(run_evaluation(agent, eval_set))
 
 
 if __name__ == "__main__":
-    agents_to_eval = [root_agent]
-    run_evaluation(agents_to_eval, eval_set)
+    main(root_agent, eval_set)

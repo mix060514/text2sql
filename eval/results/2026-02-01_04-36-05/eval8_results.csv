@@ -1,0 +1,29 @@
+id,question,expected,eval_type,final_answer,sql_query,execute_result,llm_judge_score,llm_judge_reasoning
+0,各個區域 (Region) 最偏好（銷售額最高）的產品類別分別為何？,"{'APAC': 'Electronics', 'EMEA': 'Electronics', 'LATAM': 'Electronics', 'North America': 'Electronics'}",dataframe,"各區域中銷售額最高的產品類別如下：
+
+- **亞太區 (APAC)**：Electronics，總銷售額為 14,729,441.51 (~14.7M)。  
+- **歐洲-中東-非洲區 (EMEA)**：Electronics，總銷售額為 17,194,037.30 (~17.2M)。  
+- **拉丁美洲區 (LATAM)**：Electronics，總銷售額為 3,495,783.58 (~3.5M)。  
+- **北美洲 (North America)**：Electronics，總銷售額為 23,839,311.54 (~23.8M)。  
+
+### 商業洞察：
+1. **Electronics 是全球各區域的共同領先產品類別**，無論是在亞太、歐洲、拉丁美洲還是北美洲，皆為銷售額最高的產品類別，顯示其具有強大的市場需求與跨區域接受度。  
+2. **北美洲市場規模最大**，其 Electronics 的銷售額（~23.8M）遠超其他區域，反映該地區在產品銷售上的主導地位。  
+3. 雖然軟體（Software）在歐洲與亞太地區也有顯著表現，但 Electronics 在所有區域均穩居第一，顯示硬體產品在銷售策略與消費者偏好上具有壓倒性優勢。
+
+此結果可作為產品資源配置、市場推廣與區域策略規劃的重要依據。若需進一步分析（例如各區域銷售佔比、產品類別競爭力或成長趨勢），歡迎提出需求。","SELECT sd.""Region"", sd.""Product Category"", SUM(sd.""Total Revenue"") AS total_revenue FROM sales_data sd GROUP BY sd.""Region"", sd.""Product Category"" ORDER BY sd.""Region"", total_revenue DESC;","[('APAC', 'Electronics', 14729441.51), ('APAC', 'Software', 7288014.71), ('APAC', 'Office Supplies', 3269243.93), ('EMEA', 'Electronics', 17194037.3), ('EMEA', 'Software', 7770392.3), ('EMEA', 'Office Supplies', 3890098.57), ('LATAM', 'Electronics', 3495783.58), ('LATAM', 'Software', 1329216.17), ('LATAM', 'Office Supplies', 570770.83), ('North America', 'Electronics', 23839311.54), ('North America', 'Software', 10776363.8), ('North America', 'Office Supplies', 5316688.94)]",10,各區域銷售額最高的產品類別正確識別為Electronics，且數據與SQL結果完全匹配，商業洞察也合理且無誤誤。
+1,亞太區 的總銷售額是多少？,25286700.15,number,"亞太區的總銷售額為 25,286,700.15 (~25.3M)。","SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'APAC';","[(25286700.15,)]",10,SQL查詢正確且結果數據精確匹配使用者問題的總銷售額。
+2,NA 的總銷售額是多少？,39932364.28,number,"北美洲地區的總銷售額為 39,932,364.28 (~39.9M)。","SELECT SUM(""Total Revenue"") FROM sales_data WHERE Region = 'North America';","[(39932364.28,)]",10,查詢正確獲取了北美洲地區的總銷售額，數據精確匹配預期答案。
+3,請列出 Software 類別在各年份的銷售額總計。,"{'2023': 13178975.35, '2024': 13985011.63}",dataframe,"Software 類別在各年份的銷售額總計如下：
+
+- **2023**: $13,178,975.35 (~13.2M)  
+- **2024**: $13,985,011.63 (~14.0M)  
+
+此數據顯示，Software 產品類別的銷售收入從 2023 年至 2024 年呈現穩健增長趨勢。","SELECT strftime('%Y', ""Order Date"") AS Year, SUM(""Total Revenue"") AS Total_Revenue FROM sales_data WHERE ""Product Category"" = 'Software' GROUP BY strftime('%Y', ""Order Date"") ORDER BY Year;","[('2023', 13178975.35), ('2024', 13985011.63)]",10,SQL查詢正確提取了Software類別各年份的銷售額總計，結果與預期完全一致，數據精確無誤。
+4,亞太區 銷售量最高的前三個產品是什麼？,"['Enterprise Laptop X1', 'Pro Smartphone 15', 'Team Collaboration Tool']",list,"在亞太區（APAC）中，銷售量最高的前三名產品及對應銷量如下：
+
+1. **產品類別**：Enterprise Laptop X1（總銷量：6,547 (~6.5K)）  
+2. **產品類別**：Pro Smartphone 15（總銷量：5,332 (~5.3K)）  
+3. **產品類別**：Team Collaboration Tool（總銷量：3,858 (~3.9K)）  
+
+> 備註：上述數據為實際查詢結果，已根據銷售量由高至低排序，並符合商業分析標準。","SELECT ""Product Name"", SUM(""Quantity"") AS total_quantity FROM sales_data WHERE ""Region"" = 'APAC' GROUP BY ""Product Name"" ORDER BY total_quantity DESC LIMIT 3;","[('Enterprise Laptop X1', 6547), ('Pro Smartphone 15', 5332), ('Team Collaboration Tool', 3858)]",10,回答正確匹配了預期結果，產品名稱、銷售量及排序完全一致，表達清晰且符合查詢邏輯。

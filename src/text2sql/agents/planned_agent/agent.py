@@ -1,5 +1,28 @@
 from typing import List, Dict, Any, Optional
 
+import mlflow
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor  # 建議生產環境用 Batch
+
+experiment_name = "ADK-Tracing"
+mlflow.set_tracking_uri("http://localhost:5000")
+exp = mlflow.get_experiment_by_name(experiment_name)
+if not exp:
+    exp_id = mlflow.create_experiment(experiment_name)
+else:
+    exp_id = exp.experiment_id
+
+otlp_exporter = OTLPSpanExporter(
+    endpoint="http://localhost:5000/v1/traces",
+    headers={"x-mlflow-experiment-id": str(exp_id)},
+)
+
+tracer_provider = TracerProvider()
+tracer_provider.add_span_processor(BatchSpanProcessor(otlp_exporter))
+trace.set_tracer_provider(tracer_provider)
+
 from pydantic import BaseModel, Field
 from google.adk.agents import LlmAgent, LoopAgent, SequentialAgent
 from google.adk.tools import ToolContext

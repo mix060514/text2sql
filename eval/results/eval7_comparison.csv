@@ -1,4 +1,0 @@
-id,question,expected,type,root_agent_actual,root_agent_sql_query,root_agent_sql_result,root_agent_data_correct,root_agent_data_details,root_agent_sql_valid,root_agent_sql_error,root_agent_judge_score,root_agent_judge_reasoning,root_agent_judge_issues
-0,North America 的總銷售額是多少？,39932364.28,number,"{
-  ""sql_query"": ""SELECT SUM(\""Total Revenue\"") FROM sales_data WHERE Region = 'North America';""
-}",,,False,"No matching number found. Expected 39932364.28, got []",False,No SQL query provided,0.5,Judge disabled,[]

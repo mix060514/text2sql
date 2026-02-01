@@ -1,0 +1,69 @@
+[
+  {
+    "id": 0,
+    "question": "各個區域 (Region) 最偏好（銷售額最高）的產品類別分別為何？",
+    "expected": {
+      "APAC": "Electronics",
+      "EMEA": "Electronics",
+      "LATAM": "Electronics",
+      "North America": "Electronics"
+    },
+    "eval_type": "dataframe",
+    "final_answer": "各區域（Region）中最偏好（銷售額最高）的產品類別分別為：\n\n1. **APAC**  \n   - 產品類別：Electronics（电子产品）  \n     總銷售額：14,729,441.51（~14.7M）\n\n2. **EMEA**  \n   - 產品類別：Electronics（电子产品）  \n     總銷售額：17,194,037.30（~17.2M）\n\n3. **LATAM**  \n   - 產品類別：Electronics（电子产品）  \n     總銷售額：3,495,783.58（~3.5M）\n\n4. **North America**  \n   - 產品類別：Electronics（电子产品）  \n     總銷售額：23,839,311.54（~23.8M）\n\n### 結論：\n在所有區域中，**Electronics（电子产品）** 為最暢銷的產品類別，且在**North America（北美）** 区域的銷售額最高，達 23,839,311.54（~23.8M），顯示該市場對電子產品有極強的偏好與需求。  \n此結果反映全球各區域對電子產品的高度認可，其中北美市場的銷售表現尤為突出，可作為未來市場策略與產品推廣的重點方向。",
+    "sql_query": "SELECT \n    sd.\"Region\",\n    sd.\"Product Category\",\n    SUM(sd.\"Total Revenue\") AS total_revenue\nFROM \n    sales_data sd\nGROUP BY \n    sd.\"Region\", \n    sd.\"Product Category\"\nORDER BY \n    sd.\"Region\", \n    total_revenue DESC;",
+    "execute_result": "[('APAC', 'Electronics', 14729441.51), ('APAC', 'Software', 7288014.71), ('APAC', 'Office Supplies', 3269243.93), ('EMEA', 'Electronics', 17194037.3), ('EMEA', 'Software', 7770392.3), ('EMEA', 'Office Supplies', 3890098.57), ('LATAM', 'Electronics', 3495783.58), ('LATAM', 'Software', 1329216.17), ('LATAM', 'Office Supplies', 570770.83), ('North America', 'Electronics', 23839311.54), ('North America', 'Software', 10776363.8), ('North America', 'Office Supplies', 5316688.94)]",
+    "llm_judge_score": 10,
+    "llm_judge_reasoning": "回答正確識別了每個區域銷售額最高的產品類別，且數據與SQL結果完全匹配，表達清晰且符合問題要求。"
+  },
+  {
+    "id": 1,
+    "question": "亞太區 的總銷售額是多少？",
+    "expected": 25286700.15,
+    "eval_type": "number",
+    "final_answer": "亞太區的總銷售額為 25,286,700.15 (~25.3M)。",
+    "sql_query": "SELECT SUM(\"Total Revenue\") FROM sales_data WHERE Region = 'APAC';",
+    "execute_result": "[(25286700.15,)]",
+    "llm_judge_score": 10,
+    "llm_judge_reasoning": "SQL查詢正確匹配了問題所需的數據，結果精確無誤，格式與預期一致。"
+  },
+  {
+    "id": 2,
+    "question": "NA 的總銷售額是多少？",
+    "expected": 39932364.28,
+    "eval_type": "number",
+    "final_answer": "北美地區（North America）的總銷售額為 39,932,364.28 (~39.9M)。",
+    "sql_query": "SELECT SUM(\"Total Revenue\") FROM sales_data WHERE Region = 'North America';",
+    "execute_result": "[(39932364.28,)]",
+    "llm_judge_score": 10,
+    "llm_judge_reasoning": "查詢正確匹配了問題所需數據，結果精確無誤，表達清晰且格式符合常見慣例。"
+  },
+  {
+    "id": 3,
+    "question": "請列出 Software 類別在各年份的銷售額總計。",
+    "expected": {
+      "2023": 13178975.35,
+      "2024": 13985011.63
+    },
+    "eval_type": "dataframe",
+    "final_answer": "Software 類別在各年份的銷售額總計如下：\n\n- **2023**: $13,178,975.35 (~13.2M)  \n- **2024**: $13,985,011.63 (~14.0M)",
+    "sql_query": "SELECT strftime('%Y', \"Order Date\") AS Year, SUM(\"Total Revenue\") AS Total_Revenue FROM sales_data WHERE \"Product Category\" = 'Software' GROUP BY strftime('%Y', \"Order Date\") ORDER BY Year;",
+    "execute_result": "[('2023', 13178975.35), ('2024', 13985011.63)]",
+    "llm_judge_score": 10,
+    "llm_judge_reasoning": "SQL查詢正確提取了Software類別各年份的銷售額總計，數據與預期答案完全一致。"
+  },
+  {
+    "id": 4,
+    "question": "亞太區 銷售量最高的前三個產品是什麼？",
+    "expected": [
+      "Enterprise Laptop X1",
+      "Pro Smartphone 15",
+      "Team Collaboration Tool"
+    ],
+    "eval_type": "list",
+    "final_answer": "亞太區銷售量最高的前三個產品為：\n\n1. **Enterprise Laptop X1** - 总销售量：6,547 (~6.5K)  \n2. **Pro Smartphone 15** - 总销售量：5,332 (~5.3K)  \n3. **Team Collaboration Tool** - 总销售量：3,858 (~3.9K)",
+    "sql_query": "SELECT \"Product Name\", SUM(\"Quantity\") AS total_quantity  FROM sales_data  WHERE \"Region\" = 'APAC'  GROUP BY \"Product Name\"  ORDER BY total_quantity DESC  LIMIT 3;",
+    "execute_result": "[('Enterprise Laptop X1', 6547), ('Pro Smartphone 15', 5332), ('Team Collaboration Tool', 3858)]",
+    "llm_judge_score": 10,
+    "llm_judge_reasoning": "回答完全正確，產品名稱、銷售量數據與預期答案一致，且格式清晰。"
+  }
+]
