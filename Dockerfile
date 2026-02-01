@@ -1,5 +1,13 @@
 
-FROM python:3.12-slim-bookworm
+FROM nvidia/cuda:12.6.3-base-ubuntu24.04
+
+# Install python and other dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    python3-venv \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv

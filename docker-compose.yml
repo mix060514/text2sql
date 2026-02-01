@@ -12,6 +12,13 @@ services:
       - WATCH_FILES=true
       - LLAMA_CPP_API_BASE=http://llama-cpp:8080
       - LLAMA_CPP_VL_API_BASE=http://llama-cpp-vl:8080
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     networks:
       - default
       - ai-stack_default
