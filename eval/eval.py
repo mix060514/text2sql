@@ -60,7 +60,7 @@ with open(ground_truth_set, "r", encoding="utf-8") as f:
 # 隨機選取 5 個測試案例（測試完成後手動改回全部）
 random.seed(42)  # 固定種子以便重現
 eval_set = all_eval_set
-eval_set = random.sample(all_eval_set, min(5, len(all_eval_set)))
+eval_set = random.sample(all_eval_set, min(10, len(all_eval_set)))
 print(f"Selected {len(eval_set)} test cases from {len(all_eval_set)} total")
 session_service = InMemorySessionService()
 APP_NAME = "text2sql_eval_v7"
@@ -346,7 +346,8 @@ def compare_data_accuracy(
 
 # %% Async Agent Wrapper
 
-AGENT_TIMEOUT_SECONDS = 120  # 單個問題的超時時間
+# AGENT_TIMEOUT_SECONDS = 120  # 單個問題的超時時間
+AGENT_TIMEOUT_SECONDS = 300  # 單個問題的超時時間
 
 
 async def _run_agent_impl(agent, question: str, session_id: str) -> Dict[str, Any]:

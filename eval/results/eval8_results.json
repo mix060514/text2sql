@@ -9,33 +9,33 @@
       "North America": "Electronics"
     },
     "eval_type": "dataframe",
-    "final_answer": "Agent Error: litellm.InternalServerError: InternalServerError: OpenAIException - Connection error.",
-    "sql_query": "",
-    "execute_result": "",
-    "llm_judge_score": 5,
-    "llm_judge_reasoning": "Judge error: litellm.InternalServerError: InternalServerError: OpenAIException - Connection error."
+    "final_answer": "各區域中最受偏愛（銷售額最高）的產品類別如下：\n\n- **APAC**：Electronics（總銷售額為 14,729,441.51，~14.7M）  \n- **EMEA**：Electronics（總銷售額為 17,194,037.30，~17.2M）  \n- **LATAM**：Electronics（總銷售額為 3,495,783.58，~3.5M）  \n- **North America**：Electronics（總銷售額為 23,839,311.54，~23.8M）  \n\n從數據可見，**Electronics** 是所有區域中銷售額最高的產品類別，且在北美洲表現尤其突出，顯示其具備強大的市場吸引力與銷售潛力。",
+    "sql_query": "SELECT \"Region\", \"Product Category\", SUM(\"Total Revenue\") AS total_revenue FROM sales_data GROUP BY \"Region\", \"Product Category\" ORDER BY \"Region\", total_revenue DESC;",
+    "execute_result": "[('APAC', 'Electronics', 14729441.51), ('APAC', 'Software', 7288014.71), ('APAC', 'Office Supplies', 3269243.93), ('EMEA', 'Electronics', 17194037.3), ('EMEA', 'Software', 7770392.3), ('EMEA', 'Office Supplies', 3890098.57), ('LATAM', 'Electronics', 3495783.58), ('LATAM', 'Software', 1329216.17), ('LATAM', 'Office Supplies', 570770.83), ('North America', 'Electronics', 23839311.54), ('North America', 'Software', 10776363.8), ('North America', 'Office Supplies', 5316688.94)]",
+    "llm_judge_score": 10,
+    "llm_judge_reasoning": "回答正確地識別了每個區域銷售額最高的產品類別，且數據與查詢結果完全一致，表達清晰且符合問題要求。"
   },
   {
     "id": 1,
     "question": "亞太區 的總銷售額是多少？",
     "expected": 25286700.15,
     "eval_type": "number",
-    "final_answer": "Agent Error: litellm.InternalServerError: InternalServerError: OpenAIException - Connection error.",
-    "sql_query": "",
-    "execute_result": "",
-    "llm_judge_score": 5,
-    "llm_judge_reasoning": "Judge error: litellm.InternalServerError: InternalServerError: OpenAIException - Connection error."
+    "final_answer": "亞太區的總銷售額為 25,286,700.15 (~25.3M)。",
+    "sql_query": "SELECT SUM(\"Total Revenue\") FROM sales_data WHERE Region = 'APAC';",
+    "execute_result": "[(25286700.15,)]",
+    "llm_judge_score": 10,
+    "llm_judge_reasoning": "SQL查詢正確獲取了亞太區的總銷售額，結果與預期完全一致，數據精確匹配。"
   },
   {
     "id": 2,
     "question": "NA 的總銷售額是多少？",
     "expected": 39932364.28,
     "eval_type": "number",
-    "final_answer": "Agent Error: litellm.InternalServerError: InternalServerError: OpenAIException - Connection error.",
-    "sql_query": "",
-    "execute_result": "",
-    "llm_judge_score": 5,
-    "llm_judge_reasoning": "Judge error: litellm.InternalServerError: InternalServerError: OpenAIException - Connection error."
+    "final_answer": "北美洲（NA）的總銷售額為 39,932,364.28 (~39.9M)。",
+    "sql_query": "SELECT SUM(\"Total Revenue\") FROM sales_data WHERE Region = 'North America';",
+    "execute_result": "[(39932364.28,)]",
+    "llm_judge_score": 10,
+    "llm_judge_reasoning": "回答正確匹配了預期的總銷售額數據，且單位和格式合理。"
   },
   {
     "id": 3,
@@ -45,11 +45,11 @@
       "2024": 13985011.63
     },
     "eval_type": "dataframe",
-    "final_answer": "Agent Error: litellm.InternalServerError: InternalServerError: OpenAIException - Connection error.",
-    "sql_query": "",
-    "execute_result": "",
-    "llm_judge_score": 5,
-    "llm_judge_reasoning": "Judge error: litellm.InternalServerError: InternalServerError: OpenAIException - Connection error."
+    "final_answer": "Software 類別在各年份的銷售額總計如下：\n\n- **2023**: $13,178,975.35 (~13.2M)  \n- **2024**: $13,985,011.63 (~14.0M)  \n\n此數據顯示，Software 類別的銷售收入從 2023 年至 2024 年持續成長，呈現穩健上揚趨勢。",
+    "sql_query": "SELECT strftime('%Y', \"Order Date\") AS Year, SUM(\"Total Revenue\") AS Total_Revenue FROM sales_data WHERE \"Product Category\" = 'Software' GROUP BY strftime('%Y', \"Order Date\") ORDER BY Year;",
+    "execute_result": "[('2023', 13178975.35), ('2024', 13985011.63)]",
+    "llm_judge_score": 10,
+    "llm_judge_reasoning": "SQL查詢正確地按年份分組計算Software類別的銷售額，結果數據與預期完全一致，格式和內容均匹配。"
   },
   {
     "id": 4,
@@ -60,10 +60,98 @@
       "Team Collaboration Tool"
     ],
     "eval_type": "list",
-    "final_answer": "Agent Error: litellm.InternalServerError: InternalServerError: OpenAIException - Connection error.",
-    "sql_query": "",
-    "execute_result": "",
-    "llm_judge_score": 5,
-    "llm_judge_reasoning": "Judge error: litellm.InternalServerError: InternalServerError: OpenAIException - Connection error."
+    "final_answer": "亞太區銷售量最高的前三個產品是：\n\n1. **Enterprise Laptop X1** - 总销量：6,547 (~6.5K)  \n2. **Pro Smartphone 15** - 总销量：5,332 (~5.3K)  \n3. **Team Collaboration Tool** - 总销量：3,858 (~3.9K)  \n\n這些產品在亞太區市場表現強勁，其中「Enterprise Laptop X1」以最高銷量領先市場。",
+    "sql_query": "SELECT \"Product Name\", SUM(\"Quantity\") AS total_qty FROM sales_data WHERE \"Region\" = 'APAC' GROUP BY \"Product Name\" ORDER BY total_qty DESC LIMIT 3;",
+    "execute_result": "[('Enterprise Laptop X1', 6547), ('Pro Smartphone 15', 5332), ('Team Collaboration Tool', 3858)]",
+    "llm_judge_score": 10,
+    "llm_judge_reasoning": "回答完全正確，產品名稱、銷售量數據與預期答案一致，且符合問題需求。"
+  },
+  {
+    "id": 5,
+    "question": "歐非中東 銷售量最高的前三個產品是什麼？",
+    "expected": [
+      "Enterprise Laptop X1",
+      "Pro Smartphone 15",
+      "Team Collaboration Tool"
+    ],
+    "eval_type": "list",
+    "final_answer": "在欧洲、中东和非洲（EMEA）地区，销售量最高的前三名产品及其总销售量如下：\n\n1. **產品類別**: Enterprise Laptop X1  \n   **總銷售量**: 7,513 (~7.5K)\n\n2. **產品類別**: Pro Smartphone 15  \n   **總銷售量**: 6,210 (~6.2K)\n\n3. **產品類別**: Team Collaboration Tool  \n   **總銷售量**: 5,003 (~5.0K)",
+    "sql_query": "SELECT \"Product Name\", SUM(\"Quantity\") AS total_quantity FROM sales_data WHERE Region = 'EMEA' GROUP BY \"Product Name\" ORDER BY total_quantity DESC LIMIT 3;",
+    "execute_result": "[('Enterprise Laptop X1', 7513), ('Pro Smartphone 15', 6210), ('Team Collaboration Tool', 5003)]",
+    "llm_judge_score": 10,
+    "llm_judge_reasoning": "回答完全正確，產品名稱、銷售量數據與預期答案一致，且符合查詢邏輯。"
+  },
+  {
+    "id": 6,
+    "question": "North America 銷售量最高的前三個產品是什麼？",
+    "expected": [
+      "Enterprise Laptop X1",
+      "Pro Smartphone 15",
+      "4K Monitor 27\""
+    ],
+    "eval_type": "list",
+    "final_answer": "北美地區銷售量最高的前三名產品是：\n\n1. 產品類別：Enterprise Laptop X1，產品名稱：Enterprise Laptop X1，總銷售量：10,419 (~10.4K)  \n2. 產品類別：Pro Smartphone 15，產品名稱：Pro Smartphone 15，總銷售量：8,442 (~8.4K)  \n3. 產品類別：4K Monitor 27\\\"，產品名稱：4K Monitor 27\\\"，總銷售量：7,055 (~7.1K)",
+    "sql_query": "SELECT \"Product Name\", SUM(\"Quantity\") AS total_qty FROM sales_data WHERE Region = 'North America' GROUP BY \"Product Name\" ORDER BY total_qty DESC LIMIT 3;",
+    "execute_result": "[('Enterprise Laptop X1', 10419), ('Pro Smartphone 15', 8442), ('4K Monitor 27\"', 7055)]",
+    "llm_judge_score": 10,
+    "llm_judge_reasoning": "回答正確匹配了問題所要求的北美地區銷售量最高的前三個產品，產品名稱和銷售量數據與預期答案完全一致。"
+  },
+  {
+    "id": 7,
+    "question": "APAC 的總銷售額是多少？",
+    "expected": 25286700.15,
+    "eval_type": "number",
+    "final_answer": "亞太區的總銷售額為 25,286,700.15 (~25.3M)。",
+    "sql_query": "SELECT SUM(\"Total Revenue\") FROM sales_data WHERE Region = 'APAC';",
+    "execute_result": "[(25286700.15,)]",
+    "llm_judge_score": 10,
+    "llm_judge_reasoning": "回答正確匹配了預期答案，數據精確無誤，表達清晰且符合問題要求。"
+  },
+  {
+    "id": 8,
+    "question": "請列出 APAC 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+    "expected": {
+      "2023-01": 973776.02,
+      "2023-02": 763996.82,
+      "2023-03": 1005437.21,
+      "2023-04": 1085883.84,
+      "2023-05": 999851.05,
+      "2023-06": 825946.06,
+      "2023-07": 897312.68,
+      "2023-08": 805145.36,
+      "2023-09": 984447.16,
+      "2023-10": 1189276.6,
+      "2023-11": 1336621.74,
+      "2023-12": 1357397.91,
+      "2024-01": 933316.4,
+      "2024-02": 1075906.73,
+      "2024-03": 971237.02,
+      "2024-04": 1076606.9,
+      "2024-05": 1015613.24,
+      "2024-06": 827017.19,
+      "2024-07": 1053949.91,
+      "2024-08": 888200.25,
+      "2024-09": 757630.84,
+      "2024-10": 1724426.36,
+      "2024-11": 1436229.04,
+      "2024-12": 1301473.82
+    },
+    "eval_type": "dataframe",
+    "final_answer": "亞太區的銷售趨勢數據如下：\n\n| 月份       | 总销售额（美元）      | 概略縮寫   |\n|------------|------------------------|------------|\n| 2023-01    | 973,776.02            | ~0.97M     |\n| 2023-02    | 763,996.82            | ~0.76M     |\n| 2023-03    | 1,005,437.21          | ~1.01M     |\n| 2023-04    | 1,085,883.84          | ~1.09M     |\n| 2023-05    | 999,851.05            | ~1.00M     |\n| 2023-06    | 825,946.06            | ~0.83M     |\n| 2023-07    | 897,312.68            | ~0.90M     |\n| 2023-08    | 805,145.36            | ~0.81M     |\n| 2023-09    | 984,447.16            | ~0.98M     |\n| 2023-10    | 1,189,276.60          | ~1.19M     |\n| 2023-11    | 1,336,621.74          | ~1.34M     |\n| 2023-12    | 1,357,397.91          | ~1.36M     |\n| 2024-01    | 933,316.40            | ~0.93M     |\n| 2024-02    | 1,075,906.73          | ~1.08M     |\n| 2024-03    | 971,237.02            | ~0.97M     |\n| 2024-04    | 1,076,606.90          | ~1.08M     |\n| 2024-05    | 1,015,613.24          | ~1.02M     |\n| 2024-06    | 827,017.19            | ~0.83M     |\n| 2024-07    | 1,053,949.91          | ~1.05M     |\n| 2024-08    | 888,200.25            | ~0.89M     |\n| 2024-09    | 757,630.84            | ~0.76M     |\n| 2024-10    | 1,724,426.36          | ~1.72M     |\n| 2024-11    | 1,436,229.04          | ~1.44M     |\n| 2024-12    | 1,301,473.82          | ~1.30M     |\n\n從數據觀察，亞太區在 2023 至 2024 年的銷售表現呈現明顯波動。其中，2024 年 10 月達到銷售高峰，總額為 1,724,426.36（~1.72M），而 2024 年 9 月則下滑至 757,630.84（~0.76M），顯示出劇烈的波動性。此現象可能與季節性需求、特定市場活動或 promotional 推出有關，建議進一步分析該月的市場活動與消費者行為，以確認驅動因素。",
+    "sql_query": "SELECT strftime('%Y-%m', \"Order Date\") AS month, SUM(\"Total Revenue\") AS total_revenue FROM sales_data WHERE \"Region\" = 'APAC' AND strftime('%Y', \"Order Date\") IN ('2023', '2024') GROUP BY strftime('%Y-%m', \"Order Date\") ORDER BY month;",
+    "execute_result": "[('2023-01', 973776.02), ('2023-02', 763996.82), ('2023-03', 1005437.21), ('2023-04', 1085883.84), ('2023-05', 999851.05), ('2023-06', 825946.06), ('2023-07', 897312.68), ('2023-08', 805145.36), ('2023-09', 984447.16), ('2023-10', 1189276.6), ('2023-11', 1336621.74), ('2023-12', 1357397.91), ('2024-01', 933316.4), ('2024-02', 1075906.73), ('2024-03', 971237.02), ('2024-04', 1076606.9), ('2024-05', 1015613.24), ('2024-06', 827017.19), ('2024-07', 1053949.91), ('2024-08', 888200.25), ('2024-09', 757630.84), ('2024-10', 1724426.36), ('2024-11', 1436229.04), ('2024-12', 1301473.82)]",
+    "llm_judge_score": 10,
+    "llm_judge_reasoning": "SQL查詢正確地篩選了APAC區域2023至2024年的月銷售數據，結果與預期答案完全一致，格式和內容均無誤。"
+  },
+  {
+    "id": 9,
+    "question": "歐非中東 的總銷售額是多少？",
+    "expected": 28854528.17,
+    "eval_type": "number",
+    "final_answer": "歐非中東的總銷售額為 **28,854,528.17** (~28.9M)。",
+    "sql_query": "SELECT SUM(\"Total Revenue\") AS total_revenue FROM sales_data WHERE Region = 'EMEA'",
+    "execute_result": "[(28854528.17,)]",
+    "llm_judge_score": 8,
+    "llm_judge_reasoning": "數據值正確，僅格式添加了千位分隔符和近似值標記，屬表達細節差異。"
   }
 ]

@@ -12,6 +12,10 @@ from .tools import check_sql_syntax, execute_sql
 # ------------------------------------------------------------------------------
 MAX_RETRIES = 3
 ENABLE_SELF_CORRECTION = True
+LLAMA_CPP_MODEL = "openai/qwen3-4b-instruct-2507"
+# LLAMA_CPP_MODEL = "openai/qwen3-14b-Q4_K_M"
+LLAMA_CPP_API_KEY = "aaa"
+LLAMA_CPP_API_BASE = "http://localhost:8081"
 
 
 # ------------------------------------------------------------------------------
@@ -72,9 +76,9 @@ SCHEMA_DESCRIPTION = f"""
 
 region_country_check_agent = LlmAgent(
     model=LiteLlm(
-        model="openai/qwen3-4b-instruct-2507",
-        api_key="aaa",
-        api_base="http://localhost:8081",
+        model=LLAMA_CPP_MODEL,
+        api_key=LLAMA_CPP_API_KEY,
+        api_base=LLAMA_CPP_API_BASE,
     ),
     name="region_country_check",
     description="A region and country check agent that checks the region and country from the user question is in database or not.",
@@ -90,9 +94,9 @@ region_country_check_agent = LlmAgent(
 
 sql_gen_agent = LlmAgent(
     model=LiteLlm(
-        model="openai/qwen3-4b-instruct-2507",
-        api_key="aaa",
-        api_base="http://localhost:8081",
+        model=LLAMA_CPP_MODEL,
+        api_key=LLAMA_CPP_API_KEY,
+        api_base=LLAMA_CPP_API_BASE,
     ),
     name="sql_gen",
     description="A SQL specialist with structured output and self-correction capabilities.",
@@ -151,9 +155,9 @@ sql_gen_sequential_agent = SequentialAgent(
 
 check_sql_agent = LlmAgent(
     model=LiteLlm(
-        model="openai/qwen3-4b-instruct-2507",
-        api_key="aaa",
-        api_base="http://localhost:8081",
+        model=LLAMA_CPP_MODEL,
+        api_key=LLAMA_CPP_API_KEY,
+        api_base=LLAMA_CPP_API_BASE,
     ),
     name="check_sql",
     description="A SQL checker that checks the SQL query for errors.",
@@ -167,9 +171,9 @@ check_sql_agent = LlmAgent(
 
 execute_sql_agent = LlmAgent(
     model=LiteLlm(
-        model="openai/qwen3-4b-instruct-2507",
-        api_key="aaa",
-        api_base="http://localhost:8081",
+        model=LLAMA_CPP_MODEL,
+        api_key=LLAMA_CPP_API_KEY,
+        api_base=LLAMA_CPP_API_BASE,
     ),
     name="execute_sql",
     description="A SQL executor that executes the SQL query against the SQLite database.",
@@ -194,9 +198,9 @@ def exit_loop(tool_context: ToolContext):
 
 critic_agent = LlmAgent(
     model=LiteLlm(
-        model="openai/qwen3-4b-instruct-2507",
-        api_key="aaa",
-        api_base="http://localhost:8081",
+        model=LLAMA_CPP_MODEL,
+        api_key=LLAMA_CPP_API_KEY,
+        api_base=LLAMA_CPP_API_BASE,
     ),
     name="critic",
     description="You are a Constructive Critic AI reviewing query result whether it can answer the user question (typically 2-6 sentences).",
@@ -228,9 +232,9 @@ get_data_agent = LoopAgent(
 
 answer_agent = LlmAgent(
     model=LiteLlm(
-        model="openai/qwen3-4b-instruct-2507",
-        api_key="aaa",
-        api_base="http://localhost:8081",
+        model=LLAMA_CPP_MODEL,
+        api_key=LLAMA_CPP_API_KEY,
+        api_base=LLAMA_CPP_API_BASE,
     ),
     name="answer",
     #  description="你是一個商業專家，回答使用者的問題",
@@ -270,9 +274,9 @@ query_and_answer_agent = SequentialAgent(
 
 root_agent = LlmAgent(
     model=LiteLlm(
-        model="openai/qwen3-4b-instruct-2507",
-        api_key="aaa",
-        api_base="http://localhost:8081",
+        model=LLAMA_CPP_MODEL,
+        api_key=LLAMA_CPP_API_KEY,
+        api_base=LLAMA_CPP_API_BASE,
     ),
     name="root_agent",
     description="Root agent that delegates SQL query tasks to query_and_answer_agent.",

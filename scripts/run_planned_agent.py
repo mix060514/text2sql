@@ -2,11 +2,13 @@
 import os
 import asyncio
 import logging
+import warnings
+import sys
+
+import litellm
 from google.adk.sessions import InMemorySessionService
 from google.adk.runners import Runner
 from google.genai import types
-import warnings
-import sys
 
 # Ignore all warnings
 warnings.filterwarnings("ignore")
@@ -17,10 +19,12 @@ logging.basicConfig(level=logging.ERROR)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 # Import the NEW planned agent
-from text2sql.agents.planned_agent.agent import planned_agent
+from text2sql.agents.planned_agent.agent import root_agent
 
 print("Libraries imported.")
 session_service = InMemorySessionService()
+
+litellm._turn_on_debug()
 
 # Define constants
 APP_NAME = "text2sql_app"
@@ -42,7 +46,7 @@ async def init_session(
 
 session = asyncio.run(init_session(APP_NAME, USER_ID, SESSION_ID))
 runner = Runner(
-    agent=planned_agent,
+    agent=root_agent,
     app_name=APP_NAME,
     session_service=session_service,
 )
