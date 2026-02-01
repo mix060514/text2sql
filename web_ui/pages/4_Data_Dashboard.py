@@ -90,6 +90,10 @@ with c2:
     # Pie chart
     cat_group = df.groupby("Product Category")["Total Revenue"].sum().reset_index()
 
+    cat_group["Percentage"] = (
+        cat_group["Total Revenue"] / cat_group["Total Revenue"].sum()
+    )
+
     chart_cat = (
         alt.Chart(cat_group)
         .mark_arc(innerRadius=50)
@@ -100,9 +104,8 @@ with c2:
                 alt.Tooltip("Product Category", type="nominal"),
                 alt.Tooltip("Total Revenue", format="$,.0f", type="quantitative"),
                 alt.Tooltip(
-                    "Total Revenue",
+                    "Percentage",
                     format=".1%",
-                    aggregate="normalize",
                     title="Percentage",
                 ),
             ],
