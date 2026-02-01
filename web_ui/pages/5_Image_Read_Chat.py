@@ -62,8 +62,38 @@ if uploaded_file is not None:
     st.sidebar.image(uploaded_file, caption="Uploaded Image", use_container_width=True)
 
     # Process image for agent
-    bytes_data = uploaded_file.getvalue()
-    current_image_mime = uploaded_file.type
+    from PIL import Image
+    import io
+
+    image = Image.open(uploaded_file)
+
+    # Qwen3-VL uses patch_size 16 and usually merge_size 2 => alignment 32
+    # Ensure dimensions are multiples of 32 and max dimension is reasonable
+    target_max = 1024  # Safe upper bound
+
+    width, height = image.size
+    scale = min(target_max / width, target_max / height, 1.0)  # Don't upscale
+
+    new_width = int(width * scale)
+    new_height = int(height * scale)
+
+    # Align to multiple of 32
+    def align_32(x):
+        return (x // 32) * 32
+
+    new_width = max(32, align_32(new_width))
+    new_height = max(32, align_32(new_height))
+
+    image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+
+    # Convert back to bytes for base64
+    buffered = io.BytesIO()
+    if image.mode in ("RGBA", "P"):
+        image = image.convert("RGB")
+
+    image.save(buffered, format="JPEG", quality=85)
+    bytes_data = buffered.getvalue()
+    current_image_mime = "image/jpeg"
     current_image_base64 = base64.b64encode(bytes_data).decode("utf-8")
 
 # Display Messages
@@ -83,20 +113,9 @@ if prompt := st.chat_input("Ask about the image..."):
         "content": msg_content,
     }
 
-    # Check if we should include image (only if specific to this turn or persistent?)
-    # For now, let's include the image IF it's the first time or if user re-uploads.
-    # Actually, simplistic approach: pass image if uploaded and currently selected.
-
     parts = [types.Part(text=prompt)]
 
     if current_image_base64:
-        # Check if we already sent this image?
-        # For simple VLM interaction, usually sending it every time or maintaining context is model dependent.
-        # ADK/LiteLLM with caching might handle it, but safer to send it if user currently sees it.
-        # But to avoid token waste, typically we send it once.
-        # For this demo, let's attach it to the current message if it's there.
-
-        # Attach image to UI message
         user_msg_data["image_base64"] = current_image_base64
 
         try:
@@ -107,9 +126,6 @@ if prompt := st.chat_input("Ask about the image..."):
             )
             parts.append(types.Part(inline_data=image_blob))
         except Exception as e:
-            # Fallback for LiteLLM if it expects specific format like image_url with data URI
-            # But ADK types usually abstraction this. If standard Blob fails, we might need a different approach.
-            # Let's try the Blob approach first as it's most likely for Google ADK.
             st.error(f"Error preparing image for agent: {e}")
 
     st.session_state.pic_messages.append(user_msg_data)
@@ -124,7 +140,7 @@ if prompt := st.chat_input("Ask about the image..."):
         full_response = ""
 
         async def run_chat():
-            response_text = ""
+            collected_text = []
             content = types.Content(role="user", parts=parts)
 
             async for event in st.session_state.pic_runner.run_async(
@@ -132,37 +148,20 @@ if prompt := st.chat_input("Ask about the image..."):
                 session_id=st.session_state.pic_session_id,
                 new_message=content,
             ):
-                pass  # We just wait for completion for now, or could stream text part
+                c = getattr(event, "content", None)
+                if c and c.parts:
+                    for p in c.parts:
+                        if p.text:
+                            collected_text.append(p.text)
+                            # Optional: Stream the update to UI
+                            # message_placeholder.markdown("".join(collected_text) + "▌")
 
-            # Get final answer
-            session = await st.session_state.pic_runner.session_service.get_session(
-                app_name="pic_read_chat",
-                user_id="web_user",
-                session_id=st.session_state.pic_session_id,
-            )
-
-            # Since pic_read_agent is a simple LlmAgent, it puts result in last turn model response
-            # Or formatted answer.
-            # LlmAgent usually returns the model response text.
-
-            # Let's check session events or state.
-            # For simple LlmAgent, the runner usually yields the model response chunks.
-            # But here we didn't capture them in loop.
-
-            # Let's retrieve the last message from history
-            if session and session.history:
-                last_msg = session.history[-1]
-                if last_msg.role == "model":
-                    for part in last_msg.parts:
-                        if part.text:
-                            response_text += part.text
-
-            return response_text
+            return "".join(collected_text)
 
         full_response = asyncio.run(run_chat())
 
         if not full_response:
-            full_response = "No response from model (check logs/connection)."
+            full_response = "Done (No text response captured, check logs if error)."
 
         message_placeholder.markdown(full_response)
         st.session_state.pic_messages.append(
