@@ -7,7 +7,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.title("🤖 Text2SQL Agent demo APP")
+st.title("🤖 Text2SQL Agent demo APP", anchor='top')
 
 st.markdown(
     """
@@ -49,7 +49,8 @@ def mermaid(code: str, height: int=600):
 
 
 
-st.markdown("### Agent 互動序列")
+# st.markdown("### Agent 互動序列", anchor="agent-互動序列")
+st.subheader("Agent 交互時序圖", anchor="agent-時序圖")
 
 mermaid(
     """
@@ -107,10 +108,12 @@ sequenceDiagram
     QA-->>Root: 任務完成
     Root-->>User: 回傳最終答案
 """,
+height=900
 )
 
 st.markdown("---")
-st.markdown("### 數據範例")
+# st.markdown("### 數據範例")
+st.subheader("資料範例", anchor="sample-data")
 st.markdown("系統使用的全球銷售數據前 5 行：")
 
 sample_data = {
@@ -131,3 +134,9 @@ df = pd.DataFrame(sample_data)
 st.dataframe(df, use_container_width=True)
 
 st.sidebar.success("請在上方選擇一個頁面。")
+
+st.sidebar.markdown("目錄")
+st.sidebar.markdown("* [回頂部](#top)")
+st.sidebar.markdown("* [Agent 交互時序圖](#agent-時序圖)")
+st.sidebar.markdown("* [資料範例](#sample-data)")
+數據範例
