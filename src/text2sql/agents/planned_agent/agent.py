@@ -66,6 +66,8 @@ SCHEMA_DESCRIPTION = f"""
     - `Customer Name` (TEXT): Name of the customer company.
     - `Product Category` (TEXT): e.g., 'Electronics', 'Software'.
     - `Product Name` (TEXT): Specific product name.
+
+    - `ASP` (REAL): Average Selling Price (Unit Price).
     
     - `Quantity` (INTEGER): Units sold.
       * RULE: For "Sales Volume" (銷售量), usage: `SUM("Quantity")`.
