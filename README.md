@@ -8,11 +8,6 @@
 
 > ⚠️ 部署於本地主機，訪問前請先聯繫作者加入 Cloudflare Zero Trust 白名單
 
-## 🔗 Demo
-
-**線上展示**：[https://agent-show.ivan-labs.com](https://agent-show.ivan-labs.com)
-
-> ⚠️ 部署於本地主機，訪問前請先聯繫作者加入 Cloudflare Zero Trust 白名單
 
 ### 畫面預覽
 
