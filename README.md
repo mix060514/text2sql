@@ -137,7 +137,7 @@ def exit_loop(tool_context: ToolContext):
 
 ## 聯絡作者
 
-- LinkedIn: [your-linkedin-url]
+- LinkedIn: [https://www.linkedin.com/in/yi-fan-zhang-1ba122171/]
 
 ## License
 
