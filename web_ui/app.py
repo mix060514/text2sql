@@ -106,8 +106,28 @@ sequenceDiagram
     
     QA-->>Root: 任務完成
     Root-->>User: 回傳最終答案
-""", 
-    height=900,
+""",
 )
+
+st.markdown("---")
+st.markdown("### 數據範例")
+st.markdown("系統使用的全球銷售數據前 5 行：")
+
+sample_data = {
+    "Order ID": ["ORD-202309986", "ORD-202325336", "ORD-202315895", "ORD-202328380", "ORD-202318954"],
+    "Order Date": ["2023-01-01", "2023-01-01", "2023-01-01", "2023-01-01", "2023-01-01"],
+    "Region": ["North America", "LATAM", "North America", "EMEA", "APAC"],
+    "Country": ["United States", "Mexico", "United States", "United Kingdom", "Singapore"],
+    "Customer Name": ["Elite Elite Systems", "Apex Elite Systems", "Apex Apex Ltd.", "Next Beta Ltd.", "Next Delta Ltd."],
+    "Product Category": ["Electronics", "Electronics", "Electronics", "Software", "Office Supplies"],
+    "Product Name": ["Docking Station", "4K Monitor 27\"", "Pro Smartphone 15", "Team Collaboration Tool", "Ergonomic Chair"],
+    "ASP": [184.04, 345.53, 1002.65, 208.97, 382.53],
+    "Quantity": [6, 11, 3, 5, 2],
+    "Total Revenue": [1104.24, 3800.83, 3007.95, 1044.85, 765.06]
+}
+
+import pandas as pd
+df = pd.DataFrame(sample_data)
+st.dataframe(df, use_container_width=True)
 
 st.sidebar.success("請在上方選擇一個頁面。")

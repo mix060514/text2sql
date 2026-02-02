@@ -126,6 +126,18 @@ def exit_loop(tool_context: ToolContext):
 - 評估維度：答案正確性、數據準確性、回答完整性
 - 輸出 0-10 信心分數，≥7 視為正確
 
+## 數據範例
+
+全球銷售數據前 5 行：
+
+| Order ID | Order Date | Region | Country | Customer Name | Product Category | Product Name | ASP | Quantity | Total Revenue |
+|----------|-----------|--------|---------|----------------|------------------|--------------|-----|----------|---------------|
+| ORD-202309986 | 2023-01-01 | North America | United States | Elite Elite Systems | Electronics | Docking Station | 184.04 | 6 | 1104.24 |
+| ORD-202325336 | 2023-01-01 | LATAM | Mexico | Apex Elite Systems | Electronics | 4K Monitor 27" | 345.53 | 11 | 3800.83 |
+| ORD-202315895 | 2023-01-01 | North America | United States | Apex Apex Ltd. | Electronics | Pro Smartphone 15 | 1002.65 | 3 | 3007.95 |
+| ORD-202328380 | 2023-01-01 | EMEA | United Kingdom | Next Beta Ltd. | Software | Team Collaboration Tool | 208.97 | 5 | 1044.85 |
+| ORD-202318954 | 2023-01-01 | APAC | Singapore | Next Delta Ltd. | Office Supplies | Ergonomic Chair | 382.53 | 2 | 765.06 |
+
 ## 技術棧
 
 | 類別 | 技術 |
