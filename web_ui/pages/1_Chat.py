@@ -75,6 +75,8 @@ selected_suggestion = st.sidebar.selectbox(
 send_suggestion = st.sidebar.button("Send Suggestion")
 
 # Display Messages
+st.info("👋 歡迎使用 *資料庫查詢助手*！請在下方輸入您的問題，我會幫您查詢資料庫回答您問題。")
+
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
