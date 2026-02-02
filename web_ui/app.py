@@ -7,28 +7,31 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.title("🤖 Text2SQL Agent Workspace")
+st.title("🤖 Text2SQL Agent demo APP")
 
 st.markdown(
     """
-Welcome to the Text2SQL Agent Workspace.
+歡迎來到 Text2SQL Agent Demo的示範APP。
 
-### Navigation
-- **Chat**: 與 Agent 互動，查看子 Agent 的思考過程，並獲取建議問題。
-- **Eval**: 查看最新的評估結果和詳細的評判推理。
-- **System Monitor**: 監控系統狀態和日誌。
-- **Data Dashboard**: 探索銷售數據和視覺化圖表。
+本應用展示了一個多代理系統，該系統能夠將自然語言查詢轉換為SQL查詢，並從銷售資料庫中查詢資料，返回合理描述給使用者。
+額外包含一個多模態語言模型，可以處理文字和圖片輸入。
 
-Select a page from the sidebar to get started.
+### 請用左邊側邊條(sidebar)選擇展示的頁面。
+- **Chat**: 用正常語言詢問資料問題，讓 Agent 查詢資料庫獲得最新資料。可以查看sub Agent的調用過程，包含範例問題集。
+- **Eval**: 查看開發此agent應用時評估的資料集和評分的詳細的評判。
+- **System Monitor**: 監控系統狀態和日誌，目前本應用部署在地端（NB RTX3080 16GB vram），部署模型為Qwen3-4b-instruct-2507以及qwen3-4b-vl。
+- **Data Dashboard**: 展示實際的銷售資料，用來做chat的對比。
+- **Image Read**: 展示多模態語言模型的圖片理解能力，可以上傳圖片並詢問相關問題。
+
+從左側邊欄選擇一個頁面開始。
 
 ---
-### Agent Control Flow
 """
 )
 
 
 # Mermaid Diagram helper
-def mermaid(code: str):
+def mermaid(code: str, height: int=600):
     import streamlit.components.v1 as components
 
     components.html(
@@ -41,45 +44,70 @@ def mermaid(code: str):
             mermaid.initialize({{ startOnLoad: true }});
         </script>
         """,
-        height=600,
+        height=height,
     )
 
 
+
+st.markdown("### Agent 互動序列")
+
 mermaid(
     """
-graph TD
-    User((User)) -->|Controls| Root["Root Agent"]
-    Root -->|Delegates| QA["Query & Answer Agent"]
+%%{init: { 'theme': 'base', 'themeVariables': { 
+    'loopBkg': '#E1F5FE', 
+    'loopBorder': '#0277BD', 
+    'altBkg': '#FFF9C4', 
+    'altBorder': '#FBC02D' 
+} } }%%
+sequenceDiagram
+    autonumber
+    participant User as 用戶
+    participant Root as root Agent
+    participant QA as 查詢&回答 Agent
+    participant GetData as 獲取數據 Agent (Loop)
+    participant Region as 區域檢查 Agent
+    participant SqlGen as SQL生成 Agent
+    participant Check as 檢查SQL Agent
+    participant Exec as 執行SQL Agent
+    participant Critic as 批評家 Agent
+    participant Ans as 回答 Agent
+
+    User->>Root: 提出數據相關問題
+    Root->>QA: 委派任務
     
-    subgraph RecursiveLogic ["Recursive Logic"]
-        QA -->|Controls| GetData["Get Data Agent (Loop)"]
-        GetData -->|Step 1| GenSqlSeq["SQL Gen Sequential"]
+    Note over QA, GetData: 開始數據獲取迴圈 (最多重試 3 次)
+    QA->>GetData: 啟動流程
+
+    loop 數據獲取與修正迴圈
+        %% 第一階段：生成 SQL
+        GetData->>Region: 檢查問題中的國家/地區
+        Region-->>GetData: 回傳地區上下文 (region_country)
+        GetData->>SqlGen: 根據 Schema 生成 SQL
+        SqlGen-->>GetData: 回傳 SQL 語句 (sql_query)
+
+        %% 第二階段：驗證與執行
+        GetData->>Check: 檢查 SQL 語法
+        Check-->>GetData: 語法確認無誤
+        GetData->>Exec: 執行 SQL 查詢
+        Exec-->>GetData: 回傳查詢結果 (query_result)
+        GetData->>Critic: 審查結果是否回答問題
         
-        subgraph GenerationPhase ["Generation Phase"]
-            GenSqlSeq -->|Check| Region["Region Check Agent"]
-            GenSqlSeq -->|Generate| SqlGen["SQL Gen Agent"]
+        alt 結果正確
+            Critic-->>GetData: 呼叫工具: exit_loop (跳出迴圈)
+        else 結果錯誤
+            Critic-->>GetData: 回傳錯誤反饋 (觸發重試)
         end
-        
-        GetData -->|Step 2| CriticSeq["SQL Critic Sequential"]
-        
-        subgraph ValidationPhase ["Validation Phase"]
-            CriticSeq -->|Verify| CheckSql["Check SQL Agent"]
-            CriticSeq -->|Execute| ExecSql["Execute SQL Agent"]
-            CriticSeq -->|Review| Critic["Critic Agent"]
-        end
-        
-        Critic -.->|Feedback Loop| GetData
     end
+
+    GetData-->>QA: 回傳最終查詢結果
     
-    QA -->|Final Step| Ans["Answer Agent"]
-    Ans -->|Response| User
+    QA->>Ans: 生成商業回答
+    Ans-->>QA: 回傳最終文本 (繁中+英文產品名)
     
-    style User fill:#f9f,stroke:#333,stroke-width:2px,color:black
-    style Root fill:#ccf,stroke:#333,stroke-width:2px,color:black
-    style QA fill:#ccf,stroke:#333,stroke-width:2px,color:black
-    style GetData fill:#ffc,stroke:#333,stroke-width:2px,color:black
-    style Ans fill:#cfc,stroke:#333,stroke-width:2px,color:black
-"""
+    QA-->>Root: 任務完成
+    Root-->>User: 回傳最終答案
+""", 
+    height=900,
 )
 
-st.sidebar.success("Select a page above.")
+st.sidebar.success("請在上方選擇一個頁面。")
