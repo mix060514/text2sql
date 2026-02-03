@@ -12,7 +12,7 @@ st.title("🤖 Text2SQL Agent demo APP", anchor='top')
 st.markdown(
     """
 [![GitHub](https://img.shields.io/badge/GitHub-mix060514%2Ftext2sql-blue?logo=github)](https://github.com/mix060514/text2sql)
-
+[![Linkedin](https://www.linkedin.com/in/yi-fan-zhang-1ba122171/)]
 歡迎來到 Text2SQL Agent 的Demo APP。
 
 本應用展示了一個多代理系統，該系統能夠將自然語言查詢轉換為SQL查詢，並從銷售資料庫中查詢資料，返回合理描述給使用者。
