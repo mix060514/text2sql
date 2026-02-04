@@ -11,11 +11,11 @@
 
 ### 畫面預覽
 
-| 對話介面 | 評估結果 |
+| 代理執行過程 | 評估結果 |
 |:--------:|:--------:|
 | ![Chat](./assets/screenshots/chat.png) | ![Eval](./assets/screenshots/eval.png) |
 
-| 資料儀表板 | 代理執行過程 |
+| 資料儀表板 | 多模態本地模型 |
 |:--------:|:--------:|
 | ![Dashboard](./assets/screenshots/dashboard.png) | ![Image_Read](./assets/screenshots/image_read.png) |
 
