@@ -1,0 +1,23 @@
+[server]
+# 啟用 CORS 以支援 Cloudflare Tunnel
+enableCORS = true
+
+# 禁用 XSRF 保護以避免與反向代理衝突
+enableXsrfProtection = false
+
+# 啟用 WebSocket 壓縮
+enableWebsocketCompression = true
+
+# Headless 模式
+headless = true
+
+# 伺服器位址和端口
+address = "0.0.0.0"
+port = 8501
+
+[browser]
+# 禁用使用統計收集
+gatherUsageStats = false
+
+# 禁用自動開啟瀏覽器
+serverAddress = "0.0.0.0"
