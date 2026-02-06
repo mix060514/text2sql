@@ -48,7 +48,7 @@ REGION_ALIASES = """
 # ------------------------------------------------------------------------------
 # Database Schema Definition
 # ------------------------------------------------------------------------------
-SCHEMA_DESCRIPTION = f"""
+SCHEMA_DESCRIPTION = """
     **Database Schema Information:**
     
     [CRITICAL] TABLE NAME: `sales_data` (DO NOT use 'sales', 'orders', or any other name)
