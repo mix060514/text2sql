@@ -7,17 +7,12 @@ from google.adk.tools import ToolContext
 from google.adk.models.lite_llm import LiteLlm
 
 from .tools import check_sql_syntax, execute_sql
-
-# ------------------------------------------------------------------------------
-# Configuration
-# ------------------------------------------------------------------------------
-MAX_RETRIES = 3
-ENABLE_SELF_CORRECTION = True
-LLAMA_CPP_MODEL = "openai/qwen3-4b-instruct-2507"
-# LLAMA_CPP_MODEL = "openai/qwen3-14b-Q4_K_M"
-LLAMA_CPP_API_KEY = "aaa"
-LLAMA_CPP_API_BASE = os.getenv("LLAMA_CPP_API_BASE", "http://localhost:8081")
-
+from text2sql.config import (
+    MAX_RETRIES,
+    LLAMA_CPP_MODEL,
+    LLAMA_CPP_API_KEY,
+    LLAMA_CPP_API_BASE,
+)
 
 # ------------------------------------------------------------------------------
 # Region and Country Aliases

@@ -1,15 +1,12 @@
 
 services:
   webui:
-    build: .
+    image: text2sql-webui:v1.0.0
     restart: always
     ports:
       - "8501:8501"
-    volumes:
-      - .:/app
-      - /app/.venv
     environment:
-      - WATCH_FILES=true
+      - WATCH_FILES=false
       - LLAMA_CPP_API_BASE=http://llama-cpp:8080
       - LLAMA_CPP_VL_API_BASE=http://llama-cpp-vl:8080
     deploy:

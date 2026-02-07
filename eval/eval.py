@@ -24,11 +24,10 @@ from google.genai import types
 
 # Setup path to import local src
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../eval")))
 
 # Import Agents
 from text2sql.agents.planned_agent.agent import root_agent
-from judge.agent import judge_agent
+from text2sql.agents.judge_agent.agent import judge_agent
 
 
 # Shared runner instances (using ADK built-in InMemoryRunner)
