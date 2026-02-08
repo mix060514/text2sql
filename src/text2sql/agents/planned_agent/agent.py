@@ -20,10 +20,14 @@ from text2sql.config import (
 # ------------------------------------------------------------------------------
 REGION_ALIASES = """
 **Region Name Mappings** (User input → Database value):
-- "North America" / "北美" / "北美洲" / "NA" → Use `Region = 'North America'`
-- "EMEA" / "歐洲中東非洲" / "歐非中東" / "Europe, Middle East, and Africa" → Use `Region = 'EMEA'`
-- "APAC" / "亞太區" / "亞太地區" / "Asia Pacific" → Use `Region = 'APAC'`
-- "LATAM" / "拉美" / "南美" / "拉丁美洲" / "Latin America" → Use `Region = 'LATAM'`
+- "North America" / "北美" / "北美洲" / "NA" / "美洲" → Use `Region = 'North America'`
+- "EMEA" / "歐洲中東非洲" / "歐非中東" / "中東歐非" / "歐洲" / "Europe, Middle East, and Africa" → Use `Region = 'EMEA'`
+- "APAC" / "亞太區" / "亞太地區" / "亞太" / "Asia Pacific" → Use `Region = 'APAC'`
+- "LATAM" / "拉美" / "南美" / "南美洲" / "拉丁美洲" / "中南美" / "Latin America" → Use `Region = 'LATAM'`
+
+**⚠️ CRITICAL REGION RULES:**
+- If user says "南美", "南美洲", or "中南美" → MUST use `Region = 'LATAM'` (NOT null or other region)
+- If user says "歐非中東" or "中東歐非" → MUST use `Region = 'EMEA'` (NOT APAC)
 
 **Country Name Mappings** (User input → Database value):
 - "China" / "中國" / "大陸" / "PRC" → Use `Country = 'China'`
@@ -115,25 +119,24 @@ sql_gen_agent = LlmAgent(
 
     {SCHEMA_DESCRIPTION}
 
-    **CRITICAL CONCEPT MAPPING (MUST FOLLOW):**
+    **⚠️ CRITICAL CONCEPT MAPPING (MUST FOLLOW - READ CAREFULLY):**
     
-    1. **"訂單數量" (Order Count / How many orders)**
-       - Concept: Counting unique transactions.
-       - Keyword matches: 訂單數, 幾筆, 多少單, Transaction count.
-       - SQL Action: `COUNT(DISTINCT "Order ID")`
-       - ❌ WRONG: SUM("Quantity")
+    | 中文詞彙 | 英文 | 正確 SQL | ❌ 錯誤 SQL |
+    |---------|------|----------|------------|
+    | 訂單數量、訂單數、幾筆訂單 | Order Count | `COUNT(DISTINCT "Order ID")` | SUM("Quantity") |
+    | 銷售量、賣出多少個、銷量 | Sales Volume | `SUM("Quantity")` | COUNT("Order ID") |
+    | 銷售額、營收、收入 | Revenue | `SUM("Total Revenue")` | - |
+    
+    **⚠️ KEY RULE: "訂單" vs "銷售量"**
+    - 「訂單數量」= 交易次數 = COUNT transactions = `COUNT(DISTINCT "Order ID")`
+    - 「銷售量」= 賣出件數 = SUM units = `SUM("Quantity")`
+    - These are COMPLETELY DIFFERENT concepts!
+    
+    Example:
+    - "訂單數量最多的客戶" → `ORDER BY COUNT(DISTINCT "Order ID") DESC`
+    - "銷售量最高的產品" → `ORDER BY SUM("Quantity") DESC`
        
-    2. **"銷售量" (Sales Volume / How many units)**
-       - Concept: Summing physical items sold.
-       - Keyword matches: 銷售量, 賣出多少個, 銷量, Units sold.
-       - SQL Action: `SUM("Quantity")`
-       - ❌ WRONG: COUNT("Order ID")
-
-    3. **"銷售額" (Revenue / Sales Amount)**
-       - Concept: Total money earned.
-       - SQL Action: `SUM("Total Revenue")`
-       
-    4. **"YoY Growth Rate %" (Year over Year Growth Rate %)**
+    **"YoY Growth Rate %" (Year over Year Growth Rate %)**
        - Concept: Year over year growth rate, the xx% not 0.xx.
        - SQL Action: `SELECT 
         ((SUM(CASE WHEN strftime('%Y', "Order Date") = '2024' THEN "Total Revenue" ELSE 0 END) - 
@@ -209,6 +212,7 @@ check_sql_agent = LlmAgent(
     use the tool check_sql_syntax to use sql parser to check the SQL query for errors.
     """,
     tools=[check_sql_syntax],
+    include_contents="none",  # Only needs state variables, not full conversation history
 )
 
 execute_sql_agent = LlmAgent(
@@ -256,6 +260,7 @@ critic_agent = LlmAgent(
     """,
     output_key="critic_result",
     tools=[exit_loop],
+    include_contents="none",  # Only needs state variables, not full conversation history
 )
 
 
@@ -363,33 +368,45 @@ plot_decision_agent = LlmAgent(
 
 **Available Data:**
 - Columns: {column_names}
-- Preview: {raw_query_result}
+- Data row count: Check the number of rows in raw_query_result
 
-**CRITICAL: When to plot?**
-- **YES**: Comparison of multiple items, trends over time, or distribution/proportions.
-- **NO**: Single values (e.g. "Total Sales", "Top 1 Product"), specific lookup (e.g. "Who is..."), or Lists where visualization adds no value.
+**⚠️ MUST PLOT (should_plot = true):**
+- Query result has >= 2 rows with categorical + numeric columns
+- "各年份", "每月", "各區域", "各類別" comparisons → YES, always plot!
+- "列出...銷售額總計" with multiple rows → YES, bar chart
+- Time series trends → YES, line chart
+- Distribution/proportion questions (佔比) → YES, pie chart
 
-**Column Selection Rules:**
-- **x_column**: The categorical dimension (e.g., Month, Region, Product).
-- **y_column**: The numeric metric (e.g., Revenue, Count).
-- **color_column**: Use this if there is a SECOND categorical dimension (e.g. comparing trends across 'Years' or 'Regions').
+**NO PLOT (should_plot = false):**
+- Single aggregate value (e.g., "總銷售額是多少" → 1 row result)
+- Top 1 query ("最高的是哪個" → Finding THE one item)
+- Pure text lookup ("誰是...")
+- Result has only 1 row
+
+**Decision Rule:**
+1. Count rows in raw_query_result
+2. If rows >= 2 AND has numeric column → should_plot = true
+3. If rows == 1 → should_plot = false
 
 **Chart Type Guidelines:**
-- **pie**: Proportions (e.g. "佔比").
-- **line**: Time trends (e.g. "趨勢").
-- **bar**: Comparisons/Rankings (e.g. "比較").
+- **bar**: Comparisons/Rankings (e.g. "比較", "各年份", "各區域")
+- **line**: Time trends (e.g. "趨勢", months, quarters)
+- **pie**: Proportions (e.g. "佔比")
 
 **Examples:**
 - "各區域銷售額佔比" 
   -> plot: true, type: "pie", x: "Region", y: "Total Revenue"
-- "2023-2024 月銷售趨勢" (Columns: Month, Revenue, Year)
-  -> plot: true, type: "line", x: "Month", y: "Revenue", color: "Year"
-- "北美的總銷售額是多少"
-  -> plot: false (Single value)
-- "銷售量最高的產品是哪個"
-  -> plot: false (Finding the top one)
+- "請列出 Electronics 類別在各年份的銷售額總計" (2 rows: 2023, 2024)
+  -> plot: true, type: "bar", x: "Year", y: "Total Revenue"
+- "2023-2024 月銷售趨勢" (24 rows)
+  -> plot: true, type: "line", x: "Period", y: "Revenue"
+- "北美的總銷售額是多少" (1 row)
+  -> plot: false
+- "銷售量最高的產品是哪個" (1 row top-1)
+  -> plot: false
 
 User question: {user_question}
+Data preview: {raw_query_result}
 """,
     output_schema=PlotDecision,
     output_key="plot_decision",
