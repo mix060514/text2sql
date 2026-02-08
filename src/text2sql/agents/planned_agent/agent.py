@@ -437,6 +437,18 @@ def render_chart_tool(tool_context: ToolContext) -> dict:
 
         if result.get("success"):
             tool_context.state["chart_image"] = result["image"]
+
+            # Store chart data for eval validation
+            tool_context.state["chart_data"] = {
+                "chart_type": chart_type,
+                "x_column": x_col,
+                "y_column": y_col,
+                "color_column": color_col,
+                "x_values": [row.get(x_col) for row in data_list],
+                "y_values": [row.get(y_col) for row in data_list],
+                "data_rows": len(data_list),
+            }
+
             # Return a summary to the LLM to save context tokens
             return {"success": True, "message": "Chart generated and stored in state."}
         return result
