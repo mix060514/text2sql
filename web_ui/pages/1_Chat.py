@@ -75,11 +75,19 @@ selected_suggestion = st.sidebar.selectbox(
 send_suggestion = st.sidebar.button("Send Suggestion")
 
 # Display Messages
-st.info("👋 歡迎使用 *資料庫查詢助手*！請在下方輸入您的問題，我會幫您查詢資料庫回答您問題。")
+st.info(
+    "👋 歡迎使用 *資料庫查詢助手*！請在下方輸入您的問題，我會幫您查詢資料庫回答您問題。"
+)
 
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
+        # Display chart if available
+        if "chart_image" in msg and msg["chart_image"]:
+            import base64
+
+            image_bytes = base64.b64decode(msg["chart_image"])
+            st.image(image_bytes, caption="資料視覺化", use_container_width=True)
         if "subagent_output" in msg and show_subagent:
             with st.expander("Sub-agent Details"):
                 st.text(msg["subagent_output"])
@@ -179,20 +187,32 @@ if prompt:
                 session_id=st.session_state.session_id,
             )
 
-            if session and session.state.get("final_answer"):
-                response_text = session.state.get("final_answer")
+            chart_image = None
+            if session:
+                response_text = session.state.get("final_answer", "Done.")
+                chart_image = session.state.get("chart_image")
             else:
                 response_text = "Done. (Check 'final_answer' in state if empty)"
 
-            return response_text, current_logs
+            return response_text, current_logs, chart_image
 
-        full_response, subagent_logs = asyncio.run(run_chat())
+        full_response, subagent_logs, chart_image = asyncio.run(run_chat())
 
         message_placeholder.markdown(full_response)
+
+        # Display chart if available
+        if chart_image:
+            import base64
+            from io import BytesIO
+
+            image_bytes = base64.b64decode(chart_image)
+            st.image(image_bytes, caption="資料視覺化", use_container_width=True)
+
         st.session_state.messages.append(
             {
                 "role": "assistant",
                 "content": full_response,
                 "subagent_output": "\n".join(subagent_logs),
+                "chart_image": chart_image,
             }
         )
