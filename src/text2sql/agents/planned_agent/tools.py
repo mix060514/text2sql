@@ -33,54 +33,50 @@ def check_sql_syntax(tool_context: ToolContext) -> str:
         return f"Syntax Error: {str(e)}"
 
 
-def execute_sql(sql_query: str, tool_context: ToolContext) -> str:
+def _clean_sql(raw: str) -> str:
+    """Strip markdown code fences and leading/trailing whitespace from SQL."""
+    import re
+
+    # Remove ```sql ... ``` or ``` ... ```
+    cleaned = re.sub(r"^```(?:sql)?\s*\n?", "", raw.strip())
+    cleaned = re.sub(r"\n?```\s*$", "", cleaned)
+    return cleaned.strip()
+
+
+def execute_sql(tool_context: ToolContext) -> str:
     """
-    Executes the SQL query against the SQLite database.
-    Returns the results as a string or an error message.
+    Executes the SQL query stored in state['sql_query'] against the SQLite database.
+    Reads SQL directly from state to avoid LLM modifying the query during tool call.
+
+    Returns:
+        The query results formatted as a markdown table, or an error message.
     """
+    import pandas as pd
+
+    sql_query = _clean_sql(tool_context.state.get("sql_query", ""))
+    if not sql_query:
+        return "Error: No SQL query found in state."
+
     try:
-        # Extract SQL from markdown blocks if present
-        import re
-
-        # Look for ```sql ... ``` or just ``` ... ```
-        code_block = re.search(
-            r"```(?:sql)?\s*(.*?)\s*```", sql_query, re.DOTALL | re.IGNORECASE
-        )
-        if code_block:
-            sql_query = code_block.group(1).strip()
-        else:
-            # Fallback: simple strip if no code block found
-            # But we should also check if it starts with "Here is..." and try to find SELECT
-            # If no code fences, check for SELECT
-            sql_upper = sql_query.upper()
-            if "SELECT " in sql_upper:
-                # Try to find the start of SELECT
-                match = re.search(r"(SELECT\s.*)", sql_query, re.DOTALL | re.IGNORECASE)
-                if match:
-                    sql_query = match.group(1).strip()
-
-            sql_query = sql_query.replace("```sql", "").replace("```", "").strip()
-
-        con = sqlite3.connect(DB_PATH)
-        cur = con.cursor()
-        cur.execute(sql_query)
-        results = cur.fetchall()
+        with sqlite3.connect(DB_PATH) as con:
+            df = pd.read_sql_query(sql_query, con)
 
         # Capture column names
-        column_names = (
-            [description[0] for description in cur.description]
-            if cur.description
-            else []
-        )
+        column_names = list(df.columns)
 
-        con.close()
-
-        # Store raw results and column names in state
+        # Store raw results (list of lists/tuples) and column names in state
         if hasattr(tool_context, "state"):
-            tool_context.state["raw_query_result"] = results
+            # Convert dataframe to list of values for consistency with previous state usage
+            # best to convert to list of lists
+            tool_context.state["raw_query_result"] = df.values.tolist()
             tool_context.state["column_names"] = column_names
 
-        return str(results)
+        # Limit to 50 rows to save context
+        if len(df) > 50:
+            df = df.head(50)
+
+        return df.to_markdown(index=False)
+
     except Exception as e:
         if hasattr(tool_context, "state"):
             tool_context.state["raw_query_result"] = []
@@ -180,17 +176,14 @@ def render_chart(
             ),
         )
 
-        # Convert to base64 image (PNG)
+        # Convert to Plotly JSON
         try:
-            # scale=2 for higher resolution
-            img_bytes = fig.to_image(format="png", width=1000, height=600, scale=2)
-            image_base64 = base64.b64encode(img_bytes).decode("utf-8")
-            return {"success": True, "image": image_base64}
+            chart_json = fig.to_json()
+            return {"success": True, "chart_json": chart_json}
         except Exception as img_err:
-            # Fallback or specific error msg
             return {
                 "success": False,
-                "error": f"Image export failed (missing kaleido?): {str(img_err)}",
+                "error": f"Chart serialization failed: {str(img_err)}",
             }
 
     except Exception as e:

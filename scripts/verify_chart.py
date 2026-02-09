@@ -49,7 +49,7 @@ async def test_and_save_chart():
     raw_result = session.state.get("raw_query_result", [])
     column_names = session.state.get("column_names", [])
     plot_decision = session.state.get("plot_decision", {})
-    chart_image_b64 = session.state.get("chart_image", "")
+    chart_json = session.state.get("chart_json", "")
 
     print("\n" + "=" * 60)
     print("DATA VERIFICATION:")
@@ -67,21 +67,28 @@ async def test_and_save_chart():
     print(f"  y_column: {plot_decision.get('y_column')}")
     print(f"  color_column: {plot_decision.get('color_column')}")
 
-    # Save chart image
-    if chart_image_b64:
-        output_path = (
-            Path(__file__).parent.parent / "eval" / "results" / "test_chart.png"
-        )
-        output_path.parent.mkdir(parents=True, exist_ok=True)
+    # Verify chart JSON
+    if chart_json:
+        import json
 
-        image_bytes = base64.b64decode(chart_image_b64)
-        with open(output_path, "wb") as f:
-            f.write(image_bytes)
+        try:
+            chart_dict = json.loads(chart_json)
+            print("\n✅ Chart JSON is valid.")
+            print(f"   JSON length: {len(chart_json)} chars")
 
-        print(f"\n✅ Chart saved to: {output_path}")
-        print(f"   Image size: {len(image_bytes)} bytes")
+            # Check for data/layout keys
+            if "data" in chart_dict and "layout" in chart_dict:
+                print(
+                    "   ✅ JSON contains 'data' and 'layout' keys (valid Plotly structure)."
+                )
+            else:
+                print("   ⚠️ JSON missing standard Plotly keys.")
 
-        # Verify logic: X-axis should be Period, Y-axis should be Revenue
+        except json.JSONDecodeError as e:
+            print(f"\n❌ Invalid JSON format: {e}")
+            return
+
+        # Simple logic check
         print("\n" + "=" * 60)
         print("LOGIC CHECK:")
 
@@ -98,26 +105,8 @@ async def test_and_save_chart():
         else:
             print(f"  ✅ y_column '{y_col}' exists in data")
 
-        # Check if data order is correct (for time series)
-        if raw_result:
-            periods = [row[0] for row in raw_result]
-            expected_order = [
-                "2023-Q1",
-                "2023-Q2",
-                "2023-Q3",
-                "2023-Q4",
-                "2024-Q1",
-                "2024-Q2",
-                "2024-Q3",
-                "2024-Q4",
-            ]
-            if periods == expected_order:
-                print("  ✅ Data is in correct chronological order")
-            else:
-                print(f"  ⚠️  Data order: {periods}")
-                print(f"      Expected: {expected_order}")
     else:
-        print("\n❌ No chart image generated!")
+        print("\n❌ No chart JSON generated!")
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ import asyncio
 import uuid
 import time
 from typing import List, Dict
+import plotly.io as pio
 
 # Setup path to import local src
 # Assuming web_ui/pages/1_Chat.py -> web_ui/pages -> web_ui -> project_root -> src
@@ -51,27 +52,16 @@ st.sidebar.title("Settings")
 show_subagent = st.sidebar.checkbox("Show Sub-agent Output", value=True)
 
 
-# Load Ground Truth for Suggestions
-@st.cache_data
-def load_suggestions():
-    data_path = project_root / "data" / "eval_set_v2.jsonl"
-    questions = []
-    if data_path.exists():
-        with open(data_path, "r", encoding="utf-8") as f:
-            for line in f:
-                try:
-                    data = json.loads(line)
-                    if "question" in data:
-                        questions.append(data["question"])
-                except:
-                    pass
-    return questions
+SUGGESTED_QUESTIONS = [
+    "EMEA 的總銷售額是多少？",
+    "請列出 Electronics 類別在各年份的銷售額總計。",
+    "請列出 North America 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+    "各區域的銷售額佔比是多少？",
+]
 
-
-suggestions = load_suggestions()
 selected_suggestion = st.sidebar.selectbox(
-    "Suggested Questions", [""] + suggestions[:20]
-)  # Limit to 20 for UI
+    "Suggested Questions", [""] + SUGGESTED_QUESTIONS
+)
 send_suggestion = st.sidebar.button("Send Suggestion")
 
 # Display Messages
@@ -79,15 +69,16 @@ st.info(
     "👋 歡迎使用 *資料庫查詢助手*！請在下方輸入您的問題，我會幫您查詢資料庫回答您問題。"
 )
 
-for msg in st.session_state.messages:
+for i, msg in enumerate(st.session_state.messages):
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
         # Display chart if available
-        if "chart_image" in msg and msg["chart_image"]:
-            import base64
-
-            image_bytes = base64.b64decode(msg["chart_image"])
-            st.image(image_bytes, caption="資料視覺化", use_container_width=True)
+        if "chart_json" in msg and msg["chart_json"]:
+            try:
+                fig = pio.from_json(msg["chart_json"])
+                st.plotly_chart(fig, use_container_width=True, key=f"history_chart_{i}")
+            except Exception as e:
+                st.error(f"Failed to render chart: {e}")
         if "subagent_output" in msg and show_subagent:
             with st.expander("Sub-agent Details"):
                 st.text(msg["subagent_output"])
@@ -187,32 +178,37 @@ if prompt:
                 session_id=st.session_state.session_id,
             )
 
-            chart_image = None
+            chart_json = None
             if session:
-                response_text = session.state.get("final_answer", "Done.")
-                chart_image = session.state.get("chart_image")
+                response_text = (
+                    session.state.get("final_answer")
+                    or session.state.get("answer")
+                    or "No answer generated."
+                )
+                chart_json = session.state.get("chart_json")
             else:
-                response_text = "Done. (Check 'final_answer' in state if empty)"
+                response_text = "No session found."
 
-            return response_text, current_logs, chart_image
+            return response_text, current_logs, chart_json
 
-        full_response, subagent_logs, chart_image = asyncio.run(run_chat())
+        full_response, subagent_logs, chart_json = asyncio.run(run_chat())
 
         message_placeholder.markdown(full_response)
 
         # Display chart if available
-        if chart_image:
-            import base64
-            from io import BytesIO
-
-            image_bytes = base64.b64decode(chart_image)
-            st.image(image_bytes, caption="資料視覺化", use_container_width=True)
+        # Display chart if available
+        if chart_json:
+            try:
+                fig = pio.from_json(chart_json)
+                st.plotly_chart(fig, use_container_width=True, key="latest_chart")
+            except Exception as e:
+                st.error(f"Failed to render chart: {e}")
 
         st.session_state.messages.append(
             {
                 "role": "assistant",
                 "content": full_response,
                 "subagent_output": "\n".join(subagent_logs),
-                "chart_image": chart_image,
+                "chart_json": chart_json,
             }
         )

@@ -1,6 +1,9 @@
 
+name: text2sql-dev
+
 services:
   webui:
+    container_name: text2sql-webui-dev
     build: .
     restart: always
     ports:

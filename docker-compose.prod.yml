@@ -1,6 +1,9 @@
 
+name: text2sql-prod
+
 services:
   webui:
+    container_name: text2sql-webui-prod
     image: text2sql-webui:v1.0.0
     restart: always
     ports:

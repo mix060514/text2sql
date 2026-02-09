@@ -5,8 +5,8 @@ import random
 from datetime import datetime, timedelta
 
 # 設定隨機種子以確保結果可重現
-np.random.seed(42)
-random.seed(42)
+np.random.seed(43)
+random.seed(43)
 
 # ==========================================
 # 1. 參數設定 (Configuration)
