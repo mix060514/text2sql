@@ -13,3 +13,8 @@ wheels/
 
 # Eval results
 eval/results/
+
+# Local secrets/settings; the checked-in example contains no real credential.
+.env
+.env.*
+!.env.example

@@ -1,3 +1,4 @@
+import asyncio
 import json
 import unittest
 from unittest.mock import patch
@@ -14,9 +15,12 @@ from text2sql.runtime import run_question, stream_turn
 class FakeModel(BaseLlm):
     replies: list[str]
     calls: int = 0
+    delay: float = 0
 
     async def generate_content_async(self, llm_request, stream=False):
         self.calls += 1
+        if self.delay:
+            await asyncio.sleep(self.delay)
         yield LlmResponse(content=types.Content(role="model", parts=[types.Part(text=self.replies.pop(0))]))
 
 
@@ -102,6 +106,15 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
                 self.assertTrue(session.state["chart_json"])
         self.assertIsNone(session.state["chart_json"])
         self.assertEqual(session.state["raw_query_result"], [[30000]])
+
+    async def test_invocation_timeout_cannot_publish_answer(self):
+        runner = self.runner([self.sql()], [self.report()])
+        runner.agent.sub_agents[1].model.delay = 1
+        with patch("text2sql.runtime.AGENT_TIMEOUT_SECONDS", 0.05):
+            state = await run_question(runner, "訂單數是多少？")
+        self.assertEqual(state["workflow_status"], "failed")
+        self.assertEqual(state["workflow_error"]["code"], "TimeoutError")
+        self.assertIsNone(state["chart_json"])
 
 
 if __name__ == "__main__":

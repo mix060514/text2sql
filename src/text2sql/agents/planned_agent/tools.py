@@ -154,6 +154,32 @@ def render_chart(spec: AnswerSubmission, columns: list[str], rows: list[list]) -
     return figure.to_json()
 
 
+def result_table(spec: AnswerSubmission, columns: list[str], rows: list[list]) -> str:
+    """Present every accepted row without asking a model to copy the data."""
+    from tabulate import tabulate
+
+    if not rows:
+        return "查詢結果：0 筆符合條件的資料。"
+    labels = {spec.x_column, spec.color_column}
+
+    def display(column, value):
+        if value is None:
+            text = "—"
+        elif column in labels:
+            text = str(value)
+        elif isinstance(value, int):
+            text = f"{value:,}"
+        elif isinstance(value, float):
+            text = f"{value:,.2f}"
+        else:
+            text = str(value)
+        return text.replace("|", "\\|").replace("\n", " ")
+
+    cells = [[display(column, value) for column, value in zip(columns, row)] for row in rows]
+    headers = [column.replace("|", "\\|").replace("\n", " ") for column in columns]
+    return tabulate(cells, headers=headers, tablefmt="pipe", disable_numparse=True)
+
+
 def complete_answer(spec: AnswerSubmission, state) -> dict:
     """Hard success gate: only executed data and a validated chart can be published."""
     if not state.get("query_success"):
@@ -162,8 +188,9 @@ def complete_answer(spec: AnswerSubmission, state) -> dict:
     if spec.chart_type == "none" and len(rows) >= 2 and len(columns) >= 2 and numeric_columns(columns, rows):
         raise ValueError("Multiple rows with a numeric measure require a chart.")
     chart_json = render_chart(spec, columns, rows) if spec.chart_type != "none" else None
+    final_answer = spec.answer + "\n\n" + result_table(spec, columns, rows)
     state.update({
-        "answer": spec.answer, "final_answer": spec.answer, "workflow_status": "completed",
+        "answer": final_answer, "final_answer": final_answer, "workflow_status": "completed",
         "workflow_error": None,
         "plot_decision": {"should_plot": chart_json is not None,
                           "chart_type": None if chart_json is None else spec.chart_type,
@@ -174,4 +201,4 @@ def complete_answer(spec: AnswerSubmission, state) -> dict:
                        "y_column": spec.y_column, "color_column": spec.color_column or None,
                        "data_rows": len(rows)} if chart_json else None,
     })
-    return {"success": True, "answer": spec.answer, "chart_generated": chart_json is not None}
+    return {"success": True, "answer": final_answer, "chart_generated": chart_json is not None}

@@ -1,7 +1,6 @@
 """Small-model path: fixed stages with bounded, error-driven repair."""
 
 from google.adk.agents import BaseAgent, LlmAgent
-from google.adk.agents.callback_context import CallbackContext
 from google.adk.events import Event, EventActions
 from google.adk.models.lite_llm import LiteLlm
 from google.genai import types
@@ -92,7 +91,7 @@ class Text2SQLWorkflow(BaseAgent):
                 spec = AnswerSubmission.model_validate(ctx.session.state.get("report"))
                 state = dict(ctx.session.state)
                 complete_answer(spec, state)  # validates and renders directly
-                yield self.update(ctx, state, spec.answer)
+                yield self.update(ctx, state, state["final_answer"])
                 return
             except (ValidationError, ValueError, TypeError) as exc:
                 feedback = f"Invalid report or chart: {exc}"

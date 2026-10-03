@@ -29,7 +29,8 @@ DOMAIN = """
 
 REPORT_RULES = """
 使用繁體中文回答，產品與公司名稱保留原文。
-answer 要依實際 columns 與 rows，列出所有結果列，不可編造資料或欄位。
+answer 要依實際 columns 與 rows 提供簡短解釋、重點或直接回答，不可編造資料或欄位。
+完整資料表由程式產生；不要在 answer 重寫所有列或輸出 Markdown 表格。
 空結果表示沒有符合條件的資料；不能編造答案。
 數字加千分位；金額保留兩位小數，可另外補充 K/M 縮寫。
 不要將原始 JSON 或 Plotly JSON 塞進 answer；程式負責產生圖表。

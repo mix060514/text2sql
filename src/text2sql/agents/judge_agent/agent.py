@@ -84,4 +84,6 @@ judge_agent = LlmAgent(
 - `reasoning`: 一到兩句話簡短說明評分理由
 """,
     output_schema=JudgeResult,
+    disallow_transfer_to_parent=True,
+    disallow_transfer_to_peers=True,
 )

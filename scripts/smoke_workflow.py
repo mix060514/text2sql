@@ -59,19 +59,42 @@ def pie_matches(state, expected):
         return False
 
 
+def plotted_rows(state):
+    columns = state.get("column_names", [])
+    spec = state.get("plot_decision", {})
+    try:
+        x, y = columns.index(spec["x_column"]), columns.index(spec["y_column"])
+        return [[row[x], row[y]] for row in state["raw_query_result"]]
+    except (KeyError, ValueError, TypeError):
+        return []
+
+
+def chart_order_matches(state, expected):
+    try:
+        chart = json.loads(state["chart_json"])
+        labels = chart["data"][0]["x"]
+        return [str(value) for value in labels] == [str(row[0]) for row in expected]
+    except (KeyError, TypeError, ValueError, IndexError):
+        return False
+
+
 async def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--limit", type=int)
+    parser.add_argument("--case", action="append", help="Run only these named cases (repeatable)")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     runner = InMemoryRunner(agent=root_agent, app_name="smoke_workflow")
     results = []
     cases = CASES[:args.limit] if args.limit else CASES
+    if args.case:
+        cases = [case for case in cases if case[0] in args.case]
     for name, question, oracle_sql, expected_chart in cases:
         started = time.monotonic()
         state = await run_question(runner, question)
         expected = read_sales(oracle_sql)["rows"]
-        data_ok = pie_matches(state, expected) if expected_chart == "pie" else normalized_rows(state.get("raw_query_result", [])) == normalized_rows(expected)
+        actual_rows = plotted_rows(state) if expected_chart not in ("none", "pie") else state.get("raw_query_result", [])
+        data_ok = pie_matches(state, expected) if expected_chart == "pie" else normalized_rows(actual_rows) == normalized_rows(expected)
         if name == "Order count":
             # "Who?" permits returning just the customer; the count need not
             # be selected. Still verify that the SQL ranks distinct orders.
@@ -81,6 +104,8 @@ async def main():
             )
         actual_chart = state.get("plot_decision", {}).get("chart_type") or "none"
         chart_ok = actual_chart == expected_chart and (expected_chart == "none" or bool(state.get("chart_json")))
+        if expected_chart not in ("none", "pie"):
+            chart_ok = chart_ok and chart_order_matches(state, expected)
         passed = state.get("workflow_status") == "completed" and data_ok and chart_ok
         result = {"case": name, "question": question, "passed": passed,
                   "data_correct": data_ok, "chart_correct": chart_ok,
@@ -89,6 +114,7 @@ async def main():
                   "rows": state.get("raw_query_result"), "answer": state.get("final_answer"),
                   "chart_type": actual_chart, "sql_attempts": state.get("sql_attempts"),
                   "report_attempts": state.get("report_attempts"),
+                  "sql_feedback": state.get("sql_feedback"), "report_feedback": state.get("report_feedback"),
                   "error": state.get("workflow_error"), "harness": state.get("harness_stats")}
         results.append(result)
         print(f"{'PASS' if passed else 'FAIL'} {name}: {result['seconds']}s", flush=True)

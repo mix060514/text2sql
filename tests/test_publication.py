@@ -28,7 +28,9 @@ class PublicationTests(unittest.TestCase):
                                                  x_column="Region", y_column="Revenue"), state)
         self.assertTrue(result["success"])
         self.assertNotIn("chart_json", result)
-        self.assertEqual(state["final_answer"], "EMEA 20；APAC 10。")
+        self.assertTrue(state["final_answer"].startswith("EMEA 20；APAC 10。"))
+        self.assertIn("Revenue", state["final_answer"])
+        self.assertIn("APAC", state["final_answer"])
         chart = json.loads(state["chart_json"])
         self.assertEqual(chart["data"][0]["x"], ["EMEA", "APAC"])
 
@@ -67,6 +69,14 @@ class PublicationTests(unittest.TestCase):
         self.assertEqual(state["answer"], "")
         self.assertEqual(state["final_answer"], "")
         self.assertFalse(state["query_success"])
+
+    def test_all_rows_present_even_if_model_summary_omits_them(self):
+        state = self.state(["Region", "Revenue"], [["first", 1250.75], ["second", 2300.25]])
+        complete_answer(AnswerSubmission(answer="第一區域較小。", chart_type="bar", x_column="Region", y_column="Revenue"), state)
+        self.assertIn("first", state["final_answer"])
+        self.assertIn("second", state["final_answer"])
+        self.assertIn("1,250.75", state["final_answer"])
+        self.assertIn("2,300.25", state["final_answer"])
 
 
 if __name__ == "__main__":

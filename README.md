@@ -1,156 +1,90 @@
-# Text-to-SQL 多代理系統
+# Text-to-SQL：兩種 Agent 架構
 
-一個基於 Google ADK 的自然語言轉 SQL 查詢系統，採用多代理協作架構，具備自我修正能力與 LLM-as-Judge 評估機制。
+這個分支是 **Qwen 27B 版**（`codex/text2sql-qwen27b`）。
+舊版保存在基準 commit `fd66447`；強模型版在 `codex/text2sql-strong`。
 
-## 🔗 Demo
+兩版共用 SQLite 銷售資料、查詢限制、圖表驗證及相同的 live smoke cases。
+設計差異見 [架構比較](docs/ARCHITECTURE.md)，實測紀錄見 [驗證結果](docs/VALIDATION.md)。
 
-**線上展示**：[https://agent-show.ivan-labs.com](https://agent-show.ivan-labs.com)
+## 27B 版流程
 
-> ⚠️ 部署於本地主機，訪問前請先聯繫作者加入 Cloudflare Zero Trust 白名單
-
-
-### 畫面預覽
-
-| 代理執行過程 | 評估結果 |
-|:--------:|:--------:|
-| ![Chat](./assets/screenshots/chat.png) | ![Eval](./assets/screenshots/eval.png) |
-
-| 資料儀表板 | 多模態本地模型 |
-|:--------:|:--------:|
-| ![Dashboard](./assets/screenshots/dashboard.png) | ![Image_Read](./assets/screenshots/image_read.png) |
-
-
-## 專案亮點
-
-- **多代理協作架構**：採用 SequentialAgent + LoopAgent 設計，實現任務分解與迭代優化
-- **自我修正機制**：透過 Critic Agent 審查查詢結果，自動觸發重試修正（最多 3 次）
-- **完整評估框架**：包含 100+ 測試案例，搭配 LLM-as-Judge 自動評分
-- **本地模型部署**：使用 llama.cpp 運行 Qwen3-4B，支援離線運行
-
-## 系統架構
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         Root Agent                              │
-│                    (任務分派與回應整合)                            │
-└─────────────────────────┬───────────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                  Query & Answer Agent                           │
-│                    (SequentialAgent)                            │
-│  ┌────────────────────────────────────────────────────────────┐ │
-│  │              Get Data Agent (LoopAgent)                    │ │
-│  │  ┌──────────────────────────────────────────────────────┐  │ │
-│  │  │  SQL Generation Sequential                           │  │ │
-│  │  │  ├─ Region/Country Check Agent (別名映射)              │ │ │
-│  │  │  └─ SQL Gen Agent (SQL 生成)                          │  │ │
-│  │  └──────────────────────────────────────────────────────┘  │ │
-│  │                          ▼                                 │ │
-│  │  ┌──────────────────────────────────────────────────────┐  │ │
-│  │  │  SQL Critic Sequential                               │  │ │
-│  │  │  ├─ Check SQL Agent (語法檢查)                        │  │ │
-│  │  │  ├─ Execute SQL Agent (執行查詢)                      │  │ │
-│  │  │  └─ Critic Agent (結果審查 → 決定是否重試)              │  │ │
-│  │  └──────────────────────────────────────────────────────┘  │ │
-│  │              ↻ Loop until correct or max retries           │ │
-│  └────────────────────────────────────────────────────────────┘ │
-│                          ▼                                      │
-│  ┌────────────────────────────────────────────────────────────┐ │
-│  │              Answer Agent (商業語言回覆)                     │ │
-│  └────────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
+```text
+使用者問題
+  → SQL planner（Qwen，SQLPlan schema）
+  → 程式直接驗證、執行唯讀 SQL
+      └─ SQL 或 schema 錯誤：只重試 planner，最多 3 次總嘗試
+  → report writer（Qwen，AnswerSubmission schema）
+      └─ schema / 圖表參數錯誤：只重試 writer，最多 2 次總嘗試
+  → 程式驗證成功條件、產生完整資料表與 Plotly 圖表、提交回答
 ```
 
-## 專案結構
+沒有 region/checker/executor/critic/renderer/echo Agents。
+模型不需要決定「要不要執行已生成的 SQL」；那是 controller 的固定下一步。
+完整資料表由程式產生，模型只寫解釋。
+SQL 成功不代表語意正確，因此仍保留評估。
 
-```
-.
-├── src/text2sql/agents/          # 核心代理系統
-│   ├── planned_agent/            # 主要 Text-to-SQL 代理
-│   └── pic_read_agent/           # 視覺語言模型代理
-│
-├── eval/                         # 評估系統
-│   ├── eval.py                   # 評估執行腳本
-│   └── judge/                    # LLM-as-Judge 評分代理
-│
-├── scripts/                      # 資料與評估集生成腳本
-│
-├── web_ui/                       # Streamlit Web 介面
-│   ├── 1_Chat.py                 # 對話介面（可觀察代理執行過程）
-│   ├── 2_Eval.py                 # 評估結果檢視
-│   ├── 3_System_Monitor.py       # GPU 監控
-│   ├── 4_Data_Dashboard.py       # 資料視覺化
-│   └── 5_Image_Read_Chat.py      # 圖片理解對話
-│
-└── data/                         # 合成銷售資料與評估集
+## 執行
+
+已確認 Pi Agent 使用的 alias 是 `qwen3.8-27b-iq3-xxs`，
+OpenAI-compatible API 為 `http://127.0.0.1:18080/v1`。本分支預設使用這組設定。
+
+```bash
+uv sync --locked
+uv run python scripts/run_planned_agent.py '南美 的總銷售額是多少？'
+uv run streamlit run web_ui/app.py
 ```
 
-## 開發流程
+若模型服務不同，使用環境變數覆寫：
 
-採用**評估驅動開發 (Evaluation-Driven Development)**：
-
-```
-1. 建立評估資料集    →    2. 開發代理系統    →    3. LLM Judge 評分    →    4. 迭代優化
-   (scripts/)              (src/)                 (eval/)                  (web_ui 驗證)
-```
-
-## 技術細節
-
-### 代理設計模式
-
-```python
-# LoopAgent: 自我修正迴圈
-get_data_agent = LoopAgent(
-    sub_agents=[sql_gen_sequential, sql_critic_sequential],
-    max_iterations=3  # 最多重試 3 次
-)
-
-# Critic Agent: 透過 exit_loop 工具控制迴圈
-def exit_loop(tool_context: ToolContext):
-    tool_context.actions.escalate = True  # 跳出迴圈
+```bash
+export LLAMA_CPP_MODEL=openai/qwen3.8-27b-iq3-xxs
+export LLAMA_CPP_API_BASE=http://127.0.0.1:18080/v1
+export LLAMA_CPP_API_KEY=aaa
 ```
 
-### 別名映射
+LiteLLM 的 `openai/` 是 transport 前綴，實際模型 ID 不含該前綴。
+Docker 中的 localhost 是容器自己；使用 Compose 時，必須將
+`LLAMA_CPP_API_BASE` 設成容器能到達且有此模型的服務 URL。
+Vision 頁面沿用獨立的 `LLAMA_CPP_VL_*` 設定。
 
-支援多語言輸入自動轉換：
+## 驗證
 
-| 使用者輸入 | 資料庫值 |
-|-----------|---------|
-| 亞太區 / APAC / Asia Pacific | `Region = 'APAC'` |
-| 中國 / China / 大陸 | `Country = 'China'` |
+```bash
+# 離線：真實 SQLite、圖表與注入失敗的 workflow 測試，不呼叫模型
+uv run python scripts/verify_all.py
 
-### LLM-as-Judge
+# 線上：同一組 8 個問題，直接與現在的 DB 比對，不使用 LLM judge
+uv run python scripts/smoke_workflow.py --output docs/smoke-qwen27b.json
 
-- 使用 Structured Output 確保評分格式一致
-- 評估維度：答案正確性、數據準確性、回答完整性
-- 輸出 0-10 信心分數，≥7 視為正確
+# 較廣的評估集；這兩個命令會呼叫模型及 LLM judge
+uv run python eval/eval_e2e.py --limit 5
+uv run python eval/eval.py
+```
 
-## 數據範例
+兩個 eval 都改用與目前 DB 配對的 `eval_set_v3.jsonl`。
+`data/eval_manifest.json` 驗證 DB / dataset 的 SHA-256，避免舊 ground truth
+被拿來評估新資料；歷史結果不能直接當成本次模型準確率。
+smoke 驗證實際資料與圖表，不能保證自然語言回答中的每一個敘述。
 
-全球銷售數據前 5 行：
+## 閱讀順序
 
-| Order ID | Order Date | Region | Country | Customer Name | Product Category | Product Name | ASP | Quantity | Total Revenue |
-|----------|-----------|--------|---------|----------------|------------------|--------------|-----|----------|---------------|
-| ORD-202309986 | 2023-01-01 | North America | United States | Elite Elite Systems | Electronics | Docking Station | 184.04 | 6 | 1104.24 |
-| ORD-202325336 | 2023-01-01 | LATAM | Mexico | Apex Elite Systems | Electronics | 4K Monitor 27" | 345.53 | 11 | 3800.83 |
-| ORD-202315895 | 2023-01-01 | North America | United States | Apex Apex Ltd. | Electronics | Pro Smartphone 15 | 1002.65 | 3 | 3007.95 |
-| ORD-202328380 | 2023-01-01 | EMEA | United Kingdom | Next Beta Ltd. | Software | Team Collaboration Tool | 208.97 | 5 | 1044.85 |
-| ORD-202318954 | 2023-01-01 | APAC | Singapore | Next Delta Ltd. | Office Supplies | Ergonomic Chair | 382.53 | 2 | 765.06 |
+1. `src/text2sql/agents/planned_agent/agent.py`：固定順序與兩處有限重試。
+2. `contracts.py`、`prompts.py`：模型輸入、輸出與業務定義。
+3. `tools.py`：SQLite 權限、結果大小、圖表與發布條件。
+4. `context.py`、`src/text2sql/runtime.py`：回合隔離與完整事件串流。
 
-## 技術棧
+查詢最多 200 列、20,000 bytes、5 秒；超限即失敗，不接受截斷的成功結果。
+每個 ADK invocation 最多 8 次模型呼叫、300 秒。
+前一回合只攜帶問題與已執行 SQL 作追問上下文，本回合一定重新查詢。
+目前使用 InMemoryRunner；沒有加入排程器或永久 session 儲存。
 
-| 類別 | 技術 |
-|------|------|
-| Agent Framework | Google ADK |
-| LLM | Qwen3-4B-Instruct (via llama.cpp) |
-| Database | SQLite |
-| Web UI | Streamlit |
+## 比較分支
 
-## 聯絡作者
+```bash
+git diff codex/text2sql-qwen27b..codex/text2sql-strong -- src/text2sql/agents/planned_agent
+```
 
-- LinkedIn: [https://www.linkedin.com/in/yi-fan-zhang-1ba122171/]
+工作目錄已分開：27B 版在原 repo，強模型版在相鄰的 `text2sql-strong` worktree。
+兩個分支皆為本機分支，尚未 push 或部署。
 
-## License
-
-MIT
+MIT License.
