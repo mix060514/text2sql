@@ -19,13 +19,18 @@ from google.adk.runners import InMemoryRunner
 from google.genai import types
 
 from text2sql.agents.planned_agent.agent import root_agent
+from text2sql.agents.planned_agent.tools import read_sales
+from text2sql.runtime import run_question
+
+# Compute against the current database, rather than retaining a seed-42 value.
+LATAM_REVENUE = read_sales('SELECT SUM("Total Revenue") FROM sales_data WHERE Region = \'LATAM\'')["rows"][0][0]
 
 # Failed cases extracted from e2e_results.json
 FAILED_CASES = [
     # Region mapping issues
     {
         "question": "南美 的總銷售額是多少？",
-        "expected_contains": ["5395770", "5,395,770"],
+        "expected_contains": [str(LATAM_REVENUE), f"{LATAM_REVENUE:,.2f}"],
         "check_type": "contains_any",
         "issue": "南美 should map to LATAM",
     },
@@ -67,27 +72,7 @@ FAILED_CASES = [
 
 async def run_agent_and_get_state(runner: InMemoryRunner, question: str) -> dict:
     """Execute agent and return session state, following eval_e2e.py pattern."""
-    session_id = f"{runner.app_name}_{int(time.time()*1000)}_{uuid.uuid4().hex[:6]}"
-    user_id = "test_user"
-
-    # Create session first
-    await runner.session_service.create_session(
-        app_name=runner.app_name, user_id=user_id, session_id=session_id
-    )
-
-    content = types.Content(role="user", parts=[types.Part(text=question)])
-
-    # Run agent
-    async for _ in runner.run_async(
-        user_id=user_id, session_id=session_id, new_message=content
-    ):
-        pass
-
-    # Get session state
-    session = await runner.session_service.get_session(
-        app_name=runner.app_name, user_id=user_id, session_id=session_id
-    )
-    return session.state if session else {}
+    return await run_question(runner, question, user_id="test_user")
 
 
 async def run_single_test(runner: InMemoryRunner, case: dict) -> dict:
@@ -140,9 +125,10 @@ async def run_single_test(runner: InMemoryRunner, case: dict) -> dict:
                 if isinstance(plot_decision, dict)
                 else False
             )
-            passed = should_plot == case.get("expected_plot", False)
+            passed = should_plot == case.get("expected_plot", False) and bool(state.get("chart_json"))
             reason = f"Plot decision: {plot_decision}"
 
+        passed = passed and state.get("workflow_status") == "completed"
         return {
             "question": question,
             "issue": case.get("issue", ""),

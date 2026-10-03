@@ -3873,7 +3873,9 @@ dependencies = [
     { name = "pandas" },
     { name = "plotly" },
     { name = "protobuf" },
+    { name = "pydantic" },
     { name = "setuptools" },
+    { name = "sqlparse" },
     { name = "streamlit" },
     { name = "tabulate" },
 ]
@@ -3890,7 +3892,9 @@ requires-dist = [
     { name = "pandas", specifier = "<3" },
     { name = "plotly", specifier = ">=6.5.2" },
     { name = "protobuf", specifier = "<5" },
+    { name = "pydantic", specifier = ">=2.12.5" },
     { name = "setuptools", specifier = ">=80.10.2" },
+    { name = "sqlparse", specifier = ">=0.5.5" },
     { name = "streamlit" },
     { name = "tabulate", specifier = ">=0.9.0" },
 ]

@@ -12,13 +12,14 @@ import plotly.io as pio
 # Setup path to import local src
 # Assuming web_ui/pages/1_Chat.py -> web_ui/pages -> web_ui -> project_root -> src
 project_root = pathlib.Path(__file__).parent.parent.parent.resolve()
-sys.path.append(str(project_root / "src"))
+sys.path.insert(0, str(project_root / "src"))
 sys.path.append(str(project_root / "eval"))
 
 try:
     from google.adk.runners import InMemoryRunner
     from google.genai import types
     from text2sql.agents.planned_agent.agent import root_agent
+    from text2sql.runtime import stream_turn
 except ImportError as e:
     st.error(f"Failed to import agent or dependencies: {e}")
     st.stop()
@@ -49,7 +50,7 @@ if "runner" not in st.session_state:
 
 # Sidebar settings
 st.sidebar.title("Settings")
-show_subagent = st.sidebar.checkbox("Show Sub-agent Output", value=True)
+show_subagent = st.sidebar.checkbox("Show Analysis Details", value=True)
 
 
 SUGGESTED_QUESTIONS = [
@@ -80,7 +81,7 @@ for i, msg in enumerate(st.session_state.messages):
             except Exception as e:
                 st.error(f"Failed to render chart: {e}")
         if "subagent_output" in msg and show_subagent:
-            with st.expander("Sub-agent Details"):
+            with st.expander("Analysis Details"):
                 st.text(msg["subagent_output"])
 
 # Chat Input
@@ -158,7 +159,8 @@ if prompt:
                 )
                 live_log_container = subagent_status.empty()
 
-            async for event in st.session_state.runner.run_async(
+            async for event in stream_turn(
+                st.session_state.runner,
                 user_id="web_user",
                 session_id=st.session_state.session_id,
                 new_message=content,

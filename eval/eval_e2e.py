@@ -25,7 +25,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # Setup path to import local src
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 from google.adk.runners import InMemoryRunner
 from google.genai import types
@@ -33,6 +33,8 @@ from google.genai import types
 # Import Agents
 from text2sql.agents.planned_agent.agent import root_agent
 from text2sql.agents.judge_agent.agent import judge_agent
+from text2sql.runtime import run_question
+from common import verify_dataset, run_metadata
 
 
 PROJECT_DIR = pathlib.Path(__file__).parent.parent.resolve()
@@ -152,23 +154,7 @@ async def run_agent_and_get_state(
     runner: InMemoryRunner, prompt: str, user_id: str = "eval_user"
 ) -> dict:
     """Execute agent and return session state."""
-    session_id = f"{runner.app_name}_{int(time.time()*1000)}_{uuid.uuid4().hex[:6]}"
-
-    await runner.session_service.create_session(
-        app_name=runner.app_name, user_id=user_id, session_id=session_id
-    )
-
-    content = types.Content(role="user", parts=[types.Part(text=prompt)])
-
-    async for _ in runner.run_async(
-        user_id=user_id, session_id=session_id, new_message=content
-    ):
-        pass
-
-    session = await runner.session_service.get_session(
-        app_name=runner.app_name, user_id=user_id, session_id=session_id
-    )
-    return session.state if session else {}
+    return await run_question(runner, prompt, user_id)
 
 
 async def judge_sql_result(
@@ -279,12 +265,16 @@ async def evaluate_single(entry: Dict, timeout: int = 300) -> E2EResult:
         # Extract SQL results
         sql_query = state.get("sql_query", "")
         sql_result = state.get("raw_query_result")
-        final_answer = state.get("answer", "")
+        final_answer = state.get("final_answer", "")
 
         # Judge SQL result
-        sql_correct, sql_score, sql_reasoning = await judge_sql_result(
-            question, ground_truth, final_answer, sql_query, sql_result
-        )
+        if state.get("workflow_status") == "completed":
+            sql_correct, sql_score, sql_reasoning = await judge_sql_result(
+                question, ground_truth, final_answer, sql_query,
+                {"columns": state.get("column_names", []), "rows": sql_result},
+            )
+        else:
+            sql_correct, sql_score, sql_reasoning = False, 0, str(state.get("workflow_error"))
 
         # Extract plot decision
         plot_decision = state.get("plot_decision", {})
@@ -325,8 +315,8 @@ async def evaluate_single(entry: Dict, timeout: int = 300) -> E2EResult:
                     and chart_json_valid
                     and trace_type_correct
                     and x_order_correct
+                    and trace_count_correct
                 )
-                # trace_count_correct is a soft metric, not part of e2e_success
         else:
             # No expected_plot → skip plot evaluation entirely
             plot_decision_correct = True
@@ -443,6 +433,7 @@ async def run_evaluation(
     limit: int = None, retry_failed: bool = False, plot_only: bool = False
 ):
     """Run the full end-to-end evaluation."""
+    verify_dataset(EVAL_SET_PATH)
     # Load eval set
     with open(EVAL_SET_PATH, "r", encoding="utf-8") as f:
         eval_set = [json.loads(line) for line in f if line.strip()]
@@ -582,6 +573,7 @@ async def run_evaluation(
             pass
 
     summary = final_metrics.get_summary()
+    summary["run_metadata"] = run_metadata(EVAL_SET_PATH)
     summary["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     print(f"\n{'='*70}")

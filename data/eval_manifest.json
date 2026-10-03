@@ -1,0 +1,7 @@
+{
+  "dataset": "eval_set_v3.jsonl",
+  "database_sha256": "72f64a081fa0d20741a09528ec7a8d03eba976fde47d08a8be920e1c4ba1fb7a",
+  "dataset_sha256": "cc219234cb030386ce9e62818ce819690ef2cd34b060a8ec941500bb8892cc25",
+  "tie_policy": "ORDER BY metric DESC, name ASC",
+  "note": "Current seed-43 database and v3 ground truth. v2 describes the older database."
+}

@@ -12,6 +12,7 @@ from google.adk.runners import InMemoryRunner
 from google.genai import types
 
 from text2sql.agents.planned_agent.agent import root_agent
+from text2sql.runtime import stream_turn
 
 
 async def test_and_save_chart():
@@ -31,7 +32,8 @@ async def test_and_save_chart():
 
     content = types.Content(role="user", parts=[types.Part(text=test_question)])
 
-    async for event in runner.run_async(
+    async for event in stream_turn(
+        runner,
         user_id="test_user",
         session_id=session_id,
         new_message=content,

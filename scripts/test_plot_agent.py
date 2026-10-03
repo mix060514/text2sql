@@ -10,6 +10,7 @@ from google.adk.runners import InMemoryRunner
 from google.genai import types
 
 from text2sql.agents.planned_agent.agent import root_agent
+from text2sql.runtime import stream_turn
 
 
 async def test_with_prompt():
@@ -31,7 +32,8 @@ async def test_with_prompt():
 
     content = types.Content(role="user", parts=[types.Part(text=test_question)])
 
-    async for event in runner.run_async(
+    async for event in stream_turn(
+        runner,
         user_id="test_user",
         session_id=session_id,
         new_message=content,
@@ -61,7 +63,7 @@ async def test_with_prompt():
     )
     print(f"  plot_decision: {session.state.get('plot_decision', 'NOT SET')}")
     print(
-        f"  chart_image: {'YES (' + str(len(session.state.get('chart_image', ''))) + ' bytes)' if session.state.get('chart_image') else 'NOT SET'}"
+        f"  chart_json: {'YES (' + str(len(session.state.get('chart_image', ''))) + ' bytes)' if session.state.get('chart_image') else 'NOT SET'}"
     )
 
 

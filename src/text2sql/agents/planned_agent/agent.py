@@ -1,588 +1,113 @@
-from typing import List, Dict, Any, Optional
-import os
+"""Small-model path: fixed stages with bounded, error-driven repair."""
 
-from pydantic import BaseModel, Field
-from google.adk.agents import LlmAgent, LoopAgent, SequentialAgent
-from google.adk.tools import ToolContext
+from google.adk.agents import BaseAgent, LlmAgent
 from google.adk.agents.callback_context import CallbackContext
+from google.adk.events import Event, EventActions
 from google.adk.models.lite_llm import LiteLlm
+from google.genai import types
+from pydantic import ValidationError
 
-from .tools import check_sql_syntax, execute_sql, render_chart
 from text2sql.config import (
-    MAX_RETRIES,
-    LLAMA_CPP_MODEL,
-    LLAMA_CPP_API_KEY,
-    LLAMA_CPP_API_BASE,
+    LLAMA_CPP_MODEL, LLAMA_CPP_API_BASE, LLAMA_CPP_API_KEY,
+    REPORT_ATTEMPTS, SQL_ATTEMPTS,
 )
-
-# ------------------------------------------------------------------------------
-# Region and Country Aliases
-# ------------------------------------------------------------------------------
-REGION_ALIASES = """
-**Region Name Mappings** (User input → Database value):
-- "North America" / "北美" / "北美洲" / "NA" / "美洲" → Use `Region = 'North America'`
-- "EMEA" / "歐洲中東非洲" / "歐非中東" / "中東歐非" / "歐洲" / "Europe, Middle East, and Africa" → Use `Region = 'EMEA'`
-- "APAC" / "亞太區" / "亞太地區" / "亞太" / "Asia Pacific" → Use `Region = 'APAC'`
-- "LATAM" / "拉美" / "南美" / "南美洲" / "拉丁美洲" / "中南美" / "Latin America" → Use `Region = 'LATAM'`
-
-**⚠️ CRITICAL REGION RULES:**
-- If user says "南美", "南美洲", or "中南美" → MUST use `Region = 'LATAM'` (NOT null or other region)
-- If user says "歐非中東" or "中東歐非" → MUST use `Region = 'EMEA'` (NOT APAC)
-
-**Country Name Mappings** (User input → Database value):
-- "China" / "中國" / "大陸" / "PRC" → Use `Country = 'China'`
-- "Germany" / "德國" / "德意志" → Use `Country = 'Germany'`
-- "United States" / "美國" / "US" / "USA" → Use `Country = 'United States'`
-- "Canada" / "加拿大" → Use `Country = 'Canada'`
-- "India" / "印度" → Use `Country = 'India'`
-- "Australia" / "澳洲" / "澳大利亞" → Use `Country = 'Australia'`
-- "Japan" / "日本" → Use `Country = 'Japan'`
-- "United Kingdom" / "英國" / "UK" → Use `Country = 'United Kingdom'`
-- "France" / "法國" → Use `Country = 'France'`
-- "Brazil" / "巴西" → Use `Country = 'Brazil'`
-- "Mexico" / "墨西哥" → Use `Country = 'Mexico'`
-
-**CRITICAL**: Always map user's region/country names to the exact database values shown above.
-"""
-
-# ------------------------------------------------------------------------------
-# Database Schema Definition
-# ------------------------------------------------------------------------------
-SCHEMA_DESCRIPTION = """
-    **Database Schema Information:**
-    
-    [CRITICAL] TABLE NAME: `sales_data` (DO NOT use 'sales', 'orders', or any other name)
-    
-    **Columns in `sales_data`:**
-    - `Order ID` (TEXT): Unique transaction ID.
-      * RULE: For "Order Count" (訂單數), usage: `COUNT(DISTINCT "Order ID")`.
-      
-    - `Order Date` (TEXT): Format 'YYYY-MM-DD'.
-    
-    - `Region` (TEXT):
-      * Values: 'North America', 'EMEA', 'APAC', 'LATAM'
-      
-    - `Country` (TEXT): e.g., 'United States', 'Germany', 'China', 'India'.
-    - `Customer Name` (TEXT): Name of the customer company.
-    - `Product Category` (TEXT): e.g., 'Electronics', 'Software'.
-    - `Product Name` (TEXT): Specific product name.
-
-    - `ASP` (REAL): Average Selling Price (Unit Price).
-    
-    - `Quantity` (INTEGER): Units sold.
-      * RULE: For "Sales Volume" (銷售量), usage: `SUM("Quantity")`.
-      
-    - `Total Revenue` (REAL): Sales amount.
-      * RULE: For "Revenue" (銷售額), usage: `SUM("Total Revenue")`.
-"""
+from .contracts import AnswerSubmission, SQLPlan
+from .prompts import DOMAIN, REPORT_RULES
+from .tools import complete_answer, execute_query
+from .context import start_turn
 
 
-# ------------------------------------------------------------------------------
-# Callback to capture user question
-# ------------------------------------------------------------------------------
-def capture_user_question(callback_context: CallbackContext):
-    """Captures user's question into session state before agent runs."""
-    if callback_context.user_content and callback_context.user_content.parts:
-        user_text = callback_context.user_content.parts[0].text
-        if user_text:
-            callback_context.state["user_question"] = user_text
-    return None  # Continue with agent execution
+def model():
+    return LiteLlm(model=LLAMA_CPP_MODEL, api_base=LLAMA_CPP_API_BASE,
+                   api_key=LLAMA_CPP_API_KEY, timeout=120)
 
 
-region_country_check_agent = LlmAgent(
-    model=LiteLlm(
-        model=LLAMA_CPP_MODEL,
-        api_key=LLAMA_CPP_API_KEY,
-        api_base=LLAMA_CPP_API_BASE,
-    ),
-    name="region_country_check",
-    description="A region and country check agent that checks the region and country from the user question is in database or not.",
-    instruction=f"""You are a region and country check agent that checks the region and country from the user question.
-    
-    {REGION_ALIASES}
-    
-    return what region and country should use in sql query, if not related with region and country, return None""
-    """,
-    output_key="region_country",
-)
-
-
-sql_gen_agent = LlmAgent(
-    model=LiteLlm(
-        model=LLAMA_CPP_MODEL,
-        api_key=LLAMA_CPP_API_KEY,
-        api_base=LLAMA_CPP_API_BASE,
-    ),
-    name="sql_gen",
-    description="A SQL specialist with structured output and self-correction capabilities.",
-    instruction=f"""You are a precise SQL specialist using SQLite.
-
-    {SCHEMA_DESCRIPTION}
-
-    **⚠️ CRITICAL CONCEPT MAPPING (MUST FOLLOW - READ CAREFULLY):**
-    
-    | 中文詞彙 | 英文 | 正確 SQL | ❌ 錯誤 SQL |
-    |---------|------|----------|------------|
-    | 訂單數量、訂單數、幾筆訂單 | Order Count | `COUNT(DISTINCT "Order ID")` | SUM("Quantity") |
-    | 銷售量、賣出多少個、銷量 | Sales Volume | `SUM("Quantity")` | COUNT("Order ID") |
-    | 銷售額、營收、收入 | Revenue | `SUM("Total Revenue")` | - |
-    
-    **⚠️ KEY RULE: "訂單" vs "銷售量"**
-    - 「訂單數量」= 交易次數 = COUNT transactions = `COUNT(DISTINCT "Order ID")`
-    - 「銷售量」= 賣出件數 = SUM units = `SUM("Quantity")`
-    - These are COMPLETELY DIFFERENT concepts!
-    
-    Example:
-    - "訂單數量最多的客戶" → `ORDER BY COUNT(DISTINCT "Order ID") DESC`
-    - "銷售量最高的產品" → `ORDER BY SUM("Quantity") DESC`
-       
-    **"YoY Growth Rate %" (Year over Year Growth Rate %)**
-       - Concept: Year over year growth rate, the xx% not 0.xx.
-       - SQL Action: `SELECT 
-        ((SUM(CASE WHEN strftime('%Y', "Order Date") = '2024' THEN "Total Revenue" ELSE 0 END) - 
-          SUM(CASE WHEN strftime('%Y', "Order Date") = '2023' THEN "Total Revenue" ELSE 0 END)) * 100.0 / 
-          NULLIF(SUM(CASE WHEN strftime('%Y', "Order Date") = '2023' THEN "Total Revenue" ELSE 0 END), 0)) 
-        as yoy_growth_pct`
-       - Output: YoY growth rate.
-
-    **SQL Examples:**
-    1. [Revenue] Total sales in North America:
-       SELECT SUM("Total Revenue") FROM sales_data WHERE Region = 'North America';
-
-    2. [Sales Volume] Top 3 products by QUANTITY (銷售量) in EMEA:
-       SELECT "Product Name", SUM("Quantity") as total_qty FROM sales_data WHERE Region = 'EMEA' GROUP BY "Product Name" ORDER BY total_qty DESC LIMIT 3;
-       
-    3. [Order Count] How many orders (訂單數量) in 2023?
-       SELECT COUNT(DISTINCT "Order ID") FROM sales_data WHERE strftime('%Y', "Order Date") = '2023';
-
-    5. **[CRITICAL] Time Series Queries (Quarterly/Monthly Trends)**:
-       When the query involves "Year + Quarter" or "Year + Month" trends for visualization:
-       - MUST create a COMBINED column as the time axis (e.g., "Period" or "YearQuarter")
-       - DO NOT output Year and Quarter as separate columns
-       - This ensures proper X-axis ordering in charts
-       
-       **Correct Example (Year + Quarter trend):**
-       ```sql
-       SELECT 
-           strftime('%Y', "Order Date") || '-' || 
-           CASE 
-               WHEN strftime('%m', "Order Date") IN ('01','02','03') THEN 'Q1'
-               WHEN strftime('%m', "Order Date") IN ('04','05','06') THEN 'Q2'
-               WHEN strftime('%m', "Order Date") IN ('07','08','09') THEN 'Q3'
-               ELSE 'Q4' 
-           END AS Period,
-           SUM("Total Revenue") AS Revenue
-       FROM sales_data
-       WHERE strftime('%Y', "Order Date") IN ('2023', '2024')
-       GROUP BY Period
-       ORDER BY Period;
-       ```
-       
-       **Correct Example (Year + Month trend):**
-       ```sql
-       SELECT 
-           strftime('%Y-%m', "Order Date") AS Period,
-           SUM("Total Revenue") AS Revenue
-       FROM sales_data
-       GROUP BY Period
-       ORDER BY Period;
-       ```
-       
-    the country or region should be used: {{region_country?}}
-    critic_result: {{critic_result?}}
-    """,
-    output_key="sql_query",
-)
-
-sql_gen_sequential_agent = SequentialAgent(
-    name="sql_gen_sequential",
-    description="agent that gen sql query for further use",
-    sub_agents=[region_country_check_agent, sql_gen_agent],
-)
-
-check_sql_agent = LlmAgent(
-    model=LiteLlm(
-        model=LLAMA_CPP_MODEL,
-        api_key=LLAMA_CPP_API_KEY,
-        api_base=LLAMA_CPP_API_BASE,
-    ),
-    name="check_sql",
-    description="A SQL checker that checks the SQL query for errors.",
-    instruction="""You are a SQL checker that checks the SQL query for errors.
-    use the tool check_sql_syntax to use sql parser to check the SQL query for errors.
-    """,
-    tools=[check_sql_syntax],
-    include_contents="none",  # Only needs state variables, not full conversation history
-)
-
-execute_sql_agent = LlmAgent(
-    model=LiteLlm(
-        model=LLAMA_CPP_MODEL,
-        api_key=LLAMA_CPP_API_KEY,
-        api_base=LLAMA_CPP_API_BASE,
-    ),
-    name="execute_sql",
-    description="A SQL executor that executes the SQL query against the SQLite database.",
-    instruction="""You are a SQL executor that executes the SQL query against the SQLite database.
-    execute this:
-    {sql_query}
-    """,
-    tools=[execute_sql],
+sql_planner = LlmAgent(
+    name="sql_planner", model=model(), output_schema=SQLPlan, output_key="sql_plan",
+    disallow_transfer_to_parent=True, disallow_transfer_to_peers=True,
     include_contents="none",
-    output_key="query_result",
-)
-
-
-def exit_loop(tool_context: ToolContext):
-    """Call this function ONLY when the critique indicates no further changes are needed, signaling the iterative process should end."""
-    #  print(f"  [Tool Call] exit_loop triggered by {tool_context.agent_name}")
-    tool_context.actions.escalate = True
-    tool_context.actions.skip_summarization = True
-    # Return empty dict as tools should typically return JSON-serializable output
-    return {}
-
-
-critic_agent = LlmAgent(
-    model=LiteLlm(
-        model=LLAMA_CPP_MODEL,
-        api_key=LLAMA_CPP_API_KEY,
-        api_base=LLAMA_CPP_API_BASE,
-    ),
-    name="critic",
-    description="You are a Constructive Critic AI reviewing query result whether it can answer the user question (typically 2-6 sentences).",
-    instruction="""You are a critic that checks the SQL query for errors.
-
-    query: {sql_query}
-    query_result: {raw_query_result?}
-    is query correct and can answer user question?
-    if yes, you must call exit_loop tool.
-    if no, return what should be fixed and give the feedback to the next round sql gen agent.
-    """,
-    output_key="critic_result",
-    tools=[exit_loop],
-    include_contents="none",  # Only needs state variables, not full conversation history
-)
-
-
-sql_critic_sequential_agent = SequentialAgent(
-    name="sql_critic",
-    description="A SQL critic that checks the SQL query for errors. execute sql and check is the result can answer the user question, if not, return the error message and the corrected sql query",
-    sub_agents=[check_sql_agent, execute_sql_agent, critic_agent],
-)
-
-
-get_data_agent = LoopAgent(
-    name="get_data_agent",
-    sub_agents=[sql_gen_sequential_agent, sql_critic_sequential_agent],
-    max_iterations=MAX_RETRIES,
-)
-
-answer_agent = LlmAgent(
-    model=LiteLlm(
-        model=LLAMA_CPP_MODEL,
-        api_key=LLAMA_CPP_API_KEY,
-        api_base=LLAMA_CPP_API_BASE,
-    ),
-    name="answer",
-    description="你是一個商業專家，回答使用者的問題",
-    instruction="""
-    請根據查詢結果，以商業專家的口吻回答使用者問題。
-
-    使用者原始問題: {user_question}
-
-    **回答規範**：
-    1. **語言**：核心敘述使用**繁體中文**，但「產品類別」與「產品名稱」請保留**英文原文**。
-    2. **拒絕幻覺**：**嚴禁**列出結果中不存在的欄位（若結果只有金額，不要強行加上「產品名稱」）。
-    3. **完整性**：你**必須**列出查詢結果中的**所有**資料列，不可省略或截斷任何一筆。
-
-    **數字呈現規則 (重要)**：
-    針對金額或銷售量等大數字，請**同時**提供以下兩種格式：
-    1. **精確數值**：務必加上千分位符號 (e.g., 25,286,700.15)。
-    2. **概略縮寫**：使用 K/M/B 進行縮寫，並加上波浪號 (e.g., ~25.3M)。
-
-    **回答範例**：
-    - 正確：「亞太區的總銷售額為 25,286,700.15 (~25.3M)。」
-    - 錯誤：「銷售額是 25286700。」(未格式化)
-    - 錯誤：「產品名稱：N/A，金額：25M。」(出現不存在的欄位)
-
-    query_result: {raw_query_result}
-    """,
-    output_key="answer",
-)
-
-query_and_answer_agent = SequentialAgent(
-    name="query_and_answer",
-    description="Agent that queries data and answers the question",
-    sub_agents=[get_data_agent, answer_agent],
-)
-
-
-# ------------------------------------------------------------------------------
-# Plot Decision Agent
-# ------------------------------------------------------------------------------
-
-
-class PlotDecision(BaseModel):
-    """Structured output for plot decision"""
-
-    should_plot: bool = Field(description="Whether to create a chart visualization")
-    chart_type: str | None = Field(
-        description="Chart type: 'bar', 'line', 'pie', or null if should_plot is false"
-    )
-    x_column: str | None = Field(
-        description="Name of the column to use as X-axis (labels/categories)"
-    )
-    y_column: str | None = Field(
-        description="Name of the column to use as Y-axis (values/metrics)"
-    )
-    color_column: str | None = Field(
-        description="Name of the column to use for grouping/coloring (optional). E.g. 'Year' or 'Region' for comparisons."
-    )
-    reason: str = Field(description="Brief reason for the decision")
-
-
-def ensure_chart_context(callback_context: Any, **kwargs: Any) -> None:
-    """Ensure necessary context variables exist in state to prevent prompt formatting errors."""
-    state = callback_context.state
-    if "column_names" not in state:
-        state["column_names"] = []
-    if "raw_query_result" not in state:
-        state["raw_query_result"] = []
-    if "user_question" not in state:
-        state["user_question"] = ""
-
-    # Generate data_preview for LLM context window optimization
-    raw_result = state["raw_query_result"]
-    columns = state["column_names"]
-    total_rows = len(raw_result)
-
-    if total_rows <= 5:
-        # Small dataset: show everything
-        preview_text = str(raw_result)
-    else:
-        # Large dataset: show head 5 + summary
-        head_data = raw_result[:5]
-        preview_text = f"Total Rows: {total_rows}\nColumns: {columns}\nHead(5): {head_data}\n(Remaining rows truncated for brevity)"
-
-    state["data_preview"] = preview_text
-    return None
-
-
-plot_decision_agent = LlmAgent(
-    model=LiteLlm(
-        model=LLAMA_CPP_MODEL,
-        api_key=LLAMA_CPP_API_KEY,
-        api_base=LLAMA_CPP_API_BASE,
-    ),
-    name="plot_decision",
-    before_agent_callback=ensure_chart_context,
-    description="Decides whether to visualize query results with a chart",
-    instruction="""You are a visualization decision agent. Based on the user's question and query results, decide:
-1. Whether a chart would be helpful (should_plot: true/false)
-2. If yes, which chart type is most appropriate
-3. Select columns for X-axis, Y-axis, and optional Color grouping (hue).
-
-**Available Data:**
-- Columns: {column_names}
-- Data Preview: {data_preview}
-- Note: If "Total Rows" > 5, relies on the summary count.
-
-**⚠️ MUST PLOT (should_plot = true):**
-- Query result has >= 2 rows with categorical + numeric columns
-- "各年份", "每月", "各區域", "各類別" comparisons → YES, always plot!
-- "列出...銷售額總計" with multiple rows → YES, bar chart
-- Time series trends → YES, line chart
-- Distribution/proportion questions (佔比) → YES, pie chart
-
-**NO PLOT (should_plot = false):**
-- Single aggregate value (e.g., "總銷售額是多少" → 1 row result)
-- Top 1 query ("最高的是哪個" → Finding THE one item)
-- Pure text lookup ("誰是...")
-- Result has only 1 row
-
-**Decision Rule:**
-1. Check "Total Rows" in data_preview.
-2. If rows >= 2 AND has numeric column → should_plot = true
-3. If rows == 1 → should_plot = false
-
-**Chart Type Guidelines:**
-- **bar**: Comparisons/Rankings (e.g. "比較", "各年份", "各區域")
-- **line**: Time trends (e.g. "趨勢", months, quarters)
-- **pie**: Proportions (e.g. "佔比")
-
-**Examples:**
-- "各區域銷售額佔比" 
-  -> plot: true, type: "pie", x: "Region", y: "Total Revenue"
-- "請列出 Electronics 類別在各年份的銷售額總計" (2 rows: 2023, 2024)
-  -> plot: true, type: "bar", x: "Year", y: "Total Revenue"
-- "2023-2024 月銷售趨勢" (24 rows)
-  -> plot: true, type: "line", x: "Period", y: "Revenue"
-- "北美的總銷售額是多少" (1 row)
-  -> plot: false
-- "銷售量最高的產品是哪個" (1 row top-1)
-  -> plot: false
-
-User question: {user_question}
-Data Preview: {data_preview}
+    instruction=DOMAIN + """
+你只負責產生一個 SQLite SELECT，不負責執行或回答。
+不要呼叫工具，不要用 Markdown 或加上說明，依輸出 schema 提交 SQL。
+使用者問題：{user_question}
+前一個成功回合的問題與 SQL（僅用於理解追問，必須重新查詢）：{previous_query_context}
+上一個錯誤（若有）：{sql_feedback}
 """,
-    output_schema=PlotDecision,
-    output_key="plot_decision",
+    generate_content_config=types.GenerateContentConfig(temperature=0.1, max_output_tokens=2048),
+)
+
+report_writer = LlmAgent(
+    name="report_writer", model=model(), output_schema=AnswerSubmission, output_key="report",
+    disallow_transfer_to_parent=True, disallow_transfer_to_peers=True,
+    include_contents="none",
+    instruction=REPORT_RULES + """
+只根據以下查詢結果生成 answer 與圖表規格，依輸出 schema 提交。
+使用者問題：{user_question}
+追問上下文：{previous_query_context}
+實際 SQL：{sql_query}
+實際欄位：{column_names}
+實際資料：{raw_query_result}
+上一個輸出錯誤（若有）：{report_feedback}
+""",
+    generate_content_config=types.GenerateContentConfig(temperature=0.1, max_output_tokens=4096),
 )
 
 
-def render_chart_tool(tool_context: ToolContext) -> dict:
-    """Tool to render chart based on plot_decision and query_result in session state."""
-    import json
+class Text2SQLWorkflow(BaseAgent):
+    """The controller owns ordering and success; models own SQL and explanation."""
 
-    plot_decision = tool_context.state.get("plot_decision", {})
-    raw_query_result = tool_context.state.get("raw_query_result")
-
-    chart_type = plot_decision.get("chart_type", "bar")
-    x_col = plot_decision.get("x_column")
-    y_col = plot_decision.get("y_column")
-    color_col = plot_decision.get("color_column")
-    column_names = tool_context.state.get("column_names", [])
-
-    if not raw_query_result:
-        return {"success": False, "error": "No query result available to render."}
-
-    if not column_names:
-        # Fallback if no column names captured (unlikely with new execute_sql)
-        return {"success": False, "error": "Missing column names for charting."}
-
-    # Convert list of tuples to list of dicts for Plotly
-    # e.g. columns=["Region", "Sales"], result=[("NA", 100)] -> [{"Region": "NA", "Sales": 100}]
-    data_list = []
-    try:
-        for row in raw_query_result:
-            row_dict = {}
-            for i, col in enumerate(column_names):
-                if i < len(row):
-                    row_dict[col] = row[i]
-            data_list.append(row_dict)
-
-        result = render_chart(
-            chart_type=chart_type,
-            data=data_list,
-            x_col=x_col,
-            y_col=y_col,
-            color_col=color_col,
+    def update(self, ctx, delta, text=None):
+        return Event(
+            invocation_id=ctx.invocation_id, author=self.name,
+            actions=EventActions(state_delta=delta),
+            content=types.Content(role="model", parts=[types.Part(text=text)]) if text else None,
         )
 
-        if result.get("success"):
-            tool_context.state["chart_json"] = result["chart_json"]
+    async def _run_async_impl(self, ctx):
+        feedback = ""
+        for attempt in range(SQL_ATTEMPTS):
+            yield self.update(ctx, {"sql_plan": None, "sql_feedback": feedback, "sql_attempts": attempt + 1})
+            try:
+                async for event in self.sub_agents[0].run_async(ctx):
+                    yield event
+                plan = SQLPlan.model_validate(ctx.session.state.get("sql_plan"))
+                state = {}
+                result = execute_query(plan.sql, state)  # mandatory execution, direct call
+                yield self.update(ctx, state)
+                if result["success"]:
+                    break
+                feedback = str(result["error"])
+            except ValidationError as exc:
+                feedback = f"Invalid SQLPlan: {exc}"
+        else:
+            yield self.failure(ctx, "SQL_ATTEMPTS_EXHAUSTED", feedback)
+            return
 
-            # Store chart data for eval validation
-            tool_context.state["chart_data"] = {
-                "chart_type": chart_type,
-                "x_column": x_col,
-                "y_column": y_col,
-                "color_column": color_col,
-                "x_values": [row.get(x_col) for row in data_list],
-                "y_values": [row.get(y_col) for row in data_list],
-                "data_rows": len(data_list),
-            }
+        feedback = ""
+        for attempt in range(REPORT_ATTEMPTS):
+            yield self.update(ctx, {"report": None, "report_feedback": feedback, "report_attempts": attempt + 1})
+            try:
+                async for event in self.sub_agents[1].run_async(ctx):
+                    yield event
+                spec = AnswerSubmission.model_validate(ctx.session.state.get("report"))
+                state = dict(ctx.session.state)
+                complete_answer(spec, state)  # validates and renders directly
+                yield self.update(ctx, state, spec.answer)
+                return
+            except (ValidationError, ValueError, TypeError) as exc:
+                feedback = f"Invalid report or chart: {exc}"
+        yield self.failure(ctx, "REPORT_ATTEMPTS_EXHAUSTED", feedback)
 
-            # Return a summary to the LLM to save context tokens
-            return {"success": True, "message": "Chart generated and stored in state."}
-        return result
-    except Exception as e:
-        return {"success": False, "error": f"Chart rendering internal error: {str(e)}"}
-
-
-plot_render_agent = LlmAgent(
-    model=LiteLlm(
-        model=LLAMA_CPP_MODEL,
-        api_key=LLAMA_CPP_API_KEY,
-        api_base=LLAMA_CPP_API_BASE,
-    ),
-    name="plot_render",
-    description="Renders charts when visualization is needed",
-    instruction="""If plot_decision indicates should_plot is true, call render_chart_tool to create the chart.
-    
-    plot_decision: {plot_decision}
-    
-    If should_plot is false, just respond that no chart is needed.
-    """,
-    tools=[render_chart_tool],
-    output_key="chart_result",
-)
-
-
-# ------------------------------------------------------------------------------
-# Root Agent: Dispatcher & Responder with Structured Output (V7)
-# ------------------------------------------------------------------------------
-
-final_echo_agent = LlmAgent(
-    model=LiteLlm(
-        model=LLAMA_CPP_MODEL,
-        api_key=LLAMA_CPP_API_KEY,
-        api_base=LLAMA_CPP_API_BASE,
-    ),
-    name="final_echo",
-    description="Echo the answer to the user.",
-    instruction="""You are the final interface to the user.
-    You simply repeat the answer generated by the previous agent.
-
-    Previous Answer: {answer}
-
-    Just output the Previous Answer text as is.
-    """,
-    include_contents="none",
-    output_key="final_answer",
-)
-
-# Sequential agent that handles the full workflow: query -> answer -> plot decision -> render -> echo
-full_workflow_agent = SequentialAgent(
-    name="full_workflow",
-    description="Complete workflow: query data, answer question, decide if chart needed, render chart, echo answer",
-    sub_agents=[
-        query_and_answer_agent,
-        plot_decision_agent,
-        plot_render_agent,
-        final_echo_agent,
-    ],
-)
+    def failure(self, ctx, code, detail):
+        message = "這次未能取得可確認的分析結果，請重新提問。"
+        return self.update(ctx, {
+            "workflow_status": "failed", "workflow_error": {"code": code, "message": detail[:500]},
+            "answer": message, "final_answer": message, "chart_json": None, "chart_data": None,
+            "plot_decision": {"should_plot": False, "chart_type": None},
+        }, message)
 
 
-def ensure_root_context(callback_context: CallbackContext):
-    """Ensure context variables for root agent."""
-    # Call existing capture
-    capture_user_question(callback_context)
-
-    # Ensure answer exists
-    if "answer" not in callback_context.state:
-        callback_context.state["answer"] = "(No answer generated yet)"
-
-
-root_agent = LlmAgent(
-    model=LiteLlm(
-        model=LLAMA_CPP_MODEL,
-        api_key=LLAMA_CPP_API_KEY,
-        api_base=LLAMA_CPP_API_BASE,
-    ),
-    name="root_agent",
-    before_agent_callback=ensure_root_context,
-    description="Root agent that delegates SQL query tasks and visualization.",
-    instruction="""You are a helpful assistant that delegates SQL database queries to a specialized sub-agent.
-
-**Your only job**: Delegate the user's question to `full_workflow` and let it handle everything.
-
-**Workflow:**
-1. When user asks a question about data, immediately transfer to `full_workflow`
-2. The sub-agent will:
-   - Generate and execute SQL query
-   - Provide a text answer
-   - Decide if visualization is helpful
-   - Render a chart if needed
-3. After the sub-agent completes, YOU MUST return the 'Generated Answer' below to the user.
-
-Generated Answer: {answer}
-
-**CRITICAL**:
-- Do NOT try to answer data questions yourself.
-- Always delegate to the sub-agent.
-- Once the sub-agent is done, you MUST repeat the content of 'Generated Answer' above as your final response.
-    """,
-    sub_agents=[full_workflow_agent],
+root_agent = Text2SQLWorkflow(
+    name="root_agent", description="Fixed SQL → execute → report workflow for Qwen 27B.",
+    sub_agents=[sql_planner, report_writer], before_agent_callback=start_turn,
 )

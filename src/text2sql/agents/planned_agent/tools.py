@@ -1,191 +1,177 @@
+"""Deterministic query execution, chart validation, and answer publication."""
+
+import json
+import math
 import sqlite3
-import sqlparse
-import logging
-
+import time
+from numbers import Real
 from pathlib import Path
-from google.adk.tools import ToolContext
 
-# Resolve project root relative to this file:
-# .../src/text2sql/agents/planned_agent/tools.py -> .../text2sql (project root)
-# parents[0]=planned_agent, [1]=agents, [2]=text2sql, [3]=src, [4]=project_root
-PROJECT_ROOT = Path(__file__).resolve().parents[4]
-DB_PATH = str(PROJECT_ROOT / "data" / "global_sales_data.sqlite")
+import sqlparse
+from pydantic import ValidationError
 
-logger = logging.getLogger(__name__)
+from text2sql.config import MAX_QUERY_ROWS, MAX_RESULT_BYTES, QUERY_TIMEOUT_SECONDS
+from .contracts import AnswerSubmission, SQLPlan
+
+DB_PATH = Path(__file__).resolve().parents[4] / "data" / "global_sales_data.sqlite"
+
+# Authorization is enforced by SQLite, independently of model instructions.
+SQL_FUNCTIONS = {
+    "abs", "avg", "cast", "ceil", "ceiling", "coalesce", "count", "date",
+    "datetime", "dense_rank", "floor", "ifnull", "instr", "julianday", "lag",
+    "lead", "length", "lower", "ltrim", "max", "min", "nullif", "printf",
+    "rank", "replace", "round", "row_number", "rtrim", "strftime", "substr",
+    "substring", "sum", "time", "total", "trim", "unixepoch", "upper",
+}
 
 
-def check_sql_syntax(tool_context: ToolContext) -> str:
-    """
-    Checks if the SQL syntax is valid using sqlparse.
-    Returns "Valid" if no errors are detected, otherwise returns an error message.
-    """
+class QueryError(ValueError):
+    def __init__(self, code: str, message: str):
+        super().__init__(message)
+        self.code = code
+
+
+def read_sales(sql: str, db_path: Path = DB_PATH) -> dict:
+    """Execute one bounded SELECT; SQLite validates real syntax and access."""
     try:
-        sql_query = tool_context.state["sql_query"]
-        parsed = sqlparse.parse(sql_query)
-        if not parsed:
-            return "Invalid SQL: Empty query"
-        # minimal check: verify we have at least one statement
-        if len(parsed) == 0:
-            return "Invalid SQL: No statements found"
+        sql = SQLPlan(sql=sql).sql.strip()
+    except ValidationError as exc:
+        raise QueryError("INVALID_ARGUMENTS", str(exc)) from exc
+    statements = sqlparse.parse(sql)
+    if len(statements) != 1 or statements[0].get_type() != "SELECT":
+        raise QueryError("READ_ONLY", "Provide exactly one SELECT (WITH ... SELECT is allowed).")
 
-        return "Valid"
-    except Exception as e:
-        return f"Syntax Error: {str(e)}"
+    read_business_table = False
 
+    def authorize(action, table, column, database, source):
+        nonlocal read_business_table
+        if action in (sqlite3.SQLITE_SELECT, sqlite3.SQLITE_RECURSIVE):
+            return sqlite3.SQLITE_OK
+        # SQLite's optimized COUNT(*) emits READ with a null database name.
+        if action == sqlite3.SQLITE_READ and database in ("main", None) and table == "sales_data":
+            read_business_table = True
+            return sqlite3.SQLITE_OK
+        if action == sqlite3.SQLITE_FUNCTION and (column or "").lower() in SQL_FUNCTIONS:
+            return sqlite3.SQLITE_OK
+        return sqlite3.SQLITE_DENY
 
-def _clean_sql(raw: str) -> str:
-    """Strip markdown code fences and leading/trailing whitespace from SQL."""
-    import re
-
-    # Remove ```sql ... ``` or ``` ... ```
-    cleaned = re.sub(r"^```(?:sql)?\s*\n?", "", raw.strip())
-    cleaned = re.sub(r"\n?```\s*$", "", cleaned)
-    return cleaned.strip()
-
-
-def execute_sql(tool_context: ToolContext) -> str:
-    """
-    Executes the SQL query stored in state['sql_query'] against the SQLite database.
-    Reads SQL directly from state to avoid LLM modifying the query during tool call.
-
-    Returns:
-        The query results formatted as a markdown table, or an error message.
-    """
-    import pandas as pd
-
-    sql_query = _clean_sql(tool_context.state.get("sql_query", ""))
-    if not sql_query:
-        return "Error: No SQL query found in state."
-
+    connection = None
     try:
-        with sqlite3.connect(DB_PATH) as con:
-            df = pd.read_sql_query(sql_query, con)
+        connection = sqlite3.connect(Path(db_path).resolve().as_uri() + "?mode=ro", uri=True)
+        connection.execute("PRAGMA query_only = ON")
+        connection.execute("PRAGMA trusted_schema = OFF")
+        connection.set_authorizer(authorize)
+        deadline = time.monotonic() + QUERY_TIMEOUT_SECONDS
+        connection.set_progress_handler(lambda: int(time.monotonic() > deadline), 1000)
+        cursor = connection.execute(sql)
+        if not read_business_table:
+            raise QueryError("NO_SALES_DATA", "The query must read sales_data; constants are not sales results.")
+        columns = [item[0] for item in cursor.description]
+        if len(columns) != len(set(columns)):
+            raise QueryError("DUPLICATE_COLUMNS", "Give each result column a unique alias.")
+        rows = [list(row) for row in cursor.fetchmany(MAX_QUERY_ROWS + 1)]
+        if len(rows) > MAX_QUERY_ROWS:
+            raise QueryError("ROW_LIMIT", f"Result exceeds {MAX_QUERY_ROWS} rows. Aggregate or narrow the query; no partial result was accepted.")
+        result = {"success": True, "sql": sql, "columns": columns, "rows": rows, "row_count": len(rows)}
+        try:
+            size = len(json.dumps(result, ensure_ascii=False, allow_nan=False).encode("utf-8"))
+        except (TypeError, ValueError) as exc:
+            raise QueryError("RESULT_TYPE", "Result must contain finite, JSON-compatible values.") from exc
+        if size > MAX_RESULT_BYTES:
+            raise QueryError("RESULT_SIZE", f"Result exceeds {MAX_RESULT_BYTES} bytes. Aggregate or narrow the query.")
+        return result
+    except sqlite3.Error as exc:
+        code = "QUERY_TIMEOUT" if str(exc) == "interrupted" else "SQL_ERROR"
+        raise QueryError(code, str(exc)) from exc
+    finally:
+        if connection is not None:
+            connection.close()
 
-        # Capture column names
-        column_names = list(df.columns)
 
-        # Store raw results (list of lists/tuples) and column names in state
-        if hasattr(tool_context, "state"):
-            # Convert dataframe to list of values for consistency with previous state usage
-            # best to convert to list of lists
-            tool_context.state["raw_query_result"] = df.values.tolist()
-            tool_context.state["column_names"] = column_names
-
-        # Limit to 50 rows to save context
-        if len(df) > 50:
-            df = df.head(50)
-
-        return df.to_markdown(index=False)
-
-    except Exception as e:
-        if hasattr(tool_context, "state"):
-            tool_context.state["raw_query_result"] = []
-            if "column_names" not in tool_context.state:
-                tool_context.state["column_names"] = []
-        return f"Execution Error: {str(e)}"
+def clear_query_state(state) -> None:
+    """Invalidate the previous result, answer, and chart before a new attempt."""
+    state.update({
+        "query_success": False, "sql_query": "", "raw_query_result": [],
+        "column_names": [], "query_result": {}, "query_error": None,
+        "plot_decision": {"should_plot": False, "chart_type": None},
+        "chart_json": None, "chart_data": None, "answer": "", "final_answer": "",
+        "workflow_status": "running", "workflow_error": None,
+    })
 
 
-def render_chart(
-    chart_type: str,
-    data: list[dict],
-    x_col: str,
-    y_col: str,
-    color_col: str = None,
-    title: str = "",
-) -> dict:
-    """
-    Renders a chart using Plotly Express and returns base64 encoded PNG image.
+def execute_query(sql: str, state) -> dict:
+    """Query directly; expose structured errors to whichever model/harness is used."""
+    clear_query_state(state)
+    state["sql_query"] = sql if isinstance(sql, str) else ""
+    try:
+        result = read_sales(sql)
+    except QueryError as exc:
+        error = {"code": exc.code, "message": str(exc)}
+        state["query_error"] = error
+        return {"success": False, "error": error}
+    state.update({
+        "query_success": True, "sql_query": result["sql"], "raw_query_result": result["rows"],
+        "column_names": result["columns"], "query_result": result,
+    })
+    return result
 
-    Args:
-        chart_type: Type of chart - "bar", "line", or "pie"
-        data: List of dictionaries with column names as keys
-              e.g., [{"Region": "North America", "Sales": 1000}, ...]
-        x_col: Column name for X-axis (or names for Pie)
-        y_col: Column name for Y-axis (or values for Pie)
-        color_col: Optional column name for grouping/color
-        title: Optional chart title
 
-    Returns:
-        dict with "success" boolean and "image" (base64 string) or "error" message
-    """
+def numeric_columns(columns: list[str], rows: list[list]) -> list[str]:
+    return [column for i, column in enumerate(columns) if rows and all(
+        isinstance(row[i], Real) and not isinstance(row[i], bool) and math.isfinite(row[i])
+        for row in rows
+    )]
+
+
+def render_chart(spec: AnswerSubmission, columns: list[str], rows: list[list]) -> str:
+    """Validate against the full actual result, then return Plotly JSON."""
     import pandas as pd
     import plotly.express as px
-    import base64
 
-    try:
-        if not data:
-            return {"success": False, "error": "No data provided for charting."}
+    if len(rows) < 2:
+        raise ValueError("Charts require at least two rows.")
+    for column in (spec.x_column, spec.y_column, spec.color_column):
+        if column and column not in columns:
+            raise ValueError(f"Unknown chart column {column!r}. Available: {columns}")
+    if spec.x_column == spec.y_column:
+        raise ValueError("Choose distinct x and y columns.")
+    if spec.y_column not in numeric_columns(columns, rows):
+        raise ValueError("The y column must contain finite numeric values in every row.")
+    data = pd.DataFrame(rows, columns=columns)
+    if spec.chart_type == "pie":
+        if (data[spec.y_column] < 0).any() or data[spec.y_column].sum() <= 0:
+            raise ValueError("Pie values must be nonnegative with a positive total.")
+        figure = px.pie(data, names=spec.x_column, values=spec.y_column, hole=0.3)
+    else:
+        draw = px.line if spec.chart_type == "line" else px.bar
+        options = {"markers": True} if spec.chart_type == "line" else {"barmode": "group"}
+        figure = draw(data, x=spec.x_column, y=spec.y_column, color=spec.color_column or None, **options)
+        for trace in figure.data:
+            trace.x = [str(value) for value in trace.x]
+        labels = list(dict.fromkeys(str(value) for value in data[spec.x_column]))
+        figure.update_xaxes(type="category", categoryorder="array", categoryarray=labels)
+    figure.update_layout(template="plotly_white", margin={"l": 20, "r": 20, "t": 40, "b": 20})
+    return figure.to_json()
 
-        df = pd.DataFrame(data)
 
-        # Basic validation
-        if x_col not in df.columns or y_col not in df.columns:
-            return {
-                "success": False,
-                "error": f"Columns {x_col} or {y_col} not found in data. Available: {list(df.columns)}",
-            }
-
-        fig = None
-
-        if chart_type == "bar":
-            # Bar chart with optional color grouping
-            fig = px.bar(
-                df,
-                x=x_col,
-                y=y_col,
-                color=color_col if color_col and color_col in df.columns else None,
-                barmode="group",
-                text_auto=True,
-                template="plotly_white",
-            )
-            fig.update_traces(textposition="outside")
-
-        elif chart_type == "line":
-            # Line chart with optional color series
-            fig = px.line(
-                df,
-                x=x_col,
-                y=y_col,
-                color=color_col if color_col and color_col in df.columns else None,
-                markers=True,
-                template="plotly_white",
-            )
-
-        elif chart_type == "pie":
-            # Pie chart (ignores color_col usually, uses x_col for slices)
-            fig = px.pie(
-                df,
-                names=x_col,
-                values=y_col,
-                hole=0.3,  # Donut style
-                template="plotly_white",
-            )
-            fig.update_traces(textposition="inside", textinfo="percent+label")
-
-        else:
-            return {"success": False, "error": f"Unknown chart type: {chart_type}"}
-
-        if title:
-            fig.update_layout(title_text=title, title_x=0.5)
-
-        # Adjust layout for better readability
-        fig.update_layout(
-            margin=dict(l=20, r=20, t=40, b=20),
-            legend=dict(
-                orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1
-            ),
-        )
-
-        # Convert to Plotly JSON
-        try:
-            chart_json = fig.to_json()
-            return {"success": True, "chart_json": chart_json}
-        except Exception as img_err:
-            return {
-                "success": False,
-                "error": f"Chart serialization failed: {str(img_err)}",
-            }
-
-    except Exception as e:
-        logger.error(f"Chart rendering error: {e}")
-        return {"success": False, "error": str(e)}
+def complete_answer(spec: AnswerSubmission, state) -> dict:
+    """Hard success gate: only executed data and a validated chart can be published."""
+    if not state.get("query_success"):
+        raise ValueError("A successful query in this turn is required before publishing.")
+    columns, rows = state["column_names"], state["raw_query_result"]
+    if spec.chart_type == "none" and len(rows) >= 2 and len(columns) >= 2 and numeric_columns(columns, rows):
+        raise ValueError("Multiple rows with a numeric measure require a chart.")
+    chart_json = render_chart(spec, columns, rows) if spec.chart_type != "none" else None
+    state.update({
+        "answer": spec.answer, "final_answer": spec.answer, "workflow_status": "completed",
+        "workflow_error": None,
+        "plot_decision": {"should_plot": chart_json is not None,
+                          "chart_type": None if chart_json is None else spec.chart_type,
+                          "x_column": spec.x_column or None, "y_column": spec.y_column or None,
+                          "color_column": spec.color_column or None},
+        "chart_json": chart_json,
+        "chart_data": {"chart_type": spec.chart_type, "x_column": spec.x_column,
+                       "y_column": spec.y_column, "color_column": spec.color_column or None,
+                       "data_rows": len(rows)} if chart_json else None,
+    })
+    return {"success": True, "answer": spec.answer, "chart_generated": chart_json is not None}
