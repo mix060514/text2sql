@@ -28,6 +28,7 @@ sql_planner = LlmAgent(
     instruction=DOMAIN + """
 你只負責產生一個 SQLite SELECT，不負責執行或回答。
 不要呼叫工具，不要用 Markdown 或加上說明，依輸出 schema 提交 SQL。
+重試只能修正原問題的 SQL；不得把問題換成訂單總數或其他未要求的統計。
 使用者問題：{user_question}
 前一個成功回合的問題與 SQL（僅用於理解追問，必須重新查詢）：{previous_query_context}
 上一個錯誤（若有）：{sql_feedback}
