@@ -7,6 +7,7 @@ from google.adk.agents.run_config import RunConfig
 from google.adk.events import Event, EventActions
 from google.genai import types
 
+from text2sql.agents.planned_agent.tools import clear_query_state
 from text2sql.config import AGENT_TIMEOUT_SECONDS, MAX_LLM_CALLS
 
 
@@ -23,10 +24,13 @@ async def stream_turn(runner, *, user_id: str, session_id: str, new_message):
         session = await runner.session_service.get_session(
             app_name=runner.app_name, user_id=user_id, session_id=session_id,
         )
+        failed_state = {}
+        clear_query_state(failed_state)
         event = Event(
             author=runner.agent.name,
             content=types.Content(role="model", parts=[types.Part(text=message)]),
             actions=EventActions(state_delta={
+                **failed_state,
                 "workflow_status": "failed",
                 "workflow_error": {"code": type(exc).__name__, "message": str(exc)[:300]},
                 "answer": message, "final_answer": message, "chart_json": None, "chart_data": None,

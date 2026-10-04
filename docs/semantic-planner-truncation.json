@@ -1,0 +1,49 @@
+{
+  "scope": "Diagnostic rerun before planner token increase; same Qwen and endpoint, 2048 planner tokens. Only model response events, no credentials.",
+  "question": "請列出 North America 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+  "planner_events": [
+    {
+      "author": "sql_planner",
+      "content": {
+        "parts": [],
+        "role": "model"
+      },
+      "usage_metadata": {
+        "candidates_token_count": 2048,
+        "prompt_token_count": 602,
+        "total_token_count": 2650
+      }
+    },
+    {
+      "author": "sql_planner",
+      "content": {
+        "parts": [],
+        "role": "model"
+      },
+      "usage_metadata": {
+        "candidates_token_count": 2048,
+        "prompt_token_count": 667,
+        "total_token_count": 2715
+      }
+    },
+    {
+      "author": "sql_planner",
+      "content": {
+        "parts": [],
+        "role": "model"
+      },
+      "usage_metadata": {
+        "candidates_token_count": 2048,
+        "prompt_token_count": 667,
+        "total_token_count": 2715
+      }
+    }
+  ],
+  "workflow_status": "failed",
+  "workflow_error": {
+    "code": "SQL_ATTEMPTS_EXHAUSTED",
+    "message": "Invalid SQLPlan or SemanticReview (not accepted): 1 validation error for SQLPlan\n  Input should be a valid dictionary or instance of SQLPlan [type=model_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.12/v/model_type"
+  },
+  "sql_attempts": 3,
+  "report_attempts": 0
+}

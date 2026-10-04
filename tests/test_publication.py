@@ -8,8 +8,23 @@ from text2sql.agents.planned_agent.tools import clear_query_state, complete_answ
 
 class PublicationTests(unittest.TestCase):
     def state(self, columns=None, rows=None):
-        return {"query_success": True, "column_names": columns or ["Region", "Revenue"],
+        state = {"query_success": True, "column_names": columns or ["Region", "Revenue"],
                 "raw_query_result": rows if rows is not None else [["EMEA", 20], ["APAC", 10]]}
+
+        result = {"sql": "SELECT test FROM sales_data", "columns": state["column_names"], "rows": state["raw_query_result"]}
+        state.update({"sql_query": result["sql"], "query_result": result, "reviewed_query": result,
+                      "semantic_review": {"accepted": True, "reason": "Matches intent"}})
+        return state
+
+    def test_semantic_acceptance_and_same_execution_required(self):
+        for delta in ({"semantic_review": None},
+                      {"semantic_review": {"accepted": False, "reason": "Wrong metric"}},
+                      {"reviewed_query": None}, {"sql_query": "different SQL"},
+                      {"raw_query_result": [[999]]}):
+            with self.subTest(delta=delta), self.assertRaises((ValueError, ValidationError)):
+                state = self.state(rows=[])
+                state.update(delta)
+                complete_answer(AnswerSubmission(answer="unsupported"), state)
 
     def test_successful_query_required(self):
         with self.assertRaises(ValueError):

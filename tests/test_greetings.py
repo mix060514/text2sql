@@ -43,7 +43,8 @@ class GreetingTests(unittest.IsolatedAsyncioTestCase):
             state={"workflow_status": "completed", "query_success": True,
                    "user_question": previous["question"], "sql_query": previous["sql"],
                    "chart_json": "old chart", "raw_query_result": [[123]],
-                   "final_answer": "old answer", "sql_attempts": 3},
+                   "final_answer": "old answer", "sql_attempts": 3,
+                   "semantic_review": {"accepted": True, "reason": "old"}, "reviewed_query": {"old": True}},
         )
         with patch.object(type(runner.agent), "_run_async_impl", side_effect=AssertionError("must not run")) as body:
             for question in ("hello", "你好"):
@@ -52,6 +53,8 @@ class GreetingTests(unittest.IsolatedAsyncioTestCase):
                     pass
                 session = await runner.session_service.get_session(app_name=runner.app_name, user_id="test", session_id="same")
                 self.assertIsNone(session.state["chart_json"])
+                self.assertIsNone(session.state["semantic_review"])
+                self.assertIsNone(session.state["reviewed_query"])
                 self.assertEqual(session.state["raw_query_result"], [])
                 self.assertEqual(json.loads(session.state["previous_query_context"]), previous)
                 self.assertEqual(session.state["sql_attempts"], 0)

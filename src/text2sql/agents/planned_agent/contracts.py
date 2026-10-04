@@ -1,4 +1,4 @@
-"""Contracts for the two places where model output enters application code."""
+"""Contracts for the places where model output enters application code."""
 
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -7,6 +7,18 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 class SQLPlan(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     sql: str = Field(min_length=1, max_length=20000)
+
+
+class SemanticReview(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    accepted: bool
+    reason: str = Field(min_length=1, max_length=4000)
+
+    @model_validator(mode="after")
+    def validate_reason(self):
+        if not self.reason.strip():
+            raise ValueError("Review requires a substantive reason.")
+        return self
 
 
 class AnswerSubmission(BaseModel):

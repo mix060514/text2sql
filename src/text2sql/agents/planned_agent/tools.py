@@ -11,7 +11,7 @@ import sqlparse
 from pydantic import ValidationError
 
 from text2sql.config import MAX_QUERY_ROWS, MAX_RESULT_BYTES, QUERY_TIMEOUT_SECONDS
-from .contracts import AnswerSubmission, SQLPlan
+from .contracts import AnswerSubmission, SQLPlan, SemanticReview
 
 DB_PATH = Path(__file__).resolve().parents[4] / "data" / "global_sales_data.sqlite"
 
@@ -91,6 +91,7 @@ def read_sales(sql: str, db_path: Path = DB_PATH) -> dict:
 def clear_query_state(state) -> None:
     """Invalidate the previous result, answer, and chart before a new attempt."""
     state.update({
+        "semantic_review": None, "reviewed_query": None,
         "query_success": False, "sql_query": "", "raw_query_result": [],
         "column_names": [], "query_result": {}, "query_error": None,
         "plot_decision": {"should_plot": False, "chart_type": None},
@@ -184,6 +185,14 @@ def complete_answer(spec: AnswerSubmission, state) -> dict:
     """Hard success gate: only executed data and a validated chart can be published."""
     if not state.get("query_success"):
         raise ValueError("A successful query in this turn is required before publishing.")
+    review = SemanticReview.model_validate(state.get("semantic_review"))
+    result = state.get("query_result")
+    if not review.accepted or not result or state.get("reviewed_query") != result:
+        raise ValueError("Explicit semantic acceptance of this executed result is required.")
+    if (result.get("sql") != state.get("sql_query") or
+            result.get("columns") != state.get("column_names") or
+            result.get("rows") != state.get("raw_query_result")):
+        raise ValueError("Published data must match the reviewed execution.")
     columns, rows = state["column_names"], state["raw_query_result"]
     if spec.chart_type == "none" and len(rows) >= 2 and len(columns) >= 2 and numeric_columns(columns, rows):
         raise ValueError("Multiple rows with a numeric measure require a chart.")

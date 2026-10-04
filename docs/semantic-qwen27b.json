@@ -1,0 +1,176 @@
+{
+  "timestamp_utc": "2026-10-04T17:37:04.456361+00:00",
+  "model": "openai/qwen3.8-27b-iq3-xxs",
+  "database_sha256": "72f64a081fa0d20741a09528ec7a8d03eba976fde47d08a8be920e1c4ba1fb7a",
+  "scope": "Live Qwen planner/reviewer/report except explicitly injected first wrong SQL; SQLite value oracle, no LLM judge.",
+  "passed": 5,
+  "total": 5,
+  "results": [
+    {
+      "case": "quantity",
+      "passed": true,
+      "seconds": 25.96,
+      "oracle_sql": "SELECT SUM(\"Quantity\") AS Units FROM sales_data",
+      "expected_rows": [
+        [
+          137430
+        ]
+      ],
+      "user_question": "總銷售量是多少？",
+      "previous_query_context": "{}",
+      "workflow_status": "completed",
+      "workflow_error": null,
+      "sql_query": "SELECT SUM(\"Quantity\") AS total_quantity FROM sales_data",
+      "column_names": [
+        "total_quantity"
+      ],
+      "raw_query_result": [
+        [
+          137430
+        ]
+      ],
+      "semantic_review": {
+        "accepted": true,
+        "reason": "SQL 使用 SUM(\"Quantity\") 計算總銷售量，符合使用者詢問總銷售量的意圖。"
+      },
+      "sql_feedback": "",
+      "sql_attempts": 1,
+      "report_attempts": 1,
+      "final_answer": "總銷售量為 137,430。\n\n| total_quantity   |\n|:-----------------|\n| 137,430          |"
+    },
+    {
+      "case": "distinct orders",
+      "passed": true,
+      "seconds": 30.29,
+      "oracle_sql": "SELECT COUNT(DISTINCT \"Order ID\") AS Orders FROM sales_data",
+      "expected_rows": [
+        [
+          30000
+        ]
+      ],
+      "user_question": "不重複的訂單總數是多少？",
+      "previous_query_context": "{}",
+      "workflow_status": "completed",
+      "workflow_error": null,
+      "sql_query": "SELECT COUNT(DISTINCT \"Order ID\") AS \"Distinct Order Count\" FROM sales_data",
+      "column_names": [
+        "Distinct Order Count"
+      ],
+      "raw_query_result": [
+        [
+          30000
+        ]
+      ],
+      "semantic_review": {
+        "accepted": true,
+        "reason": "SQL 使用 COUNT(DISTINCT \"Order ID\") 計算不重複訂單總數，未加入不必要篩選、分組或排序，回傳單一數值 30000，符合使用者原問題。"
+      },
+      "sql_feedback": "",
+      "sql_attempts": 1,
+      "report_attempts": 1,
+      "final_answer": "不重複的訂單總數為 30,000 筆。\n\n| Distinct Order Count   |\n|:-----------------------|\n| 30,000                 |"
+    },
+    {
+      "case": "wrong metric injection",
+      "passed": true,
+      "seconds": 28.79,
+      "oracle_sql": "SELECT SUM(\"Quantity\") AS Units FROM sales_data",
+      "expected_rows": [
+        [
+          137430
+        ]
+      ],
+      "user_question": "總銷售量是多少？",
+      "previous_query_context": "{}",
+      "workflow_status": "completed",
+      "workflow_error": null,
+      "sql_query": "SELECT SUM(\"Quantity\") AS \"Total Quantity\" FROM sales_data",
+      "column_names": [
+        "Total Quantity"
+      ],
+      "raw_query_result": [
+        [
+          137430
+        ]
+      ],
+      "semantic_review": {
+        "accepted": true,
+        "reason": "SQL 使用 SUM(\"Quantity\") 計算總銷售量，符合使用者詢問的總銷售量；無額外篩選或分組需求。"
+      },
+      "sql_feedback": "Semantic review rejected SQL: 問題問的是總銷售量，應使用 SUM(\"Quantity\")；本次 SQL 使用 COUNT(DISTINCT \"Order ID\")，計算的是訂單數，不是銷售量。請改為 SELECT SUM(\"Quantity\") AS \"Total Quantity\" FROM sales_data。",
+      "sql_attempts": 2,
+      "report_attempts": 1,
+      "final_answer": "總銷售量為 137,430。\n\n| Total Quantity   |\n|:-----------------|\n| 137,430          |",
+      "injected_sql": "SELECT COUNT(DISTINCT \"Order ID\") AS Units FROM sales_data",
+      "injected_rows": [
+        [
+          30000
+        ]
+      ]
+    },
+    {
+      "case": "南美總銷售量是多少？",
+      "passed": true,
+      "seconds": 32.58,
+      "oracle_sql": "SELECT SUM(\"Quantity\") AS Units FROM sales_data WHERE Region = 'LATAM'",
+      "expected_rows": [
+        [
+          7020
+        ]
+      ],
+      "user_question": "南美總銷售量是多少？",
+      "previous_query_context": "{}",
+      "workflow_status": "completed",
+      "workflow_error": null,
+      "sql_query": "SELECT SUM(\"Quantity\") AS total_quantity FROM sales_data WHERE \"Region\" = 'LATAM'",
+      "column_names": [
+        "total_quantity"
+      ],
+      "raw_query_result": [
+        [
+          7020
+        ]
+      ],
+      "semantic_review": {
+        "accepted": true,
+        "reason": "SQL 正確使用 SUM(\"Quantity\") 計算銷售量，並以 \"Region\" = 'LATAM' 篩選南美地區，符合使用者問題。"
+      },
+      "sql_feedback": "",
+      "sql_attempts": 1,
+      "report_attempts": 1,
+      "final_answer": "南美（LATAM）總銷售量為 7,020。\n\n| total_quantity   |\n|:-----------------|\n| 7,020            |"
+    },
+    {
+      "case": "那北美呢？",
+      "passed": true,
+      "seconds": 21.78,
+      "oracle_sql": "SELECT SUM(\"Quantity\") AS Units FROM sales_data WHERE Region = 'North America'",
+      "expected_rows": [
+        [
+          55128
+        ]
+      ],
+      "user_question": "那北美呢？",
+      "previous_query_context": "{\"question\": \"南美總銷售量是多少？\", \"sql\": \"SELECT SUM(\\\"Quantity\\\") AS total_quantity FROM sales_data WHERE \\\"Region\\\" = 'LATAM'\"}",
+      "workflow_status": "completed",
+      "workflow_error": null,
+      "sql_query": "SELECT SUM(\"Quantity\") AS total_quantity FROM sales_data WHERE \"Region\" = 'North America'",
+      "column_names": [
+        "total_quantity"
+      ],
+      "raw_query_result": [
+        [
+          55128
+        ]
+      ],
+      "semantic_review": {
+        "accepted": true,
+        "reason": "本次 SQL 以 Region = 'North America' 篩選北美，並以 SUM(\"Quantity\") 計算總銷售量，符合前問「南美總銷售量」的追問意圖與指標定義。"
+      },
+      "sql_feedback": "",
+      "sql_attempts": 1,
+      "report_attempts": 1,
+      "final_answer": "北美總銷售量為 55,128。\n\n| total_quantity   |\n|:-----------------|\n| 55,128           |"
+    }
+  ]
+}

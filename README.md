@@ -12,16 +12,20 @@
 使用者問題
   → SQL planner（Qwen，SQLPlan schema）
   → 程式直接驗證、執行唯讀 SQL
-      └─ SQL 或 schema 錯誤：只重試 planner，最多 3 次總嘗試
+      └─ SQL 或 schema 錯誤：回饋 planner
+  → semantic reviewer（同一 Qwen，strict accepted boolean / reason）
+      └─ 意圖不符或 review 解析失敗：回饋 planner；查詢合計最多 3 次嘗試
   → report writer（Qwen，AnswerSubmission schema）
       └─ schema / 圖表參數錯誤：只重試 writer，最多 2 次總嘗試
   → 程式驗證成功條件、產生完整資料表與 Plotly 圖表、提交回答
 ```
 
-沒有 region/checker/executor/critic/renderer/echo Agents。
+只有 planner、semantic reviewer、report writer 三個模型步驟；沒有 region/checker/executor/renderer/echo Agents。
 模型不需要決定「要不要執行已生成的 SQL」；那是 controller 的固定下一步。
 完整資料表由程式產生，模型只寫解釋。
-SQL 成功不代表語意正確，因此仍保留評估。
+SQL 執行成功且本次 reviewer 明確接受，才能產生報告與發布。
+每次嘗試清除舊接受狀態與資料；發布再核對被接受的實際 SQL、columns、rows。
+reviewer 仍可能判錯，接受不代表語意的數學保證，因此仍保留 SQLite oracle 評估。
 
 ## 執行
 
@@ -54,7 +58,10 @@ Vision 頁面沿用獨立的 `LLAMA_CPP_VL_*` 設定。
 uv run python scripts/verify_all.py
 
 # 線上：同一組 8 個問題，直接與現在的 DB 比對，不使用 LLM judge
-uv run python scripts/smoke_workflow.py --output docs/smoke-qwen27b.json
+uv run python scripts/smoke_workflow.py --output docs/smoke-qwen27b-semantic.json
+
+# 真實 reviewer：銷售量 / 訂單數、錯誤 SQL 注入與追問隔離
+uv run python scripts/verify_semantic_live.py
 
 # 較廣的評估集；這兩個命令會呼叫模型及 LLM judge
 uv run python eval/eval_e2e.py --limit 5
@@ -74,7 +81,10 @@ smoke 驗證實際資料與圖表，不能保證自然語言回答中的每一�
 4. `context.py`、`src/text2sql/runtime.py`：回合隔離與完整事件串流。
 
 查詢最多 200 列、20,000 bytes、5 秒；超限即失敗，不接受截斷的成功結果。
-每個 ADK invocation 最多 8 次模型呼叫、300 秒。
+每個 ADK invocation 最多 8 次模型呼叫、300 秒，維持原限制。
+一般成功路徑使用 3 次呼叫；最壞為 3 組 planner＋reviewer 加 2 次 report。
+planner 輸出額度為 4,096 token、reviewer 為 2,048；無有效輸出或超時則失敗。
+目前月份 smoke 仍未通過，詳見 [實際驗證與限制](docs/VALIDATION.md)。
 前一回合只攜帶問題與已執行 SQL 作追問上下文，本回合一定重新查詢。
 目前使用 InMemoryRunner；沒有加入排程器或永久 session 儲存。
 

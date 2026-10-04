@@ -1,0 +1,33 @@
+{
+  "workflow": "qwen27b",
+  "model": "openai/qwen3.8-27b-iq3-xxs",
+  "timestamp_utc": "2026-10-04T17:58:35.033711+00:00",
+  "database_sha256": "72f64a081fa0d20741a09528ec7a8d03eba976fde47d08a8be920e1c4ba1fb7a",
+  "passed": 0,
+  "total": 1,
+  "scope": "Actual SQL result values and chart generation; does not prove every natural-language claim.",
+  "results": [
+    {
+      "case": "Monthly trend",
+      "question": "請列出 North America 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+      "passed": false,
+      "data_correct": false,
+      "chart_correct": false,
+      "seconds": 260.51,
+      "sql": "",
+      "columns": [],
+      "rows": [],
+      "answer": "這次分析未能完成，請稍後重試。",
+      "chart_type": "none",
+      "sql_attempts": 2,
+      "report_attempts": 0,
+      "sql_feedback": "Invalid SQLPlan or SemanticReview (not accepted): 1 validation error for SemanticReview\n  Input should be a valid dictionary or instance of SemanticReview [type=model_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.12/v/model_type",
+      "report_feedback": null,
+      "error": {
+        "code": "Timeout",
+        "message": "litellm.Timeout: Request timed out after 120 seconds"
+      },
+      "harness": {}
+    }
+  ]
+}

@@ -7,13 +7,13 @@
 |---|---|---|
 | 分支 | codex/text2sql-strong | codex/text2sql-qwen27b |
 | 分析模型 | Codex CLI，gpt-6-sol | Pi 使用的 qwen3.8-27b-iq3-xxs |
-| 推理單位 | 一個 Codex Agent | SQL planner、report writer |
+| 推理單位 | 一個 Codex Agent | SQL planner、semantic reviewer、report writer |
 | 工具 / 推理迴圈 | Codex Harness | 固定程式流程，模型不帶 tools |
 | SQL 檢查與執行 | 同一個唯讀 MCP 查詢工具內直接執行 | controller 直接 execute_query |
-| 應用內模型 retry | 無 | SQLPlan/SQL 錯誤最多 3 次；report/圖表錯誤最多 2 次 |
+| 應用內模型 retry | 無 | SQLPlan/SQL/語義審查錯誤合計最多 3 次；report/圖表錯誤最多 2 次 |
 | 圖表 | 驗證最終規格後直接 render_chart | 同左 |
 | 格式控制 | Codex output-schema + Pydantic gate | ADK output_schema + Pydantic gate |
-| 最終成功條件 | 本回合查詢成功、規格有效 | 同左 |
+| 最終成功條件 | 本回合查詢成功、規格有效 | 本次查詢成功、strict review 接受且綁定執行結果、規格有效 |
 | context | Harness 管本次工具對話；應用只傳上回合意圖 | 每個步驟使用明確的問題、資料、錯誤欄位 |
 
 ## 強模型路線
@@ -52,17 +52,25 @@ MCP 的 annotation 是提示，真正的 DB 權限仍由 SQLite 執行。
 UI / API
 └─ Text2SQLWorkflow（deterministic controller）
    ├─ SQL planner → SQLPlan
-   │  └─ schema / SQL error：修正 planner，最多 3 次總嘗試
+   │  └─ schema / SQL error：回饋 planner
    ├─ execute_query(sql)：必定由程式直接執行
+   ├─ semantic reviewer → SemanticReview（accepted: bool、reason）
+   │  └─ 拒絕 / review schema error：回饋 planner，查詢合計最多 3 次嘗試
    ├─ report writer → AnswerSubmission
    │  └─ schema / 圖表 error：修正 writer，最多 2 次總嘗試
    └─ complete_answer：hard gate + render + 完整資料表 + commit
 ```
 
-27B 只解決 SQL 與解釋的不確定性，不決定固定步驟是否發生。
-兩個模型步驟都沒有 tools，不存在 prompt 要求另一個 Agent 務必呼叫 executor。
+27B 負責 SQL、意圖審查與解釋的不確定性，不決定固定步驟是否發生。
+三個模型步驟都沒有 tools，不存在 prompt 要求另一個 Agent 務必呼叫 executor。
 retry 只處理具體錯誤，重跑出錯的步驟，不能用無限 critic loop 取代成功條件。
-SQL 正確執行但語意錯誤時，controller 不會假裝自己能判斷；這是評估要找出的問題。
+reviewer 明確取得原問題、追問上下文、DOMAIN 業務定義及實際 SQL / columns / rows。
+controller 只在本次 query_success 且 strict review 明確接受後進 report，
+發布時比對 reviewed_query 與當前執行結果；拒絕、解析失敗及耗盡均不發布分析。
+每次嘗試、回合開始與失敗清除 review、結果及圖表，不能沿用前次接受。
+查詢修正與報告修正分開，後者不重查或重審；維持 8 calls / 300 秒總限制。
+正常路徑 3 calls，最壞 3 × (planner + reviewer) + 2 report = 8。
+語義 reviewer 仍是同一 Qwen 的判斷，可能與 planner 有共同盲點，並非一般 SQL 正確性的證明。
 
 ## 兩版共同保留的程式責任
 
@@ -86,7 +94,8 @@ B：輸出欄位型別與 JSON/schema，由框架/CLI 格式約束與硬驗證�
 小模型版有有限的錯誤修正；強模型版不增加 application repair loop。
 
 C：不能寫 DB、失敗不能繼續、資料量與時間上限、狀態隔離，是程式規則。
-強模型也不能取代這些條件。成功 gate 驗證執行與結構，並不保證 answer 所有敘述都正確。
+強模型也不能取代這些條件。強模型成功 gate 驗證執行與結構；27B 另要求本次語義審查接受。
+兩者都不保證 answer 所有敘述都正確。
 
 沒有因為「Agent 不可靠」就加入 scheduler、權限審批工作流或永久 checkpoint。
 目前仍是 InMemoryRunner；若未來需求包含恢復或多使用者服務，才另加相應的儲存與隔離。
