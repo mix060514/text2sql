@@ -10,7 +10,7 @@ st.set_page_config(page_title="Text2SQL Agent", page_icon="🤖", layout="wide",
 st.title("🤖 Text2SQL Agent")
 st.markdown("""
 以自然語言查詢銷售資料，查看實際查詢結果與圖表。
-請從左側選擇 Chat、Eval、System Monitor、Data Dashboard 或 Image Read。
+請從左側選擇 Chat、Eval、System Monitor 或 Data Dashboard。
 """)
 st.caption(f"分析模型：{ANALYSIS_MODEL}")
 if WORKFLOW_VARIANT == "strong":
