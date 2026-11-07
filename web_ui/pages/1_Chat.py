@@ -3,6 +3,8 @@ import sys
 import os
 import pathlib
 import json
+import re
+import sqlparse
 import asyncio
 import uuid
 import time
@@ -114,6 +116,30 @@ if prompt:
         full_response = ""
         subagent_logs = []
 
+        def plain(text) -> str:
+            """Model text as literal inline markdown (no headings, lists or emphasis)."""
+            text = " ".join(str(text).split())
+            return re.sub(r"([\\`*_#\[\]<>|~+=-])", r"\\\1", text)
+
+        def format_model_text(text: str) -> str:
+            """Show agent output readably; raw markdown made JSON lines into big headings."""
+            try:
+                data = json.loads(text)
+            except ValueError:
+                return plain(text)
+            if not isinstance(data, dict):
+                return f"```json\n{json.dumps(data, ensure_ascii=False, indent=2)}\n```"
+            lines = []
+            for key, value in data.items():
+                if key == "sql" and isinstance(value, str):
+                    sql = sqlparse.format(value, reindent=True, keyword_case="upper")
+                    lines.append(f"```sql\n{sql}\n```")
+                elif isinstance(value, (dict, list)):
+                    lines.append(f"- `{key}`\n\n```json\n{json.dumps(value, ensure_ascii=False, indent=2)}\n```")
+                else:
+                    lines.append(f"- `{key}`: {plain(value)}")
+            return "\n".join(lines)
+
         def format_event(event) -> str:
             """Formats an ADK event into a readable markdown string."""
             log_lines = []
@@ -127,8 +153,8 @@ if prompt:
             if content and hasattr(content, "parts"):
                 for part in content.parts:
                     # Text Content
-                    if hasattr(part, "text") and part.text:
-                        log_lines.append(f"**[{author}]** {part.text}")
+                    if getattr(part, "text", None) and not getattr(part, "thought", False):
+                        log_lines.append(f"**[{author}]**\n\n{format_model_text(part.text)}")
 
                     # Function Call
                     if hasattr(part, "function_call") and part.function_call:
@@ -177,7 +203,7 @@ if prompt:
                     current_logs.append(formatted_log)
 
                     if show_subagent:
-                        live_log_container.markdown("\n---\n".join(current_logs))
+                        live_log_container.markdown("\n\n---\n\n".join(current_logs))
 
             # Get final answer from session state
             session = await st.session_state.runner.session_service.get_session(

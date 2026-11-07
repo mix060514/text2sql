@@ -4,7 +4,7 @@
 
 | `TEXT2SQL_BACKEND` | 路線 | 檔案 |
 |---|---|---|
-| `qwen27b`（預設） | 本機 Qwen 27B，程式控制 planner → 執行 → reviewer → report | `planned_agent/qwen_workflow.py` |
+| `qwen27b`（預設） | 本機 Swift 1.5（Qwen3.8-27B 後訓練版），程式控制 planner → 執行 → reviewer → report | `planned_agent/qwen_workflow.py` |
 | `codex` | 一次 Codex CLI 呼叫，模型透過唯讀 sales MCP 工具查詢 | `planned_agent/codex_workflow.py`、`codex_backend.py`、`mcp_server.py` |
 
 `planned_agent/agent.py` 只負責選擇路線。兩條路線共用 `tools.py`、`contracts.py`、`prompts.py`。
@@ -45,8 +45,12 @@ reviewer 仍可能判錯，接受不代表語意的數學保證，因此仍保�
 
 ## 執行
 
-已確認 Pi Agent 使用的 alias 是 `qwen3.8-27b-iq3-xxs`，
-OpenAI-compatible API 為 `http://127.0.0.1:18080/v1`。本分支預設使用這組設定。
+2026-11-07 起預設模型改為 **Swift 1.5**：UkisAI 以 Qwen3.8-27B 後訓練、思考 token 較少的版本，
+本機使用 [GSQ-RCO IQ3_XXS-mtp GGUF](https://huggingface.co/ukisai/Swift-1.5-Qwen3.8-27B-GSQ-RCO-GGUF)
+（10.44GB，含 MTP 推測解碼），router alias 為 `swift15-27b-iq3-xxs`。
+換模型的原因：原版思考很長，月份趨勢題的 planner 用光輸出額度、reviewer 超過 120 秒。
+OpenAI-compatible API 為 `http://127.0.0.1:18080/v1`。原版 `qwen3.8-27b-iq3-xxs` 仍在 router 上，
+用 `LLAMA_CPP_MODEL=openai/qwen3.8-27b-iq3-xxs` 即可切回。
 
 ```bash
 uv sync --locked
@@ -57,7 +61,7 @@ uv run streamlit run web_ui/app.py
 若模型服務不同，使用環境變數覆寫：
 
 ```bash
-export LLAMA_CPP_MODEL=openai/qwen3.8-27b-iq3-xxs
+export LLAMA_CPP_MODEL=openai/swift15-27b-iq3-xxs
 export LLAMA_CPP_API_BASE=http://127.0.0.1:18080/v1
 export LLAMA_CPP_API_KEY=aaa
 ```

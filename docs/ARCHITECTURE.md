@@ -6,7 +6,7 @@
 | | 強模型版 | 27B 版 |
 |---|---|---|
 | 分支 | codex/text2sql-strong | codex/text2sql-qwen27b |
-| 分析模型 | Codex CLI，gpt-6-sol | Pi 使用的 qwen3.8-27b-iq3-xxs |
+| 分析模型 | Codex CLI，gpt-6-sol | Swift 1.5（Qwen3.8-27B 後訓練、思考較短），`swift15-27b-iq3-xxs`；2026-11-07 前為原版 `qwen3.8-27b-iq3-xxs` |
 | 推理單位 | 一個 Codex Agent（agent_codex） | agent_sql、agent_review、agent_report |
 | 工具 / 推理迴圈 | Codex Harness | 固定程式流程，模型不帶 tools |
 | SQL 檢查與執行 | 同一個唯讀 MCP 查詢工具內直接執行 | controller 直接 step_run_sql |

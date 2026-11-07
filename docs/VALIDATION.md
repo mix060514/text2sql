@@ -163,3 +163,28 @@ DB 與 dataset SHA-256 仍符合 `data/eval_manifest.json`，沒有重生或改 
 
 reviewer 仍可能錯誤接受或錯誤拒絕，與 planner 使用同一模型也可能有共同盲點。
 這是線上語義攔截與有限修復，不是一般 SQL 語義正確性或回答敘述的數學保證。
+
+## 改用 Swift 1.5（2026-11-07）
+
+模型改為 `swift15-27b-iq3-xxs`（UkisAI Swift 1.5，Qwen3.8-27B 後訓練、思考較短；
+GSQ-RCO IQ3_XXS-mtp GGUF，SHA256 與官方一致）。程式流程、token 額度、120 秒請求逾時都沒改。
+
+5 題手動抽測（與 SQLite 直接計算比對）：原版與 Swift 皆 5/5 正確。
+
+| 題目 | 原版 | Swift |
+|---|---|---|
+| EMEA 總銷售額 | 34 秒 | 109 秒* |
+| 2024 各類別銷售量 | 43 秒 | 120 秒* |
+| 銷售額前三名國家 | 74 秒 | 51 秒 |
+| 北美 2023 各季趨勢 | 85 秒 | 64 秒 |
+| 平均單價最高的產品 | 48 秒 | 101 秒* |
+
+\* Swift 測試期間另一支程式（`generate_synthetic.py`）同時排隊使用模型（router `parallel = 1`），計時偏高，不能用來比速度。
+
+月份趨勢 smoke（原版先前失敗的案例），模型無其他請求時單獨執行：
+`uv run python scripts/smoke_workflow.py --case 'Monthly trend'` → **PASS 1/1，144.03 秒**，
+資料與圖表皆正確，[紀錄](smoke-swift15-monthly.json)。
+
+單一簡單 SQL 提示直接比較思考長度：Swift 457 輸出 tokens、原版 487，差異很小；
+模型卡宣稱的 58% 減少是長推理題的數字，本專案題目的實際差異尚未量化。
+尚未在 Swift 上重跑完整 8 案例 smoke 或 132 題 eval。

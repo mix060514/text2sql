@@ -1,7 +1,7 @@
 import os
 
 # Pi Agent's verified model alias and local OpenAI-compatible endpoint.
-LLAMA_CPP_MODEL = os.getenv("LLAMA_CPP_MODEL", "openai/qwen3.8-27b-iq3-xxs")
+LLAMA_CPP_MODEL = os.getenv("LLAMA_CPP_MODEL", "openai/swift15-27b-iq3-xxs")
 LLAMA_CPP_API_KEY = os.getenv("LLAMA_CPP_API_KEY", "aaa")
 LLAMA_CPP_API_BASE = os.getenv("LLAMA_CPP_API_BASE", "http://127.0.0.1:18080/v1")
 CODEX_BINARY = os.getenv("CODEX_BINARY", "codex")

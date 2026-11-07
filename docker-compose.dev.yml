@@ -13,8 +13,12 @@ services:
       - /app/.venv
     environment:
       - WATCH_FILES=true
-      - LLAMA_CPP_API_BASE=http://llama-cpp:8080
+      # The local llama router runs on the host (0.0.0.0:18080), not in ai-stack.
+      - LLAMA_CPP_API_BASE=http://host.docker.internal:18080/v1
+      - LLAMA_CPP_MODEL=openai/swift15-27b-iq3-xxs
       - LLAMA_CPP_VL_API_BASE=http://llama-cpp-vl:8080
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     deploy:
       resources:
         reservations:

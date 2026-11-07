@@ -1,7 +1,8 @@
 # Repository guidance
 
 This branch has two backends selected by TEXT2SQL_BACKEND (config.BACKEND): the default
-"qwen27b" deterministic controller with three Qwen 27B LlmAgents (qwen_workflow.py), and
+"qwen27b" deterministic controller with three Qwen 27B LlmAgents (qwen_workflow.py; default model
+since 2026-11-07 is Swift 1.5 `swift15-27b-iq3-xxs`, a shorter-thinking Qwen3.8-27B post-train), and
 "codex", one Codex CLI invocation with the read-only sales MCP tool (codex_workflow.py).
 agent.py only selects; tools/contracts/prompts are shared.
 Read docs/HANDOFF.md first (current state, open issues, next task), then README.md and

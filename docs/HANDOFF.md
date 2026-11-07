@@ -11,6 +11,7 @@
 | 路線切換 | `TEXT2SQL_BACKEND=qwen27b`（預設）或 `codex` |
 | Codex 路線 | 使用者的 Codex 未續費，只有離線測試，沒有實際呼叫 |
 | 舊分支 | `codex/text2sql-qwen27b`、`codex/text2sql-strong` 保留不動，只在本機 |
+| 本機模型 | 2026-11-07 改為 Swift 1.5（`swift15-27b-iq3-xxs`，Qwen3.8-27B 後訓練、思考較短）；原版 `qwen3.8-27b-iq3-xxs` 仍可切回 |
 | 強模型 worktree | `../text2sql-strong`（分支 `codex/text2sql-strong`），合併後已不需要；尚未移除 |
 
 ## 合併做了什麼
@@ -29,7 +30,7 @@
 
 ## 未解決
 
-1. **27B 月份趨勢題失敗**（8 個 smoke 案例中 7/8）。planner 額度 2,048 時用光輸出；調到 4,096 後 reviewer 請求 120 秒超時。細節見 `docs/VALIDATION.md` 末段。
+1. **月份趨勢題**：原版 27B 失敗（planner 用光額度、reviewer 120 秒超時）；改用 Swift 1.5 後單獨重跑 `Monthly trend` smoke **通過**（144 秒）。完整 8 案例 smoke 尚未在 Swift 上重跑。細節見 `docs/VALIDATION.md` 末段。
 2. **完整 132 題 eval 從未在目前兩條路線上跑過**（`eval/eval_e2e.py`、`eval/eval.py`）。
 3. Session 仍用 InMemoryRunner，沒有永久儲存。
 4. 是否開 PR 把 unified 合併進 master：使用者尚未決定。
@@ -206,7 +207,9 @@
 - 不問工程細節，只問目標、檢查點、完成標準。
 - 宣稱完成要附證據（指令輸出、測試結果）。
 - 本機模型一次只能處理一個請求：模型相關工作不可平行執行。
-- 端點：`http://127.0.0.1:18080/v1`，模型 `qwen3.8-27b-iq3-xxs`。
+- 端點：`http://127.0.0.1:18080/v1`，模型 `swift15-27b-iq3-xxs`（2026-11-07 前為 `qwen3.8-27b-iq3-xxs`）。
+- 模型部署：router 設定 `/mnt/data1/llama-config/acer-two-profiles.ini`（`--models-max 1`，一次只載入一個模型），
+  改前備份 `acer-two-profiles.before-swift15-20261107.ini`；模型檔在 `/mnt/data1/models/`。
 
 ## 複習資料
 
