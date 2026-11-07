@@ -18,10 +18,12 @@ from text2sql.agents.planned_agent import tools
 
 from .checks import normalize, rule_check
 from .llm import LLMFormatError
+from .complex import compare_rows
 from .templates import compare_answers
 
 # Per-layer prompt versions: --resume-from reruns only the layers whose prompt changed.
-PROMPT_VERSIONS = {"rewrite": "v3", "label": "v4", "semantic": "v3"}
+PROMPT_VERSIONS = {"rewrite": "v3", "label": "v4", "semantic": "v3", "sql": "v1"}
+MODEL_LAYERS = ("label", "semantic", "sql")
 PROMPT_VERSION = "+".join(f"{k}-{v}" for k, v in PROMPT_VERSIONS.items())
 CATEGORIES = {
     "sales_query": "可以用唯讀查詢 sales_data（2023–2024 年銷售紀錄）回答的問題，包含要求畫圖",
@@ -43,6 +45,8 @@ METRIC_HINT = {
     "quantity": "指標是數量：用銷量、數量、件數、賣了幾件等說法；不得用營收、銷售額、金額、多少錢；不要只說「賣得最好」。",
     "count": "指標是訂單筆數：用訂單數、筆數、幾單等說法；不得用金額或銷量。",
 }
+SQL_HINT = ("這題是先寫 SQL 再出題，答案由下面這段 SQL 決定；改寫後的問題必須仍然剛好由它回答"
+            "（門檻、邊界、計算方式、名次都不能變）。題目中不要寫 SQL 或英文欄位名。\nSQL：{sql}")
 STYLES = ["口語", "簡短", "客氣正式", "加上工作情境", "換句話說"]
 
 
@@ -54,6 +58,7 @@ class SeedOutcome:
     candidates: list[dict] = field(default_factory=list)
     error: str | None = None
     seed_label: dict = field(default_factory=dict)
+    seed_sql: dict = field(default_factory=dict)
 
 
 def load_seeds(paths) -> list[dict]:
@@ -84,6 +89,10 @@ def compute_oracle(seed: dict, db_path=tools.DB_PATH) -> dict:
         problems = compare_answers(seed["eval_type"], result["columns"], result["rows"], seed["reference_answer"])
         if problems:
             raise ValueError(f"{seed['seed_id']}: SQL and pandas disagree: {'; '.join(problems)}")
+    if "reference_rows" in seed:  # complex seeds: independent pandas implementation on the CSV
+        problems = compare_rows(result["rows"], seed["reference_rows"])
+        if problems:
+            raise ValueError(f"{seed['seed_id']}: SQL and pandas disagree: {'; '.join(problems[:3])}")
     oracle["oracle"] = seed.get("oracle", "sql")
     return oracle
 
@@ -112,6 +121,7 @@ def rewrite_messages(seed: dict, count: int, failures: list[dict]) -> list[dict]
 {meaning or '- （意圖不得改變）'}
 邊界：{seed['boundary']}
 {METRIC_HINT.get(seed.get("metric"), "")}
+{SQL_HINT.format(sql=seed["sql"]) if seed.get("sql_check") else ""}
 不得加入種子沒有的年份、地區、數字或條件；不得用「去年」「今年」等相對時間取代明確年份。
 每個改寫用不同風格，可參考：{styles}。長度 4–80 字。
 {feedback}
@@ -156,6 +166,23 @@ def semantic_messages(first: str, second: str, boundary: str, kind: str = "golde
 任何一項被加入、刪除或改變，都算不同。語氣、用詞、句型不同不影響判斷。
 不要因為句子較長或較短而改變判斷。
 輸出格式：{{"same_intent": true 或 false, "changed": ["被改變或遺失的項目"], "reason": "一句話理由"}}"""},
+    ]
+
+
+def sql_messages(question: str, sql: str) -> list[dict]:
+    return [
+        {"role": "system", "content": "你是嚴格的 SQL 審查員。只輸出 JSON。"},
+        {"role": "user", "content": f"""{DB_DESCRIPTION}
+判斷下面這段 SQL 的執行結果，是否剛好回答使用者的問題。
+使用者問題：{question}
+SQL：
+{sql}
+逐項比對：篩選條件（年份、地區、類別、客戶、門檻與邊界，例如「以上」對應 >=、「超過」對應 >）、
+分組方式、指標與計算方式（總和、平均、占比、成長率、累計、差額、人數）、排名與名次數、
+比較方向（誰相比誰：成長率的分母必須是問題中「被比較的基準」，例如「甲相比乙」= (甲 - 乙) / 乙）。
+SQL 為了輸出而多帶的欄位、固定的排序規則不算錯；問題要求的資訊 SQL 沒給、或 SQL 算的不是問題問的，就算不符。
+不要因為問題較長或較短而改變判斷。
+輸出格式（mismatch 每項一句話，不要貼 SQL 原文）：{{"answers_exactly": true 或 false, "mismatch": ["不符的地方"], "reason": "一句話理由"}}"""},
     ]
 
 
@@ -214,7 +241,16 @@ class Pipeline:
         same = [v.get("same_intent") is True for v in verdicts]
         return {"passed": all(same), "position_inconsistent": same[0] != same[1], "verdicts": verdicts}
 
-    def _check(self, seed, record, round_no, seen, failures, outcome, *, do_label=True, do_semantic=True) -> None:
+    def _sql(self, seed: dict, question: str) -> dict:
+        """SQL-first check: does the seed SQL answer exactly this question?"""
+        try:
+            verdict = self.llm(sql_messages(question, seed["sql"]), temperature=0.0, max_tokens=900)
+        except LLMFormatError as exc:
+            verdict = {"answers_exactly": False, "mismatch": [], "reason": f"judge format error: {exc}"}
+        return {"passed": verdict.get("answers_exactly") is True, **verdict}
+
+    def _check(self, seed, record, round_no, seen, failures, outcome, *, do_label=True, do_semantic=True,
+               do_sql=True) -> None:
         """Run the layers on one candidate and file it as accepted or failed."""
         question = record["question"]
         reasons = rule_check(question, seed, seen)
@@ -244,6 +280,14 @@ class Pipeline:
                 record.update(status="semantic", reasons=[f"semantic: 意圖改變 {changed}{note}"])
                 failures.append(record)
                 return
+        if do_sql and seed.get("sql_check"):
+            verdict = self._sql(seed, question)
+            record["sql_check"] = verdict
+            self._write(round_no, "5_sql", {**record})
+            if not verdict["passed"]:
+                record.update(status="sql", reasons=[f"sql: SQL 不再剛好回答這題 {verdict.get('mismatch')}：{verdict.get('reason')}"])
+                failures.append(record)
+                return
         record["status"] = "accepted"
         outcome.accepted.append(record)
 
@@ -257,6 +301,13 @@ class Pipeline:
             _, outcome.seed_label = self._label(seed["question"])
         if outcome.seed_label.get("category") != seed["category"]:
             self.log(f"{seed['seed_id']}: seed classified as {outcome.seed_label.get('category')}")
+        if seed.get("sql_check"):  # the seed question itself must match its SQL
+            if reuse and previous.get("seed_sql") and "sql" not in recheck:
+                outcome.seed_sql = previous["seed_sql"]
+            else:
+                outcome.seed_sql = self._sql(seed, seed["question"])
+            if not outcome.seed_sql["passed"]:
+                self.log(f"{seed['seed_id']}: seed question does not match its SQL: {outcome.seed_sql.get('reason')}")
         seen = {normalize(seed["question"])}
         failures: list[dict] = []
         if reuse:
@@ -268,7 +319,8 @@ class Pipeline:
                 self._write(0, "1_reuse", record)
                 outcome.candidates.append(record)
                 self._check(seed, record, 0, seen, failures, outcome,
-                            do_label="label" in recheck, do_semantic="semantic" in recheck)
+                            do_label="label" in recheck, do_semantic="semantic" in recheck,
+                            do_sql="sql" in recheck)
             self.log(f"{seed['seed_id']} reuse: kept {len(outcome.accepted)}/{len(previous['rewrites'])}")
         for round_no in range(1, self.max_rounds + 1):
             need = self.variants - len(outcome.accepted)
@@ -321,7 +373,7 @@ def load_previous(run_dir: Path) -> tuple[dict, dict]:
         entry = by_seed.setdefault(item["seed_id"], {"run_id": manifest["run_id"], "rewrites": []})
         if item["source"] == "seed":
             entry.update(seed_question=item["question"], fingerprint=item.get("seed_fingerprint"),
-                         seed_label=item.get("seed_label_check"))
+                         seed_label=item.get("seed_label_check"), seed_sql=item.get("seed_sql_check"))
         else:
             entry["rewrites"].append(item)
     return manifest, by_seed
@@ -343,7 +395,8 @@ def dataset_items(outcome: SeedOutcome) -> list[dict]:
     else:
         base["expected_behavior"] = "refuse_without_query"
     items = [{"id": f"{seed['seed_id']}-seed", "question": seed["question"], "source": "seed", **base,
-              "seed_fingerprint": seed_fingerprint(seed), "seed_label_check": outcome.seed_label or None}]
+              "seed_fingerprint": seed_fingerprint(seed), "seed_label_check": outcome.seed_label or None,
+              **({"seed_sql_check": outcome.seed_sql} if outcome.seed_sql else {})}]
     for index, record in enumerate(outcome.accepted, 1):
         extra = {"reused_from": record["reused_from"]} if record.get("reused_from") else {}
         items.append({"id": f"{seed['seed_id']}-v{index}", "question": record["question"],
@@ -371,6 +424,7 @@ def build_report(outcomes: list[SeedOutcome], manifest: dict) -> str:
         f"| 1 規則 | 程式：結構、長度、繁體、實體、指標、年份、重複 | {count('rules')} |",
         f"| 2 標籤 | 本機模型盲分類，比對種子類別 | {count('label')} |",
         f"| 3 語意 | 本機模型 judge，正反兩種順序都要通過 | {count('semantic')} |",
+        f"| 4 SQL 對題 | 本機模型看 SQL 與題目，判斷 SQL 是否剛好回答（只用於 SQL 先行的種子） | {count('sql')} |",
         f"| 通過 | | {count('accepted')} / {len(candidates)} 個候選 |", "",
         f"語意層兩種順序判斷不一致（位置偏差跡象）：{inconsistent} 次。", "",
         *([f"沿用 `{manifest['resume_from']}`：{sum(1 for c in candidates if c.get('reused_from'))} 題重新檢查，"
@@ -387,6 +441,10 @@ def build_report(outcomes: list[SeedOutcome], manifest: dict) -> str:
     lines += ["", "## 種子自我分類不一致（請人工確認種子標籤）", ""]
     lines += [f"- **{o.seed['seed_id']}**「{o.seed['question']}」：種子類別 {o.seed['category']}，分類器判為 "
               f"{o.seed_label.get('category')}（{o.seed_label.get('reason') or o.seed_label.get('error')}）" for o in disputed] or ["（無）"]
+    mismatched = [o for o in outcomes if o.seed_sql and not o.seed_sql.get("passed")]
+    lines += ["", "## 種子題目與 SQL 不一致（請人工確認種子）", ""]
+    lines += [f"- **{o.seed['seed_id']}**「{o.seed['question']}」：{o.seed_sql.get('mismatch')}；{o.seed_sql.get('reason')}"
+              for o in mismatched] or ["（無）"]
     lines += ["", "## 被刷掉的候選與原因", ""]
     rejected = [c for c in candidates if c["status"] not in ("accepted",)]
     if not rejected:
@@ -418,9 +476,9 @@ def run(seed_paths, llm, out_root: Path, *, variants=2, max_rounds=3, db_path=to
         old_versions = old_manifest.get("prompt_versions") or (
             {k: "v3" for k in PROMPT_VERSIONS} if old_manifest.get("prompt_version") == "v3" else {})
         if recheck_model is None:  # rerun a model layer only if its prompt changed
-            recheck = frozenset(k for k in ("label", "semantic") if old_versions.get(k) != PROMPT_VERSIONS[k])
+            recheck = frozenset(k for k in MODEL_LAYERS if old_versions.get(k) != PROMPT_VERSIONS[k])
         elif recheck_model:
-            recheck = frozenset({"label", "semantic"})
+            recheck = frozenset(MODEL_LAYERS)
         log(f"resume from {old_manifest['run_id']}: prompts {old_versions} -> {PROMPT_VERSIONS}; "
             f"recheck layers: {sorted(recheck) or 'none'}")
     outcomes = [pipeline.run_seed(seed, previous.get(seed["seed_id"]), recheck) for seed in seeds]
