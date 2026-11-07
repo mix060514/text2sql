@@ -1,0 +1,1 @@
+{"seed_id": "X-region_top_customers_orders-EMEA-2024-5", "round": 2, "style": "口語", "question": "2024 年 EMEA 地區營收最高的五家客戶是哪幾家？他們分別下了多少訂單？", "status": null, "reasons": [], "label_check": {"category": "sales_query", "reason": "該問題可透過唯讀查詢 sales_data 表中的 2024 年 EMEA 地區客戶營收與訂單數量來回答。"}}

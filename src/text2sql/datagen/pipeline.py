@@ -22,7 +22,7 @@ from .complex import compare_rows
 from .templates import compare_answers
 
 # Per-layer prompt versions: --resume-from reruns only the layers whose prompt changed.
-PROMPT_VERSIONS = {"rewrite": "v3", "label": "v4", "semantic": "v3", "sql": "v1"}
+PROMPT_VERSIONS = {"rewrite": "v3", "label": "v4", "semantic": "v3", "sql": "v3"}
 MODEL_LAYERS = ("label", "semantic", "sql")
 PROMPT_VERSION = "+".join(f"{k}-{v}" for k, v in PROMPT_VERSIONS.items())
 CATEGORIES = {
@@ -169,7 +169,16 @@ def semantic_messages(first: str, second: str, boundary: str, kind: str = "golde
     ]
 
 
-def sql_messages(question: str, sql: str) -> list[dict]:
+def result_preview(oracle: dict | None, limit: int = 6) -> str:
+    """Columns and the first rows of the real result, so the judge need not simulate the SQL."""
+    if not oracle:
+        return ""
+    rows = "\n".join(" | ".join("NULL" if v is None else str(v) for v in row) for row in oracle["rows"][:limit])
+    more = f"\n…共 {len(oracle['rows'])} 列" if len(oracle["rows"]) > limit else ""
+    return f"\n這段 SQL 實際執行的結果（欄位：{' | '.join(oracle['columns'])}）：\n{rows}{more}\n"
+
+
+def sql_messages(question: str, sql: str, preview: str = "") -> list[dict]:
     return [
         {"role": "system", "content": "你是嚴格的 SQL 審查員。只輸出 JSON。"},
         {"role": "user", "content": f"""{DB_DESCRIPTION}
@@ -177,10 +186,13 @@ def sql_messages(question: str, sql: str) -> list[dict]:
 使用者問題：{question}
 SQL：
 {sql}
+{preview}請以實際執行結果為準，不要自行推測 SQL 會產生 NULL 或缺資料。
 逐項比對：篩選條件（年份、地區、類別、客戶、門檻與邊界，例如「以上」對應 >=、「超過」對應 >）、
 分組方式、指標與計算方式（總和、平均、占比、成長率、累計、差額、人數）、排名與名次數、
 比較方向（誰相比誰：成長率的分母必須是問題中「被比較的基準」，例如「甲相比乙」= (甲 - 乙) / 乙）。
 SQL 為了輸出而多帶的欄位、固定的排序規則不算錯；問題要求的資訊 SQL 沒給、或 SQL 算的不是問題問的，就算不符。
+資料完整涵蓋 2023-01 到 2024-12 的每個月、每個區域與類別；只依這份資料判斷，
+不得用「如果某月沒有資料」「若有並列」這類假設情境判為不符。
 不要因為問題較長或較短而改變判斷。
 輸出格式（mismatch 每項一句話，不要貼 SQL 原文）：{{"answers_exactly": true 或 false, "mismatch": ["不符的地方"], "reason": "一句話理由"}}"""},
     ]
@@ -244,7 +256,8 @@ class Pipeline:
     def _sql(self, seed: dict, question: str) -> dict:
         """SQL-first check: does the seed SQL answer exactly this question?"""
         try:
-            verdict = self.llm(sql_messages(question, seed["sql"]), temperature=0.0, max_tokens=900)
+            verdict = self.llm(sql_messages(question, seed["sql"], result_preview(self.oracles.get(seed["seed_id"]))),
+                               temperature=0.0, max_tokens=900)
         except LLMFormatError as exc:
             verdict = {"answers_exactly": False, "mismatch": [], "reason": f"judge format error: {exc}"}
         return {"passed": verdict.get("answers_exactly") is True, **verdict}

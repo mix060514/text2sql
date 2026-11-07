@@ -17,6 +17,7 @@ docs/ARCHITECTURE.md before changing the workflow.
 - `uv run python eval/eval_e2e.py --limit 5` (live model and LLM judge)
 - `uv run python scripts/build_golden_seeds.py` (offline; golden seeds from legacy templates, SQL checked against legacy pandas)
 - `uv run python scripts/build_guardrail_seeds.py` (offline; 42 block seeds, prints a review table)
+- `uv run python scripts/build_complex_seeds.py` (offline; 34 SQL-first complex seeds, SQL checked against pandas on the CSV)
 - `uv run python scripts/generate_synthetic.py` (live model; staged synthetic golden + guardrail set, see docs/SYNTHETIC_DATA_METHOD.md)
   Add `--resume-from data/synthetic/runs/<run>` to reuse accepted rewrites and regenerate only what fails.
 

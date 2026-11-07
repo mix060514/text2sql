@@ -1,0 +1,2 @@
+{"seed_id": "X-region_mom-APAC-2024", "round": 1, "style": "口語", "question": "2024 年亞太區的銷售額，一個月比上個月漲了百分之幾？", "status": null, "reasons": [], "label_check": {"category": "sales_query", "reason": "詢問 2024 年亞太區銷售額的月增長率，可透過唯讀查詢 sales_data 計算得出。"}}
+{"seed_id": "X-region_mom-APAC-2024", "round": 1, "style": "簡短", "question": "查 APAC 2024 各月營收的月增率。", "status": null, "reasons": [], "label_check": {"category": "sales_query", "reason": "該問題可透過查詢 sales_data 表中 2024 年 APAC 地區的月度營收資料並計算月增率來回答。"}}

@@ -116,7 +116,14 @@
   prompt 版本拆成各層（`PROMPT_VERSIONS`），沿用時只重跑版本變更的層。
 - 目前資料集：`data/synthetic/runs/20261107-095120/dataset.jsonl`（252 題，放行 126、攔截 126）。沿用 094328、
   只重判標籤層：257 次、382 秒；166 題沿用全數通過，B23 重新生成；種子自我分類不一致 0 筆。
-- 尚待：攔截種子仍無人工確認（`label_source` 註明）；資料集尚未接到 eval 測兩條路線。
+- SQL 先行的複雜查詢（2026-11-07，細節見 `docs/SYNTHETIC_DATA_METHOD.md`「SQL 先行」）：34 題型
+  （`src/text2sql/datagen/complex.py`，`uv run python scripts/build_complex_seeds.py`），每題 SQL 與讀原始 CSV 的
+  pandas 實作逐列一致才收；新增第 4 層「SQL 對題」：本機模型看 SQL、實際結果前幾列與題目，判斷 SQL 是否剛好回答，
+  種子本身也要過。抓到真種子問題（月增率 1 月應比前一年 12 月）。逐種子存檔，中斷的 run 可續跑。
+- 目前資料集：`data/synthetic/runs/20261107-162208/dataset.jsonl`（354 題：放行 228＝舊黃金 126＋複雜 102，攔截 126）。
+- 已知限制：SQL 對題層抓不到「上半年相比下半年」這類比較方向對調；judge 放過的改寫靠人工抽查補規則（已補 4 種）。
+- 尚待：攔截種子仍無人工確認（`label_source` 註明）；資料集尚未接到 eval 測兩條路線（複雜題的 eval_type 多為
+  dataframe，答案在 `ground_truth.rows`，接 eval 時需逐列比對）。
 - SQL 先行複雜查詢（2026-11-07）：34 個題型（CTE、視窗函數、世代分析、年增／月增／季增、門檻），SQL 與讀原始 CSV 的
   pandas 逐列一致才收（`scripts/build_complex_seeds.py`）；新增 SQL 對題層（模型判斷 SQL 是否剛好回答題目）。
   目前資料集：`data/synthetic/runs/20261107-155802/dataset.jsonl`（352 題，放行 226、攔截 126）。

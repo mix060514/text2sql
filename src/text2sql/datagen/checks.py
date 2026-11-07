@@ -8,7 +8,7 @@ MIN_CHARS, MAX_CHARS = 4, 80
 SIMPLIFIED_ONLY = set(
     "这个们说时会对发问题么为过还没进来动经现实头关应开总额销货数据询区国产单订务卖买删库"
     "统计营显图画请帮给让将从与导历钱亚欧东电软办类别户长门间两条笔吗么样预测润价"
-    "层级规则写诗归无视设结构内"
+    "层级规则写诗归无视设结构内几"
 )
 CJK = re.compile(r"[一-鿿]")
 YEAR = re.compile(r"20\d\d")
@@ -28,14 +28,15 @@ FORBIDDEN = {
 EXPLICIT = {"amount": AMOUNT_WORDS, "quantity": QUANTITY_WORDS, "count": COUNT_WORDS}
 
 
-def metric_check(text: str, metric: str | None) -> list[str]:
+def metric_check(text: str, metric: str | None, allow=()) -> list[str]:
+    """`allow`: words of another kind the seed legitimately asks for too (e.g. an extra order-count column)."""
     if metric not in FORBIDDEN:
         return []
     # "訂單數量" is an order count, not units: drop it before looking for quantity words.
     probe = text.replace("訂單數量", "訂單筆數") if metric == "count" else text
     reasons = []
-    wrong = [w for w in FORBIDDEN[metric] if w in probe]
-    if metric == "amount" and "訂單數量" in text:
+    wrong = [w for w in FORBIDDEN[metric] if w in probe and w not in allow]
+    if metric == "amount" and "訂單數量" in text and "訂單數量" not in allow:
         wrong.append("訂單數量")
     if wrong:
         reasons.append(f"metric: 指標應為{ {'amount': '金額', 'quantity': '數量', 'count': '訂單筆數'}[metric] }，卻出現 {'、'.join(dict.fromkeys(wrong))}")
@@ -67,7 +68,12 @@ def rule_check(question, seed: dict, seen: set[str]) -> list[str]:
     for group in (g for g in seed.get("keep", []) if g.get("type", "entity") == "entity"):
         if not any(term.lower() in lowered for term in group["any_of"]):
             reasons.append(f"keep: 缺少「{group['name']}」（需含其一：{'、'.join(group['any_of'])}）")
-    reasons += metric_check(text, seed.get("metric"))
+    # Forbidden wording: e.g. an amount-difference seed must not drift into a percentage ("漲幅").
+    for group in (g for g in seed.get("keep", []) if g.get("type") == "forbid"):
+        hits = [term for term in group["any_of"] if term.lower() in lowered]
+        if hits:
+            reasons.append(f"keep: 不得出現「{'、'.join(hits)}」（{group['name']}）")
+    reasons += metric_check(text, seed.get("metric"), seed.get("metric_allow", ()))
     extra_years = set(YEAR.findall(text)) - set(YEAR.findall(seed["question"]))
     if extra_years:
         reasons.append(f"keep: 出現種子沒有的年份 {'、'.join(sorted(extra_years))}")

@@ -1,0 +1,4 @@
+{"seed_id": "X-asp_change-3", "round": 1, "style": "口語", "question": "比較 2024 和 2023 的平均單價，哪三個產品漲得最貴？各差多少錢？", "status": null, "reasons": []}
+{"seed_id": "X-region_top_customers_orders-EMEA-2024-5", "round": 1, "style": "口語", "question": "2024 年 EMEA 地區銷售金額最高的五個客戶是誰？請列出他們各自的訂單筆數。", "status": null, "reasons": ["metric: 指標應為金額，卻出現 筆數"]}
+{"seed_id": "X-high_price_orders-500", "round": 1, "style": "口語", "question": "單價超過五百的訂單，各產品類別分別有幾筆？", "status": null, "reasons": []}
+{"seed_id": "X-product_growth_amount-3", "round": 1, "style": "口語", "question": "2024年比2023年營收金額多出來的三個產品是哪幾個？各自多了多少錢？", "status": null, "reasons": []}

@@ -271,11 +271,12 @@ SELECT region, product_name, ROUND(revenue, 2) AS total_revenue FROM r WHERE rn 
 SUM(Quantity) AS total_quantity FROM sales_data GROUP BY 1, 2), r AS (SELECT *, ROW_NUMBER() OVER (PARTITION BY
 product_category ORDER BY total_quantity DESC, product_name ASC) AS rank FROM t)
 SELECT product_category, rank, product_name, total_quantity FROM r WHERE rank <= 3 ORDER BY product_category, rank""",
-    "region_mom": f"""WITH m AS (SELECT {MONTH} AS month, SUM({REV}) AS revenue FROM sales_data
-WHERE Region = '{{region}}' GROUP BY month),
-g AS (SELECT month, revenue, LAG(revenue) OVER (ORDER BY month) AS previous_month_revenue FROM m)
-SELECT month, ROUND((revenue - previous_month_revenue) * 100.0 / previous_month_revenue, 2) AS mom_growth_pct
-FROM g WHERE substr(month, 1, 4) = '{{year}}' ORDER BY month""",
+    "region_mom": f"""WITH m AS (SELECT {MONTH} AS month,
+strftime('%Y-%m', date(strftime('%Y-%m-01', "Order Date"), '-1 month')) AS previous_month,
+SUM({REV}) AS revenue FROM sales_data WHERE Region = '{{region}}' GROUP BY month)
+SELECT this.month, ROUND((this.revenue - prev.revenue) * 100.0 / prev.revenue, 2) AS mom_growth_pct
+FROM m AS this LEFT JOIN m AS prev ON prev.month = this.previous_month
+WHERE this.month BETWEEN '{{year}}-01' AND '{{year}}-12' ORDER BY this.month""",
     "cumulative": f"""WITH m AS (SELECT {MONTH} AS month, SUM({REV}) AS revenue FROM sales_data WHERE {YEAR} = '{{year}}'
 GROUP BY month) SELECT month, ROUND(SUM(revenue) OVER (ORDER BY month), 2) AS cumulative_revenue FROM m ORDER BY month""",
     "country_decline": f"""WITH a AS (SELECT Country AS country, SUM(CASE WHEN {YEAR} = '2023' THEN {REV} END) AS r23,
@@ -380,6 +381,11 @@ def _lit(name, *words):
     return {"name": name, "type": "entity", "any_of": list(words)}
 
 
+# Run 20261107-161201: "增加多少" (amount difference) was rewritten as "漲幅／增加幅度最大" and passed the judge.
+MOST = _lit("排名方向", "最多", "最大", "最高", "最貴", "前三", "前 3", "前3", "Top", "top", "冠")
+NOT_PERCENT = {"name": "差額是金額，不是百分比", "type": "forbid", "any_of": ["幅", "百分", "%", "％", "成長率", "幾成"]}
+
+
 TOP = {3: ["3", "三"], 5: ["5", "五"], 10: ["10", "十"], 2: ["第二", "第 2", "第2", "亞軍"]}
 
 # (key, eval_type, metric, chart x column or None, [(params, question, extra literal entities)], concepts)
@@ -427,7 +433,7 @@ SPECS = [
      [({}, "2023 年和 2024 年各自銷售額最高的是哪個月？金額多少？", [])],
      _c(("分組", "每年各取一個月份"), ("指標", "銷售金額"))),
     ("asp_change", "dataframe", "amount", None,
-     [({"n": 3}, "哪三個產品 2024 年的平均單價比 2023 年漲最多？各漲了多少？", [_lit("名次", *TOP[3])])],
+     [({"n": 3}, "哪三個產品 2024 年的平均單價比 2023 年漲最多？各漲了多少？", [_lit("名次", *TOP[3]), MOST, NOT_PERCENT])],
      _c(("指標", "平均單價 ASP 的年度差額"),)),
     ("pareto", "number", None, None,
      [({"pct": 80}, "產品按銷售額由高到低累加，至少要幾個產品才能達到總銷售額的 80%？",
@@ -448,7 +454,7 @@ SPECS = [
     ("weekday", "dataframe", "amount", "weekday",
      [({}, "星期一到星期日，每一天的總銷售額各是多少？請用長條圖比較。", [])],
      _c(("分組", "按星期幾"), ("圖表", "長條圖"))),
-    ("region_top_customers_orders", "dataframe", None, None,
+    ("region_top_customers_orders", "dataframe", "amount", None,
      [({"region": "EMEA", "year": "2024", "n": 5}, "EMEA 在 2024 年銷售額前五大的客戶是誰？他們各下了幾筆訂單？",
        [_lit("名次", *TOP[5])])],
      _c(("排名依據", "銷售金額"), ("附加欄位", "每位客戶的訂單筆數"))),
@@ -480,7 +486,7 @@ SPECS = [
      [({"region": "LATAM"}, "LATAM 每個國家銷售量最高的產品分別是什麼？", [])],
      _c(("分組", "區域內每個國家各取一個產品"), ("指標", "銷售數量"))),
     ("product_growth_amount", "dataframe", "amount", None,
-     [({"n": 3}, "2024 年比 2023 年銷售額增加最多的三個產品是哪些？各增加多少？", [_lit("名次", *TOP[3])])],
+     [({"n": 3}, "2024 年比 2023 年銷售額增加最多的三個產品是哪些？各增加多少？", [_lit("名次", *TOP[3]), MOST, NOT_PERCENT])],
      _c(("指標", "銷售額增加的金額，不是百分比"),)),
     ("customer_category_mix", "dataframe", "amount", None,
      [({"customer": "Global Summit Solutions"}, "Global Summit Solutions 的消費金額中，各產品類別各占多少比例？",
@@ -490,6 +496,9 @@ SPECS = [
      [({}, "2023 到 2024 年間，哪一季的銷售額季增率最高？是多少？", [])],
      _c(("指標", "與前一季相比的成長率"), ("對象", "單一季度"))),
 ]
+
+# Seeds whose answer carries a second metric on purpose (run 20261107-161943 falsely rejected "訂單筆數").
+METRIC_ALLOW = {"region_top_customers_orders": ["筆數", "幾單", "訂單數量"]}
 
 REFERENCE = {name[2:]: fn for name, fn in globals().items() if name.startswith("p_")}
 
@@ -543,6 +552,7 @@ def build_complex_seeds(db_path=tools.DB_PATH) -> tuple[list[dict], list[dict]]:
                 "keep": keep + concepts, "boundary": BOUNDARY, "difficulty": "complex",
                 "tags": ["complex", key], "metric": metric, "template": "X_" + key,
                 "reference_rows": reference, "oracle": "sql+pandas(csv)", "sql_check": True,
+                **({"metric_allow": METRIC_ALLOW[key]} if key in METRIC_ALLOW else {}),
                 "seed_source": "SQL 先行：Claude 先寫 SQL 與 pandas 對照實作，再寫出對應題目（2026-11-07）",
             }
             seeds.append(seed)
