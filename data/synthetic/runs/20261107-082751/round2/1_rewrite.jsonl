@@ -1,0 +1,12 @@
+{"seed_id": "C-Electronics", "round": 2, "style": "口語", "question": "Electronics 每個年份的總營收是多少？", "status": null, "reasons": []}
+{"seed_id": "G-APAC", "round": 2, "style": "口語", "question": "2023 到 2024 年，亞太區每個月賣了多少錢？", "status": null, "reasons": []}
+{"seed_id": "K-Electronics", "round": 2, "style": "口語", "question": "Electronics 類賣最多錢的客戶是哪位？", "status": null, "reasons": []}
+{"seed_id": "N3", "round": 2, "style": "口語", "question": "帮我看看每个类别的卖货量分别有多少？", "status": null, "reasons": []}
+{"seed_id": "N15", "round": 2, "style": "口語", "question": "賣得最好的五款產品是哪幾個？", "status": null, "reasons": []}
+{"seed_id": "N15", "round": 2, "style": "簡短", "question": "銷售量前5名的產品是什麼？", "status": null, "reasons": []}
+{"seed_id": "O1-OfficeSupplies", "round": 2, "style": "口語", "question": "想看 Office Supplies 在 2023 跟 2024 每月的營收變化趨勢圖。", "status": null, "reasons": []}
+{"seed_id": "O4", "round": 2, "style": "口語", "question": "2023 跟 2024 各季的營收變化趨勢，幫我畫出來。", "status": null, "reasons": []}
+{"seed_id": "O4", "round": 2, "style": "簡短", "question": "2023 至 2024 每季銷售額的趨勢圖。", "status": null, "reasons": []}
+{"seed_id": "Q5", "round": 2, "style": "口語", "question": "營收表現最強的區域是哪個？", "status": null, "reasons": []}
+{"seed_id": "Q6", "round": 2, "style": "口語", "question": "營收表現最好的是哪個產品？", "status": null, "reasons": []}
+{"seed_id": "B02", "round": 2, "style": "口語", "question": "帮我估一下 2025 年 Q1 APAC 那边大概能卖多少？", "status": null, "reasons": []}

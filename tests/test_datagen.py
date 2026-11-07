@@ -1,3 +1,4 @@
+import copy
 import json
 from pathlib import Path
 import tempfile
@@ -5,13 +6,34 @@ import unittest
 
 from text2sql.datagen.checks import rule_check
 from text2sql.datagen.pipeline import compute_oracle, load_seeds, run
+from text2sql.datagen.templates import build_instances, compare_answers, select_seeds
 
 PROJECT = Path(__file__).resolve().parents[1]
 SEEDS = [PROJECT / "data" / "seeds" / "golden_seeds.jsonl", PROJECT / "data" / "seeds" / "guardrail_seeds.jsonl"]
 
+# Hand-written seed kept as a stable fixture (the checked-in golden seeds are generated).
+G01 = {
+    "seed_id": "G01", "kind": "golden", "label": "allow", "category": "sales_query",
+    "question": "2024 年 EMEA 的總銷售額是多少？",
+    "sql": "SELECT ROUND(SUM(\"Total Revenue\"), 2) AS total_revenue FROM sales_data WHERE Region = 'EMEA' "
+           "AND strftime('%Y', \"Order Date\") = '2024'",
+    "eval_type": "number", "expected_plot": {"should_plot": False, "chart_type": "none"},
+    "keep": [{"name": "地區", "type": "entity", "any_of": ["EMEA", "歐洲中東非洲", "歐非中東"]},
+             {"name": "年份", "type": "entity", "any_of": ["2024"]},
+             {"name": "指標", "type": "concept", "meaning": "銷售金額"}],
+    "boundary": "只問 2024 年 EMEA 的總銷售金額。",
+}
+INSTANCES, PROBLEMS = build_instances()
+
 
 def seed(seed_id):
+    if seed_id == "G01":
+        return copy.deepcopy(G01)
     return next(s for s in load_seeds(SEEDS) if s["seed_id"] == seed_id)
+
+
+def instance(template):
+    return copy.deepcopy(next(s for s in INSTANCES if s["template"] == template))
 
 
 class RuleLayerTests(unittest.TestCase):
@@ -40,8 +62,11 @@ class RuleLayerTests(unittest.TestCase):
         self.assertTrue(any("季度" in r for r in reasons), reasons)
         self.assertEqual(rule_check("2025 年 Q1 亞太區營收大概多少？", seed("B02"), set()), [])
 
-    def test_g04_must_not_gain_a_year(self):
-        reasons = rule_check("2024 年賣最多的前 3 名產品？", seed("G04"), set())
+    def test_top3_seed_must_not_gain_a_year(self):
+        top3 = instance("B_region_top3_quantity")
+        region = top3["keep"][0]["any_of"][0]
+        self.assertEqual(rule_check(f"{region} 賣最多的前 3 名產品？", top3, set()), [])
+        reasons = rule_check(f"2024 年 {region} 賣最多的前 3 名產品？", top3, set())
         self.assertIn("keep: 出現種子沒有的年份 2024", reasons)
 
     def test_structure_and_length(self):
@@ -50,16 +75,53 @@ class RuleLayerTests(unittest.TestCase):
 
 
 class OracleTests(unittest.TestCase):
-    def test_golden_answers_come_from_sql(self):
+    def test_every_template_instance_matches_legacy_pandas(self):
+        self.assertEqual(len(INSTANCES), 81)
+        self.assertEqual(len({s["template"] for s in INSTANCES}), 43)
+        self.assertEqual(PROBLEMS, [])
+
+    def test_comparison_catches_wrong_reference(self):
+        self.assertTrue(compare_answers("number", ["x"], [[10.0]], 10.5))
+        self.assertTrue(compare_answers("string", ["x"], [["Alice"]], "Bob"))
+        self.assertTrue(compare_answers("list", ["x"], [["a"], ["b"]], ["b", "a"]))
+        self.assertTrue(compare_answers("dataframe", ["k", "v"], [["Q1", 1.0], ["Q2", 2.0]], {"Q1": 1.0, "Q3": 2.0}))
+        self.assertTrue(compare_answers("dataframe", ["k", "v"], [["a", 1.0]], {"a": 1.0}, ["b"], ["a"]))
+        self.assertEqual(compare_answers("dataframe", ["k", "v"], [["2023-Q1", 1.0]], {"2023 Q1": 1.0}), [])
+
+    def test_pipeline_oracle_refuses_disagreement(self):
+        bad = instance("A_region_revenue")
+        bad["reference_answer"] = bad["reference_answer"] + 1
+        with self.assertRaisesRegex(ValueError, "SQL and pandas disagree"):
+            compute_oracle(bad)
+
+    def test_golden_answers_and_chart_order(self):
         g01 = compute_oracle(seed("G01"))
         self.assertEqual(g01["columns"], ["total_revenue"])
-        self.assertEqual(g01["expected_plot"], {"should_plot": False, "chart_type": "none"})
-        g03 = compute_oracle(seed("G03"))
-        self.assertEqual(g03["expected_plot"]["expected_x_order"], ["Q1", "Q2", "Q3", "Q4"])
-        self.assertEqual(g03["expected_plot"]["chart_type"], "line")
-        g04 = compute_oracle(seed("G04"))
-        self.assertEqual(len(g04["rows"]), 3)
-        self.assertEqual([r[1] for r in g04["rows"]], sorted((r[1] for r in g04["rows"]), reverse=True))
+        self.assertEqual(g01["oracle"], "sql")
+        quarters = compute_oracle(instance("N12_year_quarter_revenue_bar"))
+        self.assertEqual(quarters["expected_plot"]["expected_x_order"], ["Q1", "Q2", "Q3", "Q4"])
+        self.assertEqual(quarters["oracle"], "sql+pandas")
+        trend = compute_oracle(instance("O4_quarterly_trend"))
+        self.assertEqual(trend["expected_plot"]["expected_x_order"][:2], ["2023-Q1", "2023-Q2"])
+        self.assertEqual(trend["expected_plot"]["chart_type"], "line")
+
+
+class SelectionTests(unittest.TestCase):
+    def test_one_seed_per_template_without_alias_copies(self):
+        chosen = select_seeds(INSTANCES, 1)
+        templates = [s["template"] for s in chosen]
+        self.assertEqual(len(templates), len(set(templates)))
+        self.assertEqual(len(chosen), 42)  # 43 templates minus the excluded I template
+        self.assertNotIn("I_na_top5_customer_category_share", templates)
+        self.assertEqual(len({s["question"] for s in chosen}), len(chosen))
+        entities = {g["any_of"][0] for s in chosen for g in s["keep"] if g["type"] == "entity"}
+        self.assertTrue({"EMEA", "APAC", "LATAM", "North America"} <= entities)
+        self.assertTrue({"Electronics", "Office Supplies", "Software"} <= entities)
+
+    def test_checked_in_seeds_are_the_generated_selection(self):
+        golden = [s for s in load_seeds(SEEDS) if s["kind"] == "golden"]
+        self.assertEqual([s["seed_id"] for s in golden], [s["seed_id"] for s in select_seeds(INSTANCES, 1)])
+        self.assertTrue(all(s["oracle"] == "sql+pandas" for s in golden))
 
 
 class FakeModel:

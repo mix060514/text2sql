@@ -18,6 +18,7 @@ from text2sql.agents.planned_agent import tools
 
 from .checks import normalize, rule_check
 from .llm import LLMFormatError
+from .templates import compare_answers
 
 PROMPT_VERSION = "v2"
 CATEGORIES = {
@@ -63,11 +64,17 @@ def compute_oracle(seed: dict, db_path=tools.DB_PATH) -> dict:
     if not result["rows"]:
         raise ValueError(f"{seed['seed_id']}: seed SQL returned no rows")
     oracle = {"columns": result["columns"], "rows": result["rows"]}
-    plot = dict(seed["expected_plot"])
-    if plot.get("should_plot"):
+    plot = dict(seed["expected_plot"]) if seed.get("expected_plot") is not None else None
+    sql_x = None
+    if plot and plot.get("should_plot"):
         index = result["columns"].index(plot.pop("x_from_column"))
-        plot["expected_x_order"] = [row[index] for row in result["rows"]]
+        sql_x = plot["expected_x_order"] = [str(row[index]) for row in result["rows"]]
     oracle["expected_plot"] = plot
+    if "reference_answer" in seed:  # second, independent oracle (legacy pandas on the source CSV)
+        problems = compare_answers(seed["eval_type"], result["columns"], result["rows"], seed["reference_answer"])
+        if problems:
+            raise ValueError(f"{seed['seed_id']}: SQL and pandas disagree: {'; '.join(problems)}")
+    oracle["oracle"] = seed.get("oracle", "sql")
     return oracle
 
 
@@ -265,7 +272,8 @@ def dataset_items(outcome: SeedOutcome) -> list[dict]:
     if seed["kind"] == "golden":
         base.update(sql=seed["sql"], eval_type=seed["eval_type"],
                     ground_truth={"columns": outcome.oracle["columns"], "rows": outcome.oracle["rows"]},
-                    expected_plot=outcome.oracle["expected_plot"])
+                    expected_plot=outcome.oracle["expected_plot"], oracle=outcome.oracle["oracle"],
+                    template=seed.get("template"), difficulty=seed.get("difficulty"))
     else:
         base["expected_behavior"] = "refuse_without_query"
     items = [{"id": f"{seed['seed_id']}-seed", "question": seed["question"], "source": "seed", **base}]
