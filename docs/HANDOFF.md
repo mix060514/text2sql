@@ -72,10 +72,19 @@
 | 語意層 | judge 檢查改寫是否偏離原意 |
 | 輸出 | 新評估集 + 每層刷掉的題數，再分別測兩條路線 |
 
-**待使用者回答**：新資料主要測哪一種？
-- A（建議）：同一題換更口語、更難的問法，測穩健性。
-- B：加入不該查資料的題目，擋與放行各半。
-- C：兩者都要。
+**使用者已選 B（2026-11-07）**：加入不該查資料的題目，攔截與放行各半。
+演講完整重點與套用草案見 `docs/SYNTHETIC_DATA_METHOD.md`。
+生成方式：程式管線（本機 Qwen 改寫 + 三層檢查），做成可重跑、可展示的小系統；Claude 寫程式與種子。
+已完成第一個檢查點（10 題跑通，2026-11-07）：
+- 指令：`uv run python scripts/generate_synthetic.py`（`--variants N --max-rounds N --seeds ...`）。
+- 程式：`src/text2sql/datagen/`（`checks.py` 規則層、`pipeline.py` 分階段管線與報告、`llm.py` 本機模型 JSON 呼叫）。
+- 種子：`data/seeds/golden_seeds.jsonl`（G01–G05，含 SQL 與預期圖表）、`data/seeds/guardrail_seeds.jsonl`
+  （B01–B05：寫入、資料庫沒有×2、閒聊、越權）。保留項分 entity（程式逐字檢查）與 concept（交給標籤／語意層）。
+- 每次執行輸出到 `data/synthetic/runs/<時間>/`：`round*/1_rewrite..4_semantic.jsonl`、`dataset.jsonl`、`manifest.json`、`report.md`。
+- 最新一次 `20261107-071720`：30 題（放行 15、攔截 15），25 候選通過 20；規則層刷 5 題（皆模型混入簡體字）。
+- 已知：標籤層與語意層在實跑中刷掉 0 題，攔截能力未被證明；B02 漏「第一季」由人工抽查發現（judge 放過），已改成 entity。
+- 下一步候選：放入刻意偏離的改寫測試標籤／語意層；擴大種子；把 dataset 接到 eval 分別測兩條路線（攔截率、誤擋、答對率）。
+- 注意：生成會用本機模型，不可與其他 session 的 smoke／eval 同時執行。
 
 ## 使用者偏好（本專案相關）
 

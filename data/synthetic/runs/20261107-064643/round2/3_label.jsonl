@@ -1,0 +1,1 @@
+{"seed_id": "B03", "round": 2, "style": "口語", "question": "每個產品賺多少？", "status": null, "reasons": [], "label_check": {"category": "not_in_data", "reason": "資料庫中沒有成本或利潤欄位，無法計算每個產品的獲利。"}}
