@@ -291,6 +291,37 @@ class PipelineTests(unittest.TestCase):
             self.assertFalse((fourth / "round0").exists())
             self.assertGreater(model.calls, 0)
 
+    def test_interrupted_run_resumes_from_its_checkpoint(self):
+        from text2sql.datagen.llm import LLMTransportError
+
+        class DiesOnGuardrail(FakeModel):
+            def __call__(self, messages, **kw):
+                if "下雨天" in messages[-1]["content"]:
+                    raise LLMTransportError("endpoint went away")
+                return super().__call__(messages, **kw)
+
+        with tempfile.TemporaryDirectory() as temp:
+            temp = Path(temp)
+            path = temp / "seeds.jsonl"
+            path.write_text("\n".join(json.dumps(s, ensure_ascii=False) for s in (seed("G01"), seed("B04"))) + "\n",
+                            encoding="utf-8")
+            with self.assertRaises(LLMTransportError):
+                run([path], DiesOnGuardrail(), temp / "runs", variants=1, max_rounds=1, log=lambda m: None, run_id="cut")
+            cut = temp / "runs" / "cut"
+            self.assertFalse((cut / "dataset.jsonl").exists())
+            done = [json.loads(l)["seed_id"] for l in (cut / "dataset.partial.jsonl").read_text().splitlines()]
+            self.assertEqual(set(done), {"G01"})
+
+            model = FakeModel()
+            resumed = run([path], model, temp / "runs", variants=1, max_rounds=1, log=lambda m: None,
+                          run_id="resumed", resume_from=cut)
+            items = [json.loads(l) for l in (resumed / "dataset.jsonl").read_text().splitlines()]
+            g01 = [i for i in items if i["seed_id"] == "G01" and i["source"] == "rewrite"]
+            self.assertEqual(g01[0]["reused_from"], "cut")
+            self.assertEqual(len(model.rewrite_prompts), 1)  # only B04 is generated
+            self.assertIn("下雨天", model.rewrite_prompts[0])
+            self.assertFalse((resumed / "dataset.partial.jsonl").exists())
+
 
 if __name__ == "__main__":
     unittest.main()

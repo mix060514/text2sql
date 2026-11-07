@@ -364,11 +364,23 @@ def previous_matches(seed: dict, previous: dict) -> bool:
 
 
 def load_previous(run_dir: Path) -> tuple[dict, dict]:
-    """Accepted rewrites and seed labels of an earlier run, keyed by seed_id."""
+    """Accepted rewrites and seed labels of an earlier run, keyed by seed_id.
+
+    An interrupted run has only dataset.partial.jsonl (seeds finished before the stop); seeds it
+    did not reach fall back to the run it was itself resumed from.
+    """
     run_dir = Path(run_dir)
     manifest = json.loads((run_dir / "manifest.json").read_text(encoding="utf-8"))
     by_seed: dict[str, dict] = {}
-    for line in (run_dir / "dataset.jsonl").read_text(encoding="utf-8").splitlines():
+    dataset = run_dir / "dataset.jsonl"
+    if not dataset.exists():
+        dataset = run_dir / PARTIAL
+        if manifest.get("resume_from"):
+            parent_manifest, by_seed = load_previous(run_dir.parent / manifest["resume_from"])
+            manifest = {**parent_manifest, **manifest}
+    for seed_id in {json.loads(l)["seed_id"] for l in dataset.read_text(encoding="utf-8").splitlines()}:
+        by_seed.pop(seed_id, None)  # this run's own result wins over the parent's
+    for line in dataset.read_text(encoding="utf-8").splitlines():
         item = json.loads(line)
         entry = by_seed.setdefault(item["seed_id"], {"run_id": manifest["run_id"], "rewrites": []})
         if item["source"] == "seed":
@@ -460,6 +472,9 @@ def build_report(outcomes: list[SeedOutcome], manifest: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+PARTIAL = "dataset.partial.jsonl"
+
+
 def run(seed_paths, llm, out_root: Path, *, variants=2, max_rounds=3, db_path=tools.DB_PATH,
         log=print, run_id=None, resume_from=None, recheck_model=None) -> Path:
     started = time.time()
@@ -481,13 +496,24 @@ def run(seed_paths, llm, out_root: Path, *, variants=2, max_rounds=3, db_path=to
             recheck = frozenset(MODEL_LAYERS)
         log(f"resume from {old_manifest['run_id']}: prompts {old_versions} -> {PROMPT_VERSIONS}; "
             f"recheck layers: {sorted(recheck) or 'none'}")
-    outcomes = [pipeline.run_seed(seed, previous.get(seed["seed_id"]), recheck) for seed in seeds]
+    # Checkpoint: a stub manifest now and each seed's items as soon as it finishes, so an
+    # interrupted run can be passed to --resume-from and only unfinished seeds are redone.
+    (run_dir / "manifest.json").write_text(json.dumps({
+        "run_id": run_id, "status": "running", "prompt_versions": PROMPT_VERSIONS,
+        "resume_from": Path(resume_from).name if resume_from else None}, ensure_ascii=False, indent=2), encoding="utf-8")
+    outcomes = []
+    for seed in seeds:
+        outcome = pipeline.run_seed(seed, previous.get(seed["seed_id"]), recheck)
+        outcomes.append(outcome)
+        with (run_dir / PARTIAL).open("a", encoding="utf-8") as handle:
+            for item in dataset_items(outcome):
+                handle.write(json.dumps(item, ensure_ascii=False) + "\n")
     items = [item for outcome in outcomes for item in dataset_items(outcome)]
     with (run_dir / "dataset.jsonl").open("w", encoding="utf-8") as handle:
         for item in items:
             handle.write(json.dumps(item, ensure_ascii=False) + "\n")
     manifest = {
-        "run_id": run_id, "prompt_version": PROMPT_VERSION, "prompt_versions": PROMPT_VERSIONS,
+        "run_id": run_id, "status": "complete", "prompt_version": PROMPT_VERSION, "prompt_versions": PROMPT_VERSIONS,
         "model": getattr(llm, "model", type(llm).__name__), "llm_calls": getattr(llm, "calls", None),
         "variants": variants, "max_rounds": max_rounds, "seconds": time.time() - started,
         "seeds": {str(p): sha256(p) for p in seed_paths}, "database_sha256": sha256(db_path),
@@ -496,4 +522,5 @@ def run(seed_paths, llm, out_root: Path, *, variants=2, max_rounds=3, db_path=to
     }
     (run_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     (run_dir / "report.md").write_text(build_report(outcomes, manifest), encoding="utf-8")
+    (run_dir / PARTIAL).unlink(missing_ok=True)
     return run_dir
