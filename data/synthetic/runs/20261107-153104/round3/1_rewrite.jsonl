@@ -1,0 +1,9 @@
+{"seed_id": "X-region_mom-APAC-2024", "round": 3, "style": "口語", "question": "APAC 2024年每個月營收比上個月成長的百分比是多少？", "status": null, "reasons": []}
+{"seed_id": "X-region_mom-APAC-2024", "round": 3, "style": "簡短", "question": "APAC 2024各月銷售額月增百分比。", "status": null, "reasons": []}
+{"seed_id": "X-cumulative-2023", "round": 3, "style": "口語", "question": "幫我看下 2023 年每個月加總後的銷售金額，畫成折線圖。", "status": null, "reasons": []}
+{"seed_id": "X-large_order_share-10", "round": 3, "style": "口語", "question": "想知道每個地區裡，買十件以上的大單，佔了總銷售額幾成？", "status": null, "reasons": []}
+{"seed_id": "X-best_month_each_year", "round": 3, "style": "口語", "question": "2023 和 2024 這兩年，分別是哪個月營收最高？金額各是多少？", "status": null, "reasons": []}
+{"seed_id": "X-asp_change-3", "round": 3, "style": "口語", "question": "2024 跟 2023 比較，平均單價金額差額最明顯的前三產品是哪三個？各差多少？", "status": null, "reasons": []}
+{"seed_id": "X-weekday", "round": 3, "style": "口語", "question": "帮我看看从周一到周日，每天一共赚了多少钱？用长条图画出来比较一下。", "status": null, "reasons": []}
+{"seed_id": "X-weekday", "round": 3, "style": "簡短", "question": "求各星期几的总营收，并生成柱状图。", "status": null, "reasons": []}
+{"seed_id": "X-quarter_max_qoq", "round": 3, "style": "口語", "question": "看 2023 到 2024 年的資料，哪一個單季的營收跟前一季比漲得最猛？漲幅有幾成？", "status": null, "reasons": []}

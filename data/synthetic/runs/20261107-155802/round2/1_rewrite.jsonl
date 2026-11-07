@@ -1,0 +1,4 @@
+{"seed_id": "X-region_mom-APAC-2024", "round": 2, "style": "口語", "question": "APAC 2024 年各月營收相較前一個月的成長率是多少？", "status": null, "reasons": []}
+{"seed_id": "X-region_mom-APAC-2024", "round": 2, "style": "簡短", "question": "算出 APAC 2024 年每個月銷售額比上月漲的百分比。", "status": null, "reasons": []}
+{"seed_id": "X-cumulative-2023", "round": 2, "style": "口語", "question": "2023 年從頭到尾，每個月累積賣了多少錢？用折線圖畫出來。", "status": null, "reasons": []}
+{"seed_id": "X-asp_change-3", "round": 2, "style": "口語", "question": "2024 年比 2023 年，哪三個產品的平均單價漲幅最大？各漲了多少錢？", "status": null, "reasons": []}

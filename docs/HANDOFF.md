@@ -117,6 +117,10 @@
 - 目前資料集：`data/synthetic/runs/20261107-095120/dataset.jsonl`（252 題，放行 126、攔截 126）。沿用 094328、
   只重判標籤層：257 次、382 秒；166 題沿用全數通過，B23 重新生成；種子自我分類不一致 0 筆。
 - 尚待：攔截種子仍無人工確認（`label_source` 註明）；資料集尚未接到 eval 測兩條路線。
+- SQL 先行複雜查詢（2026-11-07）：34 個題型（CTE、視窗函數、世代分析、年增／月增／季增、門檻），SQL 與讀原始 CSV 的
+  pandas 逐列一致才收（`scripts/build_complex_seeds.py`）；新增 SQL 對題層（模型判斷 SQL 是否剛好回答題目）。
+  目前資料集：`data/synthetic/runs/20261107-155802/dataset.jsonl`（352 題，放行 226、攔截 126）。
+  細節與已知限制（judge 看不懂 LAG、上下半年方向對調抓不到）見 `docs/SYNTHETIC_DATA_METHOD.md`。
 
 ## 方向與優先順序（2026-11-07 討論）
 

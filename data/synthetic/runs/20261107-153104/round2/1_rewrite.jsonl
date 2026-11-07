@@ -1,0 +1,20 @@
+{"seed_id": "X-region_mom-APAC-2024", "round": 2, "style": "口語", "question": "2024年APAC每個月營收跟上一個月比，漲了百分之幾？", "status": null, "reasons": []}
+{"seed_id": "X-region_mom-APAC-2024", "round": 2, "style": "簡短", "question": "APAC 2024各月銷售額月增率是多少%？", "status": null, "reasons": []}
+{"seed_id": "X-cumulative-2023", "round": 2, "style": "口語", "question": "2023 年 1 月開始，每個月累計的營收是多少？請用折線圖顯示。", "status": null, "reasons": []}
+{"seed_id": "X-retained", "round": 2, "style": "口語", "question": "請問 2023 跟 2024 這兩年都有下單的客戶，一共有幾個人？", "status": null, "reasons": []}
+{"seed_id": "X-region_share_of_category-2024-Software", "round": 2, "style": "口語", "question": "2024 年 Software 的銷售額，各區域各占幾%？", "status": null, "reasons": []}
+{"seed_id": "X-region_yoy", "round": 2, "style": "口語", "question": "幫我看下2023年跟2024年各區域營收的年增率，請用長條圖從高到低比較。", "status": null, "reasons": []}
+{"seed_id": "X-top_customer_concentration-10", "round": 2, "style": "口語", "question": "頭十家客戶的銷售金額合起來，占總銷售額的百分比是多少？", "status": null, "reasons": []}
+{"seed_id": "X-large_order_share-10", "round": 2, "style": "口語", "question": "想知道每個區域裡，單筆買滿十件的訂單，貢獻了多少比例的業績？", "status": null, "reasons": []}
+{"seed_id": "X-large_order_share-10", "round": 2, "style": "簡短", "question": "計算各區域中，數量達十件訂單的銷售額占比。", "status": null, "reasons": []}
+{"seed_id": "X-best_month_each_year", "round": 2, "style": "口語", "question": "2023 跟 2024 年，哪幾個月賣的錢最多？各是多少？", "status": null, "reasons": []}
+{"seed_id": "X-best_month_each_year", "round": 2, "style": "簡短", "question": "2023 與 2024 年最高營收月份及金額？", "status": null, "reasons": []}
+{"seed_id": "X-asp_change-3", "round": 2, "style": "口語", "question": "幫我看看哪三款產品，2024 年的平均單價比 2023 年高出最多錢？各漲了幾個錢？", "status": null, "reasons": []}
+{"seed_id": "X-asp_change-3", "round": 2, "style": "簡短", "question": "2024 年對照 2023 年，平均單價絕對差額最大的前三名產品是哪些？差額各為多少？", "status": null, "reasons": []}
+{"seed_id": "X-multi_region_customers-4", "round": 2, "style": "口語", "question": "請問有幾位客戶在四個區域都有買過東西？", "status": null, "reasons": []}
+{"seed_id": "X-weekday", "round": 2, "style": "口語", "question": "想看每週一到週日，每天各賺了多少钱，請用長條圖比較。", "status": null, "reasons": []}
+{"seed_id": "X-weekday", "round": 2, "style": "簡短", "question": "各星期的總金額是多少？請以長條圖呈現。", "status": null, "reasons": []}
+{"seed_id": "X-h2_vs_h1-2024", "round": 2, "style": "口語", "question": "2024 年各區域下半年比上半年多賣了百分之幾？", "status": null, "reasons": []}
+{"seed_id": "X-h2_vs_h1-2024", "round": 2, "style": "簡短", "question": "2024 年各區域下半年營收對上半年的成長百分比？", "status": null, "reasons": []}
+{"seed_id": "X-country_top_quantity_product-LATAM", "round": 2, "style": "口語", "question": "在拉丁美洲這片區域裡，每個國家銷量最高的產品各是哪一個？", "status": null, "reasons": []}
+{"seed_id": "X-quarter_max_qoq", "round": 2, "style": "口語", "question": "在 2023 跟 2024 這兩年裡，哪一個單季的營收比上一季漲最多？漲幅是多少？", "status": null, "reasons": []}
