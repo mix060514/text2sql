@@ -30,8 +30,10 @@
 
 ## 未解決
 
-1. **月份趨勢題**：原版 27B 失敗（planner 用光額度、reviewer 120 秒超時）；改用 Swift 1.5 後單獨重跑 `Monthly trend` smoke **通過**（144 秒）。完整 8 案例 smoke 尚未在 Swift 上重跑。細節見 `docs/VALIDATION.md` 末段。
-2. **完整 132 題 eval 從未在目前兩條路線上跑過**（`eval/eval_e2e.py`、`eval/eval.py`）。
+1. **Swift 1.5 上 smoke 8/8 通過、132 題 eval 已跑**（2026-11-07，見 `docs/VALIDATION.md` 末段）。
+   人工核對後正確 112/132（84.8%），與 2026-02 v1.0.0 的 84.1% 持平；主要問題是 **18 題 120 秒逾時**
+   （12 題多年月份趨勢、4 題前五大客戶占比等），另有 2 題答錯。prd 升級前要先處理逾時。
+2. eval 的 LLM judge 有 20 題沒回傳結果，被記為 0 分；其中 19 題對照 ground truth 是對的。原始分數會低估。
 3. Session 仍用 InMemoryRunner，沒有永久儲存。
 4. 是否開 PR 把 unified 合併進 master：使用者尚未決定。
 
