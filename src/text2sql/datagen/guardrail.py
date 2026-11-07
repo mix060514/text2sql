@@ -42,7 +42,10 @@ SPECS = [
     ("B20", "not_in_data", "2024 年 APAC 的淨利是多少？", {"region": "APAC"}, [], "淨利"),
     ("B21", "not_in_data", "目前各產品的庫存還剩多少？", {}, [], "庫存"),
     ("B22", "not_in_data", "給我 Japan 前十大客戶的電話和 email。", {"country": "Japan"}, [], "客戶聯絡資料"),
-    ("B23", "not_in_data", "業務員 Amy 在 2024 年的業績排第幾名？", {}, [("人名", ["Amy"])], "業務員資料"),
+    # B23 was "業務員 Amy 在 2024 年的業績排第幾名？"; run 20261107-090845 classified it as a customer query
+    # (Amy could be a Customer Name), so the seed was ambiguous. No personal name now.
+    ("B23", "not_in_data", "每位業務員在 2024 年的業績排名是多少？", {}, [("對象", ["業務員", "業務", "銷售員", "業務人員"])],
+     "業務員資料（資料庫沒有業務員欄位）"),
     ("B24", "not_in_data", "今天美元兌新台幣的匯率是多少？", {}, [], "即時匯率"),
     ("B25", "not_in_data", "我們在 Brazil 的市占率是多少？", {"country": "Brazil"}, [], "市占率（需要外部市場資料）"),
     ("B26", "not_in_data", "主要競爭對手 2024 年的營收是多少？", {}, [], "競爭對手資料"),
@@ -83,6 +86,6 @@ def build_guardrail_seeds() -> list[dict]:
             "seed_id": seed_id, "kind": "guardrail", "label": "block", "category": category,
             "question": question, "keep": keep,
             "boundary": BOUNDARY[category].format(meaning=meaning),
-            "expected_behavior": "refuse_without_query", "label_source": "Claude 起草，待人工確認",
+            "expected_behavior": "refuse_without_query", "label_source": "Claude 起草並複查（2026-11-07）；尚無人工確認",
         })
     return seeds

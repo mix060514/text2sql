@@ -139,6 +139,8 @@ class GuardrailSeedTests(unittest.TestCase):
         self.assertEqual(checked_in, built)
 
     def test_alias_extras_accept_common_spellings(self):
+        b23 = seed("B23")
+        self.assertNotIn("Amy", b23["question"])  # a personal name read as a customer (run 20261107-090845)
         b02 = seed("B02")
         self.assertEqual(rule_check("2025 首季亞太營收預估多少？", b02, set()), [])
 
@@ -254,6 +256,21 @@ class PipelineTests(unittest.TestCase):
             self.assertEqual(model.calls, 0)
             self.assertEqual((items[1]["question"], items[1]["reused_from"]), (reused_q, "first"))
             self.assertIn("沿用 `first`：1 題重新檢查，1 題沿用", (second / "report.md").read_text())
+
+            # Only the label prompt changed: rerun the label layer, keep rewrites and semantic verdicts.
+            manifest_path = first / "manifest.json"
+            manifest = json.loads(manifest_path.read_text())
+            manifest["prompt_versions"] = dict(manifest["prompt_versions"], label="v0")
+            manifest_path.write_text(json.dumps(manifest))
+            model = FakeModel()
+            relabeled = run([write(seed("G01"))], model, temp / "runs", variants=1, max_rounds=1,
+                            log=lambda m: None, run_id="relabeled", resume_from=first)
+            self.assertEqual(model.calls, 2)  # seed self-label + the reused rewrite; no rewrite, no judge
+            self.assertEqual(model.rewrite_prompts, [])
+            self.assertTrue((relabeled / "round0" / "3_label.jsonl").exists())
+            self.assertFalse((relabeled / "round0" / "4_semantic.jsonl").exists())
+            manifest["prompt_versions"]["label"] = json.loads((relabeled / "manifest.json").read_text())["prompt_versions"]["label"]
+            manifest_path.write_text(json.dumps(manifest))
 
             # A stricter rule rejects the reused rewrite: only that gap is regenerated.
             stricter = seed("G01")
