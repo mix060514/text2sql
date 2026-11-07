@@ -1,7 +1,23 @@
 # Text-to-SQL：兩種 Agent 架構
 
-這個分支是 **Qwen 27B 版**（`codex/text2sql-qwen27b`）。
-舊版保存在基準 commit `fd66447`；強模型版在 `codex/text2sql-strong`。
+這個分支（`codex/text2sql-unified`）合併了兩條路線，用環境變數切換：
+
+| `TEXT2SQL_BACKEND` | 路線 | 檔案 |
+|---|---|---|
+| `qwen27b`（預設） | 本機 Qwen 27B，程式控制 planner → 執行 → reviewer → report | `planned_agent/qwen_workflow.py` |
+| `codex` | 一次 Codex CLI 呼叫，模型透過唯讀 sales MCP 工具查詢 | `planned_agent/codex_workflow.py`、`codex_backend.py`、`mcp_server.py` |
+
+`planned_agent/agent.py` 只負責選擇路線。兩條路線共用 `tools.py`、`contracts.py`、`prompts.py`。
+發布 gate `complete_answer` 預設要求 reviewer 接受；Codex 路線沒有 reviewer，
+改用 MCP receipt 作為執行證據，呼叫時傳 `require_review=False`。
+
+```bash
+export TEXT2SQL_BACKEND=codex   # 需要已登入且有額度的 Codex CLI
+```
+
+Codex 路線在此分支只有離線測試；Codex 帳號未續費，沒有實際呼叫。
+舊版保存在基準 commit `fd66447`；原兩個分支 `codex/text2sql-qwen27b`、`codex/text2sql-strong` 保留不動。
+以下內容描述 27B 路線。
 
 兩版共用 SQLite 銷售資料、查詢限制、圖表驗證及相同的 live smoke cases。
 設計差異見 [架構比較](docs/ARCHITECTURE.md)，實測紀錄見 [驗證結果](docs/VALIDATION.md)。

@@ -181,10 +181,8 @@ def result_table(spec: AnswerSubmission, columns: list[str], rows: list[list]) -
     return tabulate(cells, headers=headers, tablefmt="pipe", disable_numparse=True)
 
 
-def complete_answer(spec: AnswerSubmission, state) -> dict:
-    """Hard success gate: only executed data and a validated chart can be published."""
-    if not state.get("query_success"):
-        raise ValueError("A successful query in this turn is required before publishing.")
+def validate_review(state) -> None:
+    """Qwen path: the published result must be the one the reviewer accepted."""
     review = SemanticReview.model_validate(state.get("semantic_review"))
     result = state.get("query_result")
     if not review.accepted or not result or state.get("reviewed_query") != result:
@@ -193,6 +191,19 @@ def complete_answer(spec: AnswerSubmission, state) -> dict:
             result.get("columns") != state.get("column_names") or
             result.get("rows") != state.get("raw_query_result")):
         raise ValueError("Published data must match the reviewed execution.")
+
+
+def complete_answer(spec: AnswerSubmission, state, *, require_review: bool = True) -> dict:
+    """Hard success gate: only executed data and a validated chart can be published.
+
+    The Qwen workflow must also carry an explicit semantic acceptance bound to this
+    execution. The Codex path has no reviewer; its evidence is the MCP receipt, so it
+    passes require_review=False and still needs a successful query in this turn.
+    """
+    if not state.get("query_success"):
+        raise ValueError("A successful query in this turn is required before publishing.")
+    if require_review:
+        validate_review(state)
     columns, rows = state["column_names"], state["raw_query_result"]
     if spec.chart_type == "none" and len(rows) >= 2 and len(columns) >= 2 and numeric_columns(columns, rows):
         raise ValueError("Multiple rows with a numeric measure require a chart.")

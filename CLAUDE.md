@@ -1,6 +1,9 @@
 # Repository guidance
 
-This branch uses a deterministic Text2SQL controller with two Qwen 27B LlmAgents.
+This branch has two backends selected by TEXT2SQL_BACKEND (config.BACKEND): the default
+"qwen27b" deterministic controller with three Qwen 27B LlmAgents (qwen_workflow.py), and
+"codex", one Codex CLI invocation with the read-only sales MCP tool (codex_workflow.py).
+agent.py only selects; tools/contracts/prompts are shared.
 Read README.md and docs/ARCHITECTURE.md before changing the workflow.
 
 ## Commands
@@ -36,8 +39,11 @@ Smoke compares executed data/actual chart generation with deterministic SQLite o
 Top-N ties are ordered by metric DESC, name ASC. Time labels are Q1..Q4 for one-year
 quarters, YYYY-Qn for multi-year quarters, YYYY-MM for months.
 
-## Other branches
+## Codex backend
 
-codex/text2sql-strong delegates reasoning/tool loops to Codex CLI and exposes read_sales
+codex_workflow delegates reasoning/tool loops to Codex CLI and exposes read_sales
 through an isolated MCP tool. ADK there is a UI/session adapter, not the reasoning runtime.
+It has no semantic reviewer, so it calls complete_answer(..., require_review=False);
+the MCP receipt is its execution evidence. The source branches codex/text2sql-qwen27b and
+codex/text2sql-strong are kept unchanged.
 The legacy implementation is available at fd66447.

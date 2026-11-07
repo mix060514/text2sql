@@ -8,7 +8,7 @@ from google.adk.models.llm_response import LlmResponse
 from google.adk.runners import InMemoryRunner
 from google.genai import types
 
-from text2sql.agents.planned_agent.agent import root_agent
+from text2sql.agents.planned_agent.qwen_workflow import root_agent
 from text2sql.agents.planned_agent.tools import read_sales
 from text2sql.runtime import run_question, stream_turn
 
