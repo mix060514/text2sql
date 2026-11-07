@@ -1,0 +1,16 @@
+{
+  "run_id": "20261107-084843",
+  "prompt_version": "v3",
+  "model": "swift15-27b-iq3-xxs",
+  "llm_calls": 377,
+  "variants": 2,
+  "max_rounds": 3,
+  "seconds": 995.0004258155823,
+  "seeds": {
+    "/home/mix060514/pj/text2sql/data/seeds/golden_seeds.jsonl": "14ee675d3659613b9a6a1d6fd8f75fa8534d4cd3e96c78e8d104e823514a2da1",
+    "/home/mix060514/pj/text2sql/data/seeds/guardrail_seeds.jsonl": "572ac202ce5f484c13362961894450c6190485c1f9d89834251bc8ec15944ea6"
+  },
+  "database_sha256": "72f64a081fa0d20741a09528ec7a8d03eba976fde47d08a8be920e1c4ba1fb7a",
+  "dataset_sha256": "a9552ae924bb6fc2cdb4a7cc4ac3d70575e898b55dcd75185b4087c777d2479e",
+  "items": 141
+}

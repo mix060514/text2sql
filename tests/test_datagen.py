@@ -17,7 +17,7 @@ G01 = {
     "question": "2024 年 EMEA 的總銷售額是多少？",
     "sql": "SELECT ROUND(SUM(\"Total Revenue\"), 2) AS total_revenue FROM sales_data WHERE Region = 'EMEA' "
            "AND strftime('%Y', \"Order Date\") = '2024'",
-    "eval_type": "number", "expected_plot": {"should_plot": False, "chart_type": "none"},
+    "eval_type": "number", "expected_plot": {"should_plot": False, "chart_type": "none"}, "metric": "amount",
     "keep": [{"name": "地區", "type": "entity", "any_of": ["EMEA", "歐洲中東非洲", "歐非中東"]},
              {"name": "年份", "type": "entity", "any_of": ["2024"]},
              {"name": "指標", "type": "concept", "meaning": "銷售金額"}],
@@ -56,6 +56,26 @@ class RuleLayerTests(unittest.TestCase):
         self.assertEqual(rule_check("把 2023 年拉美的單子全部清乾淨", seed("B01"), set()), [])
         self.assertTrue(rule_check("把拉美的單子全部清乾淨", seed("B01"), set()))  # lost the year
 
+    def test_metric_kind_is_checked_by_code(self):
+        # Rewrites from run 20261107-082751 that the semantic judge passed.
+        cases = {
+            "M_region_top_category": "每個區域銷量第一的品類各為何？",
+            "E_year_best_quarter": "2023 年哪一季賣得最多？",
+            "K_category_top_customer": "哪家的客戶在 Electronics 類買貨最多？",
+            "N15_top5_product_quantity_bar": "賣得最好的五款產品是哪幾個？",
+        }
+        for template, question in cases.items():
+            seed_ = next(s for s in select_seeds(INSTANCES, 1) if s["template"] == template)
+            self.assertTrue(any(r.startswith("metric") for r in rule_check(question, seed_, set())), template)
+        k = next(s for s in select_seeds(INSTANCES, 1) if s["template"] == "K_category_top_customer")
+        self.assertEqual(rule_check("Electronics 這類產品，哪家公司買最多錢？", k, set()), [])
+        d = instance("D_country_top_order_customer")
+        country = d["keep"][0]["any_of"][0]
+        self.assertEqual(rule_check(f"{country} 訂單數量最多的客戶？", d, set()), [])
+        self.assertTrue(rule_check(f"{country} 營收最高的客戶？", d, set()))
+        q11 = instance("Q11_country_quantity")
+        self.assertEqual(rule_check("日本那邊總共賣了多少件？", q11, set()), [])
+
     def test_b02_must_keep_the_quarter(self):
         # 2026-11-07 run 20261107-071250: both B02 rewrites dropped 第一季 and the judge passed them.
         reasons = rule_check("預估 2025 年亞太區營收是多少？", seed("B02"), set())
@@ -65,8 +85,8 @@ class RuleLayerTests(unittest.TestCase):
     def test_top3_seed_must_not_gain_a_year(self):
         top3 = instance("B_region_top3_quantity")
         region = top3["keep"][0]["any_of"][0]
-        self.assertEqual(rule_check(f"{region} 賣最多的前 3 名產品？", top3, set()), [])
-        reasons = rule_check(f"2024 年 {region} 賣最多的前 3 名產品？", top3, set())
+        self.assertEqual(rule_check(f"{region} 銷量最高的前 3 名產品？", top3, set()), [])
+        reasons = rule_check(f"2024 年 {region} 銷量最高的前 3 名產品？", top3, set())
         self.assertIn("keep: 出現種子沒有的年份 2024", reasons)
 
     def test_structure_and_length(self):
@@ -177,7 +197,7 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("含簡體字", model.rewrite_prompts[1])
         self.assertIn("分類成 chitchat", model.rewrite_prompts[1])
         self.assertIn("兩種順序判斷不一致", report)
-        self.assertIn("| 1 規則 | 程式：結構、長度、繁體、實體、年份、重複 | 1 |", report)
+        self.assertIn("| 1 規則 | 程式：結構、長度、繁體、實體、指標、年份、重複 | 1 |", report)
         self.assertIn("| 2 標籤 | 本機模型盲分類，比對種子類別 | 1 |", report)
         self.assertIn("| 3 語意 | 本機模型 judge，正反兩種順序都要通過 | 1 |", report)
         self.assertEqual(manifest["llm_calls"], model.calls)

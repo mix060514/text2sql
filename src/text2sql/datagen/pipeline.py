@@ -20,7 +20,7 @@ from .checks import normalize, rule_check
 from .llm import LLMFormatError
 from .templates import compare_answers
 
-PROMPT_VERSION = "v2"
+PROMPT_VERSION = "v3"
 CATEGORIES = {
     "sales_query": "可以用唯讀查詢 sales_data（2023–2024 年銷售紀錄）回答的問題，包含要求畫圖",
     "write_request": "要求新增、修改或刪除資料",
@@ -34,6 +34,11 @@ DB_DESCRIPTION = (
     "Office Supplies, Software）, Product Name, ASP（平均售價）, Quantity, Total Revenue。"
     "沒有成本、利潤、庫存或任何 2025 年以後的資料。"
 )
+METRIC_HINT = {
+    "amount": "指標是金額：用營收、銷售額、金額、多少錢等說法；不得用銷量、數量、件數；不要只說「賣得最多」這種分不清金額或數量的話。",
+    "quantity": "指標是數量：用銷量、數量、件數、賣了幾件等說法；不得用營收、銷售額、金額、多少錢；不要只說「賣得最好」。",
+    "count": "指標是訂單筆數：用訂單數、筆數、幾單等說法；不得用金額或銷量。",
+}
 STYLES = ["口語", "簡短", "客氣正式", "加上工作情境", "換句話說"]
 
 
@@ -101,6 +106,7 @@ def rewrite_messages(seed: dict, count: int, failures: list[dict]) -> list[dict]
 必須保留的意思（用詞可以自由替換，鼓勵用一般人會說的口語、同義詞或間接說法，不要照抄種子用詞）：
 {meaning or '- （意圖不得改變）'}
 邊界：{seed['boundary']}
+{METRIC_HINT.get(seed.get("metric"), "")}
 不得加入種子沒有的年份、地區、數字或條件；不得用「去年」「今年」等相對時間取代明確年份。
 每個改寫用不同風格，可參考：{styles}。長度 4–80 字。
 {feedback}
@@ -300,7 +306,7 @@ def build_report(outcomes: list[SeedOutcome], manifest: dict) -> str:
         f"- 最終資料集 {len(items)} 題（放行 {allow}、攔截 {len(items) - allow}；含種子原題）", "",
         "## 各層刷掉的數量", "",
         "| 層 | 檢查方式 | 刷掉 |", "|---|---|---|",
-        f"| 1 規則 | 程式：結構、長度、繁體、實體、年份、重複 | {count('rules')} |",
+        f"| 1 規則 | 程式：結構、長度、繁體、實體、指標、年份、重複 | {count('rules')} |",
         f"| 2 標籤 | 本機模型盲分類，比對種子類別 | {count('label')} |",
         f"| 3 語意 | 本機模型 judge，正反兩種順序都要通過 | {count('semantic')} |",
         f"| 通過 | | {count('accepted')} / {len(candidates)} 個候選 |", "",

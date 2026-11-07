@@ -1,0 +1,2 @@
+{"seed_id": "C-Electronics", "round": 3, "style": "口語", "question": "電子類產品每一年總共賣了多少錢？", "status": null, "reasons": [], "label_check": {"category": "sales_query", "reason": "詢問電子類產品在資料庫涵蓋期間（2023-2024）的年度總營收，可透過唯讀查詢 sales_data 表回答。"}}
+{"seed_id": "N2", "round": 3, "style": "口語", "question": "想看各產品類別營收比較，麻煩給圖表。", "status": null, "reasons": [], "label_check": {"category": "sales_query", "reason": "要求基於現有銷售資料進行產品類別營收比較並繪製圖表，屬於唯讀查詢範圍。"}}

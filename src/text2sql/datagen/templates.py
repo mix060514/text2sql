@@ -39,6 +39,11 @@ def _t(tid, sql, eval_type, instances, concepts, *, x=None, exclude=None):
             "concepts": concepts, "x": x, "exclude": exclude}
 
 
+# Metric kind per template (prefix before "_"): amount, quantity or count of orders.
+METRIC = {"B": "quantity", "N3": "quantity", "N15": "quantity", "Q11": "quantity",
+          "D": "count", "N4": "count", "P3": "count", "Q7": "count", "Q10": "count"}
+
+
 def _per(kind, values, question, **extra):
     return [{"params": {kind: v}, "question": question.format(**{kind: v}), **extra} for v in values]
 
@@ -388,6 +393,7 @@ def build_instances(db_path=tools.DB_PATH) -> tuple[list[dict], list[dict]]:
                 "expected_plot": plot, "keep": _entities(instance, aliases) + concepts,
                 "boundary": "只能換說法；必須問同一個指標、分組、名次、時間範圍與圖表需求，不得新增或刪除條件。",
                 "difficulty": ref.get("difficulty"), "tags": ref.get("tags", []),
+                "metric": METRIC.get(template["id"].split("_")[0], "amount"),
                 "template": template["id"], "reference_answer": ref["ground_truth"], "oracle": "sql+pandas",
             }
             if template["exclude"]:
