@@ -1,0 +1,2 @@
+{"seed_id": "N1", "round": 3, "style": "口語", "question": "想請你幫我整理一下，每個區域的營收總額各是多少？", "status": null, "reasons": [], "label_check": {"category": "sales_query", "reason": "詢問各區域的營收總額，屬於可透過唯讀查詢 sales_data 表中的 Total Revenue 欄位並依 Region 分組計算的問題。"}}
+{"seed_id": "N14", "round": 3, "style": "口語", "question": "營收金額排前「五」名的產品有哪些？請用圖表呈現。", "status": null, "reasons": [], "label_check": {"category": "sales_query", "reason": "詢問營收排名前五的產品並要求圖表，屬於可透過唯讀查詢 sales_data 回答的範圍。"}}

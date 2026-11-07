@@ -126,6 +126,23 @@ class OracleTests(unittest.TestCase):
         self.assertEqual(trend["expected_plot"]["chart_type"], "line")
 
 
+class GuardrailSeedTests(unittest.TestCase):
+    def test_block_side_matches_golden_breadth(self):
+        from collections import Counter
+        from text2sql.datagen.guardrail import build_guardrail_seeds
+        built = build_guardrail_seeds()
+        self.assertEqual(len(built), 42)
+        self.assertEqual(Counter(s["category"] for s in built),
+                         {"write_request": 10, "not_in_data": 16, "chitchat": 8, "prompt_injection": 8})
+        self.assertTrue(all(s["label"] == "block" for s in built))
+        checked_in = [s for s in load_seeds(SEEDS) if s["kind"] == "guardrail"]
+        self.assertEqual(checked_in, built)
+
+    def test_alias_extras_accept_common_spellings(self):
+        b02 = seed("B02")
+        self.assertEqual(rule_check("2025 首季亞太營收預估多少？", b02, set()), [])
+
+
 class SelectionTests(unittest.TestCase):
     def test_one_seed_per_template_without_alias_copies(self):
         chosen = select_seeds(INSTANCES, 1)
@@ -197,6 +214,7 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("含簡體字", model.rewrite_prompts[1])
         self.assertIn("分類成 chitchat", model.rewrite_prompts[1])
         self.assertIn("兩種順序判斷不一致", report)
+        self.assertIn("## 種子自我分類不一致（請人工確認種子標籤）\n\n（無）", report)
         self.assertIn("| 1 規則 | 程式：結構、長度、繁體、實體、指標、年份、重複 | 1 |", report)
         self.assertIn("| 2 標籤 | 本機模型盲分類，比對種子類別 | 1 |", report)
         self.assertIn("| 3 語意 | 本機模型 judge，正反兩種順序都要通過 | 1 |", report)
@@ -214,6 +232,47 @@ class PipelineTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "G01"):
                 run([seeds_file], model, Path(temp) / "runs", log=lambda m: None, run_id="bad")
         self.assertEqual(model.calls, 0)
+
+    def test_resume_reuses_rechecks_and_fills_gaps(self):
+        with tempfile.TemporaryDirectory() as temp:
+            temp = Path(temp)
+
+            def write(seed_):
+                path = temp / "seeds.jsonl"
+                path.write_text(json.dumps(seed_, ensure_ascii=False) + "\n", encoding="utf-8")
+                return path
+
+            first = run([write(seed("G01"))], FakeModel(), temp / "runs", variants=1, max_rounds=1,
+                        log=lambda m: None, run_id="first")
+            reused_q = [json.loads(l) for l in (first / "dataset.jsonl").read_text().splitlines()][1]["question"]
+
+            # Same seed, same prompts: the accepted rewrite is reused with zero model calls.
+            model = FakeModel()
+            second = run([write(seed("G01"))], model, temp / "runs", variants=1, max_rounds=1,
+                         log=lambda m: None, run_id="second", resume_from=first)
+            items = [json.loads(l) for l in (second / "dataset.jsonl").read_text().splitlines()]
+            self.assertEqual(model.calls, 0)
+            self.assertEqual((items[1]["question"], items[1]["reused_from"]), (reused_q, "first"))
+            self.assertIn("沿用 `first`：1 題重新檢查，1 題沿用", (second / "report.md").read_text())
+
+            # A stricter rule rejects the reused rewrite: only that gap is regenerated.
+            stricter = seed("G01")
+            stricter["keep"].append({"name": "要說營收", "type": "entity", "any_of": ["銷售額"]})
+            model = FakeModel()
+            third = run([write(stricter)], model, temp / "runs", variants=1, max_rounds=1,
+                        log=lambda m: None, run_id="third", resume_from=first)
+            reuse = [json.loads(l) for l in (third / "round0" / "2_rules.jsonl").read_text().splitlines()]
+            self.assertTrue(any("要說營收" in r for r in reuse[0]["reasons"]))
+            self.assertEqual(len(model.rewrite_prompts), 1)
+            self.assertIn("要說營收", model.rewrite_prompts[0])
+
+            # A changed seed question invalidates reuse entirely.
+            changed = dict(seed("G01"), question="2024 年 EMEA 的營業額是多少？")
+            model = FakeModel()
+            fourth = run([write(changed)], model, temp / "runs", variants=1, max_rounds=1,
+                         log=lambda m: None, run_id="fourth", resume_from=first)
+            self.assertFalse((fourth / "round0").exists())
+            self.assertGreater(model.calls, 0)
 
 
 if __name__ == "__main__":

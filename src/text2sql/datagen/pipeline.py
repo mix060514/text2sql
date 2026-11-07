@@ -49,6 +49,7 @@ class SeedOutcome:
     accepted: list[dict] = field(default_factory=list)
     candidates: list[dict] = field(default_factory=list)
     error: str | None = None
+    seed_label: dict = field(default_factory=dict)
 
 
 def load_seeds(paths) -> list[dict]:
@@ -208,10 +209,60 @@ class Pipeline:
         same = [v.get("same_intent") is True for v in verdicts]
         return {"passed": all(same), "position_inconsistent": same[0] != same[1], "verdicts": verdicts}
 
-    def run_seed(self, seed: dict) -> SeedOutcome:
+    def _check(self, seed, record, round_no, seen, failures, outcome, *, model_layers=True) -> None:
+        """Run the layers on one candidate and file it as accepted or failed."""
+        question = record["question"]
+        reasons = rule_check(question, seed, seen)
+        self._write(round_no, "2_rules", {**record, "reasons": reasons})
+        if isinstance(question, str):
+            seen.add(normalize(question))
+        if reasons:
+            record.update(status="rules", reasons=reasons)
+            failures.append(record)
+            return
+        if model_layers:
+            ok, label = self._label(question)
+            record["label_check"] = label
+            self._write(round_no, "3_label", {**record})
+            if not ok or label.get("category") != seed["category"]:
+                why = label.get("error") or f"分類成 {label.get('category')}，應為 {seed['category']}：{label.get('reason')}"
+                record.update(status="label", reasons=[f"label: {why}"])
+                failures.append(record)
+                return
+            semantic = self._semantic(seed, question)
+            record["semantic_check"] = semantic
+            self._write(round_no, "4_semantic", {**record})
+            if not semantic["passed"]:
+                changed = sorted({c for v in semantic["verdicts"] for c in (v.get("changed") or [])})
+                note = "（兩種順序判斷不一致）" if semantic["position_inconsistent"] else ""
+                record.update(status="semantic", reasons=[f"semantic: 意圖改變 {changed}{note}"])
+                failures.append(record)
+                return
+        record["status"] = "accepted"
+        outcome.accepted.append(record)
+
+    def run_seed(self, seed: dict, previous: dict | None = None, recheck_model: bool = False) -> SeedOutcome:
         outcome = SeedOutcome(seed=seed, oracle=self.oracles.get(seed["seed_id"]))
+        reuse = previous is not None and previous_matches(seed, previous)
+        # Classify the seed itself: a disagreement means the seed (not a rewrite) may be ambiguous.
+        if reuse and previous.get("seed_label") and not recheck_model:
+            outcome.seed_label = previous["seed_label"]
+        else:
+            _, outcome.seed_label = self._label(seed["question"])
+        if outcome.seed_label.get("category") != seed["category"]:
+            self.log(f"{seed['seed_id']}: seed classified as {outcome.seed_label.get('category')}")
         seen = {normalize(seed["question"])}
         failures: list[dict] = []
+        if reuse:
+            # Round 0: earlier accepted rewrites. Rules always rerun (free); model layers only on request.
+            for item in previous["rewrites"][:self.variants]:
+                record = {"seed_id": seed["seed_id"], "round": 0, "style": item.get("style"),
+                          "question": item["question"], "status": None, "reasons": [],
+                          "reused_from": previous["run_id"]}
+                self._write(0, "1_reuse", record)
+                outcome.candidates.append(record)
+                self._check(seed, record, 0, seen, failures, outcome, model_layers=recheck_model)
+            self.log(f"{seed['seed_id']} reuse: kept {len(outcome.accepted)}/{len(previous['rewrites'])}")
         for round_no in range(1, self.max_rounds + 1):
             need = self.variants - len(outcome.accepted)
             if need <= 0:
@@ -236,35 +287,37 @@ class Pipeline:
                 if len(outcome.accepted) >= self.variants:
                     record.update(status="surplus")
                     continue
-                reasons = rule_check(question, seed, seen)
-                self._write(round_no, "2_rules", {**record, "reasons": reasons})
-                if isinstance(question, str):
-                    seen.add(normalize(question))
-                if reasons:
-                    record.update(status="rules", reasons=reasons)
-                    failures.append(record)
-                    continue
-                ok, label = self._label(question)
-                record["label_check"] = label
-                self._write(round_no, "3_label", {**record})
-                if not ok or label.get("category") != seed["category"]:
-                    why = label.get("error") or f"分類成 {label.get('category')}，應為 {seed['category']}：{label.get('reason')}"
-                    record.update(status="label", reasons=[f"label: {why}"])
-                    failures.append(record)
-                    continue
-                semantic = self._semantic(seed, question)
-                record["semantic_check"] = semantic
-                self._write(round_no, "4_semantic", {**record})
-                if not semantic["passed"]:
-                    changed = sorted({c for v in semantic["verdicts"] for c in (v.get("changed") or [])})
-                    note = "（兩種順序判斷不一致）" if semantic["position_inconsistent"] else ""
-                    record.update(status="semantic", reasons=[f"semantic: 意圖改變 {changed}{note}"])
-                    failures.append(record)
-                    continue
-                record["status"] = "accepted"
-                outcome.accepted.append(record)
+                self._check(seed, record, round_no, seen, failures, outcome)
             self.log(f"{seed['seed_id']} round {round_no}: accepted {len(outcome.accepted)}/{self.variants}")
         return outcome
+
+
+def seed_fingerprint(seed: dict) -> str:
+    """What a rewrite's validity depends on beyond the rules (which are always rechecked)."""
+    core = {k: seed.get(k) for k in ("question", "label", "category", "sql")}
+    return hashlib.sha256(json.dumps(core, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
+
+
+def previous_matches(seed: dict, previous: dict) -> bool:
+    if previous.get("fingerprint"):
+        return previous["fingerprint"] == seed_fingerprint(seed)
+    return previous.get("seed_question") == seed["question"]  # runs before fingerprints existed
+
+
+def load_previous(run_dir: Path) -> tuple[dict, dict]:
+    """Accepted rewrites and seed labels of an earlier run, keyed by seed_id."""
+    run_dir = Path(run_dir)
+    manifest = json.loads((run_dir / "manifest.json").read_text(encoding="utf-8"))
+    by_seed: dict[str, dict] = {}
+    for line in (run_dir / "dataset.jsonl").read_text(encoding="utf-8").splitlines():
+        item = json.loads(line)
+        entry = by_seed.setdefault(item["seed_id"], {"run_id": manifest["run_id"], "rewrites": []})
+        if item["source"] == "seed":
+            entry.update(seed_question=item["question"], fingerprint=item.get("seed_fingerprint"),
+                         seed_label=item.get("seed_label_check"))
+        else:
+            entry["rewrites"].append(item)
+    return manifest, by_seed
 
 
 # ---------- outputs ----------
@@ -282,10 +335,12 @@ def dataset_items(outcome: SeedOutcome) -> list[dict]:
                     template=seed.get("template"), difficulty=seed.get("difficulty"))
     else:
         base["expected_behavior"] = "refuse_without_query"
-    items = [{"id": f"{seed['seed_id']}-seed", "question": seed["question"], "source": "seed", **base}]
+    items = [{"id": f"{seed['seed_id']}-seed", "question": seed["question"], "source": "seed", **base,
+              "seed_fingerprint": seed_fingerprint(seed), "seed_label_check": outcome.seed_label or None}]
     for index, record in enumerate(outcome.accepted, 1):
+        extra = {"reused_from": record["reused_from"]} if record.get("reused_from") else {}
         items.append({"id": f"{seed['seed_id']}-v{index}", "question": record["question"],
-                      "source": "rewrite", "style": record.get("style"), "round": record["round"], **base})
+                      "source": "rewrite", "style": record.get("style"), "round": record["round"], **base, **extra})
     return items
 
 
@@ -311,12 +366,20 @@ def build_report(outcomes: list[SeedOutcome], manifest: dict) -> str:
         f"| 3 語意 | 本機模型 judge，正反兩種順序都要通過 | {count('semantic')} |",
         f"| 通過 | | {count('accepted')} / {len(candidates)} 個候選 |", "",
         f"語意層兩種順序判斷不一致（位置偏差跡象）：{inconsistent} 次。", "",
+        *([f"沿用 `{manifest['resume_from']}`：{sum(1 for c in candidates if c.get('reused_from'))} 題重新檢查，"
+           f"{sum(1 for c in candidates if c.get('reused_from') and c['status'] == 'accepted')} 題沿用"
+           f"（標籤／語意層{'重新判斷' if manifest['recheck_model'] else '沿用上次結果'}）；"
+           f"其餘為新生成。", ""] if manifest.get("resume_from") else []),
         "## 每個種子", "", "| 種子 | 類別 | 標籤 | 候選 | 通過 | 狀態 |", "|---|---|---|---|---|---|",
     ]
     for o in outcomes:
         tried = [c for c in o.candidates if c["status"] != "surplus"]
         state = o.error or ("達標" if len(o.accepted) >= manifest["variants"] else "未達標")
         lines.append(f"| {o.seed['seed_id']} | {o.seed['category']} | {o.seed['label']} | {len(tried)} | {len(o.accepted)} | {state} |")
+    disputed = [o for o in outcomes if o.seed_label and o.seed_label.get("category") != o.seed["category"]]
+    lines += ["", "## 種子自我分類不一致（請人工確認種子標籤）", ""]
+    lines += [f"- **{o.seed['seed_id']}**「{o.seed['question']}」：種子類別 {o.seed['category']}，分類器判為 "
+              f"{o.seed_label.get('category')}（{o.seed_label.get('reason') or o.seed_label.get('error')}）" for o in disputed] or ["（無）"]
     lines += ["", "## 被刷掉的候選與原因", ""]
     rejected = [c for c in candidates if c["status"] not in ("accepted",)]
     if not rejected:
@@ -333,7 +396,7 @@ def build_report(outcomes: list[SeedOutcome], manifest: dict) -> str:
 
 
 def run(seed_paths, llm, out_root: Path, *, variants=2, max_rounds=3, db_path=tools.DB_PATH,
-        log=print, run_id=None) -> Path:
+        log=print, run_id=None, resume_from=None, recheck_model=None) -> Path:
     started = time.time()
     run_id = run_id or time.strftime("%Y%m%d-%H%M%S")
     run_dir = Path(out_root) / run_id
@@ -341,7 +404,14 @@ def run(seed_paths, llm, out_root: Path, *, variants=2, max_rounds=3, db_path=to
     seeds = load_seeds(seed_paths)
     pipeline = Pipeline(llm, run_dir, variants=variants, max_rounds=max_rounds, db_path=db_path, log=log)
     pipeline.prepare_oracles(seeds)
-    outcomes = [pipeline.run_seed(seed) for seed in seeds]
+    previous: dict = {}
+    if resume_from:
+        old_manifest, previous = load_previous(resume_from)
+        if recheck_model is None:  # model-layer prompts changed -> their old verdicts are stale
+            recheck_model = old_manifest.get("prompt_version") != PROMPT_VERSION
+        log(f"resume from {old_manifest['run_id']} (prompt {old_manifest.get('prompt_version')} -> {PROMPT_VERSION}); "
+            f"recheck model layers: {bool(recheck_model)}")
+    outcomes = [pipeline.run_seed(seed, previous.get(seed["seed_id"]), bool(recheck_model)) for seed in seeds]
     items = [item for outcome in outcomes for item in dataset_items(outcome)]
     with (run_dir / "dataset.jsonl").open("w", encoding="utf-8") as handle:
         for item in items:
@@ -352,6 +422,7 @@ def run(seed_paths, llm, out_root: Path, *, variants=2, max_rounds=3, db_path=to
         "variants": variants, "max_rounds": max_rounds, "seconds": time.time() - started,
         "seeds": {str(p): sha256(p) for p in seed_paths}, "database_sha256": sha256(db_path),
         "dataset_sha256": sha256(run_dir / "dataset.jsonl"), "items": len(items),
+        "resume_from": Path(resume_from).name if resume_from else None, "recheck_model": bool(recheck_model),
     }
     (run_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     (run_dir / "report.md").write_text(build_report(outcomes, manifest), encoding="utf-8")

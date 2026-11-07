@@ -32,6 +32,11 @@ CATEGORY_ALIASES = {
     "Software": ["Software", "軟體"],
 }
 REVENUE = ("指標", "銷售金額（營收）")
+# Common Taiwanese spellings missing from the legacy alias table.
+EXTRA_ALIASES = {
+    "North America": ["北美區", "北美地區"], "APAC": ["亞太", "亞洲太平洋"], "LATAM": ["中南美"],
+    "EMEA": ["歐洲、中東及非洲", "歐洲中東"], "United States": ["美"], "Germany": ["德"],
+}
 
 
 def _t(tid, sql, eval_type, instances, concepts, *, x=None, exclude=None):
@@ -341,9 +346,7 @@ def _entities(instance: dict, aliases: dict) -> list[dict]:
     groups = []
     for kind, value in instance["params"].items():
         if kind in ("region", "country"):
-            names = list(dict.fromkeys([value, *aliases.get(value, [])]))
-            if value == "North America":
-                names += ["北美區", "北美地區"]
+            names = list(dict.fromkeys([value, *aliases.get(value, []), *EXTRA_ALIASES.get(value, [])]))
             groups.append({"name": "地區" if kind == "region" else "國家", "type": "entity", "any_of": names})
         elif kind == "category":
             groups.append({"name": "產品類別", "type": "entity", "any_of": CATEGORY_ALIASES[value]})
