@@ -8,7 +8,7 @@
 | `codex` | 一次 Codex CLI 呼叫，模型透過唯讀 sales MCP 工具查詢 | `planned_agent/codex_workflow.py`、`codex_backend.py`、`mcp_server.py` |
 
 `planned_agent/agent.py` 只負責選擇路線。兩條路線共用 `tools.py`、`contracts.py`、`prompts.py`。
-發布 gate `complete_answer` 預設要求 reviewer 接受；Codex 路線沒有 reviewer，
+發布 gate `step_publish` 預設要求 reviewer 接受；Codex 路線沒有 reviewer，
 改用 MCP receipt 作為執行證據，呼叫時傳 `require_review=False`。
 
 ```bash
@@ -26,17 +26,17 @@ Codex 路線在此分支只有離線測試；Codex 帳號未續費，沒有實�
 
 ```text
 使用者問題
-  → SQL planner（Qwen，SQLPlan schema）
-  → 程式直接驗證、執行唯讀 SQL
-      └─ SQL 或 schema 錯誤：回饋 planner
-  → semantic reviewer（同一 Qwen，strict accepted boolean / reason）
-      └─ 意圖不符或 review 解析失敗：回饋 planner；查詢合計最多 3 次嘗試
-  → report writer（Qwen，AnswerSubmission schema）
-      └─ schema / 圖表參數錯誤：只重試 writer，最多 2 次總嘗試
-  → 程式驗證成功條件、產生完整資料表與 Plotly 圖表、提交回答
+  → agent_sql（Qwen，SQLPlan schema）
+  → step_run_sql（程式直接驗證、執行唯讀 SQL）
+      └─ SQL 或 schema 錯誤：回饋 agent_sql
+  → agent_review（同一 Qwen，strict accepted boolean / reason）
+      └─ 意圖不符或 review 解析失敗：回饋 agent_sql；查詢合計最多 3 次嘗試
+  → agent_report（Qwen，AnswerSubmission schema）
+      └─ schema / 圖表參數錯誤：只重試 agent_report，最多 2 次總嘗試
+  → step_publish（程式驗證成功條件、產生完整資料表）→ step_draw_chart（Plotly）、提交回答
 ```
 
-只有 planner、semantic reviewer、report writer 三個模型步驟；沒有 region/checker/executor/renderer/echo Agents。
+只有 agent_sql、agent_review、agent_report 三個模型步驟（命名：agent_ = LLM、tool_ = 模型呼叫的工具、step_ = 程式一定執行）；Chat 頁可展開「查看執行流程」，點步驟看輸入／輸出；沒有 region/checker/executor/renderer/echo Agents。
 模型不需要決定「要不要執行已生成的 SQL」；那是 controller 的固定下一步。
 完整資料表由程式產生，模型只寫解釋。
 SQL 執行成功且本次 reviewer 明確接受，才能產生報告與發布。

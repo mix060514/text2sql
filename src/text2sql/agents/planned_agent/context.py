@@ -26,6 +26,7 @@ def start_turn(callback_context):
     state["sql_attempts"] = 0
     state["report_attempts"] = 0
     state["harness_stats"] = {}
+    state["workflow_trace"] = []
     state["interaction_kind"] = "query"
     # Match the whole message, not a substring: "hello，請查營收" is a query.
     normalized = unicodedata.normalize("NFKC", state["user_question"]).casefold().strip(" \t\r\n.!?，。！？~～")

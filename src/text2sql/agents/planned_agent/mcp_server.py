@@ -9,7 +9,7 @@ from mcp.server.fastmcp import FastMCP
 from mcp.types import ToolAnnotations
 
 from text2sql.config import MAX_QUERY_CALLS
-from .tools import clear_query_state, execute_query
+from .tools import clear_query_state, step_run_sql
 
 
 class QueryRecorder:
@@ -27,7 +27,7 @@ class QueryRecorder:
                 result = {"success": False, "error": {"code": "QUERY_BUDGET", "message": "Sales query budget exhausted."}}
                 state["query_error"] = result["error"]
             else:
-                result = execute_query(sql, state)
+                result = step_run_sql(sql, state)
             self.receipt.write_text(json.dumps({"state": state, "query_calls": self.calls}, ensure_ascii=False))
             return result
 
@@ -37,7 +37,7 @@ def main():
     server = FastMCP("sales")
 
     @server.tool(annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=False))
-    def query_sales_data(sql: str) -> dict:
+    def tool_query_sales(sql: str) -> dict:
         """Execute one read-only SQLite SELECT against sales_data.
 
         Returns actual columns and all accepted rows, or a structured error.

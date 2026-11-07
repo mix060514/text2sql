@@ -12,8 +12,9 @@ from text2sql.config import (
 )
 from .contracts import AnswerSubmission, SQLPlan, SemanticReview
 from .prompts import DOMAIN, REPORT_RULES
-from .tools import clear_query_state, complete_answer, execute_query
+from .tools import clear_query_state, step_publish, step_run_sql
 from .context import start_turn
+from .trace import Trace, record_chart, rows_preview
 
 
 def model():
@@ -21,8 +22,8 @@ def model():
                    api_key=LLAMA_CPP_API_KEY, timeout=120)
 
 
-sql_planner = LlmAgent(
-    name="sql_planner", model=model(), output_schema=SQLPlan, output_key="sql_plan",
+agent_sql = LlmAgent(
+    name="agent_sql", model=model(), output_schema=SQLPlan, output_key="sql_plan",
     disallow_transfer_to_parent=True, disallow_transfer_to_peers=True,
     include_contents="none",
     instruction=DOMAIN + """
@@ -38,8 +39,8 @@ sql_planner = LlmAgent(
     generate_content_config=types.GenerateContentConfig(temperature=0.1, max_output_tokens=4096),
 )
 
-semantic_reviewer = LlmAgent(
-    name="semantic_reviewer", model=model(), output_schema=SemanticReview,
+agent_review = LlmAgent(
+    name="agent_review", model=model(), output_schema=SemanticReview,
     output_key="semantic_review", include_contents="none",
     disallow_transfer_to_parent=True, disallow_transfer_to_peers=True,
     instruction=DOMAIN + """
@@ -58,8 +59,8 @@ SQL 可執行不等於符合意圖。逐項核對指標、篩選、地區、時�
     generate_content_config=types.GenerateContentConfig(temperature=0.1, max_output_tokens=2048),
 )
 
-report_writer = LlmAgent(
-    name="report_writer", model=model(), output_schema=AnswerSubmission, output_key="report",
+agent_report = LlmAgent(
+    name="agent_report", model=model(), output_schema=AnswerSubmission, output_key="report",
     disallow_transfer_to_parent=True, disallow_transfer_to_peers=True,
     include_contents="none",
     instruction=REPORT_RULES + """
@@ -86,6 +87,11 @@ class Text2SQLWorkflow(BaseAgent):
         )
 
     async def _run_async_impl(self, ctx):
+        trace = Trace()
+
+        def traced(delta=None):
+            return {**(delta or {}), "workflow_trace": trace.snapshot()}
+
         feedback = ""
         for attempt in range(SQL_ATTEMPTS):
             attempt_state = {}
@@ -93,45 +99,76 @@ class Text2SQLWorkflow(BaseAgent):
             attempt_state.update({"sql_plan": None, "report": None,
                                   "sql_feedback": feedback, "sql_attempts": attempt + 1})
             yield self.update(ctx, attempt_state)
+            entry = trace.start("agent_sql", attempt + 1, {
+                "user_question": ctx.session.state.get("user_question", ""),
+                "previous_query_context": ctx.session.state.get("previous_query_context", "{}"),
+                "sql_feedback": feedback,
+            })
             try:
                 async for event in self.sub_agents[0].run_async(ctx):
                     yield event
                 plan = SQLPlan.model_validate(ctx.session.state.get("sql_plan"))
+                trace.finish(entry, "ok", {"sql": plan.sql})
+                entry = trace.start("step_run_sql", attempt + 1, {"sql": plan.sql})
                 state = {}
-                result = execute_query(plan.sql, state)  # mandatory execution, direct call
-                yield self.update(ctx, state)
+                result = step_run_sql(plan.sql, state)  # mandatory execution, direct call
                 if not result["success"]:
+                    trace.finish(entry, "error", {"error": result["error"]})
+                    yield self.update(ctx, traced(state))
                     feedback = str(result["error"])
                     continue
+                trace.finish(entry, "ok", rows_preview(result["columns"], result["rows"]))
+                yield self.update(ctx, traced(state))
+                entry = trace.start("agent_review", attempt + 1, {
+                    "user_question": ctx.session.state.get("user_question", ""),
+                    "sql": result["sql"], **rows_preview(result["columns"], result["rows"]),
+                })
                 async for event in self.sub_agents[1].run_async(ctx):
                     yield event
                 review = SemanticReview.model_validate(ctx.session.state.get("semantic_review"))
+                trace.finish(entry, "ok" if review.accepted else "rejected", review.model_dump())
                 if review.accepted:
-                    yield self.update(ctx, {"reviewed_query": result})
+                    yield self.update(ctx, traced({"reviewed_query": result}))
                     break
                 feedback = f"Semantic review rejected SQL: {review.reason}"
+                yield self.update(ctx, traced())
             except ValidationError as exc:
+                trace.finish(entry, "error", {"error": str(exc)})
                 feedback = f"Invalid SQLPlan or SemanticReview (not accepted): {exc}"
+                yield self.update(ctx, traced())
         else:
-            yield self.failure(ctx, "SQL_ATTEMPTS_EXHAUSTED", feedback)
+            yield self.failure(ctx, "SQL_ATTEMPTS_EXHAUSTED", feedback, trace)
             return
 
         feedback = ""
         for attempt in range(REPORT_ATTEMPTS):
             yield self.update(ctx, {"report": None, "report_feedback": feedback, "report_attempts": attempt + 1})
+            entry = trace.start("agent_report", attempt + 1, {
+                "user_question": ctx.session.state.get("user_question", ""),
+                "sql": ctx.session.state.get("sql_query", ""),
+                **rows_preview(ctx.session.state.get("column_names"), ctx.session.state.get("raw_query_result")),
+                "report_feedback": feedback,
+            })
             try:
                 async for event in self.sub_agents[2].run_async(ctx):
                     yield event
                 spec = AnswerSubmission.model_validate(ctx.session.state.get("report"))
+                trace.finish(entry, "ok", spec.model_dump())
+                entry = trace.start("step_publish", attempt + 1, spec.model_dump())
                 state = dict(ctx.session.state)
-                complete_answer(spec, state)  # validates and renders directly
-                yield self.update(ctx, state, state["final_answer"])
+                step_publish(spec, state)  # validates and renders directly
+                trace.finish(entry, "ok", {"final_answer": state["final_answer"],
+                                           "chart_generated": state["chart_json"] is not None})
+                record_chart(trace, attempt + 1, spec, state)
+                yield self.update(ctx, traced(state), state["final_answer"])
                 return
             except (ValidationError, ValueError, TypeError) as exc:
+                trace.finish(entry, "error", {"error": str(exc)})
                 feedback = f"Invalid report or chart: {exc}"
-        yield self.failure(ctx, "REPORT_ATTEMPTS_EXHAUSTED", feedback)
+                yield self.update(ctx, traced())
+        yield self.failure(ctx, "REPORT_ATTEMPTS_EXHAUSTED", feedback, trace)
 
-    def failure(self, ctx, code, detail):
+    def failure(self, ctx, code, detail, trace):
         message = "這次未能取得可確認的分析結果，請重新提問。"
         state = {}
         clear_query_state(state)
@@ -139,11 +176,12 @@ class Text2SQLWorkflow(BaseAgent):
             "workflow_status": "failed", "workflow_error": {"code": code, "message": detail[:500]},
             "answer": message, "final_answer": message, "chart_json": None, "chart_data": None,
             "plot_decision": {"should_plot": False, "chart_type": None},
+            "workflow_trace": trace.snapshot(),
         })
         return self.update(ctx, state, message)
 
 
 root_agent = Text2SQLWorkflow(
     name="root_agent", description="Fixed SQL → execute → review → report workflow for Qwen 27B.",
-    sub_agents=[sql_planner, semantic_reviewer, report_writer], before_agent_callback=start_turn,
+    sub_agents=[agent_sql, agent_review, agent_report], before_agent_callback=start_turn,
 )

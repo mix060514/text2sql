@@ -24,7 +24,7 @@ docs/ARCHITECTURE.md before changing the workflow.
 - tools.read_sales enforces one SELECT, SQLite read-only/authorizer, query deadline,
   row/byte limits and typed results. sqlparse is not a syntax or security validator.
 - SQL success permits a legitimate empty result. Failed SQL cannot reach report generation.
-- contracts.AnswerSubmission validates output shape. complete_answer validates real columns,
+- contracts.AnswerSubmission validates output shape. step_publish validates real columns,
   numeric values and required charts, then renders and commits without an echo agent.
 - SQL attempts: 3 total; report attempts: 2 total. Only explicit validation/execution
   errors retry. Transport/runtime errors stop the invocation.
@@ -46,7 +46,7 @@ quarters, YYYY-Qn for multi-year quarters, YYYY-MM for months.
 
 codex_workflow delegates reasoning/tool loops to Codex CLI and exposes read_sales
 through an isolated MCP tool. ADK there is a UI/session adapter, not the reasoning runtime.
-It has no semantic reviewer, so it calls complete_answer(..., require_review=False);
+It has no semantic reviewer, so it calls step_publish(..., require_review=False);
 the MCP receipt is its execution evidence. The source branches codex/text2sql-qwen27b and
 codex/text2sql-strong are kept unchanged.
 The legacy implementation is available at fd66447.

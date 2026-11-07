@@ -13,7 +13,7 @@ from text2sql.agents.planned_agent.codex_workflow import root_agent
 from text2sql.agents.planned_agent.codex_backend import stop_process
 from text2sql.agents.planned_agent.contracts import AnswerSubmission
 from text2sql.agents.planned_agent.mcp_server import QueryRecorder
-from text2sql.agents.planned_agent.tools import execute_query
+from text2sql.agents.planned_agent.tools import step_run_sql
 from text2sql.runtime import run_question, stream_turn
 
 
@@ -23,7 +23,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
 
     def evidence(self, sql='SELECT COUNT(*) AS Orders FROM sales_data'):
         state = {}
-        execute_query(sql, state)
+        step_run_sql(sql, state)
         return state
 
     async def test_commits_only_executed_data(self):

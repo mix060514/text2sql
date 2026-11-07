@@ -17,8 +17,8 @@
 
 - `planned_agent/agent.py` 只依 `config.BACKEND` 選路線。
 - 27B：`qwen_workflow.py`。planner → 程式唯讀執行 SQL → semantic reviewer → report writer → 發布 gate → 程式畫圖與完整資料表。
-- Codex：`codex_workflow.py` + `codex_backend.py` + `mcp_server.py`。一次 Codex CLI 呼叫，模型透過唯讀 MCP `query_sales_data` 查詢；應用核對 MCP 寫的 receipt。
-- 發布 gate `tools.complete_answer(..., require_review=True)`：27B 要求 reviewer 接受且資料與被接受的執行一致；Codex 傳 `require_review=False`，改以 receipt 為證據。
+- Codex：`codex_workflow.py` + `codex_backend.py` + `mcp_server.py`。一次 Codex CLI 呼叫，模型透過唯讀 MCP `tool_query_sales` 查詢；應用核對 MCP 寫的 receipt。
+- 發布 gate `tools.step_publish(..., require_review=True)`：27B 要求 reviewer 接受且資料與被接受的執行一致；Codex 傳 `require_review=False`，改以 receipt 為證據。
 - 兩條路線共用 `tools.py`（唯讀、上限、畫圖、資料表）、`contracts.py`、`prompts.py`、`context.py`。
 
 ## 驗證證據
@@ -103,6 +103,77 @@
   規則是保底，由離線測試證明能擋）；標籤層首次刷 1（「每個產品各賺了多少錢」被判為利潤＝資料庫沒有，正確）；
   語意層刷 10，部分過嚴（「營收增加」「3C」被判意圖改變），代價是多樣性而非正確性。
 - 放行與攔截比例 126:15，攔截種子需要擴充才能接近演講的各半。
+
+## 方向與優先順序（2026-11-07 討論）
+
+主軸：**先讓合成測試集可信，再拿它評估模型。** 依序：
+
+1. **平衡攔截／放行**：目前種子 42 放行（黃金）對 5 攔截（B01–B05），攔截率無意義。
+   補攔截種子（寫入、資料庫沒有、閒聊、越權）到接近放行數。只改種子檔，不需模型。
+2. **證明檢查層有效**：實跑中標籤層、語意層刷掉 0 題，judge 放過 B02 漏「第一季」。
+   刻意放入偏離原意的改寫，確認會被刷掉；刷不掉就修檢查層。
+3. **接上 eval 並取得分數**：dataset 接到 eval，用 Swift 1.5 跑 27B 路線，
+   看攔截率、誤擋率、放行題答對率；同時在 Swift 上重跑完整 132 題 eval 與 8 案例 smoke。
+
+暫不做：Codex 路線（未續費）、開 PR 合併 master（等第 3 步數字出來，作為 PR 證據）、
+永久 session 儲存（與目前目標無關）。
+`20261107-082751` 這輪生成（42+5 種子）讓它跑完，當補種子前的對照。
+
+### 介面：維持 Streamlit
+
+- 瓶頸在測試集與評估，不在介面；Streamlit 足以支撐單人展示問答、表格、Plotly。
+- 後端仍是 InMemoryRunner，只換前端解決不了掉對話與多人問題。
+- 重新考慮的條件（任一成立）：多人同時使用／部署給別人；需要登入與保留對話紀錄；
+  需要即時顯示 planner → SQL → reviewer 每一步且 Streamlit 明顯卡頓。屆時主要工作是後端
+  （API 層 + 永久 session），前端選型是次要。
+- 可做的改進（取代原本「可展開區塊顯示 SQL」的想法）：**可點擊的執行流程圖**，見下節。
+
+### 介面改進：可點擊的執行流程圖（2026-11-07 已實作，見 docs/ARCHITECTURE.md「執行紀錄與流程圖」）
+
+目標讀者是使用者與面試官，他們最想知道：
+1. 哪裡是 LLM、哪裡是程式（本專案賣點：模型只負責想，程式負責做）。
+2. 每一步實際看到什麼、交出什麼（證明答案不是模型編的）。
+3. 出錯怎麼處理（reviewer 拒絕、SQL 重試、報告重寫）。
+4. 每一步花多少時間（本機 27B 的瓶頸在哪）。
+
+呈現：
+```
+[問題] → (agent_sql) → [step_run_sql] → (agent_review) → (agent_report) → [step_publish] → [step_draw_chart]
+            ↑________ 被拒絕／SQL 錯誤時重試 ________|
+```
+- 圓角框 = LLM（`agent_`），方框 = 程式（`step_`）；通過綠色、拒絕／失敗紅色，重試標 ×2。
+- 點任一框，下方顯示該步的輸入、輸出、耗時。
+- 每則回答下方有「查看執行流程」可展開，歷史題目也看得到。
+
+做法：
+- Chat 頁已逐一讀 `stream_turn` 的 event（`web_ui/pages/1_Chat.py`），每個 event 有 author 與
+  state_delta；據此記錄每步的輸入、輸出、時間成「執行紀錄」，跟回答一起存進訊息歷史。
+- 單一自含 SVG + 少量 JS 元件嵌入 Streamlit，點擊在瀏覽器內處理，不需額外套件、不觸發整頁重跑。
+- 執行紀錄先用假 event 離線測試；真實跑一題需本機模型空閒時驗證。
+- 實作結果：controller 直接記錄每步（比從 event 反推可靠），`tests/test_trace.py` 6 個測試；
+  Streamlit AppTest 以假模型驅動 Chat 頁，確認流程圖出現；亮色、暗色、380px 手機截圖無 JS 錯誤。
+- **尚未驗證**：用本機模型真實跑一題看流程圖（合成資料生成佔用模型時不可做）。
+- Codex 路線只有「Codex → tool_query_sales → step_publish」，流程圖依 BACKEND 切換。
+
+### 命名規則：名字要看得出是 Agent、Tool 還是程式步驟（2026-11-07 已實作，agent 與函式全改）
+
+一律用小寫開頭前綴（全大寫保留給常數，例如 `MAX_QUERY_ROWS`）：
+
+| 類型 | 意思 | 前綴 | 現在 → 改成 |
+|---|---|---|---|
+| Agent（LLM） | 由模型判斷、產生內容 | `agent_` | `sql_planner` → `agent_sql`；`semantic_reviewer` → `agent_review`；`report_writer` → `agent_report` |
+| Tool（模型呼叫） | 模型自己決定要不要呼叫 | `tool_` | Codex MCP `query_sales_data` → `tool_query_sales` |
+| 步驟（程式，一定執行） | controller 固定呼叫，不經模型判斷 | `step_` | `execute_query` → `step_run_sql`；`complete_answer` → `step_publish`；`render_chart` → `step_draw_chart` |
+
+- 範圍：agent、MCP tool、step 函式、tests、CLAUDE.md、README、ARCHITECTURE 全部改名；離線測試通過。
+- MCP tool 改名會改到 Codex 看到的名稱；Codex 目前無法實測（只有離線測試）。
+- `docs/semantic-planner-truncation.json` 等歷史紀錄保留舊名 `sql_planner`，不改。
+
+### 待補：ASP「平均單價」定義
+
+`DOMAIN` 只寫 ASP 是單價，沒定義平均單價用 `AVG("ASP")`（簡單平均）還是
+`SUM("Total Revenue")/SUM("Quantity")`（加權平均），reviewer 也無規則判斷。
+先查 eval ground truth 用哪一種，再補進 `prompts.py` 的 `DOMAIN`。
 
 ## 使用者偏好（本專案相關）
 

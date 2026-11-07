@@ -7,11 +7,11 @@
 |---|---|---|
 | 分支 | codex/text2sql-strong | codex/text2sql-qwen27b |
 | 分析模型 | Codex CLI，gpt-6-sol | Pi 使用的 qwen3.8-27b-iq3-xxs |
-| 推理單位 | 一個 Codex Agent | SQL planner、semantic reviewer、report writer |
+| 推理單位 | 一個 Codex Agent（agent_codex） | agent_sql、agent_review、agent_report |
 | 工具 / 推理迴圈 | Codex Harness | 固定程式流程，模型不帶 tools |
-| SQL 檢查與執行 | 同一個唯讀 MCP 查詢工具內直接執行 | controller 直接 execute_query |
+| SQL 檢查與執行 | 同一個唯讀 MCP 查詢工具內直接執行 | controller 直接 step_run_sql |
 | 應用內模型 retry | 無 | SQLPlan/SQL/語義審查錯誤合計最多 3 次；report/圖表錯誤最多 2 次 |
-| 圖表 | 驗證最終規格後直接 render_chart | 同左 |
+| 圖表 | 驗證最終規格後直接 step_draw_chart | 同左 |
 | 格式控制 | Codex output-schema + Pydantic gate | ADK output_schema + Pydantic gate |
 | 最終成功條件 | 本回合查詢成功、規格有效 | 本次查詢成功、strict review 接受且綁定執行結果、規格有效 |
 | context | Harness 管本次工具對話；應用只傳上回合意圖 | 每個步驟使用明確的問題、資料、錯誤欄位 |
@@ -23,10 +23,10 @@ UI / API
 └─ CodexSalesAgent（ADK 介面轉接）
    └─ 一次 Codex Harness invocation
       ├─ 規劃、SQL 選擇、工具錯誤修正
-      └─ sales.query_sales_data(sql)
+      └─ sales.tool_query_sales(sql)
          └─ deterministic SELECT 驗證 + SQLite 執行
    → 應用檢查本回合執行 receipt + AnswerSubmission
-   → deterministic render_chart
+   → deterministic step_draw_chart
    → deterministic result_table（完整資料）+ answer / chart
 ```
 
@@ -51,14 +51,14 @@ MCP 的 annotation 是提示，真正的 DB 權限仍由 SQLite 執行。
 ```text
 UI / API
 └─ Text2SQLWorkflow（deterministic controller）
-   ├─ SQL planner → SQLPlan
+   ├─ agent_sql → SQLPlan
    │  └─ schema / SQL error：回饋 planner
-   ├─ execute_query(sql)：必定由程式直接執行
-   ├─ semantic reviewer → SemanticReview（accepted: bool、reason）
+   ├─ step_run_sql(sql)：必定由程式直接執行
+   ├─ agent_review → SemanticReview（accepted: bool、reason）
    │  └─ 拒絕 / review schema error：回饋 planner，查詢合計最多 3 次嘗試
-   ├─ report writer → AnswerSubmission
+   ├─ agent_report → AnswerSubmission
    │  └─ schema / 圖表 error：修正 writer，最多 2 次總嘗試
-   └─ complete_answer：hard gate + render + 完整資料表 + commit
+   └─ step_publish：hard gate + render + 完整資料表 + commit
 ```
 
 27B 負責 SQL、意圖審查與解釋的不確定性，不決定固定步驟是否發生。
@@ -71,6 +71,17 @@ controller 只在本次 query_success 且 strict review 明確接受後進 repor
 查詢修正與報告修正分開，後者不重查或重審；維持 8 calls / 300 秒總限制。
 正常路徑 3 calls，最壞 3 × (planner + reviewer) + 2 report = 8。
 語義 reviewer 仍是同一 Qwen 的判斷，可能與 planner 有共同盲點，並非一般 SQL 正確性的證明。
+
+命名規則：`agent_*` = LLM、`tool_*` = 模型自己呼叫的工具、`step_*` = controller 一定執行的程式。
+
+## 執行紀錄與流程圖
+
+controller 每一步記錄 `{name, kind, attempt, status, input, output, ms}` 到 state `workflow_trace`
+（`agents/planned_agent/trace.py`），每回合由 start_turn 清空，失敗路徑也保留。
+資料列只存前 20 列預覽；紀錄只供顯示，不回饋給 prompt 或發布判斷。
+`step_draw_chart` 在 `step_publish` 內執行，紀錄的是實際 Plotly trace，沒有自己的耗時。
+Codex 路線的 MCP receipt 只保留最後一次查詢，`tool_query_sales` 的 attempt 是查詢總次數。
+Chat 頁（`web_ui/flow_view.py`）把它畫成可點擊的 SVG 流程圖，點步驟看每次嘗試的輸入、輸出。
 
 ## 兩版共同保留的程式責任
 

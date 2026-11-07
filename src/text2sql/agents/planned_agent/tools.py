@@ -100,7 +100,7 @@ def clear_query_state(state) -> None:
     })
 
 
-def execute_query(sql: str, state) -> dict:
+def step_run_sql(sql: str, state) -> dict:
     """Query directly; expose structured errors to whichever model/harness is used."""
     clear_query_state(state)
     state["sql_query"] = sql if isinstance(sql, str) else ""
@@ -124,7 +124,7 @@ def numeric_columns(columns: list[str], rows: list[list]) -> list[str]:
     )]
 
 
-def render_chart(spec: AnswerSubmission, columns: list[str], rows: list[list]) -> str:
+def step_draw_chart(spec: AnswerSubmission, columns: list[str], rows: list[list]) -> str:
     """Validate against the full actual result, then return Plotly JSON."""
     import pandas as pd
     import plotly.express as px
@@ -193,7 +193,7 @@ def validate_review(state) -> None:
         raise ValueError("Published data must match the reviewed execution.")
 
 
-def complete_answer(spec: AnswerSubmission, state, *, require_review: bool = True) -> dict:
+def step_publish(spec: AnswerSubmission, state, *, require_review: bool = True) -> dict:
     """Hard success gate: only executed data and a validated chart can be published.
 
     The Qwen workflow must also carry an explicit semantic acceptance bound to this
@@ -207,7 +207,7 @@ def complete_answer(spec: AnswerSubmission, state, *, require_review: bool = Tru
     columns, rows = state["column_names"], state["raw_query_result"]
     if spec.chart_type == "none" and len(rows) >= 2 and len(columns) >= 2 and numeric_columns(columns, rows):
         raise ValueError("Multiple rows with a numeric measure require a chart.")
-    chart_json = render_chart(spec, columns, rows) if spec.chart_type != "none" else None
+    chart_json = step_draw_chart(spec, columns, rows) if spec.chart_type != "none" else None
     final_answer = spec.answer + "\n\n" + result_table(spec, columns, rows)
     state.update({
         "answer": final_answer, "final_answer": final_answer, "workflow_status": "completed",

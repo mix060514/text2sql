@@ -59,7 +59,7 @@ async def stop_process(process):
 
 async def run_codex(question: str, previous_context: str = "{}"):
     prompt = DOMAIN + REPORT_RULES + """
-你是銷售分析 Agent。使用 sales MCP 的 query_sales_data 查詢真實資料。
+你是銷售分析 Agent。使用 sales MCP 的 tool_query_sales 查詢真實資料。
 可以根據工具的錯誤修正查詢；工具直接驗證與執行 SQL。
 回答必須依本次最後一次成功執行的結果。不要自行編造或使用常數查詢代替 sales_data。
 若最後一次工具回傳失敗，先修正後重查，再提交回答。

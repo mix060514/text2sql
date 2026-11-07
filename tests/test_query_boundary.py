@@ -88,7 +88,7 @@ class QueryBoundaryTests(unittest.TestCase):
     def test_failed_attempt_invalidates_success_and_chart(self):
         state = {"query_success": True, "raw_query_result": [[999]],
                  "column_names": ["old"], "chart_json": "old", "final_answer": "old"}
-        result = tools.execute_query('SELECT missing FROM sales_data', state)
+        result = tools.step_run_sql('SELECT missing FROM sales_data', state)
         self.assertFalse(result["success"])
         self.assertFalse(state["query_success"])
         self.assertEqual(state["raw_query_result"], [])

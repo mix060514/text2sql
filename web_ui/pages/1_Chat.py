@@ -14,12 +14,15 @@ import plotly.io as pio
 project_root = pathlib.Path(__file__).parent.parent.parent.resolve()
 sys.path.insert(0, str(project_root / "src"))
 sys.path.append(str(project_root / "eval"))
+sys.path.insert(0, str(project_root / "web_ui"))
 
 try:
     from google.adk.runners import InMemoryRunner
     from google.genai import types
     from text2sql.agents.planned_agent.agent import root_agent
     from text2sql.runtime import stream_turn
+    from text2sql.config import BACKEND
+    from flow_view import render_flow
 except ImportError as e:
     st.error(f"Failed to import agent or dependencies: {e}")
     st.stop()
@@ -80,6 +83,9 @@ for i, msg in enumerate(st.session_state.messages):
                 st.plotly_chart(fig, use_container_width=True, key=f"history_chart_{i}")
             except Exception as e:
                 st.error(f"Failed to render chart: {e}")
+        if msg.get("workflow_trace"):
+            with st.expander("查看執行流程（點步驟看輸入／輸出）"):
+                render_flow(msg["workflow_trace"], msg.get("backend", BACKEND))
         if "subagent_output" in msg and show_subagent:
             with st.expander("Analysis Details"):
                 st.text(msg["subagent_output"])
@@ -181,7 +187,9 @@ if prompt:
             )
 
             chart_json = None
+            trace = []
             if session:
+                trace = session.state.get("workflow_trace") or []
                 response_text = (
                     session.state.get("final_answer")
                     or session.state.get("answer")
@@ -191,9 +199,9 @@ if prompt:
             else:
                 response_text = "No session found."
 
-            return response_text, current_logs, chart_json
+            return response_text, current_logs, chart_json, trace
 
-        full_response, subagent_logs, chart_json = asyncio.run(run_chat())
+        full_response, subagent_logs, chart_json, trace = asyncio.run(run_chat())
 
         message_placeholder.markdown(full_response)
 
@@ -206,11 +214,17 @@ if prompt:
             except Exception as e:
                 st.error(f"Failed to render chart: {e}")
 
+        if trace:
+            with st.expander("查看執行流程（點步驟看輸入／輸出）", expanded=True):
+                render_flow(trace, BACKEND)
+
         st.session_state.messages.append(
             {
                 "role": "assistant",
                 "content": full_response,
                 "subagent_output": "\n".join(subagent_logs),
                 "chart_json": chart_json,
+                "workflow_trace": trace,
+                "backend": BACKEND,
             }
         )
