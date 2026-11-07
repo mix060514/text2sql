@@ -46,6 +46,11 @@ class ComplexOracleTests(unittest.TestCase):
             rows = tools.read_sales(cx.SQL[key].replace(old, new).format(**params))["rows"]
             self.assertTrue(cx.compare_rows(rows, cx.REFERENCE[key](df, **params)), key)
 
+    def test_month_over_month_january_uses_previous_december(self):
+        rows = complex_seed("X-region_mom-APAC-2024")["reference_rows"]
+        self.assertEqual(rows[0], ["2024-01", -34.01])  # was None before run 20261107-153104's finding
+        self.assertEqual(len(rows), 12)
+
     def test_pipeline_oracle_refuses_disagreement(self):
         bad = complex_seed("X-pareto-80")
         bad["reference_rows"] = [[4]]

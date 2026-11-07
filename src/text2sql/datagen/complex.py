@@ -64,9 +64,12 @@ def p_category_top3_quantity(df):
 
 
 def p_region_mom(df, region, year):
-    t = df[(df.Region == region) & (df.year == year)].groupby("ym")[R].sum().sort_index()
-    growth = (t - t.shift(1)) * 100.0 / t.shift(1)
-    return _rows(pd.DataFrame({"m": t.index, "g": growth.round(2).values}))
+    # January compares with the previous December (run 20261107-153104: the SQL judge flagged a
+    # within-year LAG that left January empty although December data exists).
+    t = df[df.Region == region].groupby("ym")[R].sum().sort_index()
+    growth = ((t - t.shift(1)) * 100.0 / t.shift(1)).round(2)
+    keep = [m.startswith(year) for m in t.index]
+    return _rows(pd.DataFrame({"m": t.index[keep], "g": growth.values[keep]}))
 
 
 def p_cumulative(df, year):
@@ -269,9 +272,10 @@ SUM(Quantity) AS total_quantity FROM sales_data GROUP BY 1, 2), r AS (SELECT *, 
 product_category ORDER BY total_quantity DESC, product_name ASC) AS rank FROM t)
 SELECT product_category, rank, product_name, total_quantity FROM r WHERE rank <= 3 ORDER BY product_category, rank""",
     "region_mom": f"""WITH m AS (SELECT {MONTH} AS month, SUM({REV}) AS revenue FROM sales_data
-WHERE Region = '{{region}}' AND {YEAR} = '{{year}}' GROUP BY month)
-SELECT month, ROUND((revenue - LAG(revenue) OVER (ORDER BY month)) * 100.0 / LAG(revenue) OVER (ORDER BY month), 2)
-AS mom_growth_pct FROM m ORDER BY month""",
+WHERE Region = '{{region}}' GROUP BY month),
+g AS (SELECT month, revenue, LAG(revenue) OVER (ORDER BY month) AS previous_month_revenue FROM m)
+SELECT month, ROUND((revenue - previous_month_revenue) * 100.0 / previous_month_revenue, 2) AS mom_growth_pct
+FROM g WHERE substr(month, 1, 4) = '{{year}}' ORDER BY month""",
     "cumulative": f"""WITH m AS (SELECT {MONTH} AS month, SUM({REV}) AS revenue FROM sales_data WHERE {YEAR} = '{{year}}'
 GROUP BY month) SELECT month, ROUND(SUM(revenue) OVER (ORDER BY month), 2) AS cumulative_revenue FROM m ORDER BY month""",
     "country_decline": f"""WITH a AS (SELECT Country AS country, SUM(CASE WHEN {YEAR} = '2023' THEN {REV} END) AS r23,
@@ -430,7 +434,7 @@ SPECS = [
        [_lit("門檻", "80%", "80 %", "八成", "百分之八十")])],
      _c(("指標", "累計銷售額占比達門檻所需的產品個數"),)),
     ("multi_region_customers", "number", None, None,
-     [({"k": 4}, "有多少位客戶在全部四個區域都下過單？", [_lit("區域數", "四", "4", "全部", "所有", "每個")])],
+     [({"k": 4}, "有多少位客戶在全部四個區域都下過單？", [_lit("區域數", "四", "4", "全部", "所有", "每個", "全區", "各個")])],
      _c(("對象", "客戶人數"), ("條件", "在所有區域都有購買"))),
     ("region_category_matrix", "dataframe", "amount", None,
      [({"year": "2023"}, "2023 年每個區域在各產品類別的銷售額分別是多少？", [])],
