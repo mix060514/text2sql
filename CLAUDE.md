@@ -4,7 +4,8 @@ This branch has two backends selected by TEXT2SQL_BACKEND (config.BACKEND): the 
 "qwen27b" deterministic controller with three Qwen 27B LlmAgents (qwen_workflow.py), and
 "codex", one Codex CLI invocation with the read-only sales MCP tool (codex_workflow.py).
 agent.py only selects; tools/contracts/prompts are shared.
-Read README.md and docs/ARCHITECTURE.md before changing the workflow.
+Read docs/HANDOFF.md first (current state, open issues, next task), then README.md and
+docs/ARCHITECTURE.md before changing the workflow.
 
 ## Commands
 

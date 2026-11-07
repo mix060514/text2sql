@@ -1,0 +1,92 @@
+# 交接紀錄（2026-11-07）
+
+新 session 先讀這份，再讀 README.md 與 CLAUDE.md。
+
+## 現況
+
+| 項目 | 狀態 |
+|---|---|
+| 目前分支 | `codex/text2sql-unified`（commit `19821ae` 起），已 push 到 `origin` |
+| GitHub master | 仍停在 2026-02-06 `4761ae8`，尚未合併 unified，也沒開 PR |
+| 路線切換 | `TEXT2SQL_BACKEND=qwen27b`（預設）或 `codex` |
+| Codex 路線 | 使用者的 Codex 未續費，只有離線測試，沒有實際呼叫 |
+| 舊分支 | `codex/text2sql-qwen27b`、`codex/text2sql-strong` 保留不動，只在本機 |
+| 強模型 worktree | `../text2sql-strong`（分支 `codex/text2sql-strong`），合併後已不需要；尚未移除 |
+
+## 合併做了什麼
+
+- `planned_agent/agent.py` 只依 `config.BACKEND` 選路線。
+- 27B：`qwen_workflow.py`。planner → 程式唯讀執行 SQL → semantic reviewer → report writer → 發布 gate → 程式畫圖與完整資料表。
+- Codex：`codex_workflow.py` + `codex_backend.py` + `mcp_server.py`。一次 Codex CLI 呼叫，模型透過唯讀 MCP `query_sales_data` 查詢；應用核對 MCP 寫的 receipt。
+- 發布 gate `tools.complete_answer(..., require_review=True)`：27B 要求 reviewer 接受且資料與被接受的執行一致；Codex 傳 `require_review=False`，改以 receipt 為證據。
+- 兩條路線共用 `tools.py`（唯讀、上限、畫圖、資料表）、`contracts.py`、`prompts.py`、`context.py`。
+
+## 驗證證據
+
+- 離線 `uv run python scripts/verify_all.py`：54/54（27B 43、Codex 9、路線切換 2）。
+- 27B 實測 `南美 的總銷售額是多少？` → 4,872,116.29，約 35 秒，與 SQLite 直接計算相同。
+- push 前掃描 `origin/master..unified` 19 個 commit：無金鑰／密碼；`.env` 只含 `localhost` 與假金鑰 `aaa`，且本次是刪除它們。
+
+## 未解決
+
+1. **27B 月份趨勢題失敗**（8 個 smoke 案例中 7/8）。planner 額度 2,048 時用光輸出；調到 4,096 後 reviewer 請求 120 秒超時。細節見 `docs/VALIDATION.md` 末段。
+2. **完整 132 題 eval 從未在目前兩條路線上跑過**（`eval/eval_e2e.py`、`eval/eval.py`）。
+3. Session 仍用 InMemoryRunner，沒有永久儲存。
+4. 是否開 PR 把 unified 合併進 master：使用者尚未決定。
+
+## 既有測試資料
+
+| 檔案 | 筆數 | 說明 |
+|---|---|---|
+| `data/eval_set_v3.jsonl` | 132 | 正式評估集。eval_type：dataframe 59、number 33、string 23、list 17；difficulty：medium 59、hard 43、simple 30 |
+| `data/eval_set_v2.jsonl` | 82 | 舊 DB 用，不再使用 |
+| `data/plot_eval_set.jsonl` | 19 | 圖表決策題（mock columns） |
+| `data/eval_manifest.json` | — | DB 與 dataset 的 SHA-256 |
+
+產生方式：`scripts/generate_ground_truth.py` 以地區／國家別名表加題目模板展開問法，ground truth 由 pandas 從原始 CSV 計算，不經模型。
+
+## 下一個任務：照演講方法產生新測試資料
+
+使用者想用一場演講（台灣 IBM 講者，「用合成資料測試 AI Guardrails」）的方法產生新資料，舊 132 題當種子與對照組。演講要點：
+
+1. 先定義測試標的與政策：哪些該擋、哪些該放行（演講例子：證券助手，擋投資建議／保證收益，放行公開資訊查詢；目標 300 筆，擋 150、放行 150）。
+2. 準備種子資料；改寫時保留關鍵欄位（例如公司、年份），不得改變原意或標籤。
+3. 生成流程分階段，不要一個 prompt 做完；每階段可 rollback／regen。
+4. 品質檢查分三層，由便宜到昂貴：
+   - 規則：JSON 結構、長度、語言，用程式檢查。
+   - 標籤／意圖：產出是否仍屬同一類別、同一標籤。
+   - 語意：LLM judge 檢查一致性、相關性。
+5. 不通過時，把失敗原因放回 prompt 重新生成。
+6. 不要照單全收 judge：注意位置偏差、長度偏差；演講的失敗例子是改寫後丟掉了「退休」背景，judge 仍給過。
+7. 評估看兩個指標：該擋的有沒有擋、有沒有漏。
+
+套到本專案的草案（尚未確認）：
+
+| 演講步驟 | text2sql |
+|---|---|
+| 政策 | 該回答的銷售查詢 vs. 不該查資料的輸入（寫入請求、資料庫外問題、閒聊） |
+| 種子 | `eval_set_v3.jsonl` 132 題 |
+| 生成 | 本機 Qwen 改寫問法，地區、指標、時間不得改變 |
+| 規則層 | JSON、長度、繁體中文，程式判斷 |
+| 標籤層 | 標準答案由 SQLite 重新計算，不靠模型 |
+| 語意層 | judge 檢查改寫是否偏離原意 |
+| 輸出 | 新評估集 + 每層刷掉的題數，再分別測兩條路線 |
+
+**待使用者回答**：新資料主要測哪一種？
+- A（建議）：同一題換更口語、更難的問法，測穩健性。
+- B：加入不該查資料的題目，擋與放行各半。
+- C：兩者都要。
+
+## 使用者偏好（本專案相關）
+
+- 回覆用繁體中文；一次只問一個問題（使用者常用語音回答）。
+- 不問工程細節，只問目標、檢查點、完成標準。
+- 宣稱完成要附證據（指令輸出、測試結果）。
+- 本機模型一次只能處理一個請求：模型相關工作不可平行執行。
+- 端點：`http://127.0.0.1:18080/v1`，模型 `qwen3.8-27b-iq3-xxs`。
+
+## 複習資料
+
+`docs/review/` 有 5 頁 60 分鐘複習頁面（用 answer-me-with-html 的 am CLI 產生，未安裝該 skill）：
+1. 專案全貌　2. 27B 路線　3. Codex 路線　4. 驗證方式　5. 自我測驗與現況。
+頁面內容描述的是合併前兩個分支的狀態。
