@@ -32,6 +32,8 @@ REPORT_THINKING = os.getenv("REPORT_THINKING", "false").strip().lower() in ("1",
 SQL_THINKING_BUDGET = int(os.getenv("SQL_THINKING_BUDGET", "2048"))
 REVIEW_THINKING_BUDGET = int(os.getenv("REVIEW_THINKING_BUDGET", "1024"))
 JUDGE_THINKING_BUDGET = int(os.getenv("JUDGE_THINKING_BUDGET", "1024"))
+# Few-shot SQL examples for hard question types (prompts.SQL_EXAMPLES).
+SQL_FEW_SHOT = os.getenv("SQL_FEW_SHOT", "false").strip().lower() in ("1", "true", "yes")
 
 if min(MAX_LLM_CALLS, AGENT_TIMEOUT_SECONDS, QUERY_TIMEOUT_SECONDS,
        MAX_QUERY_ROWS, MAX_RESULT_BYTES, SQL_ATTEMPTS, REPORT_ATTEMPTS) <= 0:

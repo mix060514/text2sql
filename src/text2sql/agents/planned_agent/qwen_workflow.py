@@ -12,10 +12,10 @@ from pydantic import ValidationError
 from text2sql.config import (
     LLAMA_CPP_MODEL, LLAMA_CPP_API_BASE, LLAMA_CPP_API_KEY,
     REPORT_ATTEMPTS, REPORT_THINKING, REVIEW_THINKING_BUDGET, SQL_ATTEMPTS,
-    SQL_THINKING_BUDGET,
+    SQL_FEW_SHOT, SQL_THINKING_BUDGET,
 )
 from .contracts import AnswerSubmission, SQLPlan, SemanticReview
-from .prompts import DOMAIN, REPORT_RULES
+from .prompts import DOMAIN, REPORT_RULES, format_sql_examples
 from .tools import clear_query_state, step_publish, step_run_sql
 from .context import start_turn
 from .trace import Trace, record_chart, rows_preview
@@ -93,18 +93,25 @@ def model(thinking: bool = True, budget: int = -1):
                                    api_key=LLAMA_CPP_API_KEY, timeout=MODEL_REQUEST_SECONDS, **extra)
 
 
-agent_sql = LlmAgent(
-    name="agent_sql", model=model(budget=SQL_THINKING_BUDGET), output_schema=SQLPlan, output_key="sql_plan",
-    disallow_transfer_to_parent=True, disallow_transfer_to_peers=True,
-    include_contents="none",
-    instruction=DOMAIN + """
+SQL_TASK = """
 你只負責產生一個 SQLite SELECT，不負責執行或回答。
 不要呼叫工具，不要用 Markdown 或加上說明，依輸出 schema 提交 SQL。
 重試只能修正原問題的 SQL；不得把問題換成訂單總數或其他未要求的統計。
 使用者問題：{user_question}
 前一個成功回合的問題與 SQL（僅用於理解追問，必須重新查詢）：{previous_query_context}
 上一個錯誤（若有）：{sql_feedback}
-""",
+"""
+
+
+def sql_instruction(few_shot: bool) -> str:
+    return DOMAIN + ("\n" + format_sql_examples() if few_shot else "") + SQL_TASK
+
+
+agent_sql = LlmAgent(
+    name="agent_sql", model=model(budget=SQL_THINKING_BUDGET), output_schema=SQLPlan, output_key="sql_plan",
+    disallow_transfer_to_parent=True, disallow_transfer_to_peers=True,
+    include_contents="none",
+    instruction=sql_instruction(SQL_FEW_SHOT),
     # Live monthly query exhausted 2048 completion tokens with no SQL text.
     # Give planning more output headroom without changing invocation limits.
     generate_content_config=types.GenerateContentConfig(temperature=0.1, max_output_tokens=4096),

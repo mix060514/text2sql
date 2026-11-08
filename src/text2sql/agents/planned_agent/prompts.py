@@ -48,3 +48,52 @@ answer 要依實際 columns 與 rows 提供簡短解釋、重點或直接回答�
 - x_column、y_column、color_column 必須是結果中真實欄位名稱。
 - y_column 必須是數值；color_column 用於多組系列，pie 不填 color_column。
 """
+
+
+# Few-shot examples for question types that were hard to solve in one go (see
+# docs/optimization). Same type as the hard questions, different content: other
+# regions/countries/years/metrics, never an evaluation question (tests enforce this).
+# No braces in this text: ADK treats {name} in instructions as state placeholders.
+SQL_EXAMPLES = [
+    {
+        "type": "跨年逐月趨勢",
+        "question": "請列出 Japan 在 2023 至 2024 年每個月的銷售量。",
+        "sql": """SELECT substr("Order Date", 1, 7) AS "Month", SUM("Quantity") AS "Total Quantity"
+FROM sales_data
+WHERE "Country" = 'Japan' AND substr("Order Date", 1, 4) IN ('2023', '2024')
+GROUP BY substr("Order Date", 1, 7)
+ORDER BY "Month"
+""",
+        "note": "逐月趨勢直接用 substr 取 YYYY-MM 分組，一列一個月、依月份升冪；不需要補零或視窗函數。",
+    },
+    {
+        "type": "前 N 大客戶的類別占比",
+        "question": "在 EMEA 區域，2024 年前三大客戶各自購買各產品類別的金額占比為何？",
+        "sql": """WITH top_customers AS MATERIALIZED (
+  SELECT "Customer Name", SUM("Total Revenue") AS customer_total
+  FROM sales_data
+  WHERE "Region" = 'EMEA' AND substr("Order Date", 1, 4) = '2024'
+  GROUP BY "Customer Name"
+  ORDER BY customer_total DESC, "Customer Name" ASC
+  LIMIT 3
+)
+SELECT s."Customer Name", s."Product Category",
+       ROUND(SUM(s."Total Revenue") * 100.0 / t.customer_total, 2) AS "Share (%)"
+FROM sales_data AS s
+JOIN top_customers AS t ON s."Customer Name" = t."Customer Name"
+WHERE s."Region" = 'EMEA' AND substr(s."Order Date", 1, 4) = '2024'
+GROUP BY s."Customer Name", s."Product Category", t.customer_total
+ORDER BY t.customer_total DESC, s."Customer Name", s."Product Category"
+""",
+        "note": "「前 N 大客戶各類別占比」是每位客戶各自的類別占比（分母是該客戶自己的總額），"
+                "不是 N 位客戶合計的類別占比；先用 CTE 取前 N 名，再 JOIN 回明細。"
+                "帶 LIMIT 的 CTE 再 JOIN 時必須寫 AS MATERIALIZED，否則 SQLite 會對每一列重算而逾時。",
+    },
+]
+
+
+def format_sql_examples(examples=None) -> str:
+    lines = ["範例（同類問題的寫法；地區、國家、年份、指標與名次要依使用者問題替換，不可照抄）："]
+    for i, ex in enumerate(examples or SQL_EXAMPLES, 1):
+        lines += [f"範例 {i}【{ex['type']}】問題：{ex['question']}", f"重點：{ex['note']}", "SQL：", ex["sql"], ""]
+    return "\n".join(lines)
