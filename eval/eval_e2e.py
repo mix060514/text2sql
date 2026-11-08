@@ -597,6 +597,70 @@ async def run_evaluation(
     return summary
 
 
+async def run_synthetic(run_dir=None, limit=None, label=None, reuse=True, timeout=300):
+    """Run the synthetic golden + guardrail set; grade deterministically against its oracle."""
+    import synthetic
+
+    run_dir = pathlib.Path(run_dir) if run_dir else synthetic.latest_run()
+    manifest, items = synthetic.load_run(run_dir)
+    if label:
+        items = [item for item in items if item["label"] == label]
+    if limit:
+        items = items[:limit]
+    metadata = {"workflow": run_metadata(EVAL_SET_PATH)["workflow"],
+                "model": run_metadata(EVAL_SET_PATH)["model"],
+                "database_sha256": manifest["database_sha256"],
+                "dataset": f"synthetic/{run_dir.name}/dataset.jsonl",
+                "dataset_sha256": manifest["dataset_sha256"]}
+    reused = synthetic.find_reusable(items, metadata) if reuse else {}
+
+    output_dir = PROJECT_DIR / "eval" / "results" / f"synthetic_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    print(f"\n{'='*70}")
+    print(f"Synthetic Evaluation | run {run_dir.name} | Cases: {len(items)} | reused passes: {len(reused)}")
+    print(f"Output Directory: {output_dir}")
+    print(f"{'='*70}\n")
+
+    def write(records):
+        summary = {**synthetic.summarize(records), "run_metadata": metadata,
+                   "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+        (output_dir / "synthetic_results.json").write_text(
+            json.dumps(records, indent=2, ensure_ascii=False), encoding="utf-8")
+        (output_dir / "synthetic_summary.json").write_text(
+            json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
+        return summary
+
+    records = []
+    for i, item in enumerate(items):
+        print(f"[{i+1}/{len(items)}] {item['label']:<5} {item['question'][:45]}... ", end="", flush=True)
+        if item["id"] in reused:
+            result = reused[item["id"]]
+            print(f"🟢 reused ({result['reused_from']})")
+        else:
+            try:
+                state = await asyncio.wait_for(run_agent_and_get_state(eval_runner, item["question"]), timeout=timeout)
+                result = synthetic.grade_state(item, state)
+            except Exception as exc:  # timeout or runtime error: a failed case, not a crash
+                result = {"passed": False, "reason": f"{type(exc).__name__}: {str(exc)[:200]}",
+                          "workflow_status": "error"}
+            print(("🟢 " if result["passed"] else "🔴 ") + result["reason"])
+        records.append({"id": item["id"], "question": item["question"], "label": item["label"],
+                        "category": item.get("category"), "difficulty": item.get("difficulty"),
+                        "source": item.get("source"), "seed_id": item.get("seed_id"), **result})
+        summary = write(records)
+
+    print(f"\n{'='*70}")
+    for key in ("allow_accuracy", "block_rate"):
+        part = summary[key]
+        if part["total"]:
+            print(f"{key:<16} {part['passed']}/{part['total']} = {part['rate']:.1%}")
+    print(f"false_block      {summary['false_block']['count']}/{summary['false_block']['total']}")
+    print(f"reused           {summary['reused']}")
+    print(f"runtime_errors   {summary['runtime_errors']}")
+    print(f"{'='*70}\nResults saved to: {output_dir}")
+    return summary
+
+
 if __name__ == "__main__":
     import argparse
 
@@ -614,7 +678,22 @@ if __name__ == "__main__":
         action="store_true",
         help="Only run questions with expected_plot",
     )
+    parser.add_argument(
+        "--synthetic", nargs="?", const="latest", default=None, metavar="RUN_DIR",
+        help="Run the synthetic set (default: newest complete data/synthetic/runs/<run>) "
+             "with deterministic grading instead of eval_set_v3",
+    )
+    parser.add_argument("--label", choices=["allow", "block"], help="--synthetic: only this label")
+    parser.add_argument("--no-reuse", action="store_true",
+                        help="--synthetic: rerun everything, even items that passed before")
     args = parser.parse_args()
+
+    if args.synthetic:
+        asyncio.run(run_synthetic(
+            run_dir=None if args.synthetic == "latest" else args.synthetic,
+            limit=args.limit, label=args.label, reuse=not args.no_reuse,
+        ))
+        raise SystemExit(0)
 
     asyncio.run(
         run_evaluation(

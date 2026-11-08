@@ -16,6 +16,8 @@ docs/ARCHITECTURE.md before changing the workflow.
 - `uv run python scripts/verify_all.py` (offline, standard-library unittest)
 - `uv run python scripts/smoke_workflow.py --output docs/smoke-qwen27b.json` (live model)
 - `uv run python eval/eval_e2e.py --limit 5` (live model and LLM judge)
+- `uv run python eval/eval_e2e.py --synthetic [RUN_DIR] [--label allow|block] [--no-reuse]` (live model; synthetic set graded
+  against its SQLite oracle, no judge; reuses earlier passes for the same model/DB, incl. regraded eval_e2e rows)
 - `uv run python scripts/build_golden_seeds.py` (offline; golden seeds from legacy templates, SQL checked against legacy pandas)
 - `uv run python scripts/build_guardrail_seeds.py` (offline; 42 block seeds, prints a review table)
 - `uv run python scripts/build_complex_seeds.py` (offline; 34 SQL-first complex seeds, SQL checked against pandas on the CSV)
