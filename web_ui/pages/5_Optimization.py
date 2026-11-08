@@ -179,11 +179,11 @@ if conc:
         "模型伺服器原本一次只處理一個請求，其他人要排隊。這裡用同一張 GPU、同樣的總上下文，"
         "測試同時處理 1 到 N 個寫 SQL 請求（真實 prompt、思考上限與輸出上限）時的吞吐量與單一請求耗時。"
     )
-    base = next((r for r in conc if r["parallel"] == 1), None)
+    base = next((r for r in conc if r["parallel"] == 1 and r.get("drafting", "mtp") == "mtp"), None)
     st.dataframe(pd.DataFrame([
-        {"並發路數": r["parallel"], "請求數": r["requests"],
+        {"草稿方式": r.get("drafting", "mtp").upper(), "並發路數": r["parallel"], "請求數": r["requests"],
          "總吞吐量 (tokens/秒)": r["aggregate_tps"],
-         "相對 1 路": f"{r['aggregate_tps'] / base['aggregate_tps']:.2f}×" if base else "–",
+         "相對 MTP 1 路": f"{r['aggregate_tps'] / base['aggregate_tps']:.2f}×" if base else "–",
          "單一請求平均耗時": sec(r["avg_request_seconds"]), "單一請求最長": sec(r["max_request_seconds"]),
          "每路生成速度 (tokens/秒)": r["avg_decode_tps_per_request"],
          "prompt 快取命中": f"{r['avg_cached_tokens']}/{r['avg_prompt_tokens']}",

@@ -122,12 +122,14 @@ def main():
     ap.add_argument("--model", default=config.LLAMA_CPP_MODEL.split("/")[-1])
     ap.add_argument("--parallel", type=int, required=True)
     ap.add_argument("--rounds", type=int, default=2)
+    ap.add_argument("--drafting", default="mtp", help="speculative drafter of the server under test (label only)")
     args = ap.parse_args()
     row = asyncio.run(bench(args.base, args.model, args.parallel, args.rounds))
+    row["drafting"] = args.drafting
     data = json.loads(OUT.read_text(encoding="utf-8")) if OUT.exists() else []
-    data = [d for d in data if d["parallel"] != args.parallel] + [row]
-    OUT.write_text(json.dumps(sorted(data, key=lambda d: d["parallel"]), ensure_ascii=False, indent=2),
-                   encoding="utf-8")
+    key = lambda d: (d.get("drafting", "mtp"), d["parallel"])
+    data = [d for d in data if key(d) != key(row)] + [row]
+    OUT.write_text(json.dumps(sorted(data, key=key), ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps({k: v for k, v in row.items() if k != "requests_detail"}, ensure_ascii=False))
 
 
