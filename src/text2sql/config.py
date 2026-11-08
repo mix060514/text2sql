@@ -27,6 +27,10 @@ REPORT_ATTEMPTS = int(os.getenv("REPORT_ATTEMPTS", "2"))
 # The report writer only phrases already-validated rows; thinking made it take 20-85 s and
 # pushed requests past the 120 s timeout. Set to true to restore model thinking there.
 REPORT_THINKING = os.getenv("REPORT_THINKING", "false").strip().lower() in ("1", "true", "yes")
+# Max thinking tokens per request (llama.cpp thinking_budget_tokens; -1 = unlimited).
+# At ~35 tok/s an unbounded planner sometimes thought past the 120 s request timeout.
+SQL_THINKING_BUDGET = int(os.getenv("SQL_THINKING_BUDGET", "2048"))
+REVIEW_THINKING_BUDGET = int(os.getenv("REVIEW_THINKING_BUDGET", "1024"))
 
 if min(MAX_LLM_CALLS, AGENT_TIMEOUT_SECONDS, QUERY_TIMEOUT_SECONDS,
        MAX_QUERY_ROWS, MAX_RESULT_BYTES, SQL_ATTEMPTS, REPORT_ATTEMPTS) <= 0:

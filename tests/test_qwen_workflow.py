@@ -223,5 +223,16 @@ class ThinkingConfigTests(unittest.TestCase):
         off = {"chat_template_kwargs": {"enable_thinking": False}}
         self.assertEqual(qw.agent_report.model._additional_args.get("extra_body"), off)
         for agent in (qw.agent_sql, qw.agent_review):
-            self.assertNotIn("extra_body", agent.model._additional_args)
+            self.assertNotIn("chat_template_kwargs", agent.model._additional_args.get("extra_body", {}))
         self.assertNotIn("extra_body", qw.model(thinking=True)._additional_args)
+
+    def test_sql_and_review_thinking_is_budgeted(self):
+        from text2sql import config
+        from text2sql.agents.planned_agent import qwen_workflow as qw
+
+        sql_body = qw.agent_sql.model._additional_args.get("extra_body", {})
+        review_body = qw.agent_review.model._additional_args.get("extra_body", {})
+        self.assertEqual(sql_body.get("thinking_budget_tokens"), config.SQL_THINKING_BUDGET)
+        self.assertEqual(review_body.get("thinking_budget_tokens"), config.REVIEW_THINKING_BUDGET)
+        self.assertNotIn("chat_template_kwargs", sql_body)
+        self.assertNotIn("extra_body", qw.model(thinking=True, budget=-1)._additional_args)

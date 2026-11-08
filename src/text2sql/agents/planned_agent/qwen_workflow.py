@@ -8,7 +8,8 @@ from pydantic import ValidationError
 
 from text2sql.config import (
     LLAMA_CPP_MODEL, LLAMA_CPP_API_BASE, LLAMA_CPP_API_KEY,
-    REPORT_ATTEMPTS, REPORT_THINKING, SQL_ATTEMPTS,
+    REPORT_ATTEMPTS, REPORT_THINKING, REVIEW_THINKING_BUDGET, SQL_ATTEMPTS,
+    SQL_THINKING_BUDGET,
 )
 from .contracts import AnswerSubmission, SQLPlan, SemanticReview
 from .prompts import DOMAIN, REPORT_RULES
@@ -17,14 +18,19 @@ from .context import start_turn
 from .trace import Trace, record_chart, rows_preview
 
 
-def model(thinking: bool = True):
-    extra = {} if thinking else {"extra_body": {"chat_template_kwargs": {"enable_thinking": False}}}
+def model(thinking: bool = True, budget: int = -1):
+    if not thinking:
+        extra = {"extra_body": {"chat_template_kwargs": {"enable_thinking": False}}}
+    elif budget >= 0:
+        extra = {"extra_body": {"thinking_budget_tokens": budget}}
+    else:
+        extra = {}
     return LiteLlm(model=LLAMA_CPP_MODEL, api_base=LLAMA_CPP_API_BASE,
                    api_key=LLAMA_CPP_API_KEY, timeout=120, **extra)
 
 
 agent_sql = LlmAgent(
-    name="agent_sql", model=model(), output_schema=SQLPlan, output_key="sql_plan",
+    name="agent_sql", model=model(budget=SQL_THINKING_BUDGET), output_schema=SQLPlan, output_key="sql_plan",
     disallow_transfer_to_parent=True, disallow_transfer_to_peers=True,
     include_contents="none",
     instruction=DOMAIN + """
@@ -41,7 +47,7 @@ agent_sql = LlmAgent(
 )
 
 agent_review = LlmAgent(
-    name="agent_review", model=model(), output_schema=SemanticReview,
+    name="agent_review", model=model(budget=REVIEW_THINKING_BUDGET), output_schema=SemanticReview,
     output_key="semantic_review", include_contents="none",
     disallow_transfer_to_parent=True, disallow_transfer_to_peers=True,
     instruction=DOMAIN + """
