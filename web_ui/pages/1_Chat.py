@@ -58,11 +58,32 @@ st.sidebar.title("Settings")
 show_subagent = st.sidebar.checkbox("Show Analysis Details", value=True)
 
 
+# Only questions the default model (Swift 1.5) answered correctly in the 2026-11-07
+# 132-question eval, with SQL results matching data/eval_set_v3.jsonl ground truth.
+# Region-level monthly trends are left out: most of them hit the 120 s timeout.
 SUGGESTED_QUESTIONS = [
+    # Single value
     "EMEA 的總銷售額是多少？",
+    "2024 年的總銷售額是多少？",
+    "哪一個產品的平均單價 (ASP) 最高？",
+    "Germany 訂單數量最多的客戶是誰？",
+    "產品類別 Electronics 的最大購買客戶是誰？",
+    "2024 年哪一個季度的總銷售額表現最好？",
+    "Electronics 類別在 2024 年相對於 2023 年的銷售額年增率 (YoY) 是多少？(請以百分比表示)",
+    "EMEA 區域 2024 年對比 2023 年的銷售額年增率是多少？",
+    # Table
+    "各個區域 (Region) 最偏好（銷售額最高）的產品類別分別為何？",
+    # Bar chart
+    "APAC 銷售量最高的前三個產品是什麼？",
     "請列出 Electronics 類別在各年份的銷售額總計。",
-    "請列出 North America 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
-    "各區域的銷售額佔比是多少？",
+    "請比較各區域的總銷售額。",
+    "銷售額前五名的產品分別是哪些？請用圖表呈現。",
+    "2024 年各季度的銷售額分別是多少？",
+    # Line chart (monthly trend, slower: about 1-2 minutes)
+    "請呈現 Electronics 類別在 2023 至 2024 年的月銷售額趨勢。",
+    # Pie chart
+    "各區域的銷售額占比分別是多少？請用圓餅圖呈現。",
+    "2024 年各產品類別的銷售額占比分別是多少？",
 ]
 
 selected_suggestion = st.sidebar.selectbox(
