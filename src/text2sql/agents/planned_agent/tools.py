@@ -193,17 +193,14 @@ def validate_review(state) -> None:
         raise ValueError("Published data must match the reviewed execution.")
 
 
-def step_publish(spec: AnswerSubmission, state, *, require_review: bool = True) -> dict:
+def step_publish(spec: AnswerSubmission, state) -> dict:
     """Hard success gate: only executed data and a validated chart can be published.
 
-    The Qwen workflow must also carry an explicit semantic acceptance bound to this
-    execution. The Codex path has no reviewer; its evidence is the MCP receipt, so it
-    passes require_review=False and still needs a successful query in this turn.
+    It also requires an explicit semantic acceptance bound to this execution.
     """
     if not state.get("query_success"):
         raise ValueError("A successful query in this turn is required before publishing.")
-    if require_review:
-        validate_review(state)
+    validate_review(state)
     columns, rows = state["column_names"], state["raw_query_result"]
     if spec.chart_type == "none" and len(rows) >= 2 and len(columns) >= 2 and numeric_columns(columns, rows):
         raise ValueError("Multiple rows with a numeric measure require a chart.")

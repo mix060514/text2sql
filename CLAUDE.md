@@ -1,10 +1,10 @@
 # Repository guidance
 
-This branch has two backends selected by TEXT2SQL_BACKEND (config.BACKEND): the default
-"qwen27b" deterministic controller with three Qwen 27B LlmAgents (qwen_workflow.py; default model
-since 2026-11-07 is Swift 1.5 `swift15-27b-iq3-xxs`, a shorter-thinking Qwen3.8-27B post-train), and
-"codex", one Codex CLI invocation with the read-only sales MCP tool (codex_workflow.py).
-agent.py only selects; tools/contracts/prompts are shared.
+This branch has one backend: the "qwen27b" deterministic controller with three Qwen 27B
+LlmAgents (qwen_workflow.py; default model since 2026-11-07 is Swift 1.5 `swift15-27b-iq3-xxs`,
+a shorter-thinking Qwen3.8-27B post-train). TEXT2SQL_BACKEND (config.BACKEND) accepts only
+"qwen27b". The Codex CLI backend was removed on 2026-11-08 (the service is external-facing;
+a CLI agent subprocess is not a suitable serving path). It remains in git at 96f9615.
 Read docs/HANDOFF.md first (current state, open issues, next task), then README.md and
 docs/ARCHITECTURE.md before changing the workflow.
 
@@ -46,11 +46,9 @@ Smoke compares executed data/actual chart generation with deterministic SQLite o
 Top-N ties are ordered by metric DESC, name ASC. Time labels are Q1..Q4 for one-year
 quarters, YYYY-Qn for multi-year quarters, YYYY-MM for months.
 
-## Codex backend
+## History
 
-codex_workflow delegates reasoning/tool loops to Codex CLI and exposes read_sales
-through an isolated MCP tool. ADK there is a UI/session adapter, not the reasoning runtime.
-It has no semantic reviewer, so it calls step_publish(..., require_review=False);
-the MCP receipt is its execution evidence. The source branches codex/text2sql-qwen27b and
-codex/text2sql-strong are kept unchanged.
+The removed Codex backend (codex_workflow.py, codex_backend.py, mcp_server.py) is at 96f9615.
+step_publish now always requires the semantic review. The source branches
+codex/text2sql-qwen27b and codex/text2sql-strong are kept unchanged.
 The legacy implementation is available at fd66447.

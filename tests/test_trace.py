@@ -1,16 +1,12 @@
 import json
 import unittest
-from unittest.mock import patch
 
 from google.adk.models.base_llm import BaseLlm
 from google.adk.models.llm_response import LlmResponse
 from google.adk.runners import InMemoryRunner
 from google.genai import types
 
-from text2sql.agents.planned_agent.codex_workflow import root_agent as codex_root
-from text2sql.agents.planned_agent.contracts import AnswerSubmission
 from text2sql.agents.planned_agent.qwen_workflow import root_agent as qwen_root
-from text2sql.agents.planned_agent.tools import step_run_sql
 from text2sql.runtime import run_question
 
 REGION_SQL = 'SELECT Region, SUM("Total Revenue") AS Revenue FROM sales_data GROUP BY Region ORDER BY Region'
@@ -96,22 +92,3 @@ class QwenTraceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(steps(state)[-1], ("step_draw_chart", 1, "skipped"))
         json.dumps(state["workflow_trace"], ensure_ascii=False)  # serializable for the UI
 
-
-class CodexTraceTests(unittest.IsolatedAsyncioTestCase):
-    async def test_codex_trace(self):
-        evidence = {}
-        step_run_sql(REGION_SQL, evidence)
-        spec = AnswerSubmission(answer="ok", chart_type="pie", x_column="Region", y_column="Revenue")
-        with patch("text2sql.agents.planned_agent.codex_workflow.run_codex",
-                   return_value=(spec, evidence, {"query_calls": 2})):
-            state = await run_question(InMemoryRunner(agent=codex_root.clone(), app_name="t"), "佔比")
-        self.assertEqual(steps(state), [("agent_codex", 1, "ok"), ("tool_query_sales", 2, "ok"),
-                                        ("step_publish", 1, "ok"), ("step_draw_chart", 1, "ok")])
-        self.assertEqual(state["workflow_trace"][1]["kind"], "tool")
-        self.assertEqual(state["workflow_trace"][3]["output"]["plotly_traces"][0]["type"], "pie")
-
-    async def test_codex_failure_keeps_trace(self):
-        with patch("text2sql.agents.planned_agent.codex_workflow.run_codex", side_effect=RuntimeError("boom")):
-            state = await run_question(InMemoryRunner(agent=codex_root.clone(), app_name="t"), "x")
-        self.assertEqual(state["workflow_status"], "failed")
-        self.assertEqual(steps(state), [("agent_codex", 1, "error")])

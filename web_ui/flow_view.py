@@ -23,17 +23,6 @@ PIPELINES = {
             {"from": "step_publish", "to": "agent_report", "label": "規格不合法 → 重寫（最多 2 次）"},
         ],
     },
-    "codex": {
-        "nodes": [
-            ("agent_codex", "Codex 推理"),
-            ("tool_query_sales", "MCP 唯讀查詢"),
-            ("step_publish", "發布檢查"),
-            ("step_draw_chart", "Plotly 畫圖"),
-        ],
-        "loops": [
-            {"from": "tool_query_sales", "to": "agent_codex", "label": "Codex 依錯誤自行重查"},
-        ],
-    },
 }
 
 TEMPLATE = r"""<!doctype html>

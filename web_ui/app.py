@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-from text2sql.config import ANALYSIS_MODEL, WORKFLOW_VARIANT
+from text2sql.config import ANALYSIS_MODEL
 
 st.set_page_config(page_title="Text2SQL Agent", page_icon="🤖", layout="wide",
                    initial_sidebar_state="expanded")
@@ -13,8 +13,5 @@ st.markdown("""
 請從左側選擇 Chat、Eval、System Monitor 或 Data Dashboard。
 """)
 st.caption(f"分析模型：{ANALYSIS_MODEL}")
-if WORKFLOW_VARIANT == "strong":
-    st.markdown("分析流程：Codex 分析助手 → 唯讀查詢 → 結果驗證 → 回答與圖表。")
-else:
-    st.markdown("分析流程：SQL 規劃 → 唯讀查詢 → 結果解釋 → 回答與圖表。")
+st.markdown("分析流程：SQL 規劃 → 唯讀查詢 → 語意審查 → 回答與圖表。")
 st.sidebar.success("從左側選擇頁面開始。")

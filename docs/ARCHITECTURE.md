@@ -1,5 +1,8 @@
 # 架構比較與閱讀指南
 
+> 2026-11-08：強模型（Codex CLI）路線已從 `codex/text2sql-unified` 移除，
+> 目前只有下方「小模型路線」。比較表保留作歷史紀錄；移除前的程式在 commit `96f9615`。
+
 基準：`fd66447`。兩版都保留原本的 Streamlit / ADK session 介面，
 但推理與控制流程的責任不同。
 
@@ -15,36 +18,6 @@
 | 格式控制 | Codex output-schema + Pydantic gate | ADK output_schema + Pydantic gate |
 | 最終成功條件 | 本回合查詢成功、規格有效 | 本次查詢成功、strict review 接受且綁定執行結果、規格有效 |
 | context | Harness 管本次工具對話；應用只傳上回合意圖 | 每個步驟使用明確的問題、資料、錯誤欄位 |
-
-## 強模型路線
-
-```text
-UI / API
-└─ CodexSalesAgent（ADK 介面轉接）
-   └─ 一次 Codex Harness invocation
-      ├─ 規劃、SQL 選擇、工具錯誤修正
-      └─ sales.tool_query_sales(sql)
-         └─ deterministic SELECT 驗證 + SQLite 執行
-   → 應用檢查本回合執行 receipt + AnswerSubmission
-   → deterministic step_draw_chart
-   → deterministic result_table（完整資料）+ answer / chart
-```
-
-`agent.py` 只接橋接函式與完成結果。沒有 root delegation prompt，
-沒有為每一步設一個 Agent，也沒有自己寫一個 loop until success。
-`codex_backend.py` 啟動一次非互動 CLI，使用 JSON Schema 接收最終規格。
-`mcp_server.py` 提供實際查詢，並把最後一次查詢的執行證據寫入本回合的暫存 receipt。
-
-receipt 由應用的 MCP server 產生，不能把模型自己說「查詢成功」視作證據。
-每次 invocation 使用獨立暫存目錄；不讀上回合的 receipt。
-CLI 不繼承個人 connectors，shell 關閉、sandbox 是 read-only；
-MCP 的 annotation 是提示，真正的 DB 權限仍由 SQLite 執行。
-本次 CLI 的期限由應用限制；取消時停止整個程序群組。
-這是本機示範接法，沒有把 ChatGPT 登入憑證放進 repo 或提供給模型。
-
-官方依據：
-[非互動與 output-schema](https://learn.chatgpt.com/docs/non-interactive-mode)、
-[MCP 設定](https://learn.chatgpt.com/docs/extend/mcp?surface=cli)。
 
 ## 小模型路線
 
@@ -80,7 +53,6 @@ controller 每一步記錄 `{name, kind, attempt, status, input, output, ms}` �
 （`agents/planned_agent/trace.py`），每回合由 start_turn 清空，失敗路徑也保留。
 資料列只存前 20 列預覽；紀錄只供顯示，不回饋給 prompt 或發布判斷。
 `step_draw_chart` 在 `step_publish` 內執行，紀錄的是實際 Plotly trace，沒有自己的耗時。
-Codex 路線的 MCP receipt 只保留最後一次查詢，`tool_query_sales` 的 attempt 是查詢總次數。
 Chat 頁（`web_ui/flow_view.py`）把它畫成可點擊的 SVG 流程圖，點步驟看每次嘗試的輸入、輸出。
 
 ## 兩版共同保留的程式責任

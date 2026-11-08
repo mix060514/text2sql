@@ -8,13 +8,13 @@
 |---|---|
 | 目前分支 | `codex/text2sql-unified`（commit `19821ae` 起），已 push 到 `origin` |
 | GitHub master | 仍停在 2026-02-06 `4761ae8`，尚未合併 unified，也沒開 PR |
-| 路線切換 | `TEXT2SQL_BACKEND=qwen27b`（預設）或 `codex` |
-| Codex 路線 | 使用者的 Codex 未續費，只有離線測試，沒有實際呼叫 |
+| 路線 | 只有 `qwen27b`；`TEXT2SQL_BACKEND` 設其他值會報錯 |
+| Codex 路線 | 2026-11-08 移除（服務對外，不用 CLI agent 子程序）；移除前程式在 `96f9615` |
 | 舊分支 | `codex/text2sql-qwen27b`、`codex/text2sql-strong` 保留不動，只在本機 |
 | 本機模型 | 2026-11-07 改為 Swift 1.5（`swift15-27b-iq3-xxs`，Qwen3.8-27B 後訓練、思考較短）；原版 `qwen3.8-27b-iq3-xxs` 仍可切回 |
 | 強模型 worktree | `../text2sql-strong`（分支 `codex/text2sql-strong`），合併後已不需要；尚未移除 |
 
-## 合併做了什麼
+## 合併做了什麼（歷史；Codex 部分已於 2026-11-08 移除）
 
 - `planned_agent/agent.py` 只依 `config.BACKEND` 選路線。
 - 27B：`qwen_workflow.py`。planner → 程式唯讀執行 SQL → semantic reviewer → report writer → 發布 gate → 程式畫圖與完整資料表。
