@@ -1,0 +1,11 @@
+{
+  "sleep_idle_seconds": 30,
+  "vram_awake_mib": 13901,
+  "vram_idle_10s_mib": 13901,
+  "vram_idle_45s_mib": 211,
+  "awake_request_seconds": 0.557,
+  "cold_start_request_seconds": 3.743,
+  "second_request_seconds": 0.429,
+  "log": "sleep_test.log",
+  "note": "短請求（max_tokens 32、不思考）；冷啟動時模型檔已在作業系統的檔案快取中"
+}

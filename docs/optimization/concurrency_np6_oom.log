@@ -1,0 +1,2 @@
+/root/llama-b10941-src/ggml/src/ggml-backend.cpp:188: GGML_ASSERT(buffer) failed
+0.03.355.576 E ggml_backend_cuda_buffer_type_alloc_buffer: allocating 884.62 MiB on device 0: cudaMalloc failed: out of memory

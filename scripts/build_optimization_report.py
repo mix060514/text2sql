@@ -246,6 +246,8 @@ def main():
         "concurrency": [{k: v for k, v in row.items() if k != "requests_detail"}
                         for row in json.loads((OUT / "concurrency.json").read_text(encoding="utf-8"))]
                        if (OUT / "concurrency.json").exists() else [],
+        "sleep": json.loads((OUT / "sleep_test.json").read_text(encoding="utf-8"))
+                 if (OUT / "sleep_test.json").exists() else None,
         "cases": cases,
         "complex_review": [
             {"seed_id": r["seed_id"], "question": r["question"], "reason": review[r["seed_id"]]["reason"],

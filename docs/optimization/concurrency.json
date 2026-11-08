@@ -1,0 +1,399 @@
+[
+  {
+    "parallel": 1,
+    "requests": 12,
+    "wall_seconds": 212.3,
+    "aggregate_tps": 25.0,
+    "avg_request_seconds": 17.7,
+    "max_request_seconds": 43.6,
+    "avg_decode_tps_per_request": 27.0,
+    "avg_prompt_tokens": 2004,
+    "avg_cached_tokens": 1889,
+    "max_completion_tokens": 969,
+    "truncated": 0,
+    "empty_answers": 0,
+    "n_ctx_per_slot": 65536,
+    "ctx_size_total": 65536,
+    "gpu_mem_mib": 13911,
+    "sql_thinking_budget": 4096,
+    "max_output_tokens": 6144,
+    "requests_detail": [
+      {
+        "seconds": 15.6,
+        "completion_tokens": 516,
+        "prompt_tokens": 2001,
+        "cached_tokens": 1997,
+        "decode_tps": 33.5,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 11.7,
+        "completion_tokens": 364,
+        "prompt_tokens": 2003,
+        "cached_tokens": 1869,
+        "decode_tps": 33.1,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 7.0,
+        "completion_tokens": 204,
+        "prompt_tokens": 1999,
+        "cached_tokens": 1871,
+        "decode_tps": 32.1,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 26.2,
+        "completion_tokens": 716,
+        "prompt_tokens": 2015,
+        "cached_tokens": 1871,
+        "decode_tps": 28.1,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 27.7,
+        "completion_tokens": 623,
+        "prompt_tokens": 2003,
+        "cached_tokens": 1883,
+        "decode_tps": 23.1,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 11.2,
+        "completion_tokens": 287,
+        "prompt_tokens": 2001,
+        "cached_tokens": 1883,
+        "decode_tps": 27.2,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 19.2,
+        "completion_tokens": 494,
+        "prompt_tokens": 2013,
+        "cached_tokens": 1883,
+        "decode_tps": 27.3,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 14.6,
+        "completion_tokens": 329,
+        "prompt_tokens": 1999,
+        "cached_tokens": 1883,
+        "decode_tps": 23.6,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 43.6,
+        "completion_tokens": 969,
+        "prompt_tokens": 2001,
+        "cached_tokens": 1883,
+        "decode_tps": 22.7,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 15.2,
+        "completion_tokens": 344,
+        "prompt_tokens": 2003,
+        "cached_tokens": 1883,
+        "decode_tps": 23.8,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 8.0,
+        "completion_tokens": 186,
+        "prompt_tokens": 1999,
+        "cached_tokens": 1883,
+        "decode_tps": 25.5,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 12.3,
+        "completion_tokens": 281,
+        "prompt_tokens": 2015,
+        "cached_tokens": 1883,
+        "decode_tps": 24.4,
+        "finish_reason": "stop",
+        "answer_empty": false
+      }
+    ],
+    "measured_at": "2026-11-08 17:13:48"
+  },
+  {
+    "parallel": 2,
+    "requests": 12,
+    "wall_seconds": 156.0,
+    "aggregate_tps": 30.6,
+    "avg_request_seconds": 25.4,
+    "max_request_seconds": 64.8,
+    "avg_decode_tps_per_request": 17.4,
+    "avg_prompt_tokens": 2004,
+    "avg_cached_tokens": 1730,
+    "max_completion_tokens": 962,
+    "truncated": 0,
+    "empty_answers": 0,
+    "n_ctx_per_slot": 65536,
+    "ctx_size_total": 65536,
+    "gpu_mem_mib": 14509,
+    "sql_thinking_budget": 4096,
+    "max_output_tokens": 6144,
+    "requests_detail": [
+      {
+        "seconds": 24.3,
+        "completion_tokens": 337,
+        "prompt_tokens": 2003,
+        "cached_tokens": 0,
+        "decode_tps": 19.1,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 38.3,
+        "completion_tokens": 608,
+        "prompt_tokens": 2001,
+        "cached_tokens": 1997,
+        "decode_tps": 16.0,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 15.2,
+        "completion_tokens": 244,
+        "prompt_tokens": 1999,
+        "cached_tokens": 1871,
+        "decode_tps": 17.4,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 14.5,
+        "completion_tokens": 210,
+        "prompt_tokens": 2015,
+        "cached_tokens": 1869,
+        "decode_tps": 16.0,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 19.7,
+        "completion_tokens": 317,
+        "prompt_tokens": 2001,
+        "cached_tokens": 1883,
+        "decode_tps": 17.4,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 27.1,
+        "completion_tokens": 481,
+        "prompt_tokens": 2013,
+        "cached_tokens": 1883,
+        "decode_tps": 18.5,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 64.8,
+        "completion_tokens": 962,
+        "prompt_tokens": 2003,
+        "cached_tokens": 1871,
+        "decode_tps": 15.2,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 22.8,
+        "completion_tokens": 329,
+        "prompt_tokens": 1999,
+        "cached_tokens": 1883,
+        "decode_tps": 15.3,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 30.3,
+        "completion_tokens": 492,
+        "prompt_tokens": 2001,
+        "cached_tokens": 1871,
+        "decode_tps": 16.9,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 22.6,
+        "completion_tokens": 342,
+        "prompt_tokens": 2003,
+        "cached_tokens": 1883,
+        "decode_tps": 16.1,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 14.8,
+        "completion_tokens": 217,
+        "prompt_tokens": 1999,
+        "cached_tokens": 1871,
+        "decode_tps": 16.1,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 11.0,
+        "completion_tokens": 239,
+        "prompt_tokens": 2015,
+        "cached_tokens": 1883,
+        "decode_tps": 24.6,
+        "finish_reason": "stop",
+        "answer_empty": false
+      }
+    ],
+    "measured_at": "2026-11-08 17:17:10"
+  },
+  {
+    "parallel": 4,
+    "requests": 12,
+    "wall_seconds": 99.6,
+    "aggregate_tps": 50.8,
+    "avg_request_seconds": 31.5,
+    "max_request_seconds": 72.0,
+    "avg_decode_tps_per_request": 16.3,
+    "avg_prompt_tokens": 2004,
+    "avg_cached_tokens": 1429,
+    "max_completion_tokens": 1142,
+    "truncated": 0,
+    "empty_answers": 0,
+    "n_ctx_per_slot": 65536,
+    "ctx_size_total": 65536,
+    "gpu_mem_mib": 15705,
+    "sql_thinking_budget": 4096,
+    "max_output_tokens": 6144,
+    "requests_detail": [
+      {
+        "seconds": 27.6,
+        "completion_tokens": 188,
+        "prompt_tokens": 1999,
+        "cached_tokens": 0,
+        "decode_tps": 11.0,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 31.0,
+        "completion_tokens": 239,
+        "prompt_tokens": 2015,
+        "cached_tokens": 0,
+        "decode_tps": 20.0,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 38.0,
+        "completion_tokens": 331,
+        "prompt_tokens": 2003,
+        "cached_tokens": 0,
+        "decode_tps": 15.6,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 16.6,
+        "completion_tokens": 260,
+        "prompt_tokens": 2001,
+        "cached_tokens": 1883,
+        "decode_tps": 16.9,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 52.6,
+        "completion_tokens": 626,
+        "prompt_tokens": 2001,
+        "cached_tokens": 1997,
+        "decode_tps": 11.9,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 17.5,
+        "completion_tokens": 274,
+        "prompt_tokens": 1999,
+        "cached_tokens": 1883,
+        "decode_tps": 16.9,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 35.8,
+        "completion_tokens": 597,
+        "prompt_tokens": 2013,
+        "cached_tokens": 1871,
+        "decode_tps": 17.4,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 18.2,
+        "completion_tokens": 289,
+        "prompt_tokens": 2003,
+        "cached_tokens": 1883,
+        "decode_tps": 17.0,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 14.7,
+        "completion_tokens": 219,
+        "prompt_tokens": 1999,
+        "cached_tokens": 1881,
+        "decode_tps": 16.3,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 40.5,
+        "completion_tokens": 659,
+        "prompt_tokens": 2001,
+        "cached_tokens": 1997,
+        "decode_tps": 16.4,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 13.2,
+        "completion_tokens": 238,
+        "prompt_tokens": 2015,
+        "cached_tokens": 1883,
+        "decode_tps": 19.8,
+        "finish_reason": "stop",
+        "answer_empty": false
+      },
+      {
+        "seconds": 72.0,
+        "completion_tokens": 1142,
+        "prompt_tokens": 2003,
+        "cached_tokens": 1867,
+        "decode_tps": 16.2,
+        "finish_reason": "stop",
+        "answer_empty": false
+      }
+    ],
+    "measured_at": "2026-11-08 17:19:32"
+  },
+  {
+    "parallel": 6,
+    "drafting": "mtp",
+    "failed": "啟動失敗：顯存不足（還需配置 884.62 MiB，cudaMalloc out of memory）",
+    "ctx_size_total": 65536,
+    "measured_at": "2026-11-08 17:19:54"
+  }
+]
