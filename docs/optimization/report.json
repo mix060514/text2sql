@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-08 11:56:11",
+  "generated_at": "2026-11-08 14:41:21",
   "overall": {
     "template": {
       "2026-11-07": {
@@ -9,7 +9,13 @@
         "first_try": null,
         "avg_seconds": null
       },
-      "baseline": null,
+      "baseline": {
+        "n": 132,
+        "success": 0.9242424242424242,
+        "timeout": 0.030303030303030304,
+        "first_try": 0.9140625,
+        "avg_seconds": 77.1
+      },
       "few_shot": null
     },
     "complex": {
@@ -105,7 +111,78 @@
           "avg_seconds": null
         }
       },
-      "baseline": {},
+      "baseline": {
+        "彙總查詢": {
+          "n": 37,
+          "success": 0.972972972972973,
+          "timeout": 0.0,
+          "first_try": 0.972972972972973,
+          "avg_seconds": 42.8
+        },
+        "排名／最高": {
+          "n": 39,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 0.9743589743589743,
+          "avg_seconds": 42.0
+        },
+        "年度總計": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 46.4
+        },
+        "季度彙總": {
+          "n": 4,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 62.6
+        },
+        "年增率／同期比較": {
+          "n": 8,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 64.1
+        },
+        "跨年逐月趨勢": {
+          "n": 23,
+          "success": 0.8260869565217391,
+          "timeout": 0.17391304347826086,
+          "first_try": 0.7894736842105263,
+          "avg_seconds": 185.8
+        },
+        "前 N 大客戶的類別占比": {
+          "n": 4,
+          "success": 0.0,
+          "timeout": 0.0,
+          "first_try": 0.0,
+          "avg_seconds": 194.4
+        },
+        "客戶跨年變動": {
+          "n": 1,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 94.5
+        },
+        "跨年逐季趨勢": {
+          "n": 5,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 76.4
+        },
+        "占比": {
+          "n": 8,
+          "success": 0.875,
+          "timeout": 0.0,
+          "first_try": 0.875,
+          "avg_seconds": 65.3
+        }
+      },
       "few_shot": {}
     },
     "complex": {
@@ -412,8 +489,8 @@
       "fix": "在 few-shot 範例示範 WITH ... AS MATERIALIZED，前 N 名只算一次。",
       "timing": {
         "plain": {
-          "seconds": 20.0,
-          "finished": false
+          "seconds": 19.687,
+          "finished": true
         },
         "materialized": {
           "seconds": 0.009,
@@ -436,7 +513,13 @@
           "first_try": null,
           "avg_seconds": null
         },
-        "after": null
+        "after": {
+          "n": 1,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 53.6
+        }
       },
       "scope": "Q94"
     },
@@ -454,7 +537,13 @@
           "first_try": null,
           "avg_seconds": null
         },
-        "after": null
+        "after": {
+          "n": 6,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 75.3
+        }
       },
       "scope": "Q101–Q105、Q110"
     },
@@ -585,7 +674,58 @@
     }
   ],
   "few_shot": {
-    "template": {},
+    "template": {
+      "彙總查詢": {
+        "before": {
+          "n": 37,
+          "success": 0.972972972972973,
+          "timeout": 0.0,
+          "first_try": 0.972972972972973,
+          "avg_seconds": 42.8
+        },
+        "after": null
+      },
+      "排名／最高": {
+        "before": {
+          "n": 39,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 0.9743589743589743,
+          "avg_seconds": 42.0
+        },
+        "after": null
+      },
+      "跨年逐月趨勢": {
+        "before": {
+          "n": 23,
+          "success": 0.8260869565217391,
+          "timeout": 0.17391304347826086,
+          "first_try": 0.7894736842105263,
+          "avg_seconds": 185.8
+        },
+        "after": null
+      },
+      "前 N 大客戶的類別占比": {
+        "before": {
+          "n": 4,
+          "success": 0.0,
+          "timeout": 0.0,
+          "first_try": 0.0,
+          "avg_seconds": 194.4
+        },
+        "after": null
+      },
+      "占比": {
+        "before": {
+          "n": 8,
+          "success": 0.875,
+          "timeout": 0.0,
+          "first_try": 0.875,
+          "avg_seconds": 65.3
+        },
+        "after": null
+      }
+    },
     "complex": {
       "APAC 在 2024 年每個月的銷售額比前一個月成長了多少百分比？": {
         "before": {
