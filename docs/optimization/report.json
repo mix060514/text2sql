@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-08 09:19:22",
+  "generated_at": "2026-11-08 11:51:49",
   "overall": {
     "template": {
       "2026-11-07": {
@@ -13,7 +13,13 @@
       "few_shot": null
     },
     "complex": {
-      "baseline": null,
+      "baseline": {
+        "n": 102,
+        "success": 0.8137254901960784,
+        "timeout": 0.00980392156862745,
+        "first_try": 0.7524752475247525,
+        "avg_seconds": 93.5
+      },
       "few_shot": null
     }
   },
@@ -95,7 +101,246 @@
       "few_shot": {}
     },
     "complex": {
-      "baseline": {},
+      "baseline": {
+        "2024 年各區域銷售額最高的產品分別是什麼？金額是多少？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 56.6
+        },
+        "每個產品類別裡，銷售量前三名的產品分別是哪些？": {
+          "n": 3,
+          "success": 0.0,
+          "timeout": 0.0,
+          "first_try": 0.0,
+          "avg_seconds": 76.6
+        },
+        "APAC 在 2024 年每個月的銷售額比前一個月成長了多少百分比？": {
+          "n": 3,
+          "success": 0.0,
+          "timeout": 0.3333333333333333,
+          "first_try": 0.0,
+          "avg_seconds": 212.8
+        },
+        "2023 年從一月起逐月累計的銷售額是多少？請用折線圖呈現。": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 0.3333333333333333,
+          "avg_seconds": 185.2
+        },
+        "哪些國家 2024 年的銷售額比 2023 年下滑？各下滑了多少百分比？": {
+          "n": 3,
+          "success": 0.0,
+          "timeout": 0.0,
+          "first_try": 0.0,
+          "avg_seconds": 128.7
+        },
+        "2024 年三種產品類別都有買過的客戶有幾位？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 97.7
+        },
+        "2023 年和 2024 年都有下過單的客戶共有多少位？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 49.9
+        },
+        "哪些客戶是 2024 年才第一次下單的新客戶？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 70.8
+        },
+        "各區域平均每筆訂單的金額是多少？由高到低排列。": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 47.4
+        },
+        "2024 年 Software 的銷售額中，各區域各占多少百分比？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 82.4
+        },
+        "各區域 2024 年相較 2023 年的銷售額年增率是多少？請由高到低用長條圖比較。": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 75.5
+        },
+        "前十大客戶的銷售額加起來占全部銷售額的百分之幾？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 100.8
+        },
+        "各區域中，數量 10 件以上的大訂單貢獻了多少比例的銷售額？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 0.3333333333333333,
+          "avg_seconds": 181.3
+        },
+        "2023 年和 2024 年各自銷售額最高的是哪個月？金額多少？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 73.1
+        },
+        "哪三個產品 2024 年的平均單價比 2023 年漲最多？各漲了多少？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 92.6
+        },
+        "產品按銷售額由高到低累加，至少要幾個產品才能達到總銷售額的 80%？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 0.3333333333333333,
+          "avg_seconds": 181.7
+        },
+        "有多少位客戶在全部四個區域都下過單？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 48.1
+        },
+        "2023 年每個區域在各產品類別的銷售額分別是多少？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 43.9
+        },
+        "2024 年每個產品類別銷售額最高的月份分別是哪個月？": {
+          "n": 3,
+          "success": 0.0,
+          "timeout": 0.0,
+          "first_try": 0.0,
+          "avg_seconds": 87.8
+        },
+        "Electronics 在 2024 年每一季與 2023 年同一季相比，銷售額成長率各是多少？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 122.5
+        },
+        "星期一到星期日，每一天的總銷售額各是多少？請用長條圖比較。": {
+          "n": 3,
+          "success": 0.6666666666666666,
+          "timeout": 0.0,
+          "first_try": 0.6666666666666666,
+          "avg_seconds": 73.4
+        },
+        "EMEA 在 2024 年銷售額前五大的客戶是誰？他們各下了幾筆訂單？": {
+          "n": 3,
+          "success": 0.3333333333333333,
+          "timeout": 0.0,
+          "first_try": 0.3333333333333333,
+          "avg_seconds": 63.4
+        },
+        "各產品類別平均每筆訂單買幾件？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 70.3
+        },
+        "哪些國家的總銷售額高於所有國家的平均值？": {
+          "n": 3,
+          "success": 0.6666666666666666,
+          "timeout": 0.0,
+          "first_try": 0.6666666666666666,
+          "avg_seconds": 49.5
+        },
+        "2024 年下半年相比上半年，各區域的銷售額成長了多少百分比？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 82.7
+        },
+        "Japan 的銷售額在同一個區域的國家裡排第幾名？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 97.6
+        },
+        "2023 年銷售額第二高的客戶是誰？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 56.5
+        },
+        "2024 年有哪些月份的銷售額超過 2023 年同一個月？": {
+          "n": 3,
+          "success": 0.0,
+          "timeout": 0.0,
+          "first_try": 0.0,
+          "avg_seconds": 129.4
+        },
+        "單價超過 500 的訂單，在各產品類別各有幾筆？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 63.0
+        },
+        "各區域平均每位客戶貢獻多少銷售額？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 60.4
+        },
+        "LATAM 每個國家銷售量最高的產品分別是什麼？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 65.5
+        },
+        "2024 年比 2023 年銷售額增加最多的三個產品是哪些？各增加多少？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 88.5
+        },
+        "Global Summit Solutions 的消費金額中，各產品類別各占多少比例？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 60.4
+        },
+        "2023 到 2024 年間，哪一季的銷售額季增率最高？是多少？": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 0.6666666666666666,
+          "avg_seconds": 201.4
+        }
+      },
       "few_shot": {}
     }
   },
@@ -159,11 +404,11 @@
       "fix": "在 few-shot 範例示範 WITH ... AS MATERIALIZED，前 N 名只算一次。",
       "timing": {
         "plain": {
-          "seconds": 20.0,
-          "finished": false
+          "seconds": 19.522,
+          "finished": true
         },
         "materialized": {
-          "seconds": 0.01,
+          "seconds": 0.008,
           "finished": true
         }
       },
@@ -208,6 +453,137 @@
   ],
   "few_shot": {
     "template": {},
-    "complex": {}
+    "complex": {
+      "每個產品類別裡，銷售量前三名的產品分別是哪些？": {
+        "before": {
+          "n": 3,
+          "success": 0.0,
+          "timeout": 0.0,
+          "first_try": 0.0,
+          "avg_seconds": 76.6
+        },
+        "after": null
+      },
+      "APAC 在 2024 年每個月的銷售額比前一個月成長了多少百分比？": {
+        "before": {
+          "n": 3,
+          "success": 0.0,
+          "timeout": 0.3333333333333333,
+          "first_try": 0.0,
+          "avg_seconds": 212.8
+        },
+        "after": null
+      },
+      "2023 年從一月起逐月累計的銷售額是多少？請用折線圖呈現。": {
+        "before": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 0.3333333333333333,
+          "avg_seconds": 185.2
+        },
+        "after": null
+      },
+      "哪些國家 2024 年的銷售額比 2023 年下滑？各下滑了多少百分比？": {
+        "before": {
+          "n": 3,
+          "success": 0.0,
+          "timeout": 0.0,
+          "first_try": 0.0,
+          "avg_seconds": 128.7
+        },
+        "after": null
+      },
+      "各區域中，數量 10 件以上的大訂單貢獻了多少比例的銷售額？": {
+        "before": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 0.3333333333333333,
+          "avg_seconds": 181.3
+        },
+        "after": null
+      },
+      "產品按銷售額由高到低累加，至少要幾個產品才能達到總銷售額的 80%？": {
+        "before": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 0.3333333333333333,
+          "avg_seconds": 181.7
+        },
+        "after": null
+      },
+      "2024 年每個產品類別銷售額最高的月份分別是哪個月？": {
+        "before": {
+          "n": 3,
+          "success": 0.0,
+          "timeout": 0.0,
+          "first_try": 0.0,
+          "avg_seconds": 87.8
+        },
+        "after": null
+      },
+      "Electronics 在 2024 年每一季與 2023 年同一季相比，銷售額成長率各是多少？": {
+        "before": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 1.0,
+          "avg_seconds": 122.5
+        },
+        "after": null
+      },
+      "星期一到星期日，每一天的總銷售額各是多少？請用長條圖比較。": {
+        "before": {
+          "n": 3,
+          "success": 0.6666666666666666,
+          "timeout": 0.0,
+          "first_try": 0.6666666666666666,
+          "avg_seconds": 73.4
+        },
+        "after": null
+      },
+      "EMEA 在 2024 年銷售額前五大的客戶是誰？他們各下了幾筆訂單？": {
+        "before": {
+          "n": 3,
+          "success": 0.3333333333333333,
+          "timeout": 0.0,
+          "first_try": 0.3333333333333333,
+          "avg_seconds": 63.4
+        },
+        "after": null
+      },
+      "哪些國家的總銷售額高於所有國家的平均值？": {
+        "before": {
+          "n": 3,
+          "success": 0.6666666666666666,
+          "timeout": 0.0,
+          "first_try": 0.6666666666666666,
+          "avg_seconds": 49.5
+        },
+        "after": null
+      },
+      "2024 年有哪些月份的銷售額超過 2023 年同一個月？": {
+        "before": {
+          "n": 3,
+          "success": 0.0,
+          "timeout": 0.0,
+          "first_try": 0.0,
+          "avg_seconds": 129.4
+        },
+        "after": null
+      },
+      "2023 到 2024 年間，哪一季的銷售額季增率最高？是多少？": {
+        "before": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": 0.6666666666666666,
+          "avg_seconds": 201.4
+        },
+        "after": null
+      }
+    }
   }
 }
