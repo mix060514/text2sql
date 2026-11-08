@@ -8,8 +8,10 @@ ARCHITECTURE_SVG = ROOT / "docs" / "architecture.svg"
 sys.path.insert(0, str(ROOT / "src"))
 from text2sql.config import ANALYSIS_MODEL
 
-REPO_URL = "https://github.com/mix060514/text2sql"
-DOCS_URL = f"{REPO_URL}/blob/codex/text2sql-unified/docs"
+REPO = "https://github.com/mix060514/text2sql"
+BRANCH = "codex/text2sql-unified"  # master is the old implementation
+REPO_URL = f"{REPO}/tree/{BRANCH}"
+DOCS_URL = f"{REPO}/blob/{BRANCH}/docs"
 
 st.title("🤖 Text2SQL：用中文問銷售資料")
 st.markdown(f"""
