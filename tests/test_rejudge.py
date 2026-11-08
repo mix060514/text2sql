@@ -111,3 +111,26 @@ class SyntheticSubsetTests(unittest.TestCase):
         self.assertEqual(pick("template"), ["A-1"])
         self.assertEqual(pick("block"), ["B01"])
         self.assertEqual(pick(None), ["A-1", "X-region", "B01"])
+
+
+class EffortFieldTests(unittest.IsolatedAsyncioTestCase):
+    async def test_records_seconds_and_sql_attempts(self):
+        state = {"workflow_status": "completed", "sql_query": "SELECT 1", "raw_query_result": [[1]],
+                 "final_answer": "1", "workflow_trace": [{"name": "agent_sql"}, {"name": "step_run_sql"},
+                                                          {"name": "step_run_sql"}]}
+
+        async def fake_run(runner, prompt, user_id="eval_user"):
+            return state
+
+        async def fake_judge(*args, **kwargs):
+            return True, 10, "ok"
+
+        with patch.object(eval_e2e, "run_agent_and_get_state", fake_run), \
+                patch.object(eval_e2e, "judge_sql_result", fake_judge):
+            r = await eval_e2e.evaluate_single({"question": "q", "ground_truth": 1})
+        self.assertEqual(r.sql_attempts, 2)
+        self.assertGreaterEqual(r.seconds, 0.0)
+
+    def test_old_rows_without_effort_fields_still_load(self):
+        old = row("q", "fine", correct=True)
+        self.assertEqual(eval_e2e.E2EResult(**old).sql_attempts, 0)

@@ -80,6 +80,10 @@ class E2EResult:
     # Overall
     e2e_success: bool  # True if all components passed
 
+    # Effort (defaults keep older result files loadable)
+    seconds: float = 0.0  # wall time of workflow + judge
+    sql_attempts: int = 0  # step_run_sql executions; 1 = solved on the first SQL
+
 
 @dataclass
 class E2EMetrics:
@@ -256,7 +260,14 @@ def validate_plotly_json(chart_json_str: str, expected_plot: dict) -> dict:
 
 
 async def evaluate_single(entry: Dict, timeout: int = 300) -> E2EResult:
-    """Evaluate a single test case end-to-end."""
+    """Evaluate a single test case end-to-end and record how long it took."""
+    started = time.monotonic()
+    result = await _evaluate_single(entry, timeout)
+    result.seconds = round(time.monotonic() - started, 1)
+    return result
+
+
+async def _evaluate_single(entry: Dict, timeout: int = 300) -> E2EResult:
     question = entry["question"]
     ground_truth = entry.get("ground_truth")
     eval_type = entry.get("eval_type", "unknown")
@@ -364,6 +375,7 @@ async def evaluate_single(entry: Dict, timeout: int = 300) -> E2EResult:
             x_order_correct=x_order_correct,
             trace_count_correct=trace_count_correct,
             e2e_success=e2e_success,
+            sql_attempts=sum(1 for e in state.get("workflow_trace") or [] if e.get("name") == "step_run_sql"),
         )
 
     except asyncio.TimeoutError:
@@ -708,12 +720,14 @@ async def run_synthetic(run_dir=None, limit=None, label=None, reuse=True, timeou
             result = reused[item["id"]]
             print(f"🟢 reused ({result['reused_from']})")
         else:
+            started = time.monotonic()
             try:
                 state = await asyncio.wait_for(run_agent_and_get_state(eval_runner, item["question"]), timeout=timeout)
                 result = synthetic.grade_state(item, state)
             except Exception as exc:  # timeout or runtime error: a failed case, not a crash
                 result = {"passed": False, "reason": f"{type(exc).__name__}: {str(exc)[:200]}",
                           "workflow_status": "error"}
+            result["seconds"] = round(time.monotonic() - started, 1)
             print(("🟢 " if result["passed"] else "🔴 ") + result["reason"])
         records.append({"id": item["id"], "question": item["question"], "label": item["label"],
                         "subset": synthetic.subset_of(item),
