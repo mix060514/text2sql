@@ -65,3 +65,21 @@ class RejudgeTests(unittest.IsolatedAsyncioTestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class XOrderTests(unittest.TestCase):
+    """Q101-Q105: chart x was 2023-Q1.. (project convention YYYY-Qn), eval set wrote 2023 Q1.."""
+
+    def check(self, x, expected):
+        chart = {"data": [{"type": "scatter", "x": x, "y": [1] * len(x)}]}
+        plot = {"should_plot": True, "chart_type": "line", "expected_x_order": expected, "expected_traces": 1}
+        return eval_e2e.validate_plotly_json(json.dumps(chart), plot)["x_order_correct"]
+
+    def test_quarter_label_separator_is_ignored(self):
+        self.assertTrue(self.check(["2023-Q1", "2023-Q2", "2024-Q1"], ["2023 Q1", "2023 Q2", "2024 Q1"]))
+
+    def test_wrong_order_still_fails(self):
+        self.assertFalse(self.check(["2023-Q2", "2023-Q1"], ["2023 Q1", "2023 Q2"]))
+
+    def test_different_labels_still_fail(self):
+        self.assertFalse(self.check(["2023-01", "2023-02"], ["2023 Q1", "2023 Q2"]))

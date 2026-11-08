@@ -14,6 +14,7 @@ Usage:
 """
 
 import json
+import re
 import pathlib
 import sys
 import os
@@ -226,7 +227,10 @@ def validate_plotly_json(chart_json_str: str, expected_plot: dict) -> dict:
         actual_x = [str(v) for v in traces[0].get("x", [])] if traces else []
 
     if expected_x:
-        x_order_correct = actual_x == [str(v) for v in expected_x]
+        # Separators are formatting, not order: the project labels multi-year quarters
+        # YYYY-Qn while eval_set_v3 wrote "YYYY Qn" (Q101-Q105).
+        norm = lambda v: re.sub(r"[\s\-_/]", "", str(v)).upper()
+        x_order_correct = [norm(v) for v in actual_x] == [norm(v) for v in expected_x]
     else:
         x_order_correct = True
 
