@@ -8,8 +8,8 @@ project_root = pathlib.Path(__file__).parent.parent.parent.resolve()
 results_dir = project_root / "eval" / "results"
 eval_set_path = project_root / "data" / "eval_set_v3.jsonl"
 
-st.set_page_config(page_title="Evaluation Results", page_icon="📊", layout="wide")
-st.title("📊 Evaluation Results Viewer")
+st.set_page_config(page_title="評估結果", page_icon="📊", layout="wide")
+st.title("📊 評估結果")
 
 # eval/eval_e2e.py writes <run>/e2e_results.json (+ e2e_summary.json); the older eval/eval.py
 # wrote <run>/eval_results.json. List current e2e runs first, newest first, then legacy ones.
@@ -17,45 +17,47 @@ E2E, LEGACY = "e2e", "legacy"
 runs = sorted(
     [(p, E2E) for p in results_dir.glob("*/e2e_results.json")],
     key=lambda r: r[0].parent.name, reverse=True,
-) + sorted(
-    [(p, LEGACY) for p in results_dir.glob("*/eval_results.json")],
-    key=lambda r: r[0].parent.name, reverse=True,
 )
+if st.sidebar.checkbox("顯示舊版評估", help="舊資料庫與舊題庫的結果，數字不能與目前的評估直接比較。"):
+    runs += sorted(
+        [(p, LEGACY) for p in results_dir.glob("*/eval_results.json")],
+        key=lambda r: r[0].parent.name, reverse=True,
+    )
 
 if not runs:
-    st.warning("No evaluation results found in `eval/results/`.")
+    st.warning("目前沒有評估結果。")
     st.stop()
 
-labels = {(p.parent.name if k == E2E else f"[legacy] {p.parent.name}"): (p, k) for p, k in runs}
-selected_file, kind = labels[st.sidebar.selectbox("Select Evaluation Run", list(labels))]
+labels = {(p.parent.name if k == E2E else f"[舊版] {p.parent.name}"): (p, k) for p, k in runs}
+selected_file, kind = labels[st.sidebar.selectbox("選擇評估批次", list(labels))]
 
 data = json.loads(selected_file.read_text(encoding="utf-8"))
 if not data:
-    st.error("Selected file is empty.")
+    st.error("這個評估批次沒有資料。")
     st.stop()
 
 
 def show_legacy(data):
-    st.caption("Legacy eval.py run (older database / eval set); not comparable with e2e runs.")
+    st.caption("舊版評估（舊資料庫與舊題庫），不能與目前的評估直接比較。")
     df = pd.DataFrame(data)
-    st.metric(label="Total Questions", value=len(df))
-    st.metric(label="Average Judge Score", value=f"{df['llm_judge_score'].mean():.2f} / 10")
+    st.metric(label="題數", value=len(df))
+    st.metric(label="LLM 評審平均分數", value=f"{df['llm_judge_score'].mean():.2f} / 10")
     st.divider()
-    st.subheader("Detailed Results")
+    st.subheader("逐題結果")
     for index, row in df.iterrows():
-        with st.expander(f"Q{index+1}: {row['question'][:80]}... (Score: {row['llm_judge_score']})"):
+        with st.expander(f"Q{index+1}: {row['question'][:80]}...（評審 {row['llm_judge_score']}）"):
             col1, col2 = st.columns(2)
             with col1:
-                st.markdown("**Expected Result:**")
+                st.markdown("**標準答案：**")
                 st.code(json.dumps(row["expected"], ensure_ascii=False, indent=2), language="json")
-                st.markdown("**Agent Answer:**")
+                st.markdown("**系統回答：**")
                 st.write(row["final_answer"])
-                st.markdown("**SQL Query:**")
+                st.markdown("**SQL：**")
                 st.code(row["sql_query"], language="sql")
             with col2:
-                st.markdown("**Judge Reasoning:**")
+                st.markdown("**評審理由：**")
                 st.info(row["llm_judge_reasoning"])
-                st.markdown("**Execution Result:**")
+                st.markdown("**查詢結果：**")
                 st.code(str(row["execute_result"]), language="json")
 
 
@@ -66,34 +68,59 @@ def load_ground_truth():
     return {r["question"]: r.get("ground_truth") for r in rows}
 
 
+DIFFICULTY = {"simple": "簡單", "medium": "中等", "hard": "困難"}
+CHART = {"bar": "長條圖", "line": "折線圖", "pie": "圓餅圖", "table": "表格"}
+chart_name = lambda should, kind: CHART.get(kind, kind) if should else "不畫圖"
+
+
 def show_e2e(data, summary_path):
     summary = json.loads(summary_path.read_text(encoding="utf-8")) if summary_path.exists() else {}
     meta = summary.get("run_metadata", {})
     if meta:
-        st.caption(f"model `{meta.get('model')}` · workflow `{meta.get('workflow')}` · "
-                   f"dataset `{meta.get('dataset')}` · {summary.get('timestamp', '')}")
+        model = str(meta.get("model", ""))
+        model = model.split("/", 1)[1] if model.startswith("openai/") else model
+        st.caption(f"模型 `{model}` · 流程 `{meta.get('workflow')}` · "
+                   f"題庫 `{meta.get('dataset')}` · {summary.get('timestamp', '')}")
 
     df = pd.DataFrame(data)
     rate = lambda col: f"{df[col].mean():.1%}" if col in df else "–"
     cols = st.columns(4)
-    cols[0].metric("Total Questions", len(df))
-    cols[1].metric("E2E Success", rate("e2e_success"))
-    cols[2].metric("SQL Correct (judge)", rate("sql_correct"))
+    cols[0].metric("題數", len(df))
+    cols[1].metric("整題答對", rate("e2e_success"))
+    cols[2].metric("SQL 正確（LLM 評審）", rate("sql_correct"))
     plotted = df[df["has_expected_plot"]] if "has_expected_plot" in df else df.iloc[0:0]
-    cols[3].metric("Plot Decision Correct",
-                   f"{plotted['plot_decision_correct'].mean():.1%}" if len(plotted) else "–")
-    st.caption("SQL correctness comes from an LLM judge, which can mis-score; "
-               "check failures against the expected result before trusting the rate.")
+    cols[3].metric("畫圖判斷正確", f"{plotted['plot_decision_correct'].mean():.1%}" if len(plotted) else "–")
+
+    # Two shapes: the eval's own per-question deadline (sql_query == "TIMEOUT") and a model
+    # request timeout surfaced as workflow_error {'code': 'Timeout', ...} in sql_reasoning.
+    timed_out = pd.Series(False, index=df.index)
+    if "sql_query" in df:
+        timed_out |= df["sql_query"].eq("TIMEOUT")
+    if "sql_reasoning" in df:
+        timed_out |= df["sql_reasoning"].astype(str).str.contains("'code': 'Timeout'", regex=False)
+    timeouts = int(timed_out.sum())
+    with st.expander("指標怎麼算", expanded=True):
+        st.markdown(f"""
+- **題庫**：132 題模板考卷，題目由 17 個題型填入地區、產品等產生，標準答案用 pandas 從原始資料計算，
+  與問答系統寫的 SQL 是兩條獨立路徑。其中 54 題只是同一個地區換不同叫法（例如 EMEA／歐非中東）。
+- **SQL 正確**：由另一個 LLM 評審比對查詢結果與標準答案，給 0–10 分。LLM 評審可能誤判，
+  失敗題請展開對照「標準答案」與「查詢結果」再下結論。
+- **畫圖判斷正確**：只計算有標註預期圖表的題目，比對該不該畫圖以及圖表類型。
+- **整題答對**：SQL 正確，且（有預期圖表時）畫圖判斷、圖表類型、X 軸順序與資料序列數都正確。
+- 每題有執行時間上限，逾時算答錯；這個批次有 {timeouts} 題逾時（含模型請求逾時）。
+""")
 
     if {"difficulty", "e2e_success"} <= set(df.columns):
-        st.dataframe(
-            df.groupby("difficulty")["e2e_success"].agg(["count", "mean"])
-              .rename(columns={"count": "questions", "mean": "e2e success"}),
-        )
+        by_level = (df.groupby("difficulty")["e2e_success"].agg(["count", "mean"])
+                      .reindex([k for k in DIFFICULTY if k in set(df["difficulty"])]))
+        by_level.index = [DIFFICULTY[k] for k in by_level.index]
+        by_level.index.name = "難度"
+        by_level["mean"] = by_level["mean"].map("{:.1%}".format)
+        st.dataframe(by_level.rename(columns={"count": "題數", "mean": "整題答對"}))
 
     st.divider()
-    st.subheader("Detailed Results")
-    only_failed = st.checkbox("Show failures only")
+    st.subheader("逐題結果")
+    only_failed = st.checkbox("只看答錯的題目")
     truth = load_ground_truth() if meta.get("dataset", "eval_set_v3.jsonl") == "eval_set_v3.jsonl" else {}
 
     for index, row in df.iterrows():
@@ -101,25 +128,25 @@ def show_e2e(data, summary_path):
         if only_failed and ok:
             continue
         mark = "✅" if ok else "❌"
-        with st.expander(f"{mark} Q{index+1}: {row['question'][:80]} (judge {row.get('sql_score')}/10)"):
+        with st.expander(f"{mark} Q{index+1}: {row['question'][:80]}（評審 {row.get('sql_score')}/10）"):
             col1, col2 = st.columns(2)
             with col1:
                 if row["question"] in truth:
-                    st.markdown("**Expected Result:**")
+                    st.markdown("**標準答案：**")
                     st.code(json.dumps(truth[row["question"]], ensure_ascii=False, indent=2), language="json")
-                st.markdown("**Agent Answer:**")
+                st.markdown("**系統回答：**")
                 st.write(row.get("answer"))
-                st.markdown("**SQL Query:**")
+                st.markdown("**SQL：**")
                 st.code(row.get("sql_query") or "", language="sql")
             with col2:
-                st.markdown("**Judge Reasoning:**")
+                st.markdown("**評審理由：**")
                 st.info(row.get("sql_reasoning") or "")
                 if row.get("has_expected_plot"):
                     st.markdown(
-                        f"**Plot:** expected `{row.get('expected_chart_type') if row.get('expected_should_plot') else 'no plot'}`, "
-                        f"actual `{row.get('actual_chart_type') if row.get('actual_should_plot') else 'no plot'}`"
+                        f"**圖表：** 預期 `{chart_name(row.get('expected_should_plot'), row.get('expected_chart_type'))}`，"
+                        f"實際 `{chart_name(row.get('actual_should_plot'), row.get('actual_chart_type'))}`"
                     )
-                st.markdown("**SQL Result:**")
+                st.markdown("**查詢結果：**")
                 st.code(json.dumps(row.get("sql_result"), ensure_ascii=False, default=str)[:3000], language="json")
 
 

@@ -71,7 +71,6 @@ td,th{border:1px solid var(--line);padding:2px 6px;text-align:left}
 <div class="legend">
   <span><i class="sw" style="background:var(--agent);border-color:var(--agent-b);border-radius:8px"></i>agent_：LLM 判斷</span>
   <span><i class="sw" style="background:var(--step);border-color:var(--step-b)"></i>step_：程式，一定執行</span>
-  <span><i class="sw" style="background:var(--tool);border-color:var(--tool-b);border-style:dashed"></i>tool_：模型自己呼叫</span>
   <span><i class="dot" style="background:var(--ok)"></i>通過</span>
   <span><i class="dot" style="background:var(--bad)"></i>錯誤／拒絕</span>
   <span><i class="dot" style="background:var(--run)"></i>執行中</span>

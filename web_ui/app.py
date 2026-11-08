@@ -1,7 +1,7 @@
 """Streamlit entrypoint: declares the sidebar pages with Traditional Chinese labels."""
 import streamlit as st
 
-st.set_page_config(page_title="Text2SQL Agent", page_icon="🤖", layout="wide",
+st.set_page_config(page_title="Text2SQL", page_icon="🤖", layout="wide",
                    initial_sidebar_state="expanded")
 
 st.navigation([

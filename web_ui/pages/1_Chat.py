@@ -23,10 +23,11 @@ try:
     from text2sql.config import BACKEND
     from flow_view import render_flow
 except ImportError as e:
-    st.error(f"Failed to import agent or dependencies: {e}")
+    st.error("服務暫時無法啟動，請稍後再試。")
+    print(f"chat page import failed: {e}", file=sys.stderr)
     st.stop()
 
-st.set_page_config(page_title="Chat with Agent", page_icon="💬", layout="wide")
+st.set_page_config(page_title="對話查詢", page_icon="💬", layout="wide")
 
 # Initialize Session State
 if "messages" not in st.session_state:
@@ -82,13 +83,14 @@ SUGGESTED_QUESTIONS = [
 ]
 
 selected_suggestion = st.sidebar.selectbox(
-    "Suggested Questions", [""] + SUGGESTED_QUESTIONS
+    "範例問題", [""] + SUGGESTED_QUESTIONS
 )
-send_suggestion = st.sidebar.button("Send Suggestion")
+send_suggestion = st.sidebar.button("送出範例問題")
 
 # Display Messages
 st.info(
-    "👋 歡迎使用 *資料庫查詢助手*！請在下方輸入您的問題，我會幫您查詢資料庫回答您問題。"
+    "👋 用中文詢問 2023–2024 年的全球銷售資料（地區、國家、產品、客戶、銷售額）。"
+    "可在下方輸入問題，或從左側選一題範例。月趨勢等較複雜的問題約需 1–2 分鐘。"
 )
 
 for i, msg in enumerate(st.session_state.messages):
@@ -100,13 +102,13 @@ for i, msg in enumerate(st.session_state.messages):
                 fig = pio.from_json(msg["chart_json"])
                 st.plotly_chart(fig, use_container_width=True, key=f"history_chart_{i}")
             except Exception as e:
-                st.error(f"Failed to render chart: {e}")
+                st.error("圖表無法顯示。")
         if msg.get("workflow_trace"):
             with st.expander(FLOW_TITLE):
                 render_flow(msg["workflow_trace"], msg.get("backend", BACKEND))
 
 # Chat Input
-chat_prompt = st.chat_input("Ask a question...")
+chat_prompt = st.chat_input("輸入問題，例如：EMEA 的總銷售額是多少？")
 
 prompt = None
 if chat_prompt:
@@ -153,11 +155,11 @@ if prompt:
                 session_id=st.session_state.session_id,
             )
             if not session:
-                return "No session found.", None, []
+                return "這次分析未能完成，請稍後重試。", None, []
             response_text = (
                 session.state.get("final_answer")
                 or session.state.get("answer")
-                or "No answer generated."
+                or "這次分析未能完成，請稍後重試。"
             )
             return (response_text, session.state.get("chart_json"),
                     session.state.get("workflow_trace") or [])
@@ -171,7 +173,7 @@ if prompt:
                 fig = pio.from_json(chart_json)
                 chart_placeholder.plotly_chart(fig, use_container_width=True, key="latest_chart")
             except Exception as e:
-                chart_placeholder.error(f"Failed to render chart: {e}")
+                chart_placeholder.error("圖表無法顯示。")
 
         if trace:
             show_flow(trace, expanded=True)
