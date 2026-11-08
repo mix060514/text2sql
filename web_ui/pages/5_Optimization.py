@@ -1,0 +1,128 @@
+"""優化成果: what was hard, why, what changed, and the measured before/after numbers.
+
+All numbers come from docs/optimization/report.json, built by
+scripts/build_optimization_report.py from evaluation result files.
+"""
+
+import json
+import pathlib
+
+import pandas as pd
+import streamlit as st
+
+project_root = pathlib.Path(__file__).parent.parent.parent.resolve()
+report_path = project_root / "docs" / "optimization" / "report.json"
+
+st.set_page_config(page_title="優化成果", page_icon="🛠️", layout="wide")
+st.title("🛠️ 優化成果")
+
+if not report_path.exists():
+    st.info("還沒有優化報告。")
+    st.stop()
+report = json.loads(report_path.read_text(encoding="utf-8"))
+
+pct = lambda v: "–" if v is None else f"{v:.0%}"
+sec = lambda v: "–" if v is None else f"{v:.0f} 秒"
+
+
+def delta(before, after, key, fmt, better="up"):
+    if not before or not after or before.get(key) is None or after.get(key) is None:
+        return None
+    d = after[key] - before[key]
+    text = (f"{d:+.0%}" if fmt == "pct" else f"{d:+.0f} 秒")
+    return text
+
+
+def metric_row(before, after, labels=("成功率", "逾時率", "平均耗時")):
+    cols = st.columns(len(labels))
+    spec = {"成功率": ("success", "pct", "normal"), "逾時率": ("timeout", "pct", "inverse"),
+            "平均耗時": ("avg_seconds", "sec", "inverse"), "一次解決率": ("first_try", "pct", "normal")}
+    for col, label in zip(cols, labels):
+        key, fmt, color = spec[label]
+        value = (after or {}).get(key)
+        shown = pct(value) if fmt == "pct" else sec(value)
+        before_v = (before or {}).get(key)
+        help_text = f"優化前：{pct(before_v) if fmt == 'pct' else sec(before_v)}"
+        col.metric(label, shown, delta(before, after, key, fmt), delta_color=color, help=help_text)
+
+
+st.markdown(
+    "本頁整理問答系統在本機 27B 模型上**難以一次解決的題型**、找到的根本原因、做了什麼修改，"
+    "以及修改前後的實測數字。所有數字由評估結果檔案自動計算"
+    "（`scripts/build_optimization_report.py`），不是手動填寫。"
+)
+
+# ---- Overview ---------------------------------------------------------------------------
+overall = report["overall"]["template"]
+st.subheader("模板題整體（132 題）")
+stages = [("2026-11-07 第一次完整評估", overall.get("2026-11-07")),
+          ("基礎設施與評分修正後", overall.get("baseline")),
+          ("加入 few-shot 後", overall.get("few_shot"))]
+table = pd.DataFrame([
+    {"階段": name, "成功率": pct(s["success"]), "逾時率": pct(s["timeout"]),
+     "一次解決率": pct(s["first_try"]), "平均耗時": sec(s["avg_seconds"])}
+    for name, s in stages if s
+])
+st.dataframe(table, hide_index=True, width="stretch")
+st.caption("成功率＝SQL 結果正確且圖表檢查通過；一次解決率＝第一次寫出的 SQL 就成功（不需重試）；"
+           "平均耗時含 LLM 評審。2026-11-07 的評估當時尚未記錄耗時與重試次數。")
+
+# ---- Cases ------------------------------------------------------------------------------
+st.divider()
+st.subheader("優化案例")
+for case in report["cases"]:
+    with st.container(border=True):
+        st.markdown(f"#### {case['title']}")
+        st.caption(f"範圍：{case.get('scope', '')}")
+        c1, c2, c3 = st.columns(3)
+        c1.markdown(f"**問題**\n\n{case['problem']}")
+        c2.markdown(f"**根本原因**\n\n{case['cause']}")
+        c3.markdown(f"**修改**\n\n{case['fix']}")
+        if case.get("metrics"):
+            m = case["metrics"]
+            if m.get("after"):
+                st.markdown(f"**修改前 → 修改後**（{m['before']['n']} 題）")
+                labels = case.get("labels") or (
+                    ("成功率", "逾時率", "平均耗時") if m["after"].get("avg_seconds") else ("成功率", "逾時率"))
+                metric_row(m["before"], m["after"], labels)
+            else:
+                st.caption("修改後的數據將在下一次完整評估後更新。")
+        if case.get("timing"):
+            t = case["timing"]
+            plain = t["plain"]
+            plain_text = f"{plain['seconds']:.0f} 秒仍未完成" if not plain["finished"] else f"{plain['seconds']:.2f} 秒"
+            cols = st.columns(2)
+            cols[0].metric("一般 CTE", plain_text)
+            cols[1].metric("AS MATERIALIZED", f"{t['materialized']['seconds']:.2f} 秒")
+
+# ---- Few-shot ---------------------------------------------------------------------------
+st.divider()
+st.subheader("Few-shot：難題型加入同類範例")
+st.markdown(
+    "以「基礎設施與評分修正後」的評估為基準，找出**有失敗、需要重試或平均超過 120 秒**的題型，"
+    "為它們各寫一個**同題型、不同內容**的範例（例如考題問 LATAM，範例用 Japan；考題問前五大，範例用前三大），"
+    "範例題目不在任何評估集中（有自動測試檢查），只示範做法，不提供答案。"
+)
+
+
+def few_shot_table(rows: dict, name: str):
+    if not rows:
+        st.caption(f"{name}：基準評估完成後更新。")
+        return
+    data = []
+    for t, m in rows.items():
+        b, a = m["before"] or {}, m["after"] or {}
+        data.append({"題型": t, "題數": b.get("n"),
+                     "成功率（前→後）": f"{pct(b.get('success'))} → {pct(a.get('success'))}",
+                     "一次解決率（前→後）": f"{pct(b.get('first_try'))} → {pct(a.get('first_try'))}",
+                     "逾時率（前→後）": f"{pct(b.get('timeout'))} → {pct(a.get('timeout'))}",
+                     "平均耗時（前→後）": f"{sec(b.get('avg_seconds'))} → {sec(a.get('avg_seconds'))}"})
+    st.markdown(f"**{name}**")
+    st.dataframe(pd.DataFrame(data), hide_index=True, width="stretch")
+
+
+few = report.get("few_shot", {})
+few_shot_table(few.get("template"), "模板題")
+few_shot_table(few.get("complex"), "複雜題（34 種 SQL-first 題型，每種含原題與 2 個改寫）")
+
+st.caption(f"報告產生時間：{report.get('generated_at', '')}")

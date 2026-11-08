@@ -1,0 +1,213 @@
+{
+  "generated_at": "2026-11-08 09:19:22",
+  "overall": {
+    "template": {
+      "2026-11-07": {
+        "n": 132,
+        "success": 0.6590909090909091,
+        "timeout": 0.13636363636363635,
+        "first_try": null,
+        "avg_seconds": null
+      },
+      "baseline": null,
+      "few_shot": null
+    },
+    "complex": {
+      "baseline": null,
+      "few_shot": null
+    }
+  },
+  "by_type": {
+    "template": {
+      "2026-11-07": {
+        "彙總查詢": {
+          "n": 37,
+          "success": 0.6486486486486487,
+          "timeout": 0.0,
+          "first_try": null,
+          "avg_seconds": null
+        },
+        "排名／最高": {
+          "n": 39,
+          "success": 0.8974358974358975,
+          "timeout": 0.0,
+          "first_try": null,
+          "avg_seconds": null
+        },
+        "年度總計": {
+          "n": 3,
+          "success": 1.0,
+          "timeout": 0.0,
+          "first_try": null,
+          "avg_seconds": null
+        },
+        "季度彙總": {
+          "n": 4,
+          "success": 0.75,
+          "timeout": 0.0,
+          "first_try": null,
+          "avg_seconds": null
+        },
+        "年增率／同期比較": {
+          "n": 8,
+          "success": 0.75,
+          "timeout": 0.0,
+          "first_try": null,
+          "avg_seconds": null
+        },
+        "跨年逐月趨勢": {
+          "n": 23,
+          "success": 0.43478260869565216,
+          "timeout": 0.5652173913043478,
+          "first_try": null,
+          "avg_seconds": null
+        },
+        "前 N 大客戶的類別占比": {
+          "n": 4,
+          "success": 0.0,
+          "timeout": 1.0,
+          "first_try": null,
+          "avg_seconds": null
+        },
+        "客戶跨年變動": {
+          "n": 1,
+          "success": 0.0,
+          "timeout": 1.0,
+          "first_try": null,
+          "avg_seconds": null
+        },
+        "跨年逐季趨勢": {
+          "n": 5,
+          "success": 0.0,
+          "timeout": 0.0,
+          "first_try": null,
+          "avg_seconds": null
+        },
+        "占比": {
+          "n": 8,
+          "success": 0.75,
+          "timeout": 0.0,
+          "first_try": null,
+          "avg_seconds": null
+        }
+      },
+      "baseline": {},
+      "few_shot": {}
+    },
+    "complex": {
+      "baseline": {},
+      "few_shot": {}
+    }
+  },
+  "cases": [
+    {
+      "id": "streaming",
+      "title": "模型請求逾時連鎖失敗",
+      "problem": "兩年逐月趨勢、前五大客戶等 18 題在 120 秒內等不到模型回覆，全部失敗；失敗還會一題接一題連續發生。",
+      "cause": "模型思考沒有上限，常想到 4,096 tokens 才停；用一般（非串流）請求時，程式放棄後 llama.cpp 仍把那個沒人要的回答生完，佔住唯一的推論槽，後面排隊的請求跟著逾時。",
+      "fix": "寫 SQL 與審查加上思考上限（2,048／1,024 tokens），寫報告關閉思考；請求改用串流並設總時限，逾時就關閉連線，llama.cpp 立即釋放推論槽。",
+      "metrics": {
+        "before": {
+          "n": 18,
+          "success": 0.0,
+          "timeout": 1.0,
+          "first_try": null,
+          "avg_seconds": null
+        },
+        "after": {
+          "n": 18,
+          "success": 0.6666666666666666,
+          "timeout": 0.2222222222222222,
+          "first_try": null,
+          "avg_seconds": 201.5
+        }
+      },
+      "scope": "2026-11-07 逾時的 18 題，修正後逐題重跑"
+    },
+    {
+      "id": "judge",
+      "title": "LLM 評審連鎖失敗",
+      "problem": "20 題的回答其實正確，卻因評審沒有回傳結果被記為 0 分。",
+      "cause": "評審用的是沒有時限、不串流的模型呼叫，一次逾時就留下幽靈請求，後面的評審請求連續失敗（兩串，各 8 題與 12 題）。",
+      "fix": "評審改用同一套有思考上限的串流模型，並新增 --rejudge 只重評失敗題、保留原答案。",
+      "metrics": {
+        "before": {
+          "n": 20,
+          "success": 0.0,
+          "timeout": 0.0,
+          "first_try": null,
+          "avg_seconds": null
+        },
+        "after": {
+          "n": 20,
+          "success": 0.95,
+          "timeout": 0.0,
+          "first_try": null,
+          "avg_seconds": null
+        }
+      },
+      "scope": "評審沒有回傳結果的題目",
+      "labels": [
+        "成功率"
+      ]
+    },
+    {
+      "id": "materialized",
+      "title": "前 N 名 CTE 查詢被 5 秒上限擋下",
+      "problem": "「前五大客戶各類別占比」第一次寫出的 SQL 常被資料庫 5 秒上限中斷，只能整個重寫，多花 1 到 2 分鐘。",
+      "cause": "帶 LIMIT 的 CTE 再 JOIN 回明細時，SQLite 以 co-routine 執行，明細每一列都重算一次前 N 名。",
+      "fix": "在 few-shot 範例示範 WITH ... AS MATERIALIZED，前 N 名只算一次。",
+      "timing": {
+        "plain": {
+          "seconds": 20.0,
+          "finished": false
+        },
+        "materialized": {
+          "seconds": 0.01,
+          "finished": true
+        }
+      },
+      "scope": "同一句查詢在正式資料庫上實測"
+    },
+    {
+      "id": "quarter",
+      "title": "月份被當成季度",
+      "problem": "「2023 年各季度的銷售額」把 1、2、3 月當成 Q1、Q2、Q3，其餘月份全算 Q4；審查也沒抓到。",
+      "cause": "提示只規定季度標籤格式，沒有寫月份怎麼對應季度。",
+      "fix": "提示寫明季度公式 (月份 + 2) / 3，並有測試用標準答案驗證公式。",
+      "metrics": {
+        "before": {
+          "n": 1,
+          "success": 0.0,
+          "timeout": 0.0,
+          "first_try": null,
+          "avg_seconds": null
+        },
+        "after": null
+      },
+      "scope": "Q94"
+    },
+    {
+      "id": "grading",
+      "title": "評分規則誤判正確答案",
+      "problem": "跨年季度趨勢 5 題與指定圓餅圖 1 題，答案正確卻被判錯。",
+      "cause": "X 軸 2023-Q1（專案規範）與題庫的 2023 Q1 只差分隔符號就判順序錯；評審看不到圖，因此以「沒附圓餅圖」扣分。",
+      "fix": "比對 X 軸順序時忽略分隔符號（順序仍嚴格比對）；評審提示註明圖表另由程式檢查。",
+      "metrics": {
+        "before": {
+          "n": 6,
+          "success": 0.0,
+          "timeout": 0.0,
+          "first_try": null,
+          "avg_seconds": null
+        },
+        "after": null
+      },
+      "scope": "Q101–Q105、Q110"
+    }
+  ],
+  "few_shot": {
+    "template": {},
+    "complex": {}
+  }
+}

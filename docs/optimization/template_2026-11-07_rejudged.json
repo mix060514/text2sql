@@ -1,0 +1,4984 @@
+[
+  {
+    "question": "EMEA 的總銷售額是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") FROM sales_data WHERE \"Region\" = 'EMEA';",
+    "sql_result": [
+      [
+        31087500.6
+      ]
+    ],
+    "answer": "EMEA 的總銷售額為 31,087,500.60（約 31.09M）。\n\n| SUM(\"Total Revenue\")   |\n|:-----------------------|\n| 31,087,500.60          |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 回答的數值 31,087,500.60 與預期答案 31087500.6 完全一致，且完整回應了問題，格式清晰。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "歐洲中東非洲 的總銷售額是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") FROM sales_data WHERE \"Region\" = 'EMEA';",
+    "sql_result": [
+      [
+        31087500.6
+      ]
+    ],
+    "answer": "歐洲中東非洲（EMEA）的總銷售額為 31,087,500.60，約 31.09M。\n\n| SUM(\"Total Revenue\")   |\n|:-----------------------|\n| 31,087,500.60          |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案及 SQL 執行結果完全一致，數值正確且包含完整單位與簡潔說明。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "歐非中東 的總銷售額是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") FROM sales_data WHERE \"Region\" = 'EMEA';",
+    "sql_result": [
+      [
+        31087500.6
+      ]
+    ],
+    "answer": "歐非中東（EMEA）的總銷售額為 31,087,500.60（約 31.09M）。\n\n| SUM(\"Total Revenue\")   |\n|:-----------------------|\n| 31,087,500.60          |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 回答的總銷售額 31,087,500.60 與預期答案 31087500.6 在語意上完全一致，僅格式呈現差異，且完整回答了問題。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "Europe, Middle East, and Africa 的總銷售額是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") FROM sales_data WHERE \"Region\" = 'EMEA';",
+    "sql_result": [
+      [
+        31087500.6
+      ]
+    ],
+    "answer": "EMEA（Europe, Middle East, and Africa）的總銷售額為 31,087,500.60，約 31.09M。\n\n| SUM(\"Total Revenue\")   |\n|:-----------------------|\n| 31,087,500.60          |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案語意一致，數值 31,087,500.60 等同 31087500.6，格式差異不影響理解，且完整回答問題。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "North America 的總銷售額是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") FROM sales_data WHERE \"Region\" = 'North America';",
+    "sql_result": [
+      [
+        40912387.32
+      ]
+    ],
+    "answer": "North America 的總銷售額為 $40,912,387.32（約 $40.91M）。\n\n| SUM(\"Total Revenue\")   |\n|:-----------------------|\n| 40,912,387.32          |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案完全一致，數據精確，並完整回答了問題。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "北美 的總銷售額是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") FROM sales_data WHERE \"Region\" = 'North America';",
+    "sql_result": [
+      [
+        40912387.32
+      ]
+    ],
+    "answer": "北美總銷售額為 40,912,387.32（約 40.91M）。\n\n| SUM(\"Total Revenue\")   |\n|:-----------------------|\n| 40,912,387.32          |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的數值與預期答案及 SQL 結果完全一致，僅使用千位逗號格式與額外近似說明，不影響理解。回答完整且清晰。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "北美洲 的總銷售額是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Region\" = 'North America';",
+    "sql_result": [
+      [
+        40912387.32
+      ]
+    ],
+    "answer": "北美洲的總銷售額為 40,912,387.32 元，約 40.91M。\n\n| Total Revenue   |\n|:----------------|\n| 40,912,387.32   |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的數值與 SQL 結果及預期答案完全一致，僅有格式化和簡短補充說明，不影響正確性。回答完整且清晰。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "NA 的總銷售額是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Region\" = 'North America';",
+    "sql_result": [
+      [
+        40912387.32
+      ]
+    ],
+    "answer": "North America 的總銷售額為 40,912,387.32（約 40.91M）。\n\n| Total Revenue   |\n|:----------------|\n| 40,912,387.32   |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的數值與預期答案及 SQL 結果完全一致，且完整回答 NA 的總銷售額。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "APAC 的總銷售額是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Region\" = 'APAC';",
+    "sql_result": [
+      [
+        24912047.29
+      ]
+    ],
+    "answer": "APAC 的總銷售額為 24,912,047.29 元，約 24.91M。\n\n| Total Revenue   |\n|:----------------|\n| 24,912,047.29   |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 回答的數值與 SQL 執行結果及預期答案完全一致，並清楚說明約 24.91M，資料完整且易讀。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "亞太區 的總銷售額是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") FROM sales_data WHERE \"Region\" = 'APAC';",
+    "sql_result": [
+      [
+        24912047.29
+      ]
+    ],
+    "answer": "亞太區的總銷售額為 24,912,047.29，約 24.91M。\n\n| SUM(\"Total Revenue\")   |\n|:-----------------------|\n| 24,912,047.29          |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 回答與預期答案及 SQL 結果完全一致，數值精確且提供了清楚的格式與簡略說明。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "亞太地區 的總銷售額是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Region\" = 'APAC';",
+    "sql_result": [
+      [
+        24912047.29
+      ]
+    ],
+    "answer": "亞太地區的總銷售額為 24,912,047.29（約 24.91M）。\n\n| Total Revenue   |\n|:----------------|\n| 24,912,047.29   |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答數值與預期答案及 SQL 結果完全一致，並清楚回答問題，附加的約數表示不影響正確性。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "Asia Pacific 的總銷售額是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") FROM sales_data WHERE \"Region\" = 'APAC';",
+    "sql_result": [
+      [
+        24912047.29
+      ]
+    ],
+    "answer": "APAC 的總銷售額為 24,912,047.29（約 24.91M）。\n\n| SUM(\"Total Revenue\")   |\n|:-----------------------|\n| 24,912,047.29          |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的數值與預期答案完全一致，且清楚說明 APAC（Asia Pacific）總銷售額，回答完整。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "LATAM 的總銷售額是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Region\" = 'LATAM';",
+    "sql_result": [
+      [
+        4872116.29
+      ]
+    ],
+    "answer": "LATAM 的總銷售額為 4,872,116.29（約 4.87M）。\n\n| Total Revenue   |\n|:----------------|\n| 4,872,116.29    |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 回答的數值 4,872,116.29 與預期答案 4872116.29 完全一致，僅格式差異（逗號分隔），且完整回應了 LATAM 總銷售額的請求。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "拉美 的總銷售額是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Region\" = 'LATAM';",
+    "sql_result": [
+      [
+        4872116.29
+      ]
+    ],
+    "answer": "拉美（LATAM）的總銷售額為 4,872,116.29，約 4.87M。\n\n| Total Revenue   |\n|:----------------|\n| 4,872,116.29    |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案及 SQL 執行結果完全一致，數值精確且表達清晰，僅有無害的格式化與約數補充。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "南美 的總銷售額是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") FROM sales_data WHERE \"Region\" = 'LATAM';",
+    "sql_result": [
+      [
+        4872116.29
+      ]
+    ],
+    "answer": "南美（LATAM）的總銷售額為 4,872,116.29，約 4.87M。\n\n| SUM(\"Total Revenue\")   |\n|:-----------------------|\n| 4,872,116.29           |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答數值與預期答案完全一致，格式清晰且完整回答了問題。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "拉丁美洲 的總銷售額是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") FROM sales_data WHERE \"Region\" = 'LATAM';",
+    "sql_result": [
+      [
+        4872116.29
+      ]
+    ],
+    "answer": "拉丁美洲的總銷售額為 4,872,116.29，約 4.87M。\n\n| SUM(\"Total Revenue\")   |\n|:-----------------------|\n| 4,872,116.29           |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案和 SQL 結果完全一致，數值精確且格式清晰，並額外提供了約略值，不影響正確性。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "Latin America 的總銷售額是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") FROM sales_data WHERE \"Region\" = 'LATAM';",
+    "sql_result": [
+      [
+        4872116.29
+      ]
+    ],
+    "answer": "Latin America 的總銷售額為 4,872,116.29，約 4.87M。\n\n| SUM(\"Total Revenue\")   |\n|:-----------------------|\n| 4,872,116.29           |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 提供的總銷售額與 SQL 結果及預期答案完全一致，格式上的逗號與近似值說明不影響正確性與完整性。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "EMEA 銷售量最高的前三個產品是什麼？",
+    "eval_type": "list",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\" AS product, SUM(\"Quantity\") AS total_quantity FROM sales_data WHERE \"Region\" = 'EMEA' GROUP BY \"Product Name\" ORDER BY total_quantity DESC, \"Product Name\" ASC LIMIT 3;",
+    "sql_result": [
+      [
+        "Enterprise Laptop X1",
+        6940
+      ],
+      [
+        "Pro Smartphone 15",
+        6259
+      ],
+      [
+        "Team Collaboration Tool",
+        4929
+      ]
+    ],
+    "answer": "EMEA 銷售量最高的前三個產品依序為 Enterprise Laptop X1（6,940）、Pro Smartphone 15（6,259）、Team Collaboration Tool（4,929）。\n\n| product                 | total_quantity   |\n|:------------------------|:-----------------|\n| Enterprise Laptop X1    | 6,940            |\n| Pro Smartphone 15       | 6,259            |\n| Team Collaboration Tool | 4,929            |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案及 SQL 查詢結果完全一致，產品名稱、排序與銷售量數值都正確，且完整回答了問題。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": true,
+    "expected_chart_type": null,
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "歐洲中東非洲 銷售量最高的前三個產品是什麼？",
+    "eval_type": "list",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\" AS product, SUM(\"Quantity\") AS total_quantity FROM sales_data WHERE \"Region\" = 'EMEA' GROUP BY \"Product Name\" ORDER BY total_quantity DESC, \"Product Name\" ASC LIMIT 3;",
+    "sql_result": [
+      [
+        "Enterprise Laptop X1",
+        6940
+      ],
+      [
+        "Pro Smartphone 15",
+        6259
+      ],
+      [
+        "Team Collaboration Tool",
+        4929
+      ]
+    ],
+    "answer": "歐洲中東非洲（EMEA）銷售量最高的前三個產品是 Enterprise Laptop X1（6,940）、Pro Smartphone 15（6,259）與 Team Collaboration Tool（4,929）。\n\n| product                 | total_quantity   |\n|:------------------------|:-----------------|\n| Enterprise Laptop X1    | 6,940            |\n| Pro Smartphone 15       | 6,259            |\n| Team Collaboration Tool | 4,929            |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 正確列出 EMEA 地區銷售量最高的前三個產品，且數量與 SQL 結果完全一致，回答完整清晰。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": true,
+    "expected_chart_type": null,
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "歐非中東 銷售量最高的前三個產品是什麼？",
+    "eval_type": "list",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\" AS product, SUM(\"Quantity\") AS quantity FROM sales_data WHERE \"Region\" = 'EMEA' GROUP BY \"Product Name\" ORDER BY quantity DESC, \"Product Name\" ASC LIMIT 3;",
+    "sql_result": [
+      [
+        "Enterprise Laptop X1",
+        6940
+      ],
+      [
+        "Pro Smartphone 15",
+        6259
+      ],
+      [
+        "Team Collaboration Tool",
+        4929
+      ]
+    ],
+    "answer": "歐非中東（EMEA）銷售量最高的前三個產品為：Enterprise Laptop X1（6,940）、Pro Smartphone 15（6,259）、Team Collaboration Tool（4,929）。\n\n| product                 | quantity   |\n|:------------------------|:-----------|\n| Enterprise Laptop X1    | 6,940      |\n| Pro Smartphone 15       | 6,259      |\n| Team Collaboration Tool | 4,929      |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 準確列出歐非中東區銷售量最高的前三個產品，產品名稱與預期答案完全一致，且數量與 SQL 執行結果完全相符，回答完整清晰。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": true,
+    "expected_chart_type": null,
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "Europe, Middle East, and Africa 銷售量最高的前三個產品是什麼？",
+    "eval_type": "list",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\" AS \"Product\", SUM(\"Quantity\") AS \"Quantity\" FROM sales_data WHERE \"Region\" = 'EMEA' GROUP BY \"Product Name\" ORDER BY SUM(\"Quantity\") DESC, \"Product Name\" ASC LIMIT 3;",
+    "sql_result": [
+      [
+        "Enterprise Laptop X1",
+        6940
+      ],
+      [
+        "Pro Smartphone 15",
+        6259
+      ],
+      [
+        "Team Collaboration Tool",
+        4929
+      ]
+    ],
+    "answer": "EMEA 銷售量最高的前三個產品是 Enterprise Laptop X1（6,940）、Pro Smartphone 15（6,259）與 Team Collaboration Tool（4,929）。\n\n| Product                 | Quantity   |\n|:------------------------|:-----------|\n| Enterprise Laptop X1    | 6,940      |\n| Pro Smartphone 15       | 6,259      |\n| Team Collaboration Tool | 4,929      |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 正確列出 EMEA 銷售量最高的前三個產品，且數量與 SQL 結果完全一致，回答完整清晰。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": true,
+    "expected_chart_type": null,
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "North America 銷售量最高的前三個產品是什麼？",
+    "eval_type": "list",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\" AS product_name, SUM(\"Quantity\") AS total_quantity FROM sales_data WHERE \"Region\" = 'North America' GROUP BY \"Product Name\" ORDER BY total_quantity DESC, \"Product Name\" ASC LIMIT 3;",
+    "sql_result": [
+      [
+        "Enterprise Laptop X1",
+        10667
+      ],
+      [
+        "Pro Smartphone 15",
+        8361
+      ],
+      [
+        "4K Monitor 27\"",
+        6241
+      ]
+    ],
+    "answer": "North America 銷售量最高的前三個產品依序為 Enterprise Laptop X1（10,667 件）、Pro Smartphone 15（8,361 件）與 4K Monitor 27\"（6,241 件）。\n\n| product_name         | total_quantity   |\n|:---------------------|:-----------------|\n| Enterprise Laptop X1 | 10,667           |\n| Pro Smartphone 15    | 8,361            |\n| 4K Monitor 27\"       | 6,241            |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 正確列出 North America 銷售量最高的前三個產品，順序與預期一致，且數量與 SQL 查詢結果完全匹配，回答清晰完整。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": true,
+    "expected_chart_type": null,
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "北美 銷售量最高的前三個產品是什麼？",
+    "eval_type": "list",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\", SUM(\"Quantity\") AS \"Sales Quantity\" FROM sales_data WHERE \"Region\" = 'North America' GROUP BY \"Product Name\" ORDER BY SUM(\"Quantity\") DESC, \"Product Name\" ASC LIMIT 3;",
+    "sql_result": [
+      [
+        "Enterprise Laptop X1",
+        10667
+      ],
+      [
+        "Pro Smartphone 15",
+        8361
+      ],
+      [
+        "4K Monitor 27\"",
+        6241
+      ]
+    ],
+    "answer": "北美銷售量最高的前三個產品依序為 Enterprise Laptop X1（10,667 件）、Pro Smartphone 15（8,361 件）、4K Monitor 27\"（6,241 件）。\n\n| Product Name         | Sales Quantity   |\n|:---------------------|:-----------------|\n| Enterprise Laptop X1 | 10,667           |\n| Pro Smartphone 15    | 8,361            |\n| 4K Monitor 27\"       | 6,241            |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 正確列出北美銷售量最高的前三個產品，且順序與數量均與 SQL 結果一致，回答完整清晰。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": true,
+    "expected_chart_type": null,
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "北美洲 銷售量最高的前三個產品是什麼？",
+    "eval_type": "list",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\", SUM(\"Quantity\") AS \"Total Quantity\" FROM sales_data WHERE \"Region\" = 'North America' GROUP BY \"Product Name\" ORDER BY SUM(\"Quantity\") DESC, \"Product Name\" ASC LIMIT 3;",
+    "sql_result": [
+      [
+        "Enterprise Laptop X1",
+        10667
+      ],
+      [
+        "Pro Smartphone 15",
+        8361
+      ],
+      [
+        "4K Monitor 27\"",
+        6241
+      ]
+    ],
+    "answer": "北美洲銷售量最高的前三個產品依序為 Enterprise Laptop X1（10,667）、Pro Smartphone 15（8,361）、4K Monitor 27\"（6,241）。\n\n| Product Name         | Total Quantity   |\n|:---------------------|:-----------------|\n| Enterprise Laptop X1 | 10,667           |\n| Pro Smartphone 15    | 8,361            |\n| 4K Monitor 27\"       | 6,241            |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案完全一致，正確列出北美洲銷售量最高的前三個產品，且數量與 SQL 執行結果相符，表達完整清晰。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": true,
+    "expected_chart_type": null,
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "NA 銷售量最高的前三個產品是什麼？",
+    "eval_type": "list",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\"\nFROM sales_data\nWHERE \"Region\" = 'North America'\nGROUP BY \"Product Name\"\nORDER BY SUM(\"Quantity\") DESC, \"Product Name\" ASC\nLIMIT 3;",
+    "sql_result": [
+      [
+        "Enterprise Laptop X1"
+      ],
+      [
+        "Pro Smartphone 15"
+      ],
+      [
+        "4K Monitor 27\""
+      ]
+    ],
+    "answer": "NA 銷售量最高的前三個產品是 Enterprise Laptop X1、Pro Smartphone 15、4K Monitor 27\"。\n\n| Product Name         |\n|:---------------------|\n| Enterprise Laptop X1 |\n| Pro Smartphone 15    |\n| 4K Monitor 27\"       |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案完全一致，正確列出 NA 銷售量最高的前三個產品，且順序與數據均無誤。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "APAC 銷售量最高的前三個產品是什麼？",
+    "eval_type": "list",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\" AS product, SUM(\"Quantity\") AS total_quantity FROM sales_data WHERE \"Region\" = 'APAC' GROUP BY \"Product Name\" ORDER BY total_quantity DESC, \"Product Name\" ASC LIMIT 3;",
+    "sql_result": [
+      [
+        "Enterprise Laptop X1",
+        6237
+      ],
+      [
+        "Pro Smartphone 15",
+        5235
+      ],
+      [
+        "4K Monitor 27\"",
+        4135
+      ]
+    ],
+    "answer": "APAC 銷售量最高的前三個產品依序為 Enterprise Laptop X1（6,237 件）、Pro Smartphone 15（5,235 件）、4K Monitor 27\"（4,135 件）。\n\n| product              | total_quantity   |\n|:---------------------|:-----------------|\n| Enterprise Laptop X1 | 6,237            |\n| Pro Smartphone 15    | 5,235            |\n| 4K Monitor 27\"       | 4,135            |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 正確列出 APAC 銷售量前三名產品與數量，順序與預期答案一致，數據與 SQL 結果完全相符。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": true,
+    "expected_chart_type": null,
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "亞太區 銷售量最高的前三個產品是什麼？",
+    "eval_type": "list",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\" AS product, SUM(\"Quantity\") AS total_quantity FROM sales_data WHERE \"Region\" = 'APAC' GROUP BY \"Product Name\" ORDER BY total_quantity DESC, \"Product Name\" ASC LIMIT 3;",
+    "sql_result": [
+      [
+        "Enterprise Laptop X1",
+        6237
+      ],
+      [
+        "Pro Smartphone 15",
+        5235
+      ],
+      [
+        "4K Monitor 27\"",
+        4135
+      ]
+    ],
+    "answer": "亞太區銷售量最高的前三個產品依序為：Enterprise Laptop X1（6,237 件）、Pro Smartphone 15（5,235 件）、4K Monitor 27\"（4,135 件）。\n\n| product              | total_quantity   |\n|:---------------------|:-----------------|\n| Enterprise Laptop X1 | 6,237            |\n| Pro Smartphone 15    | 5,235            |\n| 4K Monitor 27\"       | 4,135            |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 正確列出亞太區銷售量最高的前三個產品，且產品名稱與數量均與 SQL 結果完全一致。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": true,
+    "expected_chart_type": null,
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "亞太地區 銷售量最高的前三個產品是什麼？",
+    "eval_type": "list",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\" AS product, SUM(\"Quantity\") AS total_quantity FROM sales_data WHERE \"Region\" = 'APAC' GROUP BY \"Product Name\" ORDER BY total_quantity DESC, \"Product Name\" ASC LIMIT 3",
+    "sql_result": [
+      [
+        "Enterprise Laptop X1",
+        6237
+      ],
+      [
+        "Pro Smartphone 15",
+        5235
+      ],
+      [
+        "4K Monitor 27\"",
+        4135
+      ]
+    ],
+    "answer": "亞太地區銷售量最高的前三個產品為：Enterprise Laptop X1（6,237 件）、Pro Smartphone 15（5,235 件）、4K Monitor 27\"（4,135 件）。\n\n| product              | total_quantity   |\n|:---------------------|:-----------------|\n| Enterprise Laptop X1 | 6,237            |\n| Pro Smartphone 15    | 5,235            |\n| 4K Monitor 27\"       | 4,135            |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 正確列出亞太地區銷售量最高的前三個產品，順序與產品名稱均與預期答案一致，數值亦與 SQL 結果完全匹配，回答完整清晰。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": true,
+    "expected_chart_type": null,
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "Asia Pacific 銷售量最高的前三個產品是什麼？",
+    "eval_type": "list",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\" AS \"Product Name\", SUM(\"Quantity\") AS \"Total Quantity\" FROM sales_data WHERE \"Region\" = 'APAC' GROUP BY \"Product Name\" ORDER BY SUM(\"Quantity\") DESC, \"Product Name\" ASC LIMIT 3;",
+    "sql_result": [
+      [
+        "Enterprise Laptop X1",
+        6237
+      ],
+      [
+        "Pro Smartphone 15",
+        5235
+      ],
+      [
+        "4K Monitor 27\"",
+        4135
+      ]
+    ],
+    "answer": "Asia Pacific 銷售量最高的前三個產品為 Enterprise Laptop X1（6,237）、Pro Smartphone 15（5,235）、4K Monitor 27\"（4,135）。\n\n| Product Name         | Total Quantity   |\n|:---------------------|:-----------------|\n| Enterprise Laptop X1 | 6,237            |\n| Pro Smartphone 15    | 5,235            |\n| 4K Monitor 27\"       | 4,135            |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 正確列出 APAC 銷售量前三名產品，產品名稱與數量均與 SQL 結果及預期答案一致，且回答格式清晰完整。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": true,
+    "expected_chart_type": null,
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "LATAM 銷售量最高的前三個產品是什麼？",
+    "eval_type": "list",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\", SUM(\"Quantity\") AS \"Quantity\" FROM sales_data WHERE \"Region\" = 'LATAM' GROUP BY \"Product Name\" ORDER BY SUM(\"Quantity\") DESC, \"Product Name\" ASC LIMIT 3;",
+    "sql_result": [
+      [
+        "Enterprise Laptop X1",
+        1179
+      ],
+      [
+        "Pro Smartphone 15",
+        1069
+      ],
+      [
+        "Ergonomic Chair",
+        881
+      ]
+    ],
+    "answer": "LATAM 銷售量最高的前三個產品依序為 Enterprise Laptop X1（1,179 件）、Pro Smartphone 15（1,069 件）、Ergonomic Chair（881 件）。\n\n| Product Name         | Quantity   |\n|:---------------------|:-----------|\n| Enterprise Laptop X1 | 1,179      |\n| Pro Smartphone 15    | 1,069      |\n| Ergonomic Chair      | 881        |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 正確列出 LATAM 銷售量前三名產品，且數量與 SQL 結果一致，回答完整清晰。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": true,
+    "expected_chart_type": null,
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "拉美 銷售量最高的前三個產品是什麼？",
+    "eval_type": "list",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\", SUM(\"Quantity\") AS \"Sales Quantity\" FROM sales_data WHERE \"Region\" = 'LATAM' GROUP BY \"Product Name\" ORDER BY SUM(\"Quantity\") DESC, \"Product Name\" ASC LIMIT 3;",
+    "sql_result": [
+      [
+        "Enterprise Laptop X1",
+        1179
+      ],
+      [
+        "Pro Smartphone 15",
+        1069
+      ],
+      [
+        "Ergonomic Chair",
+        881
+      ]
+    ],
+    "answer": "拉美銷售量最高的前三個產品依序為 Enterprise Laptop X1（1,179）、Pro Smartphone 15（1,069）與 Ergonomic Chair（881）。\n\n| Product Name         | Sales Quantity   |\n|:---------------------|:-----------------|\n| Enterprise Laptop X1 | 1,179            |\n| Pro Smartphone 15    | 1,069            |\n| Ergonomic Chair      | 881              |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 正確列出拉美銷售量最高的前三個產品，且與預期答案及 SQL 查詢結果完全一致，數據與格式皆正確完整。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": true,
+    "expected_chart_type": null,
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "南美 銷售量最高的前三個產品是什麼？",
+    "eval_type": "list",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\", SUM(\"Quantity\") AS \"Quantity\" FROM sales_data WHERE \"Region\" = 'LATAM' GROUP BY \"Product Name\" ORDER BY SUM(\"Quantity\") DESC, \"Product Name\" ASC LIMIT 3;",
+    "sql_result": [
+      [
+        "Enterprise Laptop X1",
+        1179
+      ],
+      [
+        "Pro Smartphone 15",
+        1069
+      ],
+      [
+        "Ergonomic Chair",
+        881
+      ]
+    ],
+    "answer": "南美銷售量最高的前三個產品依序為 Enterprise Laptop X1（1,179 件）、Pro Smartphone 15（1,069 件）與 Ergonomic Chair（881 件）。\n\n| Product Name         | Quantity   |\n|:---------------------|:-----------|\n| Enterprise Laptop X1 | 1,179      |\n| Pro Smartphone 15    | 1,069      |\n| Ergonomic Chair      | 881        |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案完全一致，且數量數據與 SQL 結果精確匹配，表達清晰完整。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": true,
+    "expected_chart_type": null,
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "拉丁美洲 銷售量最高的前三個產品是什麼？",
+    "eval_type": "list",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\" AS \"Product Name\", SUM(\"Quantity\") AS \"Quantity\" FROM sales_data WHERE \"Region\" = 'LATAM' GROUP BY \"Product Name\" ORDER BY \"Quantity\" DESC, \"Product Name\" ASC LIMIT 3",
+    "sql_result": [
+      [
+        "Enterprise Laptop X1",
+        1179
+      ],
+      [
+        "Pro Smartphone 15",
+        1069
+      ],
+      [
+        "Ergonomic Chair",
+        881
+      ]
+    ],
+    "answer": "拉丁美洲銷售量最高的前三個產品依序為 Enterprise Laptop X1（1,179 件）、Pro Smartphone 15（1,069 件）與 Ergonomic Chair（881 件）。\n\n| Product Name         | Quantity   |\n|:---------------------|:-----------|\n| Enterprise Laptop X1 | 1,179      |\n| Pro Smartphone 15    | 1,069      |\n| Ergonomic Chair      | 881        |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案及 SQL 查詢結果完全一致，產品名稱、順序與銷售量皆正確，且完整回答了問題。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": true,
+    "expected_chart_type": null,
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "Latin America 銷售量最高的前三個產品是什麼？",
+    "eval_type": "list",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\" AS product, SUM(\"Quantity\") AS total_quantity FROM sales_data WHERE \"Region\" = 'LATAM' GROUP BY \"Product Name\" ORDER BY total_quantity DESC, \"Product Name\" ASC LIMIT 3;",
+    "sql_result": [
+      [
+        "Enterprise Laptop X1",
+        1179
+      ],
+      [
+        "Pro Smartphone 15",
+        1069
+      ],
+      [
+        "Ergonomic Chair",
+        881
+      ]
+    ],
+    "answer": "Latin America 銷售量最高的前三個產品是 Enterprise Laptop X1（1,179）、Pro Smartphone 15（1,069）、Ergonomic Chair（881）。\n\n| product              | total_quantity   |\n|:---------------------|:-----------------|\n| Enterprise Laptop X1 | 1,179            |\n| Pro Smartphone 15    | 1,069            |\n| Ergonomic Chair      | 881              |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 正確列出前三名產品，且數量與 SQL 查詢結果完全一致，回答完整清晰。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": true,
+    "expected_chart_type": null,
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "請列出 Electronics 類別在各年份的銷售額總計。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "SELECT substr(\"Order Date\", 1, 4) AS \"Year\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Product Category\" = 'Electronics' GROUP BY substr(\"Order Date\", 1, 4) ORDER BY \"Year\";",
+    "sql_result": [
+      [
+        "2023",
+        28995600.91
+      ],
+      [
+        "2024",
+        28624656.21
+      ]
+    ],
+    "answer": "Electronics 類別 2023 年銷售額總計為 28,995,600.91（約 29.00M），2024 年為 28,624,656.21（約 28.62M）。\n\n| Year   | Total Revenue   |\n|:-------|:----------------|\n| 2023   | 28,995,600.91   |\n| 2024   | 28,624,656.21   |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答完整列出 2023 年與 2024 年 Electronics 類別的銷售額總計，數值與 SQL 查詢結果完全一致，格式清晰且數據精確無誤。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "bar",
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "請列出 Office Supplies 類別在各年份的銷售額總計。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "SELECT substr(\"Order Date\", 1, 4) AS \"Year\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Product Category\" = 'Office Supplies' GROUP BY substr(\"Order Date\", 1, 4) ORDER BY \"Year\" ASC;",
+    "sql_result": [
+      [
+        "2023",
+        6785030.32
+      ],
+      [
+        "2024",
+        6596379.33
+      ]
+    ],
+    "answer": "Office Supplies 類別各年份銷售額總計：2023 年為 6,785,030.32（約 6.79M），2024 年為 6,596,379.33（約 6.60M）。\n\n| Year   | Total Revenue   |\n|:-------|:----------------|\n| 2023   | 6,785,030.32    |\n| 2024   | 6,596,379.33    |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 回答與預期答案及 SQL 查詢結果完全一致，年份與銷售額總計均正確，並以表格清楚呈現，回答完整。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "bar",
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "請列出 Software 類別在各年份的銷售額總計。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "SELECT substr(\"Order Date\", 1, 4) AS \"Year\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Product Category\" = 'Software' GROUP BY substr(\"Order Date\", 1, 4) ORDER BY \"Year\" ASC;",
+    "sql_result": [
+      [
+        "2023",
+        15625718.03
+      ],
+      [
+        "2024",
+        15156666.7
+      ]
+    ],
+    "answer": "Software 類別各年份銷售額總計：2023 年為 15,625,718.03 元（約 15.63M），2024 年為 15,156,666.70 元（約 15.16M）。\n\n| Year   | Total Revenue   |\n|:-------|:----------------|\n| 2023   | 15,625,718.03   |\n| 2024   | 15,156,666.70   |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 回答與預期答案及 SQL 結果完全一致，年份與銷售額數據正確，並完整列出所有年份，格式清晰。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "bar",
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "Canada 訂單數量最多的客戶是誰？",
+    "eval_type": "string",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Customer Name\" FROM sales_data WHERE \"Country\" = 'Canada' GROUP BY \"Customer Name\" ORDER BY COUNT(DISTINCT \"Order ID\") DESC, \"Customer Name\" ASC LIMIT 1;",
+    "sql_result": [
+      [
+        "Next Gamma Inc."
+      ]
+    ],
+    "answer": "Canada 訂單數量最多的客戶是 Next Gamma Inc.\n\n| Customer Name   |\n|:----------------|\n| Next Gamma Inc. |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案完全一致，明確指出 Canada 訂單數量最多的客戶是 Next Gamma Inc.，且與 SQL 查詢結果相符，資訊完整且無誤。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "加拿大 訂單數量最多的客戶是誰？",
+    "eval_type": "string",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Customer Name\" FROM sales_data WHERE \"Country\" = 'Canada' GROUP BY \"Customer Name\" ORDER BY COUNT(DISTINCT \"Order ID\") DESC, \"Customer Name\" ASC LIMIT 1;",
+    "sql_result": [
+      [
+        "Next Gamma Inc."
+      ]
+    ],
+    "answer": "加拿大訂單數量最多的客戶是 Next Gamma Inc.\n\n| Customer Name   |\n|:----------------|\n| Next Gamma Inc. |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案完全一致，準確識別了加拿大訂單數量最多的客戶，且格式清晰完整。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "India 訂單數量最多的客戶是誰？",
+    "eval_type": "string",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Customer Name\" FROM sales_data WHERE \"Country\" = 'India' GROUP BY \"Customer Name\" ORDER BY COUNT(DISTINCT \"Order ID\") DESC, \"Customer Name\" ASC LIMIT 1;",
+    "sql_result": [
+      [
+        "Next Gamma Inc."
+      ]
+    ],
+    "answer": "India 訂單數量最多的客戶是 Next Gamma Inc.\n\n| Customer Name   |\n|:----------------|\n| Next Gamma Inc. |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案完全一致，且清楚指出 India 訂單數量最多的客戶是 Next Gamma Inc.。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "印度 訂單數量最多的客戶是誰？",
+    "eval_type": "string",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Customer Name\" FROM sales_data WHERE \"Country\" = 'India' GROUP BY \"Customer Name\" ORDER BY COUNT(DISTINCT \"Order ID\") DESC, \"Customer Name\" ASC LIMIT 1;",
+    "sql_result": [
+      [
+        "Next Gamma Inc."
+      ]
+    ],
+    "answer": "印度訂單數量最多的客戶是 Next Gamma Inc.\n\n| Customer Name   |\n|:----------------|\n| Next Gamma Inc. |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案完全一致，且與 SQL 查詢結果相符，數據正確且回答完整清晰。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "Germany 訂單數量最多的客戶是誰？",
+    "eval_type": "string",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Customer Name\" FROM sales_data WHERE \"Country\" = 'Germany' GROUP BY \"Customer Name\" ORDER BY COUNT(DISTINCT \"Order ID\") DESC, \"Customer Name\" ASC LIMIT 1;",
+    "sql_result": [
+      [
+        "Global Alpha Corp."
+      ]
+    ],
+    "answer": "Germany 訂單數量最多的客戶是 Global Alpha Corp.\n\n| Customer Name      |\n|:-------------------|\n| Global Alpha Corp. |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案及 SQL 查詢結果完全一致，語意正確且資料完整。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "德國 訂單數量最多的客戶是誰？",
+    "eval_type": "string",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Customer Name\" FROM sales_data WHERE \"Country\" = 'Germany' GROUP BY \"Customer Name\" ORDER BY COUNT(DISTINCT \"Order ID\") DESC, \"Customer Name\" ASC LIMIT 1;",
+    "sql_result": [
+      [
+        "Global Alpha Corp."
+      ]
+    ],
+    "answer": "德國訂單數量最多的客戶是 Global Alpha Corp.。\n\n| Customer Name      |\n|:-------------------|\n| Global Alpha Corp. |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的答案與預期答案及 SQL 執行結果一致，完整回答問題且格式清晰。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "德意志 訂單數量最多的客戶是誰？",
+    "eval_type": "string",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Customer Name\" FROM sales_data WHERE \"Country\" = 'Germany' GROUP BY \"Customer Name\" ORDER BY COUNT(DISTINCT \"Order ID\") DESC, \"Customer Name\" ASC LIMIT 1;",
+    "sql_result": [
+      [
+        "Global Alpha Corp."
+      ]
+    ],
+    "answer": "德意志訂單數量最多的客戶是 Global Alpha Corp.。\n\n| Customer Name      |\n|:-------------------|\n| Global Alpha Corp. |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案完全一致，並正確指出德意志訂單數量最多的客戶為 Global Alpha Corp。數據與問題要求均正確且完整。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "Australia 訂單數量最多的客戶是誰？",
+    "eval_type": "string",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Customer Name\" FROM sales_data WHERE \"Country\" = 'Australia' GROUP BY \"Customer Name\" ORDER BY COUNT(DISTINCT \"Order ID\") DESC, \"Customer Name\" ASC LIMIT 1;",
+    "sql_result": [
+      [
+        "Prime Elite Solutions"
+      ]
+    ],
+    "answer": "Australia 訂單數量最多的客戶是 Prime Elite Solutions。\n\n| Customer Name         |\n|:----------------------|\n| Prime Elite Solutions |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案完全一致，且 SQL 查詢結果也確認答案正確，回答簡潔完整。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "澳洲 訂單數量最多的客戶是誰？",
+    "eval_type": "string",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Customer Name\" FROM sales_data WHERE \"Country\" = 'Australia' GROUP BY \"Customer Name\" ORDER BY COUNT(DISTINCT \"Order ID\") DESC, \"Customer Name\" ASC LIMIT 1",
+    "sql_result": [
+      [
+        "Prime Elite Solutions"
+      ]
+    ],
+    "answer": "澳洲訂單數量最多的客戶是 Prime Elite Solutions。\n\n| Customer Name         |\n|:----------------------|\n| Prime Elite Solutions |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案一致，正確指出澳洲訂單數量最多的客戶為 Prime Elite Solutions，且回答完整清晰。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "澳大利亞 訂單數量最多的客戶是誰？",
+    "eval_type": "string",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Customer Name\" AS \"Customer Name\" FROM sales_data WHERE \"Country\" = 'Australia' GROUP BY \"Customer Name\" ORDER BY COUNT(DISTINCT \"Order ID\") DESC, \"Customer Name\" ASC LIMIT 1;",
+    "sql_result": [
+      [
+        "Prime Elite Solutions"
+      ]
+    ],
+    "answer": "澳大利亞訂單數量最多的客戶是 Prime Elite Solutions。\n\n| Customer Name         |\n|:----------------------|\n| Prime Elite Solutions |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 答案與預期答案完全一致，並由 SQL 執行結果支持，回答完整且數據正確。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "China 訂單數量最多的客戶是誰？",
+    "eval_type": "string",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Customer Name\" FROM sales_data WHERE \"Country\" = 'China' GROUP BY \"Customer Name\" ORDER BY COUNT(DISTINCT \"Order ID\") DESC, \"Customer Name\" ASC LIMIT 1;",
+    "sql_result": [
+      [
+        "Beta Gamma Group"
+      ]
+    ],
+    "answer": "China 訂單數量最多的客戶是 Beta Gamma Group。\n\n| Customer Name    |\n|:-----------------|\n| Beta Gamma Group |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 回答與預期答案完全一致，並正確指出 China 訂單數量最多的客戶為 Beta Gamma Group，數據與 SQL 執行結果相符。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "中國 訂單數量最多的客戶是誰？",
+    "eval_type": "string",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Customer Name\" AS customer_name, COUNT(DISTINCT \"Order ID\") AS order_count FROM sales_data WHERE \"Country\" = 'China' GROUP BY \"Customer Name\" ORDER BY order_count DESC, \"Customer Name\" ASC LIMIT 1;",
+    "sql_result": [
+      [
+        "Beta Gamma Group",
+        20
+      ]
+    ],
+    "answer": "中國訂單數量最多的客戶是 Beta Gamma Group，共 20 筆訂單。\n\n| customer_name    | order_count   |\n|:-----------------|:--------------|\n| Beta Gamma Group | 20            |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 正確指出中國訂單數量最多的客戶為 Beta Gamma Group，且訂單數量 20 與 SQL 結果一致，回答完整清晰。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "大陸 訂單數量最多的客戶是誰？",
+    "eval_type": "string",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Customer Name\" FROM sales_data WHERE \"Country\" = 'China' GROUP BY \"Customer Name\" ORDER BY COUNT(DISTINCT \"Order ID\") DESC, \"Customer Name\" ASC LIMIT 1;",
+    "sql_result": [
+      [
+        "Beta Gamma Group"
+      ]
+    ],
+    "answer": "大陸訂單數量最多的客戶是 Beta Gamma Group。\n\n| Customer Name    |\n|:-----------------|\n| Beta Gamma Group |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案完全一致，數據準確且回答完整。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "PRC 訂單數量最多的客戶是誰？",
+    "eval_type": "string",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Customer Name\" FROM sales_data WHERE \"Country\" = 'China' GROUP BY \"Customer Name\" ORDER BY COUNT(DISTINCT \"Order ID\") DESC, \"Customer Name\" ASC LIMIT 1;",
+    "sql_result": [
+      [
+        "Beta Gamma Group"
+      ]
+    ],
+    "answer": "PRC 訂單數量最多的客戶是 Beta Gamma Group。\n\n| Customer Name    |\n|:-----------------|\n| Beta Gamma Group |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案完全一致，且數據來源正確，完整回答了問題。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "2023 年哪一個季度的總銷售額表現最好？",
+    "eval_type": "string",
+    "difficulty": "medium",
+    "sql_query": "SELECT CASE WHEN CAST(substr(\"Order Date\", 6, 2) AS INTEGER) BETWEEN 1 AND 3 THEN 'Q1' WHEN CAST(substr(\"Order Date\", 6, 2) AS INTEGER) BETWEEN 4 AND 6 THEN 'Q2' WHEN CAST(substr(\"Order Date\", 6, 2) AS INTEGER) BETWEEN 7 AND 9 THEN 'Q3' ELSE 'Q4' END AS \"Quarter\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE substr(\"Order Date\", 1, 4) = '2023' GROUP BY 1 ORDER BY \"Total Revenue\" DESC, \"Quarter\" ASC LIMIT 1;",
+    "sql_result": [
+      [
+        "Q4",
+        18089592.8
+      ]
+    ],
+    "answer": "2023 年總銷售額表現最好的季度是 Q4，總銷售額為 18,089,592.80 元（約 18.09M）。\n\n| Quarter   | Total Revenue   |\n|:----------|:----------------|\n| Q4        | 18,089,592.80   |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 正確回答 Q4 為 2023 年表現最好的季度，且銷售額 18,089,592.80 與 SQL 結果完全一致，回答完整清晰。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "2024 年哪一個季度的總銷售額表現最好？",
+    "eval_type": "string",
+    "difficulty": "medium",
+    "sql_query": "SELECT\n  CASE\n    WHEN CAST(substr(\"Order Date\", 6, 2) AS INTEGER) BETWEEN 1 AND 3 THEN 'Q1'\n    WHEN CAST(substr(\"Order Date\", 6, 2) AS INTEGER) BETWEEN 4 AND 6 THEN 'Q2'\n    WHEN CAST(substr(\"Order Date\", 6, 2) AS INTEGER) BETWEEN 7 AND 9 THEN 'Q3'\n    ELSE 'Q4'\n  END AS \"Quarter\",\n  SUM(\"Total Revenue\") AS \"Total Revenue\"\nFROM sales_data\nWHERE substr(\"Order Date\", 1, 4) = '2024'\nGROUP BY 1\nORDER BY \"Total Revenue\" DESC, \"Quarter\" ASC\nLIMIT 1;",
+    "sql_result": [
+      [
+        "Q4",
+        16400864.11
+      ]
+    ],
+    "answer": "2024 年總銷售額表現最好的季度是 Q4，總銷售額為 16,400,864.11（約 16.40M）。\n\n| Quarter   | Total Revenue   |\n|:----------|:----------------|\n| Q4        | 16,400,864.11   |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 正確回答 Q4 為 2024 年總銷售額表現最好的季度，且銷售額數據 16,400,864.11 與 SQL 結果一致，回答完整清晰。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "Electronics 類別在 2024 年相對於 2023 年的銷售額年增率 (YoY) 是多少？(請以百分比表示)",
+    "eval_type": "number",
+    "difficulty": "hard",
+    "sql_query": "SELECT\n  (SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END) -\n   SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END)) * 100.0 /\n  NULLIF(SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END), 0) AS \"YoY\"\nFROM sales_data\nWHERE \"Product Category\" = 'Electronics'\n  AND substr(\"Order Date\", 1, 4) IN ('2023', '2024');",
+    "sql_result": [
+      [
+        -1.2793137177994054
+      ]
+    ],
+    "answer": "Electronics 類別 2024 年相對於 2023 年的銷售額年增率為 -1.28%。\n\n| YoY   |\n|:------|\n| -1.28 |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的計算結果 -1.28% 與預期答案 -1.28 語意一致，且正確使用百分比格式，資料來源與 SQL 結果相符。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "Office Supplies 類別在 2024 年相對於 2023 年的銷售額年增率 (YoY) 是多少？(請以百分比表示)",
+    "eval_type": "number",
+    "difficulty": "hard",
+    "sql_query": "SELECT\n  (SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END) -\n   SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END)) * 100.0 /\n  NULLIF(SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END), 0) AS \"YoY Percentage\"\nFROM sales_data\nWHERE \"Product Category\" = 'Office Supplies'\n  AND substr(\"Order Date\", 1, 4) IN ('2023', '2024');",
+    "sql_result": [
+      [
+        -2.7804001029136183
+      ]
+    ],
+    "answer": "Office Supplies 類別在 2024 年相對於 2023 年的銷售額年增率為 -2.78%。\n\n| YoY Percentage   |\n|:-----------------|\n| -2.78            |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 回答與預期答案語意一致，數值 -2.78% 與 SQL 結果相符，且包含單位與表格呈現，回答完整。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "Software 類別在 2024 年相對於 2023 年的銷售額年增率 (YoY) 是多少？(請以百分比表示)",
+    "eval_type": "number",
+    "difficulty": "hard",
+    "sql_query": "SELECT (SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END) - SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END)) * 100.0 / NULLIF(SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END), 0) AS \"YoY\" FROM sales_data WHERE \"Product Category\" = 'Software' AND substr(\"Order Date\", 1, 4) IN ('2023', '2024');",
+    "sql_result": [
+      [
+        -3.001790567956384
+      ]
+    ],
+    "answer": "Software 類別 2024 年相對於 2023 年的銷售額年增率為 -3.00%。\n\n| YoY   |\n|:------|\n| -3.00 |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的數值與預期答案一致，且符合 SQL 結果的四捨五入，單位與格式正確，回答完整清晰。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "請列出 EMEA 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "SELECT\n    substr(\"Order Date\", 1, 7) AS \"Month\",\n    SUM(\"Total Revenue\") AS \"Total Revenue\"\nFROM sales_data\nWHERE \"Region\" = 'EMEA'\n  AND \"Order Date\" BETWEEN '2023-01-01' AND '2024-12-31'\nGROUP BY substr(\"Order Date\", 1, 7)\nORDER BY \"Month\" ASC;",
+    "sql_result": [
+      [
+        "2023-01",
+        1204453.79
+      ],
+      [
+        "2023-02",
+        1089673.97
+      ],
+      [
+        "2023-03",
+        1031398.68
+      ],
+      [
+        "2023-04",
+        942433.78
+      ],
+      [
+        "2023-05",
+        1130576.21
+      ],
+      [
+        "2023-06",
+        1056342.81
+      ],
+      [
+        "2023-07",
+        1173556.46
+      ],
+      [
+        "2023-08",
+        1277143.78
+      ],
+      [
+        "2023-09",
+        1095201.94
+      ],
+      [
+        "2023-10",
+        2154599.09
+      ],
+      [
+        "2023-11",
+        1654709.04
+      ],
+      [
+        "2023-12",
+        1800320.15
+      ],
+      [
+        "2024-01",
+        1485823.23
+      ],
+      [
+        "2024-02",
+        911781.4
+      ],
+      [
+        "2024-03",
+        1069561.39
+      ],
+      [
+        "2024-04",
+        1176280.36
+      ],
+      [
+        "2024-05",
+        1028076.9400000001
+      ],
+      [
+        "2024-06",
+        1081117.61
+      ],
+      [
+        "2024-07",
+        1276261.88
+      ],
+      [
+        "2024-08",
+        1383315.03
+      ],
+      [
+        "2024-09",
+        1066556.69
+      ],
+      [
+        "2024-10",
+        1787276.53
+      ],
+      [
+        "2024-11",
+        1648220.44
+      ],
+      [
+        "2024-12",
+        1562819.4
+      ]
+    ],
+    "answer": "EMEA 區域 2023 至 2024 年共 24 個月的銷售趨勢數據已依月份排列。整體總營收為 31,087,500.60（約 31.09M），月均約 1,295,312.53（約 1.30M）。最高月為 2023-10 的 2,154,599.09，最低月為 2024-02 的 911,781.40；2023 下半年與 2024 第四季較明顯高於其他月份。\n\n| Month   | Total Revenue   |\n|:--------|:----------------|\n| 2023-01 | 1,204,453.79    |\n| 2023-02 | 1,089,673.97    |\n| 2023-03 | 1,031,398.68    |\n| 2023-04 | 942,433.78      |\n| 2023-05 | 1,130,576.21    |\n| 2023-06 | 1,056,342.81    |\n| 2023-07 | 1,173,556.46    |\n| 2023-08 | 1,277,143.78    |\n| 2023-09 | 1,095,201.94    |\n| 2023-10 | 2,154,599.09    |\n| 2023-11 | 1,654,709.04    |\n| 2023-12 | 1,800,320.15    |\n| 2024-01 | 1,485,823.23    |\n| 2024-02 | 911,781.40      |\n| 2024-03 | 1,069,561.39    |\n| 2024-04 | 1,176,280.36    |\n| 2024-05 | 1,028,076.94    |\n| 2024-06 | 1,081,117.61    |\n| 2024-07 | 1,276,261.88    |\n| 2024-08 | 1,383,315.03    |\n| 2024-09 | 1,066,556.69    |\n| 2024-10 | 1,787,276.53    |\n| 2024-11 | 1,648,220.44    |\n| 2024-12 | 1,562,819.40    |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 完整列出 EMEA 2023-2024 每個月銷售數據，所有數值與預期完全一致，並提供正確之總計與月均等補充資訊。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "line",
+    "actual_chart_type": "line",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "請列出 歐洲中東非洲 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "TIMEOUT",
+    "sql_result": null,
+    "answer": "",
+    "sql_correct": false,
+    "sql_score": 0,
+    "sql_reasoning": "Timeout exceeded",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": false,
+    "expected_chart_type": "line",
+    "actual_chart_type": null,
+    "plot_decision_correct": false,
+    "chart_json_valid": false,
+    "trace_type_correct": false,
+    "x_order_correct": false,
+    "trace_count_correct": false,
+    "e2e_success": false
+  },
+  {
+    "question": "請列出 歐非中東 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "",
+    "sql_result": [],
+    "answer": "這次分析未能完成，請稍後重試。",
+    "sql_correct": false,
+    "sql_score": 0,
+    "sql_reasoning": "{'code': 'Timeout', 'message': 'litellm.Timeout: Request timed out after 120 seconds'}",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": false,
+    "expected_chart_type": "line",
+    "actual_chart_type": null,
+    "plot_decision_correct": false,
+    "chart_json_valid": false,
+    "trace_type_correct": false,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "請列出 Europe, Middle East, and Africa 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "",
+    "sql_result": [],
+    "answer": "這次分析未能完成，請稍後重試。",
+    "sql_correct": false,
+    "sql_score": 0,
+    "sql_reasoning": "{'code': 'Timeout', 'message': 'litellm.Timeout: Request timed out after 120 seconds'}",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": false,
+    "expected_chart_type": "line",
+    "actual_chart_type": null,
+    "plot_decision_correct": false,
+    "chart_json_valid": false,
+    "trace_type_correct": false,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "請列出 North America 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "",
+    "sql_result": [],
+    "answer": "這次分析未能完成，請稍後重試。",
+    "sql_correct": false,
+    "sql_score": 0,
+    "sql_reasoning": "{'code': 'Timeout', 'message': 'litellm.Timeout: Request timed out after 120 seconds'}",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": false,
+    "expected_chart_type": "line",
+    "actual_chart_type": null,
+    "plot_decision_correct": false,
+    "chart_json_valid": false,
+    "trace_type_correct": false,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "請列出 北美 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "SELECT substr(\"Order Date\", 1, 7) AS \"Month\", SUM(\"Total Revenue\") AS \"Total Revenue\", SUM(\"Quantity\") AS \"Quantity\" FROM sales_data WHERE \"Region\" = 'North America' AND \"Order Date\" >= '2023-01-01' AND \"Order Date\" <= '2024-12-31' GROUP BY substr(\"Order Date\", 1, 7) ORDER BY \"Month\" ASC;",
+    "sql_result": [
+      [
+        "2023-01",
+        1422750.01,
+        2086
+      ],
+      [
+        "2023-02",
+        1703698.18,
+        2075
+      ],
+      [
+        "2023-03",
+        1649602.2,
+        2182
+      ],
+      [
+        "2023-04",
+        1363564.73,
+        1983
+      ],
+      [
+        "2023-05",
+        1343364.69,
+        1933
+      ],
+      [
+        "2023-06",
+        1152089.38,
+        1872
+      ],
+      [
+        "2023-07",
+        1737229.4,
+        2212
+      ],
+      [
+        "2023-08",
+        1636011.89,
+        2255
+      ],
+      [
+        "2023-09",
+        1269881.03,
+        1901
+      ],
+      [
+        "2023-10",
+        2633914.13,
+        3307
+      ],
+      [
+        "2023-11",
+        2453619.22,
+        3216
+      ],
+      [
+        "2023-12",
+        2025156.34,
+        2700
+      ],
+      [
+        "2024-01",
+        1632386.63,
+        2291
+      ],
+      [
+        "2024-02",
+        1509838.7,
+        2172
+      ],
+      [
+        "2024-03",
+        1628673.75,
+        2136
+      ],
+      [
+        "2024-04",
+        1427858.95,
+        2105
+      ],
+      [
+        "2024-05",
+        1502422.25,
+        2071
+      ],
+      [
+        "2024-06",
+        1291091.24,
+        1701
+      ],
+      [
+        "2024-07",
+        1657652.86,
+        2154
+      ],
+      [
+        "2024-08",
+        1461540.01,
+        1951
+      ],
+      [
+        "2024-09",
+        1381661.19,
+        1862
+      ],
+      [
+        "2024-10",
+        2352431.47,
+        2886
+      ],
+      [
+        "2024-11",
+        2036051.79,
+        2818
+      ],
+      [
+        "2024-12",
+        2639897.28,
+        3259
+      ]
+    ],
+    "answer": "北美 2023–2024 每月銷售趨勢共 24 個月。營收最高為 2024-12 的 2,639,897.28，最低為 2023-06 的 1,152,089.38；數量最高為 2023-10 的 3,307，最低為 2024-06 的 1,701。整體營收為 40,912,387.32（約 40.91M），總數量為 55,128。圖表以月份為 x 軸、Total Revenue 為 y 軸顯示趨勢。\n\n| Month   | Total Revenue   | Quantity   |\n|:--------|:----------------|:-----------|\n| 2023-01 | 1,422,750.01    | 2,086      |\n| 2023-02 | 1,703,698.18    | 2,075      |\n| 2023-03 | 1,649,602.20    | 2,182      |\n| 2023-04 | 1,363,564.73    | 1,983      |\n| 2023-05 | 1,343,364.69    | 1,933      |\n| 2023-06 | 1,152,089.38    | 1,872      |\n| 2023-07 | 1,737,229.40    | 2,212      |\n| 2023-08 | 1,636,011.89    | 2,255      |\n| 2023-09 | 1,269,881.03    | 1,901      |\n| 2023-10 | 2,633,914.13    | 3,307      |\n| 2023-11 | 2,453,619.22    | 3,216      |\n| 2023-12 | 2,025,156.34    | 2,700      |\n| 2024-01 | 1,632,386.63    | 2,291      |\n| 2024-02 | 1,509,838.70    | 2,172      |\n| 2024-03 | 1,628,673.75    | 2,136      |\n| 2024-04 | 1,427,858.95    | 2,105      |\n| 2024-05 | 1,502,422.25    | 2,071      |\n| 2024-06 | 1,291,091.24    | 1,701      |\n| 2024-07 | 1,657,652.86    | 2,154      |\n| 2024-08 | 1,461,540.01    | 1,951      |\n| 2024-09 | 1,381,661.19    | 1,862      |\n| 2024-10 | 2,352,431.47    | 2,886      |\n| 2024-11 | 2,036,051.79    | 2,818      |\n| 2024-12 | 2,639,897.28    | 3,259      |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 完整列出 2023 至 2024 北美每個月銷售數據，營收數值與預期答案及 SQL 結果完全一致，並提供正確之極值與總計資訊，回答清晰完整。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "line",
+    "actual_chart_type": "line",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "請列出 北美洲 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "TIMEOUT",
+    "sql_result": null,
+    "answer": "",
+    "sql_correct": false,
+    "sql_score": 0,
+    "sql_reasoning": "Timeout exceeded",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": false,
+    "expected_chart_type": "line",
+    "actual_chart_type": null,
+    "plot_decision_correct": false,
+    "chart_json_valid": false,
+    "trace_type_correct": false,
+    "x_order_correct": false,
+    "trace_count_correct": false,
+    "e2e_success": false
+  },
+  {
+    "question": "請列出 NA 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "",
+    "sql_result": [],
+    "answer": "這次分析未能完成，請稍後重試。",
+    "sql_correct": false,
+    "sql_score": 0,
+    "sql_reasoning": "{'code': 'Timeout', 'message': 'litellm.Timeout: Request timed out after 120 seconds'}",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": false,
+    "expected_chart_type": "line",
+    "actual_chart_type": null,
+    "plot_decision_correct": false,
+    "chart_json_valid": false,
+    "trace_type_correct": false,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "請列出 APAC 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "SELECT strftime('%Y-%m', \"Order Date\") AS \"Month\", SUM(\"Total Revenue\") AS \"Total Revenue\", SUM(\"Quantity\") AS \"Quantity\", COUNT(DISTINCT \"Order ID\") AS \"Order Count\" FROM sales_data WHERE \"Region\" = 'APAC' AND \"Order Date\" >= '2023-01-01' AND \"Order Date\" <= '2024-12-31' GROUP BY strftime('%Y-%m', \"Order Date\") ORDER BY \"Month\" ASC;",
+    "sql_result": [
+      [
+        "2023-01",
+        822054.09,
+        1157,
+        267
+      ],
+      [
+        "2023-02",
+        1329738.3,
+        1459,
+        301
+      ],
+      [
+        "2023-03",
+        1052406.59,
+        1375,
+        282
+      ],
+      [
+        "2023-04",
+        763586.01,
+        1041,
+        256
+      ],
+      [
+        "2023-05",
+        674073.82,
+        1105,
+        241
+      ],
+      [
+        "2023-06",
+        830759.13,
+        1305,
+        310
+      ],
+      [
+        "2023-07",
+        990808.45,
+        1261,
+        246
+      ],
+      [
+        "2023-08",
+        997338.14,
+        1443,
+        301
+      ],
+      [
+        "2023-09",
+        1048499.48,
+        1484,
+        286
+      ],
+      [
+        "2023-10",
+        1689703.75,
+        2243,
+        463
+      ],
+      [
+        "2023-11",
+        1318367.34,
+        1832,
+        415
+      ],
+      [
+        "2023-12",
+        1551040.4,
+        1935,
+        404
+      ],
+      [
+        "2024-01",
+        1023548.28,
+        1170,
+        279
+      ],
+      [
+        "2024-02",
+        1077014.41,
+        1349,
+        285
+      ],
+      [
+        "2024-03",
+        939977.6799999999,
+        1317,
+        310
+      ],
+      [
+        "2024-04",
+        863529.43,
+        1256,
+        280
+      ],
+      [
+        "2024-05",
+        886098.48,
+        1462,
+        285
+      ],
+      [
+        "2024-06",
+        817457.43,
+        1127,
+        266
+      ],
+      [
+        "2024-07",
+        848425.63,
+        1346,
+        280
+      ],
+      [
+        "2024-08",
+        887144.67,
+        1177,
+        285
+      ],
+      [
+        "2024-09",
+        927894.35,
+        1256,
+        285
+      ],
+      [
+        "2024-10",
+        1388028.6,
+        1971,
+        416
+      ],
+      [
+        "2024-11",
+        998473.64,
+        1487,
+        386
+      ],
+      [
+        "2024-12",
+        1186079.19,
+        1676,
+        379
+      ]
+    ],
+    "answer": "APAC 區域 2023 至 2024 年共 24 個月的銷售趨勢顯示，總營收為 24,912,047.29（約 24.91M），月均營收約 1,038,001.97。最高月為 2023-10，營收 1,689,703.75；最低月為 2023-05，營收 674,073.82。2024 年總營收為 11,843,671.79，較 2023 年的 13,068,375.50 下降 9.37%。整體趨勢呈季節性波動，10 月與第四季較強，2024 年各月多落在 0.82M 至 1.39M 區間。\n\n| Month   | Total Revenue   | Quantity   | Order Count   |\n|:--------|:----------------|:-----------|:--------------|\n| 2023-01 | 822,054.09      | 1,157      | 267           |\n| 2023-02 | 1,329,738.30    | 1,459      | 301           |\n| 2023-03 | 1,052,406.59    | 1,375      | 282           |\n| 2023-04 | 763,586.01      | 1,041      | 256           |\n| 2023-05 | 674,073.82      | 1,105      | 241           |\n| 2023-06 | 830,759.13      | 1,305      | 310           |\n| 2023-07 | 990,808.45      | 1,261      | 246           |\n| 2023-08 | 997,338.14      | 1,443      | 301           |\n| 2023-09 | 1,048,499.48    | 1,484      | 286           |\n| 2023-10 | 1,689,703.75    | 2,243      | 463           |\n| 2023-11 | 1,318,367.34    | 1,832      | 415           |\n| 2023-12 | 1,551,040.40    | 1,935      | 404           |\n| 2024-01 | 1,023,548.28    | 1,170      | 279           |\n| 2024-02 | 1,077,014.41    | 1,349      | 285           |\n| 2024-03 | 939,977.68      | 1,317      | 310           |\n| 2024-04 | 863,529.43      | 1,256      | 280           |\n| 2024-05 | 886,098.48      | 1,462      | 285           |\n| 2024-06 | 817,457.43      | 1,127      | 266           |\n| 2024-07 | 848,425.63      | 1,346      | 280           |\n| 2024-08 | 887,144.67      | 1,177      | 285           |\n| 2024-09 | 927,894.35      | 1,256      | 285           |\n| 2024-10 | 1,388,028.60    | 1,971      | 416           |\n| 2024-11 | 998,473.64      | 1,487      | 386           |\n| 2024-12 | 1,186,079.19    | 1,676      | 379           |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 完整列出 24 個月的每月營收，數值與預期答案完全一致，額外提供的 Quantity、Order Count 及摘要統計（總營收、月均、最高/最低、年度比較）也與 SQL 結果吻合，回答清晰完整。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "line",
+    "actual_chart_type": "line",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "請列出 亞太區 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "",
+    "sql_result": [],
+    "answer": "這次分析未能完成，請稍後重試。",
+    "sql_correct": false,
+    "sql_score": 0,
+    "sql_reasoning": "{'code': 'Timeout', 'message': 'litellm.Timeout: Request timed out after 120 seconds'}",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": false,
+    "expected_chart_type": "line",
+    "actual_chart_type": null,
+    "plot_decision_correct": false,
+    "chart_json_valid": false,
+    "trace_type_correct": false,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "請列出 亞太地區 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "",
+    "sql_result": [],
+    "answer": "這次分析未能完成，請稍後重試。",
+    "sql_correct": false,
+    "sql_score": 0,
+    "sql_reasoning": "{'code': 'Timeout', 'message': 'litellm.Timeout: Request timed out after 120 seconds'}",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": false,
+    "expected_chart_type": "line",
+    "actual_chart_type": null,
+    "plot_decision_correct": false,
+    "chart_json_valid": false,
+    "trace_type_correct": false,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "請列出 Asia Pacific 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "",
+    "sql_result": [],
+    "answer": "這次分析未能完成，請稍後重試。",
+    "sql_correct": false,
+    "sql_score": 0,
+    "sql_reasoning": "{'code': 'Timeout', 'message': 'litellm.Timeout: Request timed out after 120 seconds'}",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": false,
+    "expected_chart_type": "line",
+    "actual_chart_type": null,
+    "plot_decision_correct": false,
+    "chart_json_valid": false,
+    "trace_type_correct": false,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "請列出 LATAM 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "",
+    "sql_result": [],
+    "answer": "這次分析未能完成，請稍後重試。",
+    "sql_correct": false,
+    "sql_score": 0,
+    "sql_reasoning": "{'code': 'Timeout', 'message': 'litellm.Timeout: Request timed out after 120 seconds'}",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": false,
+    "expected_chart_type": "line",
+    "actual_chart_type": null,
+    "plot_decision_correct": false,
+    "chart_json_valid": false,
+    "trace_type_correct": false,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "請列出 拉美 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "SELECT substr(\"Order Date\", 1, 7) AS \"Month\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Region\" = 'LATAM' AND \"Order Date\" >= '2023-01-01' AND \"Order Date\" <= '2024-12-31' GROUP BY substr(\"Order Date\", 1, 7) ORDER BY \"Month\" ASC",
+    "sql_result": [
+      [
+        "2023-01",
+        128809.06999999999
+      ],
+      [
+        "2023-02",
+        74582.27
+      ],
+      [
+        "2023-03",
+        163381.69
+      ],
+      [
+        "2023-04",
+        202940.83
+      ],
+      [
+        "2023-05",
+        169260.28
+      ],
+      [
+        "2023-06",
+        222615.32
+      ],
+      [
+        "2023-07",
+        200947.4
+      ],
+      [
+        "2023-08",
+        256823.97
+      ],
+      [
+        "2023-09",
+        109158.69
+      ],
+      [
+        "2023-10",
+        361258.12
+      ],
+      [
+        "2023-11",
+        183786.44
+      ],
+      [
+        "2023-12",
+        263118.78
+      ],
+      [
+        "2024-01",
+        196245.62
+      ],
+      [
+        "2024-02",
+        179974.96
+      ],
+      [
+        "2024-03",
+        249875.55
+      ],
+      [
+        "2024-04",
+        105297.72
+      ],
+      [
+        "2024-05",
+        303439.86
+      ],
+      [
+        "2024-06",
+        130272.3
+      ],
+      [
+        "2024-07",
+        195895.14
+      ],
+      [
+        "2024-08",
+        235501.6
+      ],
+      [
+        "2024-09",
+        137344.91
+      ],
+      [
+        "2024-10",
+        251586.17
+      ],
+      [
+        "2024-11",
+        264918.97
+      ],
+      [
+        "2024-12",
+        285080.63
+      ]
+    ],
+    "answer": "已列出 LATAM 區域 2023-01 至 2024-12 共 24 個月的銷售趨勢。期間總營收為 4,872,116.29，約 4.87M；其中 2023 年總營收為 2,336,682.86，2024 年為 2,535,433.43，2024 年較 2023 年增加 198,750.57，約 8.50%。最高月為 2023-10 的 361,258.12，最低月為 2024-04 的 105,297.72。圖表以月份為 x 軸、Total Revenue 為 y 軸的折線圖呈現。\n\n| Month   | Total Revenue   |\n|:--------|:----------------|\n| 2023-01 | 128,809.07      |\n| 2023-02 | 74,582.27       |\n| 2023-03 | 163,381.69      |\n| 2023-04 | 202,940.83      |\n| 2023-05 | 169,260.28      |\n| 2023-06 | 222,615.32      |\n| 2023-07 | 200,947.40      |\n| 2023-08 | 256,823.97      |\n| 2023-09 | 109,158.69      |\n| 2023-10 | 361,258.12      |\n| 2023-11 | 183,786.44      |\n| 2023-12 | 263,118.78      |\n| 2024-01 | 196,245.62      |\n| 2024-02 | 179,974.96      |\n| 2024-03 | 249,875.55      |\n| 2024-04 | 105,297.72      |\n| 2024-05 | 303,439.86      |\n| 2024-06 | 130,272.30      |\n| 2024-07 | 195,895.14      |\n| 2024-08 | 235,501.60      |\n| 2024-09 | 137,344.91      |\n| 2024-10 | 251,586.17      |\n| 2024-11 | 264,918.97      |\n| 2024-12 | 285,080.63      |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答完整列出 2023 至 2024 年每個月的銷售數據，且數值與預期答案完全一致，格式清晰可讀。額外提供的彙總資訊也正確，不影響答案品質。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "line",
+    "actual_chart_type": "line",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "請列出 南美 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "SELECT substr(\"Order Date\", 1, 7) AS \"Month\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Region\" = 'LATAM' AND \"Order Date\" BETWEEN '2023-01-01' AND '2024-12-31' GROUP BY substr(\"Order Date\", 1, 7) ORDER BY \"Month\" ASC;",
+    "sql_result": [
+      [
+        "2023-01",
+        128809.06999999999
+      ],
+      [
+        "2023-02",
+        74582.27
+      ],
+      [
+        "2023-03",
+        163381.69
+      ],
+      [
+        "2023-04",
+        202940.83
+      ],
+      [
+        "2023-05",
+        169260.28
+      ],
+      [
+        "2023-06",
+        222615.32
+      ],
+      [
+        "2023-07",
+        200947.4
+      ],
+      [
+        "2023-08",
+        256823.97
+      ],
+      [
+        "2023-09",
+        109158.69
+      ],
+      [
+        "2023-10",
+        361258.12
+      ],
+      [
+        "2023-11",
+        183786.44
+      ],
+      [
+        "2023-12",
+        263118.78
+      ],
+      [
+        "2024-01",
+        196245.62
+      ],
+      [
+        "2024-02",
+        179974.96
+      ],
+      [
+        "2024-03",
+        249875.55
+      ],
+      [
+        "2024-04",
+        105297.72
+      ],
+      [
+        "2024-05",
+        303439.86
+      ],
+      [
+        "2024-06",
+        130272.3
+      ],
+      [
+        "2024-07",
+        195895.14
+      ],
+      [
+        "2024-08",
+        235501.6
+      ],
+      [
+        "2024-09",
+        137344.91
+      ],
+      [
+        "2024-10",
+        251586.17
+      ],
+      [
+        "2024-11",
+        264918.97
+      ],
+      [
+        "2024-12",
+        285080.63
+      ]
+    ],
+    "answer": "已列出 LATAM 區域 2023-01 至 2024-12 共 24 個月的每月 Total Revenue 銷售趨勢。期間最高為 2023-10 的 361,258.12（約 361.26K），最低為 2024-04 的 105,297.72（約 105.30K）；2024-12 為 285,080.63（約 285.08K）。\n\n| Month   | Total Revenue   |\n|:--------|:----------------|\n| 2023-01 | 128,809.07      |\n| 2023-02 | 74,582.27       |\n| 2023-03 | 163,381.69      |\n| 2023-04 | 202,940.83      |\n| 2023-05 | 169,260.28      |\n| 2023-06 | 222,615.32      |\n| 2023-07 | 200,947.40      |\n| 2023-08 | 256,823.97      |\n| 2023-09 | 109,158.69      |\n| 2023-10 | 361,258.12      |\n| 2023-11 | 183,786.44      |\n| 2023-12 | 263,118.78      |\n| 2024-01 | 196,245.62      |\n| 2024-02 | 179,974.96      |\n| 2024-03 | 249,875.55      |\n| 2024-04 | 105,297.72      |\n| 2024-05 | 303,439.86      |\n| 2024-06 | 130,272.30      |\n| 2024-07 | 195,895.14      |\n| 2024-08 | 235,501.60      |\n| 2024-09 | 137,344.91      |\n| 2024-10 | 251,586.17      |\n| 2024-11 | 264,918.97      |\n| 2024-12 | 285,080.63      |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 完整列出 2023-01 至 2024-12 共 24 個月的每月銷售數據，數值與預期答案及 SQL 查詢結果完全一致，且表格格式清晰、資訊完整。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "line",
+    "actual_chart_type": "line",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "請列出 拉丁美洲 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "",
+    "sql_result": [],
+    "answer": "這次分析未能完成，請稍後重試。",
+    "sql_correct": false,
+    "sql_score": 0,
+    "sql_reasoning": "{'code': 'Timeout', 'message': 'litellm.Timeout: Request timed out after 120 seconds'}",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": false,
+    "expected_chart_type": "line",
+    "actual_chart_type": null,
+    "plot_decision_correct": false,
+    "chart_json_valid": false,
+    "trace_type_correct": false,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "請列出 Latin America 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "",
+    "sql_result": [],
+    "answer": "這次分析未能完成，請稍後重試。",
+    "sql_correct": false,
+    "sql_score": 0,
+    "sql_reasoning": "{'code': 'Timeout', 'message': 'litellm.Timeout: Request timed out after 120 seconds'}",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": false,
+    "expected_chart_type": "line",
+    "actual_chart_type": null,
+    "plot_decision_correct": false,
+    "chart_json_valid": false,
+    "trace_type_correct": false,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "2024 年第四季相較於 2023 年第四季，總銷售額增加了多少？",
+    "eval_type": "number",
+    "difficulty": "hard",
+    "sql_query": "SELECT (SELECT COALESCE(SUM(\"Total Revenue\"), 0) FROM sales_data WHERE \"Order Date\" BETWEEN '2024-10-01' AND '2024-12-31') - (SELECT COALESCE(SUM(\"Total Revenue\"), 0) FROM sales_data WHERE \"Order Date\" BETWEEN '2023-10-01' AND '2023-12-31') AS \"Increase\";",
+    "sql_result": [
+      [
+        -1688728.6900000013
+      ]
+    ],
+    "answer": "2024 年第四季總銷售額較 2023 年第四季減少 1,688,728.69（約 -1.69M）。\n\n| Increase      |\n|:--------------|\n| -1,688,728.69 |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案語意一致，數值 -1,688,728.69 與 SQL 結果吻合，並清楚指出銷售額減少，回答完整且格式正確。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "在 North America 區域，2023 年前五大客戶購買各產品類別的金額占比為何？",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "",
+    "sql_result": [],
+    "answer": "這次分析未能完成，請稍後重試。",
+    "sql_correct": false,
+    "sql_score": 0,
+    "sql_reasoning": "{'code': 'Timeout', 'message': 'litellm.Timeout: Request timed out after 120 seconds'}",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "在 北美 區域，2023 年前五大客戶購買各產品類別的金額占比為何？",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "",
+    "sql_result": [],
+    "answer": "這次分析未能完成，請稍後重試。",
+    "sql_correct": false,
+    "sql_score": 0,
+    "sql_reasoning": "{'code': 'Timeout', 'message': 'litellm.Timeout: Request timed out after 120 seconds'}",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "在 北美洲 區域，2023 年前五大客戶購買各產品類別的金額占比為何？",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "",
+    "sql_result": [],
+    "answer": "這次分析未能完成，請稍後重試。",
+    "sql_correct": false,
+    "sql_score": 0,
+    "sql_reasoning": "{'code': 'Timeout', 'message': 'litellm.Timeout: Request timed out after 120 seconds'}",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "在 NA 區域，2023 年前五大客戶購買各產品類別的金額占比為何？",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "",
+    "sql_result": [],
+    "answer": "這次分析未能完成，請稍後重試。",
+    "sql_correct": false,
+    "sql_score": 0,
+    "sql_reasoning": "{'code': 'Timeout', 'message': 'litellm.Timeout: Request timed out after 120 seconds'}",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "在 2023 到 2024 年間，哪位客戶的購買總額變動幅度（絕對值）最大？",
+    "eval_type": "string",
+    "difficulty": "hard",
+    "sql_query": "",
+    "sql_result": [],
+    "answer": "這次分析未能完成，請稍後重試。",
+    "sql_correct": false,
+    "sql_score": 0,
+    "sql_reasoning": "{'code': 'Timeout', 'message': 'litellm.Timeout: Request timed out after 120 seconds'}",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "產品類別 Electronics 的最大購買客戶是誰？",
+    "eval_type": "string",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Customer Name\" FROM sales_data WHERE \"Product Category\" = 'Electronics' GROUP BY \"Customer Name\" ORDER BY SUM(\"Total Revenue\") DESC, \"Customer Name\" ASC LIMIT 1;",
+    "sql_result": [
+      [
+        "Delta Prime Ltd."
+      ]
+    ],
+    "answer": "產品類別 Electronics 的最大購買客戶是 Delta Prime Ltd.\n\n| Customer Name    |\n|:-----------------|\n| Delta Prime Ltd. |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 回答與預期答案完全一致，且 SQL 查詢結果也正確對應。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "哪一個產品的平均單價 (ASP) 最高？",
+    "eval_type": "string",
+    "difficulty": "simple",
+    "sql_query": "SELECT \"Product Name\" AS product, AVG(\"ASP\") AS avg_asp FROM sales_data GROUP BY \"Product Name\" ORDER BY avg_asp DESC, \"Product Name\" ASC LIMIT 1;",
+    "sql_result": [
+      [
+        "Cloud License (Annual)",
+        5019.999189627229
+      ]
+    ],
+    "answer": "平均單價（ASP）最高的產品是 Cloud License (Annual)，平均 ASP 為 5,020.00。\n\n| product                | avg_asp   |\n|:-----------------------|:----------|\n| Cloud License (Annual) | 5,020.00  |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 正確識別平均 ASP 最高的產品為 Cloud License (Annual)，且數值與 SQL 結果一致，僅做合理四捨五入，回答完整清晰。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "各個區域 (Region) 最偏好（銷售額最高）的產品類別分別為何？",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Region\", \"Product Category\"\nFROM (\n  SELECT \"Region\", \"Product Category\",\n         ROW_NUMBER() OVER (\n           PARTITION BY \"Region\"\n           ORDER BY \"Total Revenue\" DESC, \"Product Category\" ASC\n         ) AS rn\n  FROM (\n    SELECT \"Region\", \"Product Category\", SUM(\"Total Revenue\") AS \"Total Revenue\"\n    FROM sales_data\n    GROUP BY \"Region\", \"Product Category\"\n  )\n)\nWHERE rn = 1\nORDER BY \"Region\" ASC;",
+    "sql_result": [
+      [
+        "APAC",
+        "Electronics"
+      ],
+      [
+        "EMEA",
+        "Electronics"
+      ],
+      [
+        "LATAM",
+        "Electronics"
+      ],
+      [
+        "North America",
+        "Electronics"
+      ]
+    ],
+    "answer": "各區域銷售額最高的產品類別均為 Electronics：APAC、EMEA、LATAM 與 North America 最偏好的產品類別都是 Electronics。\n\n| Region        | Product Category   |\n|:--------------|:-------------------|\n| APAC          | Electronics        |\n| EMEA          | Electronics        |\n| LATAM         | Electronics        |\n| North America | Electronics        |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案完全一致，正確列出各區域銷售額最高的產品類別為 Electronics，且數據與格式清晰完整。",
+    "has_expected_plot": false,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "請比較各區域的總銷售額。",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Region\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data GROUP BY \"Region\" ORDER BY \"Total Revenue\" DESC",
+    "sql_result": [
+      [
+        "North America",
+        40912387.32
+      ],
+      [
+        "EMEA",
+        31087500.6
+      ],
+      [
+        "APAC",
+        24912047.29
+      ],
+      [
+        "LATAM",
+        4872116.29
+      ]
+    ],
+    "answer": "各區域總銷售額比較：North America 最高，為 40,912,387.32（約 40.91M）；EMEA 為 31,087,500.60（約 31.09M）；APAC 為 24,912,047.29（約 24.91M）；LATAM 最低，為 4,872,116.29（約 4.87M）。\n\n| Region        | Total Revenue   |\n|:--------------|:----------------|\n| North America | 40,912,387.32   |\n| EMEA          | 31,087,500.60   |\n| APAC          | 24,912,047.29   |\n| LATAM         | 4,872,116.29    |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與 SQL 查詢結果及預期答案完全一致，各區域總銷售額數據正確，並完整列出所有區域。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "bar",
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "各產品類別的總銷售額分別是多少？請用圖表比較。",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Category\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data GROUP BY \"Product Category\" ORDER BY \"Total Revenue\" DESC;",
+    "sql_result": [
+      [
+        "Electronics",
+        57620257.12
+      ],
+      [
+        "Software",
+        30782384.73
+      ],
+      [
+        "Office Supplies",
+        13381409.65
+      ]
+    ],
+    "answer": "各產品類別總銷售額比較：Electronics 為 57,620,257.12（約 57.62M），Software 為 30,782,384.73（約 30.78M），Office Supplies 為 13,381,409.65（約 13.38M）。Electronics 的總銷售額最高。\n\n| Product Category   | Total Revenue   |\n|:-------------------|:----------------|\n| Electronics        | 57,620,257.12   |\n| Software           | 30,782,384.73   |\n| Office Supplies    | 13,381,409.65   |",
+    "sql_correct": true,
+    "sql_score": 7,
+    "sql_reasoning": "Agent 提供的各產品類別總銷售額數據完全正確，表格清晰且語意一致，但未實際提供圖表比較，僅以表格呈現，因此在完整性上略有不足。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "bar",
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "各產品類別的總銷售量各是多少？",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Category\", SUM(\"Quantity\") AS \"Total Quantity\" FROM sales_data GROUP BY \"Product Category\" ORDER BY \"Product Category\" ASC;",
+    "sql_result": [
+      [
+        "Electronics",
+        80460
+      ],
+      [
+        "Office Supplies",
+        29692
+      ],
+      [
+        "Software",
+        27278
+      ]
+    ],
+    "answer": "各產品類別的總銷售量為：Electronics 80,460、Office Supplies 29,692、Software 27,278。\n\n| Product Category   | Total Quantity   |\n|:-------------------|:-----------------|\n| Electronics        | 80,460           |\n| Office Supplies    | 29,692           |\n| Software           | 27,278           |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案及 SQL 執行結果完全一致，三個產品類別的總銷售量數值正確，且完整呈現所有類別資訊。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "bar",
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "各產品類別的訂單數量各有多少？",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Category\", COUNT(DISTINCT \"Order ID\") AS \"Order Count\" FROM sales_data GROUP BY \"Product Category\" ORDER BY \"Order Count\" DESC, \"Product Category\" ASC;",
+    "sql_result": [
+      [
+        "Electronics",
+        17820
+      ],
+      [
+        "Office Supplies",
+        6363
+      ],
+      [
+        "Software",
+        5817
+      ]
+    ],
+    "answer": "各產品類別的訂單數量為：Electronics 17,820 筆、Office Supplies 6,363 筆、Software 5,817 筆。\n\n| Product Category   | Order Count   |\n|:-------------------|:--------------|\n| Electronics        | 17,820        |\n| Office Supplies    | 6,363         |\n| Software           | 5,817         |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答完全正確，三個產品類別的訂單數量與預期答案及 SQL 結果完全一致，且以清單與表格形式清楚呈現，完整回答了問題。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "bar",
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "EMEA 區域中各國家的銷售額比較如何？",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Country\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Region\" = 'EMEA' GROUP BY \"Country\" ORDER BY SUM(\"Total Revenue\") DESC, \"Country\" ASC;",
+    "sql_result": [
+      [
+        "Germany",
+        8029456.63
+      ],
+      [
+        "Netherlands",
+        7894926.14
+      ],
+      [
+        "United Kingdom",
+        7782187.39
+      ],
+      [
+        "France",
+        7380930.44
+      ]
+    ],
+    "answer": "EMEA 區域中，Germany 的銷售額最高，為 8,029,456.63（約 8.03M）；Netherlands 為 7,894,926.14（約 7.89M）；United Kingdom 為 7,782,187.39（約 7.78M）；France 為 7,380,930.44（約 7.38M）。\n\n| Country        | Total Revenue   |\n|:---------------|:----------------|\n| Germany        | 8,029,456.63    |\n| Netherlands    | 7,894,926.14    |\n| United Kingdom | 7,782,187.39    |\n| France         | 7,380,930.44    |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答完整列出 EMEA 區域四個國家銷售額，且數值與預期答案及 SQL 結果完全一致；排序與比較說明也清楚。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "bar",
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "APAC 區域各國家的銷售額分別是多少？",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Country\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Region\" = 'APAC' GROUP BY \"Country\" ORDER BY SUM(\"Total Revenue\") DESC, \"Country\" ASC;",
+    "sql_result": [
+      [
+        "India",
+        5440972.36
+      ],
+      [
+        "Singapore",
+        5097002.05
+      ],
+      [
+        "Australia",
+        4998689.48
+      ],
+      [
+        "China",
+        4811050.54
+      ],
+      [
+        "Japan",
+        4564332.86
+      ]
+    ],
+    "answer": "APAC 區域五國銷售額以 India 最高（5,440,972.36），Japan 最低（4,564,332.86）；其餘為 Singapore 5,097,002.05、Australia 4,998,689.48、China 4,811,050.54。\n\n| Country   | Total Revenue   |\n|:----------|:----------------|\n| India     | 5,440,972.36    |\n| Singapore | 5,097,002.05    |\n| Australia | 4,998,689.48    |\n| China     | 4,811,050.54    |\n| Japan     | 4,564,332.86    |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 完整列出 APAC 區域五國及各國銷售額，數值與預期答案及 SQL 結果完全一致，格式清晰。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "bar",
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "北美區域各國的銷售額比較。",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Country\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Region\" = 'North America' GROUP BY \"Country\" ORDER BY \"Total Revenue\" DESC, \"Country\" ASC;",
+    "sql_result": [
+      [
+        "United States",
+        20786210.91
+      ],
+      [
+        "Canada",
+        20126176.41
+      ]
+    ],
+    "answer": "北美區域中，United States 的銷售額最高，為 20,786,210.91（約 20.79M）；Canada 為 20,126,176.41（約 20.13M）。兩者相差 660,034.50。\n\n| Country       | Total Revenue   |\n|:--------------|:----------------|\n| United States | 20,786,210.91   |\n| Canada        | 20,126,176.41   |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案的數值完全一致，且清晰呈現北美區域各國銷售額比較，格式正確並提供有效額外比較資訊。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "bar",
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "LATAM 區域各國家的銷售額分別是多少？",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Country\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Region\" = 'LATAM' GROUP BY \"Country\" ORDER BY \"Country\" ASC;",
+    "sql_result": [
+      [
+        "Brazil",
+        2463245.68
+      ],
+      [
+        "Mexico",
+        2408870.61
+      ]
+    ],
+    "answer": "LATAM 區域中，Brazil 的銷售額為 2,463,245.68（約 2.46M），Mexico 的銷售額為 2,408,870.61（約 2.41M）。\n\n| Country   | Total Revenue   |\n|:----------|:----------------|\n| Brazil    | 2,463,245.68    |\n| Mexico    | 2,408,870.61    |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的數據與預期答案完全一致，數值精確且單位格式正確，並完整列出 LATAM 區域兩國的銷售額。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "bar",
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "Electronics 類別中各產品的銷售額排名為何？",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\", \"Total Revenue\", RANK() OVER (ORDER BY \"Total Revenue\" DESC, \"Product Name\" ASC) AS \"Rank\"\nFROM (\n  SELECT \"Product Name\", SUM(\"Total Revenue\") AS \"Total Revenue\"\n  FROM sales_data\n  WHERE \"Product Category\" = 'Electronics'\n  GROUP BY \"Product Name\"\n)\nORDER BY \"Total Revenue\" DESC, \"Product Name\" ASC;",
+    "sql_result": [
+      [
+        "Enterprise Laptop X1",
+        30063540.89,
+        1
+      ],
+      [
+        "Pro Smartphone 15",
+        18803391.54,
+        2
+      ],
+      [
+        "4K Monitor 27\"",
+        5545525.51,
+        3
+      ],
+      [
+        "Docking Station",
+        1612983.33,
+        4
+      ],
+      [
+        "Wireless Headset",
+        1594815.85,
+        5
+      ]
+    ],
+    "answer": "Electronics 類別中，銷售額排名依序為：Enterprise Laptop X1 約 30,063,540.89（約 30.06M）、Pro Smartphone 15 約 18,803,391.54（約 18.80M）、4K Monitor 27\" 約 5,545,525.51（約 5.55M）、Docking Station 約 1,612,983.33（約 1.61M）、Wireless Headset 約 1,594,815.85（約 1.59M）。\n\n| Product Name         | Total Revenue   | Rank   |\n|:---------------------|:----------------|:-------|\n| Enterprise Laptop X1 | 30,063,540.89   | 1      |\n| Pro Smartphone 15    | 18,803,391.54   | 2      |\n| 4K Monitor 27\"       | 5,545,525.51    | 3      |\n| Docking Station      | 1,612,983.33    | 4      |\n| Wireless Headset     | 1,594,815.85    | 5      |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答完整列出 Electronics 類別中所有產品的銷售額排名，且各項數值與預期答案及 SQL 結果完全一致，僅多了約百萬的簡易單位說明，不影響正確性。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "bar",
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "Office Supplies 類別各產品的銷售額比較。",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Product Category\" = 'Office Supplies' GROUP BY \"Product Name\" ORDER BY \"Total Revenue\" DESC, \"Product Name\" ASC;",
+    "sql_result": [
+      [
+        "Standing Desk",
+        6175799.29
+      ],
+      [
+        "Ergonomic Chair",
+        5573500.31
+      ],
+      [
+        "Meeting Whiteboard",
+        1632110.05
+      ]
+    ],
+    "answer": "Office Supplies 類別中，Standing Desk 銷售額最高，為 6,175,799.29（約 6.18M）；Ergonomic Chair 為 5,573,500.31（約 5.57M）；Meeting Whiteboard 為 1,632,110.05（約 1.63M）。\n\n| Product Name       | Total Revenue   |\n|:-------------------|:----------------|\n| Standing Desk      | 6,175,799.29    |\n| Ergonomic Chair    | 5,573,500.31    |\n| Meeting Whiteboard | 1,632,110.05    |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回應完整列出了 Office Supplies 類別下三個產品的銷售額，且數值與預期答案及 SQL 查詢結果完全一致，並提供了清晰的排序與表格呈現，整體回答正確且完整。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "bar",
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "Software 類別中各產品的銷售額分別是多少？",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Product Category\" = 'Software' GROUP BY \"Product Name\" ORDER BY \"Product Name\" ASC;",
+    "sql_result": [
+      [
+        "Cloud License (Annual)",
+        15115368.98
+      ],
+      [
+        "Security Suite",
+        12481281.4
+      ],
+      [
+        "Team Collaboration Tool",
+        3185734.35
+      ]
+    ],
+    "answer": "Software 類別各產品銷售額：Cloud License (Annual) 為 15,115,368.98（約 15.12M）；Security Suite 為 12,481,281.40（約 12.48M）；Team Collaboration Tool 為 3,185,734.35（約 3.19M）。\n\n| Product Name            | Total Revenue   |\n|:------------------------|:----------------|\n| Cloud License (Annual)  | 15,115,368.98   |\n| Security Suite          | 12,481,281.40   |\n| Team Collaboration Tool | 3,185,734.35    |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案及 SQL 結果完全一致，數值、產品名稱與類別皆正確，並完整列出三個產品銷售額；附加的約略金額與表格格式不影響正確性。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "bar",
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "2023 年各季度的銷售額分別是多少？",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT CASE CAST(substr(\"Order Date\", 6, 2) AS INTEGER) WHEN 1 THEN 'Q1' WHEN 2 THEN 'Q2' WHEN 3 THEN 'Q3' ELSE 'Q4' END AS \"Quarter\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE substr(\"Order Date\", 1, 4) = '2023' GROUP BY 1 ORDER BY 1;",
+    "sql_result": [
+      [
+        "Q1",
+        3578066.96
+      ],
+      [
+        "Q2",
+        4197692.72
+      ],
+      [
+        "Q3",
+        3896789.16
+      ],
+      [
+        "Q4",
+        39733800.42
+      ]
+    ],
+    "answer": "2023 年各季度銷售額：Q1 為 3,578,066.96，Q2 為 4,197,692.72，Q3 為 3,896,789.16，Q4 為 39,733,800.42。Q4 最高，約 39.73M；Q1 最低，約 3.58M。\n\n| Quarter   | Total Revenue   |\n|:----------|:----------------|\n| Q1        | 3,578,066.96    |\n| Q2        | 4,197,692.72    |\n| Q3        | 3,896,789.16    |\n| Q4        | 39,733,800.42   |",
+    "sql_correct": false,
+    "sql_score": 1,
+    "sql_reasoning": "Agent 回答的 2023 年各季度銷售額與預期正確答案完全不一致，所有季度數值均有明顯錯誤，因此核心數據不正確。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "bar",
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "2024 年各季度的銷售額分別是多少？",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT CASE WHEN CAST(strftime('%m', \"Order Date\") AS INTEGER) BETWEEN 1 AND 3 THEN 'Q1' WHEN CAST(strftime('%m', \"Order Date\") AS INTEGER) BETWEEN 4 AND 6 THEN 'Q2' WHEN CAST(strftime('%m', \"Order Date\") AS INTEGER) BETWEEN 7 AND 9 THEN 'Q3' ELSE 'Q4' END AS \"Quarter\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE strftime('%Y', \"Order Date\") = '2024' GROUP BY CASE WHEN CAST(strftime('%m', \"Order Date\") AS INTEGER) BETWEEN 1 AND 3 THEN 'Q1' WHEN CAST(strftime('%m', \"Order Date\")",
+    "sql_result": [
+      [
+        "Q1",
+        11904701.6
+      ],
+      [
+        "Q2",
+        10612942.57
+      ],
+      [
+        "Q3",
+        11459193.96
+      ],
+      [
+        "Q4",
+        16400864.11
+      ]
+    ],
+    "answer": "2024 年各季度銷售額：Q1 為 11,904,701.60 元，Q2 為 10,612,942.57 元，Q3 為 11,459,193.96 元，Q4 為 16,400,864.11 元。\n\n| Quarter   | Total Revenue   |\n|:----------|:----------------|\n| Q1        | 11,904,701.60   |\n| Q2        | 10,612,942.57   |\n| Q3        | 11,459,193.96   |\n| Q4        | 16,400,864.11   |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案完全一致，各季度銷售額數據精確匹配，格式清晰且完整。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "bar",
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "銷售額前五名的產品分別是哪些？請用圖表呈現。",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\" AS product, SUM(\"Total Revenue\") AS total_revenue FROM sales_data GROUP BY \"Product Name\" ORDER BY total_revenue DESC, \"Product Name\" ASC LIMIT 5;",
+    "sql_result": [
+      [
+        "Enterprise Laptop X1",
+        30063540.89
+      ],
+      [
+        "Pro Smartphone 15",
+        18803391.54
+      ],
+      [
+        "Cloud License (Annual)",
+        15115368.98
+      ],
+      [
+        "Security Suite",
+        12481281.4
+      ],
+      [
+        "Standing Desk",
+        6175799.29
+      ]
+    ],
+    "answer": "銷售額前五名產品依序為 Enterprise Laptop X1、Pro Smartphone 15、Cloud License (Annual)、Security Suite、Standing Desk。圖表以長條圖呈現各產品總銷售額。\n\n| product                | total_revenue   |\n|:-----------------------|:----------------|\n| Enterprise Laptop X1   | 30,063,540.89   |\n| Pro Smartphone 15      | 18,803,391.54   |\n| Cloud License (Annual) | 15,115,368.98   |\n| Security Suite         | 12,481,281.40   |\n| Standing Desk          | 6,175,799.29    |",
+    "sql_correct": true,
+    "sql_score": 8,
+    "sql_reasoning": "Agent 的銷售額排名與數值均與預期答案完全一致，僅以表格和文字說明替代實際圖表呈現，屬次要完整性缺失。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "bar",
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "銷售量前五名的產品是哪些？",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Name\" AS product, SUM(\"Quantity\") AS total_quantity FROM sales_data GROUP BY \"Product Name\" ORDER BY total_quantity DESC, \"Product Name\" ASC LIMIT 5;",
+    "sql_result": [
+      [
+        "Enterprise Laptop X1",
+        25023
+      ],
+      [
+        "Pro Smartphone 15",
+        20924
+      ],
+      [
+        "Team Collaboration Tool",
+        15949
+      ],
+      [
+        "4K Monitor 27\"",
+        15834
+      ],
+      [
+        "Ergonomic Chair",
+        13955
+      ]
+    ],
+    "answer": "銷售量前五名的產品依序為：Enterprise Laptop X1（25,023）、Pro Smartphone 15（20,924）、Team Collaboration Tool（15,949）、4K Monitor 27\"（15,834）、Ergonomic Chair（13,955）。\n\n| product                 | total_quantity   |\n|:------------------------|:-----------------|\n| Enterprise Laptop X1    | 25,023           |\n| Pro Smartphone 15       | 20,924           |\n| Team Collaboration Tool | 15,949           |\n| 4K Monitor 27\"          | 15,834           |\n| Ergonomic Chair         | 13,955           |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案及 SQL 執行結果完全一致，產品名稱與數值均正確，並以清晰的文字與表格呈現。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "bar",
+    "actual_chart_type": "bar",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "請呈現 Electronics 類別在 2023 至 2024 年的月銷售額趨勢。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "SELECT strftime('%Y-%m', \"Order Date\") AS \"Month\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Product Category\" = 'Electronics' AND \"Order Date\" BETWEEN '2023-01-01' AND '2024-12-31' GROUP BY strftime('%Y-%m', \"Order Date\") ORDER BY \"Month\" ASC",
+    "sql_result": [
+      [
+        "2023-01",
+        2250196.86
+      ],
+      [
+        "2023-02",
+        1882487.1199999999
+      ],
+      [
+        "2023-03",
+        2390160.42
+      ],
+      [
+        "2023-04",
+        2115432.07
+      ],
+      [
+        "2023-05",
+        1978043.16
+      ],
+      [
+        "2023-06",
+        1890174.31
+      ],
+      [
+        "2023-07",
+        2049275.2
+      ],
+      [
+        "2023-08",
+        2786933.94
+      ],
+      [
+        "2023-09",
+        1958577.72
+      ],
+      [
+        "2023-10",
+        3459884.13
+      ],
+      [
+        "2023-11",
+        3205230.84
+      ],
+      [
+        "2023-12",
+        3029205.14
+      ],
+      [
+        "2024-01",
+        2467423.44
+      ],
+      [
+        "2024-02",
+        2019035.17
+      ],
+      [
+        "2024-03",
+        2224218.34
+      ],
+      [
+        "2024-04",
+        1767958.89
+      ],
+      [
+        "2024-05",
+        2244984.44
+      ],
+      [
+        "2024-06",
+        1808159.0
+      ],
+      [
+        "2024-07",
+        2328441.65
+      ],
+      [
+        "2024-08",
+        2332283.44
+      ],
+      [
+        "2024-09",
+        2127707.99
+      ],
+      [
+        "2024-10",
+        3229179.13
+      ],
+      [
+        "2024-11",
+        3016799.79
+      ],
+      [
+        "2024-12",
+        3058464.93
+      ]
+    ],
+    "answer": "Electronics 類別在 2023 至 2024 年的月銷售額呈現明顯季節性：每年 Q4（10–12 月）明顯較高，其中最高為 2023-10 的 3,459,884.13，最低為 2024-04 的 1,767,958.89。2023 年合計 28,995,600.91，2024 年合計 28,624,656.21，兩年合計 57,620,257.12。\n\n| Month   | Total Revenue   |\n|:--------|:----------------|\n| 2023-01 | 2,250,196.86    |\n| 2023-02 | 1,882,487.12    |\n| 2023-03 | 2,390,160.42    |\n| 2023-04 | 2,115,432.07    |\n| 2023-05 | 1,978,043.16    |\n| 2023-06 | 1,890,174.31    |\n| 2023-07 | 2,049,275.20    |\n| 2023-08 | 2,786,933.94    |\n| 2023-09 | 1,958,577.72    |\n| 2023-10 | 3,459,884.13    |\n| 2023-11 | 3,205,230.84    |\n| 2023-12 | 3,029,205.14    |\n| 2024-01 | 2,467,423.44    |\n| 2024-02 | 2,019,035.17    |\n| 2024-03 | 2,224,218.34    |\n| 2024-04 | 1,767,958.89    |\n| 2024-05 | 2,244,984.44    |\n| 2024-06 | 1,808,159.00    |\n| 2024-07 | 2,328,441.65    |\n| 2024-08 | 2,332,283.44    |\n| 2024-09 | 2,127,707.99    |\n| 2024-10 | 3,229,179.13    |\n| 2024-11 | 3,016,799.79    |\n| 2024-12 | 3,058,464.93    |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 完整列出 2023 至 2024 各月數值，且與預期答案及 SQL 結果一致；補充的極值與年度合計也計算正確。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "line",
+    "actual_chart_type": "line",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "請呈現 Office Supplies 類別在 2023 至 2024 年的月銷售額趨勢。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "SELECT substr(\"Order Date\", 1, 7) AS \"Month\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Product Category\" = 'Office Supplies' AND \"Order Date\" >= '2023-01-01' AND \"Order Date\" <= '2024-12-31' GROUP BY substr(\"Order Date\", 1, 7) ORDER BY \"Month\" ASC;",
+    "sql_result": [
+      [
+        "2023-01",
+        498829.33
+      ],
+      [
+        "2023-02",
+        435546.96
+      ],
+      [
+        "2023-03",
+        483640.77
+      ],
+      [
+        "2023-04",
+        454930.75
+      ],
+      [
+        "2023-05",
+        509642.3
+      ],
+      [
+        "2023-06",
+        538001.14
+      ],
+      [
+        "2023-07",
+        478250.93
+      ],
+      [
+        "2023-08",
+        480105.57
+      ],
+      [
+        "2023-09",
+        623274.6
+      ],
+      [
+        "2023-10",
+        833480.66
+      ],
+      [
+        "2023-11",
+        715247.49
+      ],
+      [
+        "2023-12",
+        734079.82
+      ],
+      [
+        "2024-01",
+        528060.04
+      ],
+      [
+        "2024-02",
+        589417.91
+      ],
+      [
+        "2024-03",
+        531712.36
+      ],
+      [
+        "2024-04",
+        509413.5
+      ],
+      [
+        "2024-05",
+        496057.07
+      ],
+      [
+        "2024-06",
+        415290.13
+      ],
+      [
+        "2024-07",
+        517647.86
+      ],
+      [
+        "2024-08",
+        395610.77
+      ],
+      [
+        "2024-09",
+        533647.08
+      ],
+      [
+        "2024-10",
+        731465.54
+      ],
+      [
+        "2024-11",
+        546216.68
+      ],
+      [
+        "2024-12",
+        801840.39
+      ]
+    ],
+    "answer": "Office Supplies 類別在 2023 至 2024 年呈現明顯季節性：2023 年 10 月最高，為 833,480.66（約 0.83M）；2024 年 8 月最低，為 395,610.77（約 0.40M）。2023 年 12 月為 734,079.82，2024 年 12 月為 801,840.39，第四季通常較高；2024 年總計 6,596,379.33，略低於 2023 年 6,785,030.32。\n\n| Month   | Total Revenue   |\n|:--------|:----------------|\n| 2023-01 | 498,829.33      |\n| 2023-02 | 435,546.96      |\n| 2023-03 | 483,640.77      |\n| 2023-04 | 454,930.75      |\n| 2023-05 | 509,642.30      |\n| 2023-06 | 538,001.14      |\n| 2023-07 | 478,250.93      |\n| 2023-08 | 480,105.57      |\n| 2023-09 | 623,274.60      |\n| 2023-10 | 833,480.66      |\n| 2023-11 | 715,247.49      |\n| 2023-12 | 734,079.82      |\n| 2024-01 | 528,060.04      |\n| 2024-02 | 589,417.91      |\n| 2024-03 | 531,712.36      |\n| 2024-04 | 509,413.50      |\n| 2024-05 | 496,057.07      |\n| 2024-06 | 415,290.13      |\n| 2024-07 | 517,647.86      |\n| 2024-08 | 395,610.77      |\n| 2024-09 | 533,647.08      |\n| 2024-10 | 731,465.54      |\n| 2024-11 | 546,216.68      |\n| 2024-12 | 801,840.39      |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 提供了 2023 至 2024 年每月完整銷售額，數值與預期答案完全一致，且年度總計與極值均正確。回答清晰完整並附加了趨勢摘要。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "line",
+    "actual_chart_type": "line",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "請呈現 Software 類別在 2023 至 2024 年的月銷售額趨勢。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "SELECT strftime('%Y-%m', \"Order Date\") AS \"Month\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Product Category\" = 'Software' AND \"Order Date\" BETWEEN '2023-01-01' AND '2024-12-31' GROUP BY strftime('%Y-%m', \"Order Date\") ORDER BY \"Month\" ASC;",
+    "sql_result": [
+      [
+        "2023-01",
+        829040.77
+      ],
+      [
+        "2023-02",
+        1879658.64
+      ],
+      [
+        "2023-03",
+        1022987.97
+      ],
+      [
+        "2023-04",
+        702162.53
+      ],
+      [
+        "2023-05",
+        829589.54
+      ],
+      [
+        "2023-06",
+        833631.1900000001
+      ],
+      [
+        "2023-07",
+        1575015.58
+      ],
+      [
+        "2023-08",
+        900278.27
+      ],
+      [
+        "2023-09",
+        940888.82
+      ],
+      [
+        "2023-10",
+        2546110.3
+      ],
+      [
+        "2023-11",
+        1690003.71
+      ],
+      [
+        "2023-12",
+        1876350.71
+      ],
+      [
+        "2024-01",
+        1342520.28
+      ],
+      [
+        "2024-02",
+        1070156.39
+      ],
+      [
+        "2024-03",
+        1132157.67
+      ],
+      [
+        "2024-04",
+        1295594.07
+      ],
+      [
+        "2024-05",
+        978996.02
+      ],
+      [
+        "2024-06",
+        1096489.45
+      ],
+      [
+        "2024-07",
+        1132146.0
+      ],
+      [
+        "2024-08",
+        1239607.1
+      ],
+      [
+        "2024-09",
+        852102.07
+      ],
+      [
+        "2024-10",
+        1818678.1
+      ],
+      [
+        "2024-11",
+        1384648.3699999999
+      ],
+      [
+        "2024-12",
+        1813571.18
+      ]
+    ],
+    "answer": "Software 類別在 2023 至 2024 年的月銷售額呈現波動。2023 年 10 月最高，為 2,546,110.30；2023 年 4 月最低，為 702,162.53。2023 年合計 15,625,718.03，2024 年合計 15,156,666.70，2024 年較 2023 年略低約 3.00%。24 個月合計 30,782,384.73，月均約 1,282,599.36。\n\n| Month   | Total Revenue   |\n|:--------|:----------------|\n| 2023-01 | 829,040.77      |\n| 2023-02 | 1,879,658.64    |\n| 2023-03 | 1,022,987.97    |\n| 2023-04 | 702,162.53      |\n| 2023-05 | 829,589.54      |\n| 2023-06 | 833,631.19      |\n| 2023-07 | 1,575,015.58    |\n| 2023-08 | 900,278.27      |\n| 2023-09 | 940,888.82      |\n| 2023-10 | 2,546,110.30    |\n| 2023-11 | 1,690,003.71    |\n| 2023-12 | 1,876,350.71    |\n| 2024-01 | 1,342,520.28    |\n| 2024-02 | 1,070,156.39    |\n| 2024-03 | 1,132,157.67    |\n| 2024-04 | 1,295,594.07    |\n| 2024-05 | 978,996.02      |\n| 2024-06 | 1,096,489.45    |\n| 2024-07 | 1,132,146.00    |\n| 2024-08 | 1,239,607.10    |\n| 2024-09 | 852,102.07      |\n| 2024-10 | 1,818,678.10    |\n| 2024-11 | 1,384,648.37    |\n| 2024-12 | 1,813,571.18    |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 提供的 24 個月數據與預期答案完全一致，且附加的年度合計、最高/最低及平均值均正確，回答完整清晰。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "line",
+    "actual_chart_type": "line",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "請呈現 2023 至 2024 年各季度的總銷售額趨勢。",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT\n  substr(\"Order Date\", 1, 4) || '-Q' || ((CAST(strftime('%m', \"Order Date\") AS INTEGER) - 1) / 3 + 1) AS \"Quarter\",\n  SUM(\"Total Revenue\") AS \"Total Revenue\"\nFROM sales_data\nWHERE substr(\"Order Date\", 1, 4) BETWEEN '2023' AND '2024'\nGROUP BY 1\nORDER BY 1;",
+    "sql_result": [
+      [
+        "2023-Q1",
+        11672548.84
+      ],
+      [
+        "2023-Q2",
+        9851606.99
+      ],
+      [
+        "2023-Q3",
+        11792600.63
+      ],
+      [
+        "2023-Q4",
+        18089592.8
+      ],
+      [
+        "2024-Q1",
+        11904701.6
+      ],
+      [
+        "2024-Q2",
+        10612942.57
+      ],
+      [
+        "2024-Q3",
+        11459193.96
+      ],
+      [
+        "2024-Q4",
+        16400864.11
+      ]
+    ],
+    "answer": "2023–2024 各季度總銷售額呈現 Q4 明顯高峰、Q2 相對低谷的季節性趨勢。2023 年最高為 Q4 的 18,089,592.80（約 18.09M），最低為 Q2 的 9,851,606.99（約 9.85M）；2024 年最高為 Q4 的 16,400,864.11（約 16.40M），最低為 Q2 的 10,612,942.57（約 10.61M）。2024 年總計 50,377,702.24，較 2023 年 51,406,349.26 下降約 2.00%。\n\n| Quarter   | Total Revenue   |\n|:----------|:----------------|\n| 2023-Q1   | 11,672,548.84   |\n| 2023-Q2   | 9,851,606.99    |\n| 2023-Q3   | 11,792,600.63   |\n| 2023-Q4   | 18,089,592.80   |\n| 2024-Q1   | 11,904,701.60   |\n| 2024-Q2   | 10,612,942.57   |\n| 2024-Q3   | 11,459,193.96   |\n| 2024-Q4   | 16,400,864.11   |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "所有 2023 至 2024 各季度總銷售額數據均與預期答案完全一致，並補充了正確的趨勢分析與年度合計，回答完整且數據準確。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "line",
+    "actual_chart_type": "line",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": false,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "請呈現 EMEA 區域 2023 至 2024 年各季度的銷售額趨勢。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "SELECT strftime('%Y', \"Order Date\") || '-Q' || ((CAST(strftime('%m', \"Order Date\") AS INTEGER) - 1) / 3 + 1) AS \"Quarter\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Region\" = 'EMEA' AND \"Order Date\" BETWEEN '2023-01-01' AND '2024-12-31' GROUP BY 1 ORDER BY \"Quarter\" ASC;",
+    "sql_result": [
+      [
+        "2023-Q1",
+        3325526.44
+      ],
+      [
+        "2023-Q2",
+        3129352.8
+      ],
+      [
+        "2023-Q3",
+        3545902.18
+      ],
+      [
+        "2023-Q4",
+        5609628.28
+      ],
+      [
+        "2024-Q1",
+        3467166.02
+      ],
+      [
+        "2024-Q2",
+        3285474.91
+      ],
+      [
+        "2024-Q3",
+        3726133.6
+      ],
+      [
+        "2024-Q4",
+        4998316.37
+      ]
+    ],
+    "answer": "EMEA 區域 2023 至 2024 年各季度銷售額呈現明顯的 Q4 高峰。2023 Q4 最高，為 5,609,628.28；2024 Q4 為 4,998,316.37。其餘季度多在 3.1M–3.7M 區間，整體趨勢為 Q1–Q3 相對穩定、Q4 明顯上升。\n\n| Quarter   | Total Revenue   |\n|:----------|:----------------|\n| 2023-Q1   | 3,325,526.44    |\n| 2023-Q2   | 3,129,352.80    |\n| 2023-Q3   | 3,545,902.18    |\n| 2023-Q4   | 5,609,628.28    |\n| 2024-Q1   | 3,467,166.02    |\n| 2024-Q2   | 3,285,474.91    |\n| 2024-Q3   | 3,726,133.60    |\n| 2024-Q4   | 4,998,316.37    |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 完整列出 2023 至 2024 年 EMEA 各季度銷售額，所有數值與預期答案及 SQL 結果完全一致，並簡要說明趨勢。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "line",
+    "actual_chart_type": "line",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": false,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "請呈現 North America 區域 2023 至 2024 年各季度的銷售額趨勢。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "SELECT\n  substr(\"Order Date\", 1, 4) || '-Q' || CAST((CAST(substr(\"Order Date\", 6, 2) AS INTEGER) - 1) / 3 + 1 AS TEXT) AS \"Quarter\",\n  SUM(\"Total Revenue\") AS \"Total Revenue\"\nFROM sales_data\nWHERE \"Region\" = 'North America'\n  AND substr(\"Order Date\", 1, 4) BETWEEN '2023' AND '2024'\nGROUP BY substr(\"Order Date\", 1, 4) || '-Q' || CAST((CAST(substr(\"Order Date\", 6, 2) AS INTEGER) - 1) / 3 + 1 AS TEXT)\nORDER BY \"Quarter\" ASC;",
+    "sql_result": [
+      [
+        "2023-Q1",
+        4776050.39
+      ],
+      [
+        "2023-Q2",
+        3859018.8
+      ],
+      [
+        "2023-Q3",
+        4643122.32
+      ],
+      [
+        "2023-Q4",
+        7112689.69
+      ],
+      [
+        "2024-Q1",
+        4770899.08
+      ],
+      [
+        "2024-Q2",
+        4221372.44
+      ],
+      [
+        "2024-Q3",
+        4500854.06
+      ],
+      [
+        "2024-Q4",
+        7028380.54
+      ]
+    ],
+    "answer": "North America 2023–2024 各季度銷售額呈現明顯季節性：每年 Q4 最高，2023-Q4 為 7,112,689.69（約 7.11M），2024-Q4 為 7,028,380.54（約 7.03M）；Q2 最低，2023-Q2 為 3,859,018.80，2024-Q2 為 4,221,372.44。整體趨勢在 Q1–Q3 維持約 4.2M–4.8M，Q4 明顯拉升。\n\n| Quarter   | Total Revenue   |\n|:----------|:----------------|\n| 2023-Q1   | 4,776,050.39    |\n| 2023-Q2   | 3,859,018.80    |\n| 2023-Q3   | 4,643,122.32    |\n| 2023-Q4   | 7,112,689.69    |\n| 2024-Q1   | 4,770,899.08    |\n| 2024-Q2   | 4,221,372.44    |\n| 2024-Q3   | 4,500,854.06    |\n| 2024-Q4   | 7,028,380.54    |",
+    "sql_correct": true,
+    "sql_score": 9,
+    "sql_reasoning": "Agent 的回答完整列出 North America 2023 至 2024 年各季度銷售額，數值與預期答案完全一致，並提供趨勢說明。僅有極少描述（如 Q1–Q3 約 4.2M–4.8M）對 Q2 略有不精準，但不影響核心數據正確性。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "line",
+    "actual_chart_type": "line",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": false,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "請呈現 APAC 區域 2023 至 2024 年各季度的銷售額趨勢。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "SELECT\n    substr(\"Order Date\", 1, 4) || '-Q' || CAST(((CAST(substr(\"Order Date\", 6, 2) AS INTEGER) - 1) / 3 + 1) AS TEXT) AS \"Quarter\",\n    SUM(\"Total Revenue\") AS \"Total Revenue\"\nFROM sales_data\nWHERE \"Region\" = 'APAC'\n  AND \"Order Date\" BETWEEN '2023-01-01' AND '2024-12-31'\nGROUP BY \"Quarter\"\nORDER BY \"Quarter\" ASC;",
+    "sql_result": [
+      [
+        "2023-Q1",
+        3204198.98
+      ],
+      [
+        "2023-Q2",
+        2268418.96
+      ],
+      [
+        "2023-Q3",
+        3036646.07
+      ],
+      [
+        "2023-Q4",
+        4559111.49
+      ],
+      [
+        "2024-Q1",
+        3040540.37
+      ],
+      [
+        "2024-Q2",
+        2567085.34
+      ],
+      [
+        "2024-Q3",
+        2663464.65
+      ],
+      [
+        "2024-Q4",
+        3572581.43
+      ]
+    ],
+    "answer": "APAC 區域 2023 至 2024 年各季度銷售額呈季度波動：2023-Q4 最高為 4,559,111.49（約 4.56M），2023-Q2 最低為 2,268,418.96（約 2.27M）；2024 年各季介於 2,567,085.34 至 3,572,581.43 之間，其中 2024-Q4 較 2023-Q4 回落。\n\n| Quarter   | Total Revenue   |\n|:----------|:----------------|\n| 2023-Q1   | 3,204,198.98    |\n| 2023-Q2   | 2,268,418.96    |\n| 2023-Q3   | 3,036,646.07    |\n| 2023-Q4   | 4,559,111.49    |\n| 2024-Q1   | 3,040,540.37    |\n| 2024-Q2   | 2,567,085.34    |\n| 2024-Q3   | 2,663,464.65    |\n| 2024-Q4   | 3,572,581.43    |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "數據完全匹配預期答案，並額外提供了合理的趨勢總結，回答清晰且完整。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "line",
+    "actual_chart_type": "line",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": false,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "請呈現 LATAM 區域 2023 至 2024 年各季度的銷售額趨勢。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "SELECT\n  substr(\"Order Date\", 1, 4) || '-Q' || CAST((CAST(substr(\"Order Date\", 6, 2) AS INTEGER) - 1) / 3 + 1 AS TEXT) AS \"Quarter\",\n  SUM(\"Total Revenue\") AS \"Total Revenue\"\nFROM sales_data\nWHERE \"Region\" = 'LATAM'\n  AND \"Order Date\" >= '2023-01-01'\n  AND \"Order Date\" <= '2024-12-31'\nGROUP BY\n  substr(\"Order Date\", 1, 4) || '-Q' || CAST((CAST(substr(\"Order Date\", 6, 2) AS INTEGER) - 1) / 3 + 1 AS TEXT)\nORDER BY \"Quarter\" ASC;",
+    "sql_result": [
+      [
+        "2023-Q1",
+        366773.03
+      ],
+      [
+        "2023-Q2",
+        594816.43
+      ],
+      [
+        "2023-Q3",
+        566930.06
+      ],
+      [
+        "2023-Q4",
+        808163.34
+      ],
+      [
+        "2024-Q1",
+        626096.13
+      ],
+      [
+        "2024-Q2",
+        539009.88
+      ],
+      [
+        "2024-Q3",
+        568741.65
+      ],
+      [
+        "2024-Q4",
+        801585.77
+      ]
+    ],
+    "answer": "LATAM 區域 2023 至 2024 年各季度銷售額呈現季度波動：2023-Q4 最高為 808,163.34，2024-Q4 為 801,585.77；2024-Q2 相對較低為 539,009.88。整體約在 0.54M 至 0.81M 區間。\n\n| Quarter   | Total Revenue   |\n|:----------|:----------------|\n| 2023-Q1   | 366,773.03      |\n| 2023-Q2   | 594,816.43      |\n| 2023-Q3   | 566,930.06      |\n| 2023-Q4   | 808,163.34      |\n| 2024-Q1   | 626,096.13      |\n| 2024-Q2   | 539,009.88      |\n| 2024-Q3   | 568,741.65      |\n| 2024-Q4   | 801,585.77      |",
+    "sql_correct": true,
+    "sql_score": 7,
+    "sql_reasoning": "表格完整呈現 2023 至 2024 年各季度銷售額，數值與預期答案完全一致；但文字摘要將整體範圍誤述為 0.54M 至 0.81M，忽略了 2023-Q1 的 366,773.03，屬於次要資訊錯誤。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "line",
+    "actual_chart_type": "line",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": false,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "請呈現美國 (United States) 2023 至 2024 年的月銷售額趨勢。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "",
+    "sql_result": [],
+    "answer": "這次分析未能完成，請稍後重試。",
+    "sql_correct": false,
+    "sql_score": 0,
+    "sql_reasoning": "{'code': 'Timeout', 'message': 'litellm.Timeout: Request timed out after 120 seconds'}",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": false,
+    "expected_chart_type": "line",
+    "actual_chart_type": null,
+    "plot_decision_correct": false,
+    "chart_json_valid": false,
+    "trace_type_correct": false,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "請呈現中國 (China) 2023 至 2024 年的月銷售額趨勢。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "SELECT strftime('%Y-%m', \"Order Date\") AS \"Month\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Country\" = 'China' AND \"Order Date\" >= '2023-01-01' AND \"Order Date\" <= '2024-12-31' GROUP BY strftime('%Y-%m', \"Order Date\") ORDER BY \"Month\" ASC;",
+    "sql_result": [
+      [
+        "2023-01",
+        122271.43000000001
+      ],
+      [
+        "2023-02",
+        217997.97
+      ],
+      [
+        "2023-03",
+        155798.93
+      ],
+      [
+        "2023-04",
+        159711.65
+      ],
+      [
+        "2023-05",
+        90498.47
+      ],
+      [
+        "2023-06",
+        119211.23
+      ],
+      [
+        "2023-07",
+        184845.86
+      ],
+      [
+        "2023-08",
+        159351.14
+      ],
+      [
+        "2023-09",
+        202680.49
+      ],
+      [
+        "2023-10",
+        242055.77
+      ],
+      [
+        "2023-11",
+        343885.79
+      ],
+      [
+        "2023-12",
+        313509.62
+      ],
+      [
+        "2024-01",
+        202387.33
+      ],
+      [
+        "2024-02",
+        189908.91
+      ],
+      [
+        "2024-03",
+        156728.95
+      ],
+      [
+        "2024-04",
+        227440.45
+      ],
+      [
+        "2024-05",
+        177640.05
+      ],
+      [
+        "2024-06",
+        146046.1
+      ],
+      [
+        "2024-07",
+        200251.88
+      ],
+      [
+        "2024-08",
+        172708.6
+      ],
+      [
+        "2024-09",
+        179663.09
+      ],
+      [
+        "2024-10",
+        319273.98
+      ],
+      [
+        "2024-11",
+        180883.74
+      ],
+      [
+        "2024-12",
+        346299.11
+      ]
+    ],
+    "answer": "China 2023 至 2024 年月度銷售額整體呈波動上升。2023 年總計 2,311,818.35（約 2.31M），2024 年總計 2,499,232.19（約 2.50M），2024 年較 2023 年增加 187,413.84（約 8.11%）。最高月為 2024-12 的 346,299.11，最低月為 2023-05 的 90,498.47。2023 年 Q4 明顯走高，2024 年則在 10 月與 12 月出現高峰。\n\n| Month   | Total Revenue   |\n|:--------|:----------------|\n| 2023-01 | 122,271.43      |\n| 2023-02 | 217,997.97      |\n| 2023-03 | 155,798.93      |\n| 2023-04 | 159,711.65      |\n| 2023-05 | 90,498.47       |\n| 2023-06 | 119,211.23      |\n| 2023-07 | 184,845.86      |\n| 2023-08 | 159,351.14      |\n| 2023-09 | 202,680.49      |\n| 2023-10 | 242,055.77      |\n| 2023-11 | 343,885.79      |\n| 2023-12 | 313,509.62      |\n| 2024-01 | 202,387.33      |\n| 2024-02 | 189,908.91      |\n| 2024-03 | 156,728.95      |\n| 2024-04 | 227,440.45      |\n| 2024-05 | 177,640.05      |\n| 2024-06 | 146,046.10      |\n| 2024-07 | 200,251.88      |\n| 2024-08 | 172,708.60      |\n| 2024-09 | 179,663.09      |\n| 2024-10 | 319,273.98      |\n| 2024-11 | 180,883.74      |\n| 2024-12 | 346,299.11      |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的月度銷售額數據與預期答案及 SQL 結果完全一致，並準確計算了年總計、差額、最高/最低月與年增率，回答完整清晰。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "line",
+    "actual_chart_type": "line",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "請呈現德國 (Germany) 2023 至 2024 年的月銷售額趨勢。",
+    "eval_type": "dataframe",
+    "difficulty": "hard",
+    "sql_query": "SELECT strftime('%Y-%m', \"Order Date\") AS \"Month\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Country\" = 'Germany' AND \"Order Date\" >= '2023-01-01' AND \"Order Date\" <= '2024-12-31' GROUP BY strftime('%Y-%m', \"Order Date\") ORDER BY \"Month\" ASC;",
+    "sql_result": [
+      [
+        "2023-01",
+        282227.71
+      ],
+      [
+        "2023-02",
+        253112.59
+      ],
+      [
+        "2023-03",
+        195784.1
+      ],
+      [
+        "2023-04",
+        181882.52
+      ],
+      [
+        "2023-05",
+        345127.11
+      ],
+      [
+        "2023-06",
+        354980.79000000004
+      ],
+      [
+        "2023-07",
+        228915.72
+      ],
+      [
+        "2023-08",
+        349921.49
+      ],
+      [
+        "2023-09",
+        281707.14
+      ],
+      [
+        "2023-10",
+        395562.51
+      ],
+      [
+        "2023-11",
+        641555.82
+      ],
+      [
+        "2023-12",
+        607051.04
+      ],
+      [
+        "2024-01",
+        343397.43
+      ],
+      [
+        "2024-02",
+        260760.48
+      ],
+      [
+        "2024-03",
+        219053.65
+      ],
+      [
+        "2024-04",
+        338695.16
+      ],
+      [
+        "2024-05",
+        242161.45
+      ],
+      [
+        "2024-06",
+        216617.9
+      ],
+      [
+        "2024-07",
+        308094.85
+      ],
+      [
+        "2024-08",
+        491799.42
+      ],
+      [
+        "2024-09",
+        216461.58
+      ],
+      [
+        "2024-10",
+        554698.89
+      ],
+      [
+        "2024-11",
+        437619.03
+      ],
+      [
+        "2024-12",
+        282268.25
+      ]
+    ],
+    "answer": "德國 2023–2024 年每月銷售額呈現明顯季節性波動。2023 年總計 4,117,828.54（約 4.12M），2024 年總計 3,911,628.09（約 3.91M），2024 年較 2023 年減少 206,200.45。最高月為 2023-11 的 641,555.82，最低月為 2023-04 的 181,882.52；2024 年最高為 2024-10 的 554,698.89，最低為 2024-09 的 216,461.58。整體趨勢在每年 11–12 月明顯上升，年中與年初相對較低。\n\n| Month   | Total Revenue   |\n|:--------|:----------------|\n| 2023-01 | 282,227.71      |\n| 2023-02 | 253,112.59      |\n| 2023-03 | 195,784.10      |\n| 2023-04 | 181,882.52      |\n| 2023-05 | 345,127.11      |\n| 2023-06 | 354,980.79      |\n| 2023-07 | 228,915.72      |\n| 2023-08 | 349,921.49      |\n| 2023-09 | 281,707.14      |\n| 2023-10 | 395,562.51      |\n| 2023-11 | 641,555.82      |\n| 2023-12 | 607,051.04      |\n| 2024-01 | 343,397.43      |\n| 2024-02 | 260,760.48      |\n| 2024-03 | 219,053.65      |\n| 2024-04 | 338,695.16      |\n| 2024-05 | 242,161.45      |\n| 2024-06 | 216,617.90      |\n| 2024-07 | 308,094.85      |\n| 2024-08 | 491,799.42      |\n| 2024-09 | 216,461.58      |\n| 2024-10 | 554,698.89      |\n| 2024-11 | 437,619.03      |\n| 2024-12 | 282,268.25      |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 完整列出 24 個月份的銷售額，所有數值均與預期答案及 SQL 結果一致，額外摘要與趨勢說明也正確。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "line",
+    "actual_chart_type": "line",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "各區域的銷售額占比分別是多少？請用圓餅圖呈現。",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Region\", SUM(\"Total Revenue\") AS \"Total Revenue\", ROUND(SUM(\"Total Revenue\") * 100.0 / NULLIF((SELECT SUM(\"Total Revenue\") FROM sales_data), 0), 2) AS \"Revenue Share %\" FROM sales_data GROUP BY \"Region\" ORDER BY SUM(\"Total Revenue\") DESC;",
+    "sql_result": [
+      [
+        "North America",
+        40912387.32,
+        40.2
+      ],
+      [
+        "EMEA",
+        31087500.6,
+        30.54
+      ],
+      [
+        "APAC",
+        24912047.29,
+        24.48
+      ],
+      [
+        "LATAM",
+        4872116.29,
+        4.79
+      ]
+    ],
+    "answer": "各區域銷售額占比：North America 40.20%（40,912,387.32，約 40.91M）；EMEA 30.54%（31,087,500.60，約 31.09M）；APAC 24.48%（24,912,047.29，約 24.91M）；LATAM 4.79%（4,872,116.29，約 4.87M）。\n\n| Region        | Total Revenue   | Revenue Share %   |\n|:--------------|:----------------|:------------------|\n| North America | 40,912,387.32   | 40.20             |\n| EMEA          | 31,087,500.60   | 30.54             |\n| APAC          | 24,912,047.29   | 24.48             |\n| LATAM         | 4,872,116.29    | 4.79              |",
+    "sql_correct": true,
+    "sql_score": 8,
+    "sql_reasoning": "Agent 的銷售額占比數據與預期答案完全一致，但缺少問題要求的圓餅圖呈現，以表格代替，因此在完整性上略有不足。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "pie",
+    "actual_chart_type": "pie",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "各產品類別的銷售額占比分別是多少？請用圓餅圖表示。",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Product Category\", SUM(\"Total Revenue\") AS \"Total Revenue\", SUM(\"Total Revenue\") * 100.0 / NULLIF((SELECT SUM(\"Total Revenue\") FROM sales_data), 0) AS \"Percentage\" FROM sales_data GROUP BY \"Product Category\" ORDER BY SUM(\"Total Revenue\") DESC;",
+    "sql_result": [
+      [
+        "Electronics",
+        57620257.12,
+        56.610300209949884
+      ],
+      [
+        "Software",
+        30782384.73,
+        30.242836943860503
+      ],
+      [
+        "Office Supplies",
+        13381409.65,
+        13.146862846189611
+      ]
+    ],
+    "answer": "各產品類別銷售額占比：Electronics 56.61%（57,620,257.12，約 57.62M）、Software 30.24%（30,782,384.73，約 30.78M）、Office Supplies 13.15%（13,381,409.65，約 13.38M）。\n\n| Product Category   | Total Revenue   | Percentage   |\n|:-------------------|:----------------|:-------------|\n| Electronics        | 57,620,257.12   | 56.61        |\n| Software           | 30,782,384.73   | 30.24        |\n| Office Supplies    | 13,381,409.65   | 13.15        |",
+    "sql_correct": false,
+    "sql_score": 6,
+    "sql_reasoning": "Agent 的數據與預期百分比完全一致，SQL 結果也正確，但缺少使用者明確要求的圓餅圖，僅以表格呈現，完整性不足。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "pie",
+    "actual_chart_type": "pie",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "各區域的訂單數量占比為何？",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Region\", COUNT(DISTINCT \"Order ID\") AS \"Order Count\", ROUND(COUNT(DISTINCT \"Order ID\") * 100.0 / (SELECT COUNT(DISTINCT \"Order ID\") FROM sales_data), 2) AS \"Order Share %\" FROM sales_data GROUP BY \"Region\" ORDER BY \"Order Share %\" DESC, \"Region\" ASC;",
+    "sql_result": [
+      [
+        "North America",
+        12123,
+        40.41
+      ],
+      [
+        "EMEA",
+        8893,
+        29.64
+      ],
+      [
+        "APAC",
+        7508,
+        25.03
+      ],
+      [
+        "LATAM",
+        1476,
+        4.92
+      ]
+    ],
+    "answer": "各區域訂單數量占比：North America 40.41%、EMEA 29.64%、APAC 25.03%、LATAM 4.92%。\n\n| Region        | Order Count   | Order Share %   |\n|:--------------|:--------------|:----------------|\n| North America | 12,123        | 40.41           |\n| EMEA          | 8,893         | 29.64           |\n| APAC          | 7,508         | 25.03           |\n| LATAM         | 1,476         | 4.92            |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 回答與預期答案完全一致，各區域占比數字精確匹配，且額外提供訂單數量不影響正確性，回答完整清晰。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "pie",
+    "actual_chart_type": "pie",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "2023 年各產品類別的銷售額占比分別是多少？",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT\n  \"Product Category\",\n  SUM(\"Total Revenue\") AS \"Total Revenue\",\n  ROUND(\n    SUM(\"Total Revenue\") * 100.0 / NULLIF(\n      (SELECT SUM(\"Total Revenue\") FROM sales_data WHERE \"Order Date\" BETWEEN '2023-01-01' AND '2023-12-31'),\n      0\n    ),\n    2\n  ) AS \"Sales Share %\"\nFROM sales_data\nWHERE \"Order Date\" BETWEEN '2023-01-01' AND '2023-12-31'\nGROUP BY \"Product Category\"\nORDER BY \"Sales Share %\" DESC, \"Product Category\" ASC;",
+    "sql_result": [
+      [
+        "Electronics",
+        28995600.91,
+        56.4
+      ],
+      [
+        "Software",
+        15625718.03,
+        30.4
+      ],
+      [
+        "Office Supplies",
+        6785030.32,
+        13.2
+      ]
+    ],
+    "answer": "2023 年各產品類別銷售額占比：Electronics 56.40%（28,995,600.91，約 28.996M）、Software 30.40%（15,625,718.03，約 15.626M）、Office Supplies 13.20%（6,785,030.32，約 6.785M）。\n\n| Product Category   | Total Revenue   | Sales Share %   |\n|:-------------------|:----------------|:----------------|\n| Electronics        | 28,995,600.91   | 56.40           |\n| Software           | 15,625,718.03   | 30.40           |\n| Office Supplies    | 6,785,030.32    | 13.20           |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 回答的銷售額占比與預期答案完全一致，且完整列出三個產品類別，附加的營收金額不影響正確性。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "pie",
+    "actual_chart_type": "pie",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "2024 年各產品類別的銷售額占比分別是多少？",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "WITH cat AS (\n  SELECT\n    \"Product Category\",\n    SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  WHERE \"Order Date\" >= '2024-01-01' AND \"Order Date\" <= '2024-12-31'\n  GROUP BY \"Product Category\"\n),\ntotal AS (\n  SELECT SUM(revenue) AS total_revenue FROM cat\n)\nSELECT\n  c.\"Product Category\",\n  c.revenue AS \"Sales Revenue\",\n  ROUND(c.revenue * 100.0 / NULLIF(t.total_revenue, 0), 2) AS \"Sales Share (%)\"\nFROM cat c\nCROSS JOIN total t\nORDER BY c.revenue DESC, c.\"Product Category\" ASC;",
+    "sql_result": [
+      [
+        "Electronics",
+        28624656.21,
+        56.82
+      ],
+      [
+        "Software",
+        15156666.7,
+        30.09
+      ],
+      [
+        "Office Supplies",
+        6596379.33,
+        13.09
+      ]
+    ],
+    "answer": "2024 年各產品類別銷售額占比：Electronics 56.82%、Software 30.09%、Office Supplies 13.09%。\n\n| Product Category   | Sales Revenue   | Sales Share (%)   |\n|:-------------------|:----------------|:------------------|\n| Electronics        | 28,624,656.21   | 56.82             |\n| Software           | 15,156,666.70   | 30.09             |\n| Office Supplies    | 6,596,379.33    | 13.09             |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案及 SQL 執行結果完全一致，包含各產品類別的銷售額占比（56.82%、30.09%、13.09%），數據準確且回答完整。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "pie",
+    "actual_chart_type": "pie",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "APAC 區域中各國家的銷售額占比分別是多少？",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Country\", ROUND(SUM(\"Total Revenue\") * 100.0 / NULLIF((SELECT SUM(\"Total Revenue\") FROM sales_data WHERE \"Region\" = 'APAC'), 0), 2) AS \"Sales Revenue Share (%)\" FROM sales_data WHERE \"Region\" = 'APAC' GROUP BY \"Country\" ORDER BY \"Sales Revenue Share (%)\" DESC, \"Country\" ASC;",
+    "sql_result": [
+      [
+        "India",
+        21.84
+      ],
+      [
+        "Singapore",
+        20.46
+      ],
+      [
+        "Australia",
+        20.07
+      ],
+      [
+        "China",
+        19.31
+      ],
+      [
+        "Japan",
+        18.32
+      ]
+    ],
+    "answer": "APAC 區域中，各國銷售額占比依序為：India 21.84%、Singapore 20.46%、Australia 20.07%、China 19.31%、Japan 18.32%。\n\n| Country   | Sales Revenue Share (%)   |\n|:----------|:--------------------------|\n| India     | 21.84                     |\n| Singapore | 20.46                     |\n| Australia | 20.07                     |\n| China     | 19.31                     |\n| Japan     | 18.32                     |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 回答完整列出 APAC 各國家銷售額占比，且數值與預期答案及 SQL 結果完全一致。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "pie",
+    "actual_chart_type": "bar",
+    "plot_decision_correct": false,
+    "chart_json_valid": true,
+    "trace_type_correct": false,
+    "x_order_correct": false,
+    "trace_count_correct": true,
+    "e2e_success": false
+  },
+  {
+    "question": "EMEA 區域中各國家的銷售額占比為何？",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT \"Country\", SUM(\"Total Revenue\") AS \"Revenue\", SUM(\"Total Revenue\") * 100.0 / NULLIF((SELECT SUM(\"Total Revenue\") FROM sales_data WHERE \"Region\" = 'EMEA'), 0) AS \"Sales Share %\" FROM sales_data WHERE \"Region\" = 'EMEA' GROUP BY \"Country\" ORDER BY SUM(\"Total Revenue\") DESC, \"Country\" ASC;",
+    "sql_result": [
+      [
+        "Germany",
+        8029456.63,
+        25.828569280349285
+      ],
+      [
+        "Netherlands",
+        7894926.14,
+        25.395821431845825
+      ],
+      [
+        "United Kingdom",
+        7782187.39,
+        25.033171659995077
+      ],
+      [
+        "France",
+        7380930.44,
+        23.742437627809807
+      ]
+    ],
+    "answer": "EMEA 區域中，Germany 銷售額占比最高，為 25.83%；Netherlands 為 25.40%；United Kingdom 為 25.03%；France 為 23.74%。四國占比接近，合計為 100%。\n\n| Country        | Revenue      | Sales Share %   |\n|:---------------|:-------------|:----------------|\n| Germany        | 8,029,456.63 | 25.83           |\n| Netherlands    | 7,894,926.14 | 25.40           |\n| United Kingdom | 7,782,187.39 | 25.03           |\n| France         | 7,380,930.44 | 23.74           |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案在語意上一致，各國家銷售額占比數據精確匹配（Germany 25.83、Netherlands 25.40、United Kingdom 25.03、France 23.74），並完整回答了問題。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "pie",
+    "actual_chart_type": "pie",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "北美區域各國的銷售額占比如何？",
+    "eval_type": "dataframe",
+    "difficulty": "medium",
+    "sql_query": "SELECT c.\"Country\", c.\"Revenue\", c.\"Revenue\" * 100.0 / NULLIF(t.\"Total Revenue\", 0) AS \"Revenue Share\" FROM (SELECT \"Country\", SUM(\"Total Revenue\") AS \"Revenue\" FROM sales_data WHERE \"Region\" = 'North America' GROUP BY \"Country\") AS c CROSS JOIN (SELECT SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Region\" = 'North America') AS t ORDER BY \"Revenue Share\" DESC, \"Country\" ASC;",
+    "sql_result": [
+      [
+        "United States",
+        20786210.91,
+        50.806643834833544
+      ],
+      [
+        "Canada",
+        20126176.41,
+        49.193356165166456
+      ]
+    ],
+    "answer": "北美區域中，美國銷售額為 20,786,210.91，占比 50.81%；加拿大銷售額為 20,126,176.41，占比 49.19%。\n\n| Country       | Revenue       | Revenue Share   |\n|:--------------|:--------------|:----------------|\n| United States | 20,786,210.91 | 50.81           |\n| Canada        | 20,126,176.41 | 49.19           |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 回答的占比與預期答案完全一致，且數據與 SQL 結果相符，並完整呈現北美各國銷售額占比。",
+    "has_expected_plot": true,
+    "expected_should_plot": true,
+    "actual_should_plot": true,
+    "expected_chart_type": "pie",
+    "actual_chart_type": "pie",
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "2024 年的總銷售額是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") FROM sales_data WHERE \"Order Date\" BETWEEN '2024-01-01' AND '2024-12-31';",
+    "sql_result": [
+      [
+        50377702.24
+      ]
+    ],
+    "answer": "2024 年的總銷售額為 50,377,702.24 元（約 50.38M）。\n\n| SUM(\"Total Revenue\")   |\n|:-----------------------|\n| 50,377,702.24          |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 給出的 50,377,702.24 與預期答案及 SQL 結果完全一致，附加的約 50.38M 也正確，回答完整且清晰。",
+    "has_expected_plot": true,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "Electronics 類別的總銷售額是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") FROM sales_data WHERE \"Product Category\" = 'Electronics';",
+    "sql_result": [
+      [
+        57620257.12
+      ]
+    ],
+    "answer": "Electronics 類別的總銷售額為 57,620,257.12，約 57.62M。\n\n| SUM(\"Total Revenue\")   |\n|:-----------------------|\n| 57,620,257.12          |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 回答的數值與預期答案完全一致，且以表格呈現，補充的約數「57.62M」不影響正確性。",
+    "has_expected_plot": true,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "2023 年的總銷售額有多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Order Date\" BETWEEN '2023-01-01' AND '2023-12-31';",
+    "sql_result": [
+      [
+        51406349.26
+      ]
+    ],
+    "answer": "2023 年的總銷售額為 51,406,349.26 元（約 51.41M）。\n\n| Total Revenue   |\n|:----------------|\n| 51,406,349.26   |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 回答的數值 51,406,349.26 與預期答案及 SQL 結果完全一致，僅有格式化的千位分隔符與近似值說明，語意正確且回答完整。",
+    "has_expected_plot": true,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "Software 類別的總銷售額為何？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE LOWER(\"Product Category\") = 'software';",
+    "sql_result": [
+      [
+        30782384.73
+      ]
+    ],
+    "answer": "Software 類別的總銷售額為 30,782,384.73（約 30.78M）。\n\n| Total Revenue   |\n|:----------------|\n| 30,782,384.73   |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 回答的總銷售額為 30,782,384.73，與預期答案及 SQL 執行結果完全一致，並清楚說明為 Software 類別的總銷售額。",
+    "has_expected_plot": true,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "銷售額最高的區域是哪一個？",
+    "eval_type": "string",
+    "difficulty": "simple",
+    "sql_query": "SELECT \"Region\" FROM sales_data GROUP BY \"Region\" ORDER BY SUM(\"Total Revenue\") DESC, \"Region\" ASC LIMIT 1;",
+    "sql_result": [
+      [
+        "North America"
+      ]
+    ],
+    "answer": "銷售額最高的區域是 North America。\n\n| Region        |\n|:--------------|\n| North America |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案一致，且明確指出銷售額最高的區域為 North America，數據完整且無誤。",
+    "has_expected_plot": true,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "銷售額最高的產品是什麼？",
+    "eval_type": "string",
+    "difficulty": "simple",
+    "sql_query": "SELECT \"Product Name\" AS product, SUM(\"Total Revenue\") AS total_revenue FROM sales_data GROUP BY \"Product Name\" ORDER BY total_revenue DESC, \"Product Name\" ASC LIMIT 1;",
+    "sql_result": [
+      [
+        "Enterprise Laptop X1",
+        30063540.89
+      ]
+    ],
+    "answer": "銷售額最高的產品是 Enterprise Laptop X1，總銷售額為 30,063,540.89（約 30.06M）。\n\n| product              | total_revenue   |\n|:---------------------|:----------------|\n| Enterprise Laptop X1 | 30,063,540.89   |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 正確辨識銷售額最高的產品為 Enterprise Laptop X1，且提供的銷售額與 SQL 結果完全一致；額外補充數據未影響正確性，回答完整清晰。",
+    "has_expected_plot": true,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "訂單數量最多的客戶是誰？",
+    "eval_type": "string",
+    "difficulty": "simple",
+    "sql_query": "SELECT \"Customer Name\" FROM sales_data GROUP BY \"Customer Name\" ORDER BY COUNT(DISTINCT \"Order ID\") DESC, \"Customer Name\" ASC LIMIT 1",
+    "sql_result": [
+      [
+        "Alpha Alpha Inc."
+      ]
+    ],
+    "answer": "訂單數量最多的客戶是 Alpha Alpha Inc.\n\n| Customer Name    |\n|:-----------------|\n| Alpha Alpha Inc. |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 回答與預期答案完全一致，客戶名稱正確且表達完整。",
+    "has_expected_plot": true,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "銷售額最高的國家是哪一個？",
+    "eval_type": "string",
+    "difficulty": "simple",
+    "sql_query": "SELECT \"Country\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data GROUP BY \"Country\" ORDER BY SUM(\"Total Revenue\") DESC, \"Country\" ASC LIMIT 1;",
+    "sql_result": [
+      [
+        "United States",
+        20786210.91
+      ]
+    ],
+    "answer": "銷售額最高的國家是 United States，總銷售額為 20,786,210.91（約 20.79M）。\n\n| Country       | Total Revenue   |\n|:--------------|:----------------|\n| United States | 20,786,210.91   |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 正確回答銷售額最高的國家為 United States，且金額與 SQL 查詢結果一致，回答完整清晰。",
+    "has_expected_plot": true,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "Enterprise Laptop X1 的平均單價 (ASP) 是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT AVG(\"ASP\") AS \"Average ASP\" FROM sales_data WHERE \"Product Name\" = 'Enterprise Laptop X1';",
+    "sql_result": [
+      [
+        1200.2529246465008
+      ]
+    ],
+    "answer": "Enterprise Laptop X1 的平均單價 (ASP) 為 1,200.25。\n\n| Average ASP   |\n|:--------------|\n| 1,200.25      |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 給出的 1,200.25 與預期答案 1200.25 語意一致，且與 SQL 結果四捨五入後相符，回答完整清晰。",
+    "has_expected_plot": true,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "美國 (United States) 總共有多少筆訂單？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT COUNT(DISTINCT \"Order ID\") FROM sales_data WHERE \"Country\" = 'United States';",
+    "sql_result": [
+      [
+        6054
+      ]
+    ],
+    "answer": "美國（United States）總共有 6,054 筆訂單。\n\n| COUNT(DISTINCT \"Order ID\")   |\n|:-----------------------------|\n| 6,054                        |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案及 SQL 執行結果完全一致，數據精確且表述完整清晰。",
+    "has_expected_plot": true,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "日本 (Japan) 的總銷售量是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Quantity\") AS total_quantity FROM sales_data WHERE \"Country\" = 'Japan';",
+    "sql_result": [
+      [
+        6222
+      ]
+    ],
+    "answer": "日本（Japan）的總銷售量為 6,222。\n\n| total_quantity   |\n|:-----------------|\n| 6,222            |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 回答與預期答案及 SQL 結果完全一致，且清楚說明日本的總銷售量為 6,222，僅有數字格式差異，不影響正確性。",
+    "has_expected_plot": true,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "Cloud License (Annual) 的總銷售額是多少？",
+    "eval_type": "number",
+    "difficulty": "simple",
+    "sql_query": "SELECT SUM(\"Total Revenue\") FROM sales_data WHERE \"Product Name\" = 'Cloud License (Annual)';",
+    "sql_result": [
+      [
+        15115368.98
+      ]
+    ],
+    "answer": "Cloud License (Annual) 的總銷售額為 15,115,368.98（約 15.12M）。\n\n| SUM(\"Total Revenue\")   |\n|:-----------------------|\n| 15,115,368.98          |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的答案與預期答案及 SQL 結果完全一致，格式與單位正確，並完整回答了問題。",
+    "has_expected_plot": true,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "2024 年相較 2023 年的總銷售額年增率是多少？(以百分比表示)",
+    "eval_type": "number",
+    "difficulty": "hard",
+    "sql_query": "SELECT (SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END) - SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END)) * 100.0 / NULLIF(SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END), 0) AS \"YoY Growth Rate\" FROM sales_data",
+    "sql_result": [
+      [
+        -2.0010116158946936
+      ]
+    ],
+    "answer": "2024 年相較 2023 年的總銷售額年增率為 -2.00%。\n\n| YoY Growth Rate   |\n|:------------------|\n| -2.00             |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 回答 -2.00% 與預期 -2.0 語意一致，且與 SQL 結果四捨五入後相符，單位與格式正確完整。",
+    "has_expected_plot": true,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "North America 區域 2024 年相較 2023 年的銷售額年增率為何？",
+    "eval_type": "number",
+    "difficulty": "hard",
+    "sql_query": "SELECT (SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END) - SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END)) * 100.0 / NULLIF(SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END), 0) AS \"YoY Growth Rate (%)\" FROM sales_data WHERE \"Region\" = 'North America' AND substr(\"Order Date\", 1, 4) IN ('2023', '2024');",
+    "sql_result": [
+      [
+        0.6406045855438646
+      ]
+    ],
+    "answer": "North America 區域 2024 年相較 2023 年的銷售額年增率為 0.64%。\n\n| YoY Growth Rate (%)   |\n|:----------------------|\n| 0.64                  |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案及 SQL 執行結果一致，0.64% 的表述符合年增率的語意，數據精確且回答完整。",
+    "has_expected_plot": true,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "APAC 區域 2024 年相較 2023 年的銷售額成長率是多少百分比？",
+    "eval_type": "number",
+    "difficulty": "hard",
+    "sql_query": "SELECT (SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END) - SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END)) * 100.0 / NULLIF(SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END), 0) AS \"Growth Rate %\" FROM sales_data WHERE \"Region\" = 'APAC'",
+    "sql_result": [
+      [
+        -9.37150688698837
+      ]
+    ],
+    "answer": "APAC 區域 2024 年銷售額相較 2023 年的成長率為 -9.37%。\n\n| Growth Rate %   |\n|:----------------|\n| -9.37           |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的成長率 -9.37% 與預期答案一致，且清楚說明區域與年份，回答完整。",
+    "has_expected_plot": true,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  },
+  {
+    "question": "EMEA 區域 2024 年對比 2023 年的銷售額年增率是多少？",
+    "eval_type": "number",
+    "difficulty": "hard",
+    "sql_query": "SELECT\n  (SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END) -\n   SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END)) * 100.0 /\n  NULLIF(SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END), 0) AS \"YoY Growth Rate\"\nFROM sales_data\nWHERE \"Region\" = 'EMEA';",
+    "sql_result": [
+      [
+        -0.8540378027362017
+      ]
+    ],
+    "answer": "EMEA 區域 2024 年銷售額年增率為 -0.85%，較 2023 年下降。\n\n| YoY Growth Rate   |\n|:------------------|\n| -0.85             |",
+    "sql_correct": true,
+    "sql_score": 10,
+    "sql_reasoning": "Agent 的回答與預期答案完全一致，數據準確且回答完整。",
+    "has_expected_plot": true,
+    "expected_should_plot": false,
+    "actual_should_plot": false,
+    "expected_chart_type": null,
+    "actual_chart_type": null,
+    "plot_decision_correct": true,
+    "chart_json_valid": true,
+    "trace_type_correct": true,
+    "x_order_correct": true,
+    "trace_count_correct": true,
+    "e2e_success": true
+  }
+]
