@@ -201,6 +201,8 @@ if conc:
             f"{best['aggregate_tps'] / base['aggregate_tps']:.1f} 倍；代價是單一請求平均 {best['avg_request_seconds']:.0f} 秒"
             f"（1 路 {base['avg_request_seconds']:.0f} 秒），顯存 {best['gpu_mem_mib']:,} MiB。"
             "只有一個人使用（例如面試 demo）時 1 路最快。")
+        st.info("2026-11-08 已套用到模型服務：4 路、各路共用 64k 上下文（kv-unified）、閒置 10 分鐘自動休眠釋放顯存。"
+                "套用後以伺服器程序參數與 /slots 確認：4 路、每路可用 65,536 tokens，顯存 15.7 GB。")
     for r in failed:
         st.warning(f"{r.get('drafting', 'mtp').upper()} {r['parallel']} 路：{r['failed']}")
     st.caption("總吞吐量＝所有請求生成的 tokens ÷ 整批耗時；prompt 快取命中＝固定開頭（資料庫說明與範例）"
