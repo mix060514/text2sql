@@ -24,6 +24,9 @@ MAX_QUERY_ROWS = int(os.getenv("MAX_QUERY_ROWS", "200"))
 MAX_RESULT_BYTES = int(os.getenv("MAX_RESULT_BYTES", "20000"))
 SQL_ATTEMPTS = int(os.getenv("SQL_ATTEMPTS", "3"))
 REPORT_ATTEMPTS = int(os.getenv("REPORT_ATTEMPTS", "2"))
+# The report writer only phrases already-validated rows; thinking made it take 20-85 s and
+# pushed requests past the 120 s timeout. Set to true to restore model thinking there.
+REPORT_THINKING = os.getenv("REPORT_THINKING", "false").strip().lower() in ("1", "true", "yes")
 
 if min(MAX_LLM_CALLS, AGENT_TIMEOUT_SECONDS, QUERY_TIMEOUT_SECONDS,
        MAX_QUERY_ROWS, MAX_RESULT_BYTES, SQL_ATTEMPTS, REPORT_ATTEMPTS) <= 0:

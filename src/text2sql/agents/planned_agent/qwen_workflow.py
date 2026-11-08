@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 from text2sql.config import (
     LLAMA_CPP_MODEL, LLAMA_CPP_API_BASE, LLAMA_CPP_API_KEY,
-    REPORT_ATTEMPTS, SQL_ATTEMPTS,
+    REPORT_ATTEMPTS, REPORT_THINKING, SQL_ATTEMPTS,
 )
 from .contracts import AnswerSubmission, SQLPlan, SemanticReview
 from .prompts import DOMAIN, REPORT_RULES
@@ -17,9 +17,10 @@ from .context import start_turn
 from .trace import Trace, record_chart, rows_preview
 
 
-def model():
+def model(thinking: bool = True):
+    extra = {} if thinking else {"extra_body": {"chat_template_kwargs": {"enable_thinking": False}}}
     return LiteLlm(model=LLAMA_CPP_MODEL, api_base=LLAMA_CPP_API_BASE,
-                   api_key=LLAMA_CPP_API_KEY, timeout=120)
+                   api_key=LLAMA_CPP_API_KEY, timeout=120, **extra)
 
 
 agent_sql = LlmAgent(
@@ -60,7 +61,7 @@ SQL 可執行不等於符合意圖。逐項核對指標、篩選、地區、時�
 )
 
 agent_report = LlmAgent(
-    name="agent_report", model=model(), output_schema=AnswerSubmission, output_key="report",
+    name="agent_report", model=model(thinking=REPORT_THINKING), output_schema=AnswerSubmission, output_key="report",
     disallow_transfer_to_parent=True, disallow_transfer_to_peers=True,
     include_contents="none",
     instruction=REPORT_RULES + """

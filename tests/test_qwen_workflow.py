@@ -214,3 +214,14 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ThinkingConfigTests(unittest.TestCase):
+    def test_only_report_writer_disables_thinking(self):
+        from text2sql.agents.planned_agent import qwen_workflow as qw
+
+        off = {"chat_template_kwargs": {"enable_thinking": False}}
+        self.assertEqual(qw.agent_report.model._additional_args.get("extra_body"), off)
+        for agent in (qw.agent_sql, qw.agent_review):
+            self.assertNotIn("extra_body", agent.model._additional_args)
+        self.assertNotIn("extra_body", qw.model(thinking=True)._additional_args)
