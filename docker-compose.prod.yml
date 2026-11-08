@@ -4,14 +4,19 @@ name: text2sql-prod
 services:
   webui:
     container_name: text2sql-webui-prod
-    image: text2sql-webui:v1.0.0
+    image: text2sql-webui:v1.1.0
+    build: .
     restart: always
     ports:
       - "8501:8501"
     environment:
       - WATCH_FILES=false
-      - LLAMA_CPP_API_BASE=http://llama-cpp:8080
+      # The local llama router runs on the host (0.0.0.0:18080); ai-stack no longer has llama-cpp.
+      - LLAMA_CPP_API_BASE=http://host.docker.internal:18080/v1
+      - LLAMA_CPP_MODEL=openai/swift15-27b-iq3-xxs
       - LLAMA_CPP_VL_API_BASE=http://llama-cpp-vl:8080
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     deploy:
       resources:
         reservations:
