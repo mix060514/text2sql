@@ -57,7 +57,7 @@ overall = report["overall"]["template"]
 st.subheader("模板題整體（132 題）")
 stages = [("2026-11-07 第一次完整評估", overall.get("2026-11-07")),
           ("基礎設施與評分修正後", overall.get("baseline")),
-          ("加入 few-shot 後", overall.get("few_shot"))]
+          ("定版（few-shot＋單一時限＋思考 4096）", overall.get("few_shot"))]
 table = pd.DataFrame([
     {"階段": name, "成功率": pct(s["success"]), "逾時率": pct(s["timeout"]),
      "一次解決率": pct(s["first_try"]), "平均耗時": sec(s["avg_seconds"])}
@@ -71,7 +71,7 @@ cx = report["overall"].get("complex") or {}
 if cx.get("baseline"):
     st.subheader("複雜題整體（34 種題型 × 原題與 2 個改寫）")
     rows = [("基準（嚴格比對）", cx.get("baseline")), ("基準（人工複核後）", cx.get("baseline_reviewed")),
-            ("加入 few-shot 後（嚴格比對）", cx.get("few_shot")), ("加入 few-shot 後（人工複核後）", cx.get("few_shot_reviewed"))]
+            ("定版（嚴格比對）", cx.get("few_shot")), ("定版（人工複核後）", cx.get("few_shot_reviewed"))]
     st.dataframe(pd.DataFrame([
         {"階段": name, "題數": s["n"], "成功率": pct(s["success"]), "逾時率": pct(s["timeout"]),
          "一次解決率": pct(s["first_try"]), "平均耗時": sec(s["avg_seconds"])}
@@ -143,6 +143,33 @@ def few_shot_table(rows: dict, name: str):
 few = report.get("few_shot", {})
 few_shot_table(few.get("template"), "模板題")
 few_shot_table(few.get("complex"), "複雜題（34 種 SQL-first 題型，每種含原題與 2 個改寫）")
+
+changes = report.get("changes") or {}
+if any(changes.values()):
+    st.divider()
+    st.subheader("逐題變化：基準 → 定版")
+    st.markdown("同一批題目在基準與定版各跑一次。除了看整體成功率，也逐題檢查**原本答對、定版答錯**的題目與原因，"
+                "確認優化沒有把原本對的題目改壞；模型生成本身有隨機性，少數翻轉可能只是波動。")
+    for key, name in (("template", "模板題"), ("complex", "複雜題（人工複核後）")):
+        c = changes.get(key)
+        if not c:
+            continue
+        st.markdown(f"**{name}**：修好 {len(c['fixed'])} 題、由對變錯 {len(c['regressed'])} 題")
+        if c["regressed"]:
+            st.dataframe(pd.DataFrame([{"題目": r["question"], "題型": r["type"], "原因": r["reason"]}
+                                       for r in c["regressed"]]), hide_index=True, width="stretch")
+        if c["fixed"]:
+            with st.expander(f"{name}修好的題目"):
+                st.dataframe(pd.DataFrame([{"題目": r["question"], "題型": r["type"]} for r in c["fixed"]]),
+                             hide_index=True, width="stretch")
+
+blk = (report.get("block") or {}).get("overall")
+if blk:
+    st.divider()
+    st.subheader("攔截題（定版）")
+    st.markdown("不該執行查詢的問題（越權、改資料、離題、提示注入等）：成功＝沒有執行任何 SELECT 就拒絕。")
+    st.dataframe(pd.DataFrame([{"題數": blk["n"], "正確攔截率": pct(blk["success"]), "逾時率": pct(blk["timeout"]),
+                                "平均耗時": sec(blk["avg_seconds"])}]), hide_index=True, width="stretch")
 
 conc = report.get("concurrency") or []
 if conc:

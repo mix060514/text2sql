@@ -79,6 +79,7 @@ def main():
     ap.add_argument("--complex-baseline", type=Path)
     ap.add_argument("--template-fewshot", type=Path)
     ap.add_argument("--complex-fewshot", type=Path)
+    ap.add_argument("--block-final", type=Path)
     args = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
 
@@ -88,6 +89,7 @@ def main():
     c_base = copy(args.complex_baseline and args.complex_baseline / "synthetic_results.json", "complex_baseline.json")
     t_few = copy(args.template_fewshot and args.template_fewshot / "e2e_results.json", "template_fewshot.json")
     c_few = copy(args.complex_fewshot and args.complex_fewshot / "synthetic_results.json", "complex_fewshot.json")
+    b_final = copy(args.block_final and args.block_final / "synthetic_results.json", "block_final.json")
     streaming = OUT / "timeout_questions_after_streaming.jsonl"
 
     orig_rows = o.load_template(original)
@@ -192,6 +194,40 @@ def main():
                     for t in hard_complex},
     }
 
+    def changes(before, after, why):
+        """Per-question flips between two runs (same questions): fixed and regressed."""
+        a_map = {r["question"]: r for r in after}
+        out = {"fixed": [], "regressed": []}
+        for b in before:
+            a = a_map.get(b["question"])
+            if a is None or b["passed"] == a["passed"]:
+                continue
+            key = "fixed" if a["passed"] else "regressed"
+            out[key].append({"question": b["question"], "type": b["type"],
+                             "reason": "" if a["passed"] else why(a["question"])})
+        return out
+
+    t_final_raw = {r["question"]: r for r in json.loads(t_few.read_text(encoding="utf-8"))} if t_few else {}
+    c_final_raw = {r["question"]: r for r in json.loads(c_few.read_text(encoding="utf-8"))} if c_few else {}
+
+    def t_why(q):
+        r = t_final_raw.get(q, {})
+        if r.get("sql_query") == "TIMEOUT" or "Timeout" in str(r.get("sql_reasoning")):
+            return "逾時（超過每題 300 秒）"
+        if not r.get("sql_correct"):
+            return "答案錯誤：" + str(r.get("sql_reasoning") or "")[:160]
+        return "圖表檢查未通過（類型、X 軸順序或系列數）"
+
+    def c_why(q):
+        r = c_final_raw.get(q, {})
+        text = json.dumps(r.get("error") or "", ensure_ascii=False) + str(r.get("reason") or "")
+        if "Timeout" in text:
+            return "逾時（超過每題 300 秒）"
+        if r.get("workflow_status") != "completed":
+            return "未完成：" + str((r.get("error") or {}).get("message", r.get("reason")))[:160]
+        return "結果與標準答案不同（人工複核規則也不成立）：SQL " + str(r.get("sql_query") or "")[:200]
+
+    b_rows = o.load_synthetic(b_final, "block") if b_final else []
     report = {
         "generated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
         "overall": {
@@ -217,6 +253,11 @@ def main():
             for r in c_base_rows if not r["passed"] and r["seed_id"] in review
         ],
         "few_shot": few_shot,
+        "changes": {
+            "template": changes(t_base_rows, t_few_rows, t_why) if t_few_rows else None,
+            "complex": changes(reviewed(c_base_rows), reviewed(c_few_rows), c_why) if c_few_rows else None,
+        },
+        "block": {"overall": o.stats(b_rows) if b_rows else None, "by_category": o.by_type(b_rows)},
     }
     (OUT / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"wrote {OUT / 'report.json'}: {len(cases)} cases, hard template types {hard_template}, "
