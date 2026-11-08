@@ -25,6 +25,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from text2sql import config  # noqa: E402
 from text2sql.agents.planned_agent import qwen_workflow as qw  # noqa: E402
 
+CTX_TOTAL = 65536  # --ctx-size of the server under test (kv-unified: shared by all slots)
 OUT = ROOT / "docs" / "optimization" / "concurrency.json"
 # Same type as real traffic, none of them evaluation questions.
 QUESTIONS = [
@@ -106,7 +107,7 @@ async def bench(base, model, parallel, rounds):
         "max_completion_tokens": max(x["completion_tokens"] for x in results),
         "truncated": sum(x["finish_reason"] == "length" for x in results),
         "empty_answers": sum(x["answer_empty"] for x in results),
-        "n_ctx_per_slot": slots[0].get("n_ctx") if slots else None,
+        "n_ctx_per_slot": slots[0].get("n_ctx") if slots else None, "ctx_size_total": CTX_TOTAL,
         "gpu_mem_mib": mem,
         "sql_thinking_budget": config.SQL_THINKING_BUDGET,
         "max_output_tokens": config.SQL_THINKING_BUDGET + 2048,
