@@ -209,17 +209,4 @@ if conc:
     st.caption("總吞吐量＝所有請求生成的 tokens ÷ 整批耗時；prompt 快取命中＝固定開頭（資料庫說明與範例）"
                "直接沿用 KV cache、不需重算的 token 數。")
 
-slp = report.get("sleep")
-if slp:
-    st.divider()
-    st.subheader("閒置休眠：不用時釋放顯存")
-    st.markdown(f"伺服器加上 `--sleep-idle-seconds`，閒置超過設定秒數就卸載模型、釋放顯存，下一個請求進來時自動載回"
-                f"（類似 Ollama 的 keep_alive）。實測設定 {slp['sleep_idle_seconds']} 秒：")
-    c = st.columns(4)
-    c[0].metric("使用中顯存", f"{slp['vram_awake_mib']:,} MiB")
-    c[1].metric(f"閒置 {slp['sleep_idle_seconds']} 秒後顯存", f"{slp['vram_idle_45s_mib']:,} MiB")
-    c[2].metric("一般請求", f"{slp['awake_request_seconds']:.2f} 秒")
-    c[3].metric("休眠後第一個請求", f"{slp['cold_start_request_seconds']:.2f} 秒")
-    st.caption(slp["note"])
-
 st.caption(f"報告產生時間：{report.get('generated_at', '')}")
