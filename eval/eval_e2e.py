@@ -455,7 +455,7 @@ async def get_latest_failed_results() -> pathlib.Path | None:
 
 
 async def run_evaluation(
-    limit: int = None, retry_failed: bool = False, plot_only: bool = False
+    limit: int = None, retry_failed: bool = False, plot_only: bool = False, concurrency: int = 1
 ):
     """Run the full end-to-end evaluation."""
     verify_dataset(EVAL_SET_PATH)
@@ -530,13 +530,18 @@ async def run_evaluation(
     print(f"Output Directory: {output_dir}")
     print(f"{'='*70}\n")
 
-    for i, entry in enumerate(eval_set):
+    final_results_list = []
+    sem = asyncio.Semaphore(max(1, concurrency))
+
+    async def handle(i, entry):
+        # Up to `concurrency` questions in flight; the server's parallel slots run them
+        # together. Printing and saving below have no await, so they never interleave.
+        nonlocal final_results_list
+        async with sem:
+            result = await evaluate_single(entry)
         question = entry["question"]
         has_plot = "expected_plot" in entry
-
         print(f"[{i+1}/{len(eval_set)}] {question[:50]}... ", end="", flush=True)
-
-        result = await evaluate_single(entry)
         new_results.append(result)
         metrics.add_result(result)
 
@@ -584,6 +589,8 @@ async def run_evaluation(
         # Save merged results
         with open(output_dir / results_filename, "w", encoding="utf-8") as f:
             json.dump(final_results_list, f, indent=2, ensure_ascii=False)
+
+    await asyncio.gather(*(handle(i, entry) for i, entry in enumerate(eval_set)))
 
     # --- Final Summary Calculation ---
     # We need to re-calculate metrics based on the FULL merged list
@@ -678,7 +685,8 @@ async def rejudge_run(run_dir) -> dict:
     return summary
 
 
-async def run_synthetic(run_dir=None, limit=None, label=None, reuse=True, timeout=300, subset=None):
+async def run_synthetic(run_dir=None, limit=None, label=None, reuse=True, timeout=300, subset=None,
+                        concurrency=1):
     """Run the synthetic golden + guardrail set; grade deterministically against its oracle."""
     import synthetic
 
@@ -714,26 +722,34 @@ async def run_synthetic(run_dir=None, limit=None, label=None, reuse=True, timeou
         return summary
 
     records = []
-    for i, item in enumerate(items):
-        print(f"[{i+1}/{len(items)}] {item['label']:<5} {item['question'][:45]}... ", end="", flush=True)
+    summary = None
+    sem = asyncio.Semaphore(max(1, concurrency))
+
+    async def handle(i, item):
+        nonlocal summary
         if item["id"] in reused:
             result = reused[item["id"]]
-            print(f"🟢 reused ({result['reused_from']})")
+            line = f"🟢 reused ({result['reused_from']})"
         else:
-            started = time.monotonic()
-            try:
-                state = await asyncio.wait_for(run_agent_and_get_state(eval_runner, item["question"]), timeout=timeout)
-                result = synthetic.grade_state(item, state)
-            except Exception as exc:  # timeout or runtime error: a failed case, not a crash
-                result = {"passed": False, "reason": f"{type(exc).__name__}: {str(exc)[:200]}",
-                          "workflow_status": "error"}
-            result["seconds"] = round(time.monotonic() - started, 1)
-            print(("🟢 " if result["passed"] else "🔴 ") + result["reason"])
+            async with sem:
+                started = time.monotonic()
+                try:
+                    state = await asyncio.wait_for(run_agent_and_get_state(eval_runner, item["question"]),
+                                                   timeout=timeout)
+                    result = synthetic.grade_state(item, state)
+                except Exception as exc:  # timeout or runtime error: a failed case, not a crash
+                    result = {"passed": False, "reason": f"{type(exc).__name__}: {str(exc)[:200]}",
+                              "workflow_status": "error"}
+                result["seconds"] = round(time.monotonic() - started, 1)
+            line = ("🟢 " if result["passed"] else "🔴 ") + result["reason"]
+        print(f"[{i+1}/{len(items)}] {item['label']:<5} {item['question'][:45]}... {line}", flush=True)
         records.append({"id": item["id"], "question": item["question"], "label": item["label"],
                         "subset": synthetic.subset_of(item),
                         "category": item.get("category"), "difficulty": item.get("difficulty"),
                         "source": item.get("source"), "seed_id": item.get("seed_id"), **result})
         summary = write(records)
+
+    await asyncio.gather(*(handle(i, item) for i, item in enumerate(items)))
 
     print(f"\n{'='*70}")
     for key in ("allow_accuracy", "block_rate"):
@@ -772,6 +788,8 @@ if __name__ == "__main__":
     parser.add_argument("--label", choices=["allow", "block"], help="--synthetic: only this label")
     parser.add_argument("--subset", choices=["template", "complex", "block"],
                         help="--synthetic: only template rewrites, SQL-first complex (X-*) or block items")
+    parser.add_argument("--concurrency", type=int, default=1,
+                        help="questions in flight at once (match the model server's parallel slots)")
     parser.add_argument("--no-reuse", action="store_true",
                         help="--synthetic: rerun everything, even items that passed before")
     parser.add_argument(
@@ -791,6 +809,7 @@ if __name__ == "__main__":
         asyncio.run(run_synthetic(
             run_dir=None if args.synthetic == "latest" else args.synthetic,
             limit=args.limit, label=args.label, reuse=not args.no_reuse, subset=args.subset,
+            concurrency=args.concurrency,
         ))
         raise SystemExit(0)
 
@@ -799,5 +818,6 @@ if __name__ == "__main__":
             limit=args.limit,
             retry_failed=args.retry_failed,
             plot_only=args.plot_only,
+            concurrency=args.concurrency,
         )
     )
