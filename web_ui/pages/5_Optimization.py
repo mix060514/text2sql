@@ -204,6 +204,12 @@ if conc:
             "只有一個人使用（例如面試 demo）時 1 路最快。")
         st.info("2026-11-08 已套用到模型服務：4 路、各路共用 64k 上下文（kv-unified）、閒置 10 分鐘自動休眠釋放顯存。"
                 "套用後以伺服器程序參數與 /slots 確認：4 路、每路可用 65,536 tokens，顯存 15.7 GB。")
+        st.warning(
+            "套用後真實運行才發現的副作用：4 路同時跑評估約 15 分鐘後，伺服器在**主記憶體**為每一路保存的 "
+            "context checkpoint（每份約 150 MiB、每路預設最多 32 份）加上 8 GB prompt 快取，用到 9.9 GB，"
+            "32 GB 主機開始換頁；swap 在傳統硬碟上，負載升到 103、IO 九成時間卡住。"
+            "短時間的並發測試看不到這個問題（checkpoint 還沒累積）。"
+            "處理：卸載模型恢復主機，並限制每路 checkpoint 數（ctx-checkpoints）與 prompt 快取大小（cache-ram）。")
     for r in failed:
         st.warning(f"{r.get('drafting', 'mtp').upper()} {r['parallel']} 路：{r['failed']}")
     st.caption("總吞吐量＝所有請求生成的 tokens ÷ 整批耗時；prompt 快取命中＝固定開頭（資料庫說明與範例）"
