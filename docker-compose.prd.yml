@@ -1,9 +1,9 @@
 
-name: text2sql-prod
+name: text2sql-prd
 
 services:
   webui:
-    container_name: text2sql-webui-prod
+    container_name: text2sql-webui-prd
     image: text2sql-webui:v1.2.0
     build: .
     restart: always
