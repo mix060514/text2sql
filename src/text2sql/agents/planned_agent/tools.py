@@ -18,7 +18,7 @@ DB_PATH = Path(__file__).resolve().parents[4] / "data" / "global_sales_data.sqli
 # Authorization is enforced by SQLite, independently of model instructions.
 SQL_FUNCTIONS = {
     "abs", "avg", "cast", "ceil", "ceiling", "coalesce", "count", "date",
-    "datetime", "dense_rank", "floor", "ifnull", "instr", "julianday", "lag",
+    "datetime", "dense_rank", "floor", "ifnull", "instr", "julianday", "lag", "like",
     "lead", "length", "lower", "ltrim", "max", "min", "nullif", "printf",
     "rank", "replace", "round", "row_number", "rtrim", "strftime", "substr",
     "substring", "sum", "time", "total", "trim", "unixepoch", "upper",

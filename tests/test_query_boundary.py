@@ -39,6 +39,11 @@ class QueryBoundaryTests(unittest.TestCase):
         result = self.query('WITH counts AS (SELECT Region, SUM(Quantity) AS n FROM sales_data GROUP BY Region) SELECT Region, n, ROW_NUMBER() OVER (ORDER BY n DESC) AS rank FROM counts ORDER BY rank')
         self.assertEqual(result["rows"], [["APAC", 6, 1], ["EMEA", 1, 2]])
 
+    def test_like_pattern_filter_is_allowed(self):
+        # Live planner wrote "Order Date" LIKE '2023-%' and was denied, costing a full retry.
+        result = self.query("SELECT SUM(Quantity) AS n FROM sales_data WHERE Region LIKE 'AP%'")
+        self.assertEqual(result["rows"], [[6]])
+
     def test_unsafe_queries_cannot_change_database(self):
         before = hashlib.sha256(self.database.read_bytes()).hexdigest()
         queries = [
