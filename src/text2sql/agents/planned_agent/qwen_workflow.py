@@ -1,5 +1,8 @@
 """Small-model path: fixed stages with bounded, error-driven repair."""
 
+import asyncio
+import inspect
+
 from google.adk.agents import BaseAgent, LlmAgent
 from google.adk.events import Event, EventActions
 from google.adk.models.lite_llm import LiteLlm
@@ -18,6 +21,67 @@ from .context import start_turn
 from .trace import Trace, record_chart, rows_preview
 
 
+MODEL_REQUEST_SECONDS = 120
+
+
+class _StreamingClient:
+    """Run each completion as a stream, aggregate it, and close it at a total deadline.
+
+    llama.cpp keeps generating a non-streamed request after the client gives up, so one
+    timeout left an orphan holding the single slot and queued requests timed out in turn.
+    Closing a stream cancels the slot (verified live 2026-11-08).
+    """
+
+    def __init__(self, inner, seconds: float):
+        self.inner, self.seconds = inner, seconds
+
+    async def acompletion(self, **kwargs):
+        kwargs["stream"] = True
+        stream, text, finish, usage = None, [], None, None
+        try:
+            async with asyncio.timeout(self.seconds):
+                stream = await self.inner.acompletion(**kwargs)
+                async for part in stream:
+                    usage = part.get("usage") or usage
+                    for choice in part.get("choices") or []:
+                        delta = choice.get("delta") or {}
+                        if delta.get("tool_calls"):
+                            raise ValueError("Tool calls are not expected from workflow agents.")
+                        text.append(delta.get("content") or "")
+                        finish = choice.get("finish_reason") or finish
+        except TimeoutError:
+            raise TimeoutError(f"Model request exceeded {self.seconds:g} s; stream closed.") from None
+        finally:
+            await _close(stream)
+        return {"choices": [{"message": {"role": "assistant", "content": "".join(text)},
+                             "finish_reason": finish}], "usage": usage}
+
+
+async def _close(stream):
+    for target in (stream, getattr(stream, "completion_stream", None)):
+        closer = getattr(target, "aclose", None) or getattr(target, "close", None)
+        if closer is None:
+            continue
+        try:
+            result = closer()
+            if inspect.isawaitable(result):
+                await result
+        except Exception:
+            pass
+
+
+class BoundedStreamingLiteLlm(LiteLlm):
+    """LiteLlm whose requests stream under a total deadline but yield one final response."""
+
+    request_seconds: float = MODEL_REQUEST_SECONDS
+
+    async def generate_content_async(self, llm_request, stream=False):
+        if not isinstance(self.llm_client, _StreamingClient):
+            self.llm_client = _StreamingClient(self.llm_client, self.request_seconds)
+        async for response in super().generate_content_async(llm_request, stream=False):
+            yield response
+
+
 def model(thinking: bool = True, budget: int = -1):
     if not thinking:
         extra = {"extra_body": {"chat_template_kwargs": {"enable_thinking": False}}}
@@ -25,8 +89,8 @@ def model(thinking: bool = True, budget: int = -1):
         extra = {"extra_body": {"thinking_budget_tokens": budget}}
     else:
         extra = {}
-    return LiteLlm(model=LLAMA_CPP_MODEL, api_base=LLAMA_CPP_API_BASE,
-                   api_key=LLAMA_CPP_API_KEY, timeout=120, **extra)
+    return BoundedStreamingLiteLlm(model=LLAMA_CPP_MODEL, api_base=LLAMA_CPP_API_BASE,
+                                   api_key=LLAMA_CPP_API_KEY, timeout=MODEL_REQUEST_SECONDS, **extra)
 
 
 agent_sql = LlmAgent(
