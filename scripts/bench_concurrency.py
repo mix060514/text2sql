@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Concurrency benchmark for the local llama.cpp server (evidence for the 優化成果 page).
 
-Sends N simultaneous real agent_sql requests (few-shot instruction, thinking budget,
+Keeps N real agent_sql requests in flight (closed loop: N clients, each sends its next
+request when the previous returns) (few-shot instruction, thinking budget,
 max_output_tokens as configured) to a llama-server started with --parallel N, and
 records per-request latency, generated tokens, aggregate tokens/s, prompt-cache hits
 and truncation. Results are appended to docs/optimization/concurrency.json.
@@ -77,10 +78,20 @@ async def bench(base, model, parallel, rounds):
     async with httpx.AsyncClient(timeout=900) as client:
         await one(client, base, model, QUESTIONS[0])  # warm-up: loads the shared prompt prefix
         mem = gpu_mem_mib()
+        # Closed loop, like vLLM's serving benchmark: N clients each send their next request
+        # as soon as the previous one returns, so the server always has N requests in flight
+        # and llama.cpp's continuous batching admits each one into a free slot immediately.
+        queue = asyncio.Queue()
+        for i in range(rounds * parallel):
+            queue.put_nowait(QUESTIONS[i % len(QUESTIONS)])
+
+        async def client_loop():
+            while not queue.empty():
+                q = queue.get_nowait()
+                results.append(await one(client, base, model, q))
+
         start = time.monotonic()
-        for r in range(rounds):
-            batch = [QUESTIONS[(r * parallel + i) % len(QUESTIONS)] for i in range(parallel)]
-            results += await asyncio.gather(*(one(client, base, model, q) for q in batch))
+        await asyncio.gather(*(client_loop() for _ in range(parallel)))
         wall = time.monotonic() - start
         slots = (await client.get(f"{base}/slots")).json()
     tokens = sum(x["completion_tokens"] for x in results)
