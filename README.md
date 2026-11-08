@@ -1,45 +1,63 @@
-# Text-to-SQL Agent
+# Text-to-SQL Agent（本機 27B 模型）
 
-這個分支（`codex/text2sql-unified`）只有一條路線：本機 Swift 1.5（Qwen3.8-27B 後訓練版），
-由程式控制 planner → 執行 → reviewer → report（`planned_agent/qwen_workflow.py`）。
-`TEXT2SQL_BACKEND` 只接受 `qwen27b`。發布 gate `step_publish` 一定要求 reviewer 接受。
+用自然語言問銷售資料，系統寫 SQL、唯讀查詢、檢查答案是否對題，再回傳說明、完整資料表與圖表。
+全部跑在本機單張 GPU 上的 27B 模型（Swift 1.5，Qwen3.8-27B 後訓練版，IQ3_XXS 量化）。
 
-Codex CLI 路線已於 2026-11-08 移除：服務對外，不適合用 CLI agent 子程序回應使用者。
-移除前的程式在 commit `96f9615`；舊版保存在基準 commit `fd66447`；
-原兩個分支 `codex/text2sql-qwen27b`、`codex/text2sql-strong` 保留不動。
+<!-- demo GIF: assets/demo.gif（錄製後加入） -->
 
-兩版共用 SQLite 銷售資料、查詢限制、圖表驗證及相同的 live smoke cases。
-設計差異見 [架構比較](docs/ARCHITECTURE.md)，實測紀錄見 [驗證結果](docs/VALIDATION.md)。
+## 設計重點：模型負責想，程式負責做
 
-## 27B 版流程
+| 原則 | 做法 |
+|---|---|
+| 模型不決定流程 | 固定流程由程式控制（`Text2SQLWorkflow`），三個模型步驟都沒有 tools，不會「忘了呼叫查詢」 |
+| 答案不能是模型編的 | 資料表與圖表由程式從實際查詢結果產生；模型只寫說明文字 |
+| 查詢一定安全 | SQLite 唯讀連線 + authorizer，只允許單一 SELECT；5 秒、200 列、20 KB 上限，超限即失敗、不接受截斷結果 |
+| 能執行 ≠ 答對 | 另一個模型步驟（reviewer）檢查 SQL 是否真的回答問題，例如「銷售量」不能用訂單數算 |
+| 錯了要有限度地修 | 只有明確的驗證／執行錯誤才重試：SQL 最多 3 次、報告最多 2 次；逾時等傳輸錯誤直接停止 |
+| 評分不靠 LLM judge | 主要評估以 SQLite 標準答案逐列比對；LLM judge 只當輔助，並人工核對 |
+
+命名一眼可辨：`agent_` = LLM，`step_` = 程式一定執行，`tool_` = 模型自己決定呼叫。
+
+## 流程
 
 ```text
 使用者問題
-  → agent_sql（Qwen，SQLPlan schema）
-  → step_run_sql（程式直接驗證、執行唯讀 SQL）
-      └─ SQL 或 schema 錯誤：回饋 agent_sql
-  → agent_review（同一 Qwen，strict accepted boolean / reason）
-      └─ 意圖不符或 review 解析失敗：回饋 agent_sql；查詢合計最多 3 次嘗試
-  → agent_report（Qwen，AnswerSubmission schema）
-      └─ schema / 圖表參數錯誤：只重試 agent_report，最多 2 次總嘗試
-  → step_publish（程式驗證成功條件、產生完整資料表）→ step_draw_chart（Plotly）、提交回答
+  → agent_sql      （LLM）產生一條 SELECT
+  → step_run_sql   （程式）唯讀執行；SQL 錯誤回饋給 agent_sql
+  → agent_review   （LLM）檢查指標、篩選、時間、分組、排序是否對題；拒絕就回饋給 agent_sql（合計最多 3 次）
+  → agent_report   （LLM）寫說明與圖表規格；格式或圖表欄位錯誤只重試這一步（最多 2 次）
+  → step_publish   （程式）核對 reviewer 接受的就是這次的 SQL 與資料，產生完整資料表
+  → step_draw_chart（程式）Plotly 繪圖
 ```
 
-只有 agent_sql、agent_review、agent_report 三個模型步驟（命名：agent_ = LLM、tool_ = 模型呼叫的工具、step_ = 程式一定執行）；Chat 頁可展開「查看執行流程」，點步驟看輸入／輸出；沒有 region/checker/executor/renderer/echo Agents。
-模型不需要決定「要不要執行已生成的 SQL」；那是 controller 的固定下一步。
-完整資料表由程式產生，模型只寫解釋。
-SQL 執行成功且本次 reviewer 明確接受，才能產生報告與發布。
-每次嘗試清除舊接受狀態與資料；發布再核對被接受的實際 SQL、columns、rows。
-reviewer 仍可能判錯，接受不代表語意的數學保證，因此仍保留 SQLite oracle 評估。
+![架構](docs/architecture.svg)
+
+網頁的對話頁會即時畫出這張流程圖：圓角框是 LLM、方框是程式，綠色通過、紅色拒絕或失敗，
+點任一步可看它的輸入、輸出與耗時，用來證明答案的每個數字都來自實際查詢。
+
+模組編號（M1–M5）與名詞見 [docs/MODULES.md](docs/MODULES.md)。
+
+## 成績
+
+| 測試 | 結果 | 說明 |
+|---|---|---|
+| 離線測試 `verify_all.py` | 全數通過 | 真實 SQLite、假模型注入錯誤，不呼叫 LLM |
+| Smoke 8 題 | **8/8** | 實際資料與圖表直接和 SQLite oracle 比對（[紀錄](docs/smoke-swift15.json)） |
+| 模板考卷 132 題 | SQL 正確 **84.8%**（112/132） | 2026-11-07，Swift 1.5；與 2026-02 v1.0.0 的 84.1% 持平。未通過主因是 18 題模型 120 秒逾時 |
+| 合成考卷 354 題 | 進行中 | 放行 228（含 102 題 CTE／視窗函數等複雜查詢）、攔截 126；以 SQLite 標準答案比對 |
+
+細節、失敗分類與已知限制見 [docs/VALIDATION.md](docs/VALIDATION.md)。
+
+## 測試資料怎麼來的
+
+- **模板考卷**：17 個題型填入地區／國家／產品，標準答案用 pandas 從原始 CSV 計算，不經模型。
+- **合成考卷**：參考「用合成資料測試 AI Guardrails」的方法，種子 → 本機模型改寫問法 → 規則、標籤、語意、SQL 對題
+  四層檢查 → 不通過就把原因放回 prompt 重寫。每個種子的 SQL 都要和 pandas 的實作逐列一致才收。
+  方法與被刷掉的實例見 [docs/SYNTHETIC_DATA_METHOD.md](docs/SYNTHETIC_DATA_METHOD.md)。
 
 ## 執行
 
-2026-11-07 起預設模型改為 **Swift 1.5**：UkisAI 以 Qwen3.8-27B 後訓練、思考 token 較少的版本，
-本機使用 [GSQ-RCO IQ3_XXS-mtp GGUF](https://huggingface.co/ukisai/Swift-1.5-Qwen3.8-27B-GSQ-RCO-GGUF)
-（10.44GB，含 MTP 推測解碼），router alias 為 `swift15-27b-iq3-xxs`。
-換模型的原因：原版思考很長，月份趨勢題的 planner 用光輸出額度、reviewer 超過 120 秒。
-OpenAI-compatible API 為 `http://127.0.0.1:18080/v1`。原版 `qwen3.8-27b-iq3-xxs` 仍在 router 上，
-用 `LLAMA_CPP_MODEL=openai/qwen3.8-27b-iq3-xxs` 即可切回。
+需要一個 OpenAI 相容的模型端點（本專案用 llama.cpp router）。
 
 ```bash
 uv sync --locked
@@ -47,7 +65,7 @@ uv run python scripts/run_planned_agent.py '南美 的總銷售額是多少？'
 uv run streamlit run web_ui/app.py
 ```
 
-若模型服務不同，使用環境變數覆寫：
+模型端點用環境變數設定：
 
 ```bash
 export LLAMA_CPP_MODEL=openai/swift15-27b-iq3-xxs
@@ -55,55 +73,44 @@ export LLAMA_CPP_API_BASE=http://127.0.0.1:18080/v1
 export LLAMA_CPP_API_KEY=aaa
 ```
 
-LiteLLM 的 `openai/` 是 transport 前綴，實際模型 ID 不含該前綴。
-Docker 中的 localhost 是容器自己；使用 Compose 時，必須將
-`LLAMA_CPP_API_BASE` 設成容器能到達且有此模型的服務 URL。
-Vision 頁面沿用獨立的 `LLAMA_CPP_VL_*` 設定。
+`openai/` 是 LiteLLM 的 transport 前綴，實際模型 ID 不含它。用 Docker 時，容器內的 localhost 是容器自己，
+`LLAMA_CPP_API_BASE` 要設成容器連得到的位址（見 `docker-compose.prd.yml`）。
 
-## 驗證
+## 驗證指令
 
 ```bash
-# 離線：真實 SQLite、圖表與注入失敗的 workflow 測試，不呼叫模型
+# 離線，不呼叫模型
 uv run python scripts/verify_all.py
 
-# 線上：同一組 8 個問題，直接與現在的 DB 比對，不使用 LLM judge
-uv run python scripts/smoke_workflow.py --output docs/smoke-qwen27b-semantic.json
+# 線上：8 題 smoke，與 SQLite oracle 比對
+uv run python scripts/smoke_workflow.py --output docs/smoke-qwen27b.json
 
-# 真實 reviewer：銷售量 / 訂單數、錯誤 SQL 注入與追問隔離
-uv run python scripts/verify_semantic_live.py
-
-# 較廣的評估集；這兩個命令會呼叫模型及 LLM judge
+# 線上：模板考卷（LLM judge 輔助）與合成考卷（SQLite 比對，不用 judge）
 uv run python eval/eval_e2e.py --limit 5
-uv run python eval/eval.py
+uv run python eval/eval_e2e.py --synthetic
 ```
 
-兩個 eval 都改用與目前 DB 配對的 `eval_set_v3.jsonl`。
-`data/eval_manifest.json` 驗證 DB / dataset 的 SHA-256，避免舊 ground truth
-被拿來評估新資料；歷史結果不能直接當成本次模型準確率。
-smoke 驗證實際資料與圖表，不能保證自然語言回答中的每一個敘述。
+`data/eval_manifest.json` 記錄 DB 與考卷的 SHA-256，避免拿舊標準答案評估新資料。
 
 ## 閱讀順序
 
-1. `src/text2sql/agents/planned_agent/agent.py`：固定順序與兩處有限重試。
-2. `contracts.py`、`prompts.py`：模型輸入、輸出與業務定義。
-3. `tools.py`：SQLite 權限、結果大小、圖表與發布條件。
-4. `context.py`、`src/text2sql/runtime.py`：回合隔離與完整事件串流。
+1. [docs/HANDOFF.md](docs/HANDOFF.md)：目前狀態與下一步。
+2. `src/text2sql/agents/planned_agent/qwen_workflow.py`：固定流程與兩處有限重試。
+3. `contracts.py`、`prompts.py`：模型輸出格式與業務定義。
+4. `tools.py`：SQLite 權限、結果上限、發布條件與繪圖。
+5. `context.py`、`src/text2sql/runtime.py`：每回合清除舊結果、追問只帶上一題的問題與 SQL、完整消化事件串流。
 
-查詢最多 200 列、20,000 bytes、5 秒；超限即失敗，不接受截斷的成功結果。
-每個 ADK invocation 最多 8 次模型呼叫、300 秒，維持原限制。
-一般成功路徑使用 3 次呼叫；最壞為 3 組 planner＋reviewer 加 2 次 report。
-planner 輸出額度為 4,096 token、reviewer 為 2,048；無有效輸出或超時則失敗。
-目前月份 smoke 仍未通過，詳見 [實際驗證與限制](docs/VALIDATION.md)。
-前一回合只攜帶問題與已執行 SQL 作追問上下文，本回合一定重新查詢。
-目前使用 InMemoryRunner；沒有加入排程器或永久 session 儲存。
+## 已知限制
 
-## 比較分支
+- 本機 27B 一次只處理一個請求；多年度逐月趨勢等長題目可能超過 120 秒。
+- reviewer 與 planner 是同一個模型，可能有共同盲點；接受不代表語意上的數學保證，所以仍保留 oracle 評估。
+- 目前沒有拒答機制：寫入請求、資料庫外問題只會因 SQL 失敗而沒有答案，不是主動拒絕。
+- Session 用 InMemoryRunner，重啟後對話不保留。
 
-```bash
-git diff codex/text2sql-qwen27b..codex/text2sql-strong -- src/text2sql/agents/planned_agent
-```
+## 歷史
 
-工作目錄已分開：27B 版在原 repo，強模型版在相鄰的 `text2sql-strong` worktree。
-兩個分支皆為本機分支，尚未 push 或部署。
+早期另有一條 Codex CLI 路線，因服務對外、不適合用 CLI agent 子程序回應使用者，已於 2026-11-08 移除
+（移除前的程式在 `96f9615`，兩條路線的比較見 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)）。
+最初的實作在 `fd66447`。
 
 MIT License.
