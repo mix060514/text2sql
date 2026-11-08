@@ -61,11 +61,25 @@ def show_legacy(data):
                 st.code(str(row["execute_result"]), language="json")
 
 
-def load_ground_truth():
+def load_eval_set():
     if not eval_set_path.exists():
         return {}
     rows = (json.loads(line) for line in eval_set_path.read_text(encoding="utf-8").splitlines() if line.strip())
-    return {r["question"]: r.get("ground_truth") for r in rows}
+    return {r["question"]: r for r in rows}
+
+
+# First tag of each eval_set_v3 item is its question type (see scripts/generate_ground_truth.py).
+CATEGORY = {
+    "revenue": "銷售額", "top_products": "熱銷產品", "trend": "趨勢", "top_customer": "重要客戶",
+    "advanced": "進階分析", "yoy": "年增率", "share": "占比", "quarterly": "季度",
+    "comparison": "比較", "simple": "單一數值", "regional_preference": "地區偏好",
+    "top": "最高排名", "asp": "平均單價", "orders": "訂單數", "quantity": "銷售量",
+}
+
+
+def category_of(item):
+    tags = (item or {}).get("tags") or []
+    return CATEGORY.get(tags[0], tags[0]) if tags else "其他"
 
 
 DIFFICULTY = {"simple": "簡單", "medium": "中等", "hard": "困難"}
@@ -119,36 +133,50 @@ def show_e2e(data, summary_path):
         st.dataframe(by_level.rename(columns={"count": "題數", "mean": "整題答對"}))
 
     st.divider()
-    st.subheader("逐題結果")
-    only_failed = st.checkbox("只看答錯的題目")
-    truth = load_ground_truth() if meta.get("dataset", "eval_set_v3.jsonl") == "eval_set_v3.jsonl" else {}
+    st.subheader("依題型的題目與結果")
+    items = load_eval_set() if meta.get("dataset", "eval_set_v3.jsonl") == "eval_set_v3.jsonl" else {}
+    df["題型"] = [category_of(items.get(q)) for q in df["question"]]
+    df["_ok"] = df["e2e_success"].astype(bool) if "e2e_success" in df else False
 
-    for index, row in df.iterrows():
-        ok = bool(row.get("e2e_success"))
-        if only_failed and ok:
+    by_type = df.groupby("題型", sort=False)["_ok"].agg(["count", "sum"])
+    by_type["整題答對"] = (by_type["sum"] / by_type["count"]).map("{:.0%}".format)
+    st.dataframe(by_type.rename(columns={"count": "題數", "sum": "答對"}), width="stretch")
+
+    view = st.radio("顯示", ["隱藏答錯的題目", "全部題目", "只看答錯的題目"], horizontal=True,
+                    help="只影響下方逐題清單；上方指標一律以全部題目計算。")
+    for category, group in df.groupby("題型", sort=False):
+        shown = group[group["_ok"]] if view == "隱藏答錯的題目" else (
+            group[~group["_ok"]] if view == "只看答錯的題目" else group)
+        if shown.empty:
             continue
-        mark = "✅" if ok else "❌"
-        with st.expander(f"{mark} Q{index+1}: {row['question'][:80]}（評審 {row.get('sql_score')}/10）"):
-            col1, col2 = st.columns(2)
-            with col1:
-                if row["question"] in truth:
-                    st.markdown("**標準答案：**")
-                    st.code(json.dumps(truth[row["question"]], ensure_ascii=False, indent=2), language="json")
-                st.markdown("**系統回答：**")
-                st.write(row.get("answer"))
-                st.markdown("**SQL：**")
-                st.code(row.get("sql_query") or "", language="sql")
-            with col2:
-                st.markdown("**評審理由：**")
-                st.info(row.get("sql_reasoning") or "")
-                if row.get("has_expected_plot"):
-                    st.markdown(
-                        f"**圖表：** 預期 `{chart_name(row.get('expected_should_plot'), row.get('expected_chart_type'))}`，"
-                        f"實際 `{chart_name(row.get('actual_should_plot'), row.get('actual_chart_type'))}`"
-                    )
-                st.markdown("**查詢結果：**")
-                st.code(json.dumps(row.get("sql_result"), ensure_ascii=False, default=str)[:3000], language="json")
+        st.markdown(f"#### {category}（答對 {int(group['_ok'].sum())}/{len(group)}）")
+        for index, row in shown.iterrows():
+            show_row(index, row, items)
 
+
+def show_row(index, row, items):
+    ok = bool(row["_ok"])
+    truth = items.get(row["question"], {})
+    with st.expander(f"{'✅' if ok else '❌'} Q{index+1}: {row['question'][:80]}（評審 {row.get('sql_score')}/10）"):
+        col1, col2 = st.columns(2)
+        with col1:
+            if "ground_truth" in truth:
+                st.markdown("**標準答案：**")
+                st.code(json.dumps(truth["ground_truth"], ensure_ascii=False, indent=2), language="json")
+            st.markdown("**系統回答：**")
+            st.write(row.get("answer"))
+            st.markdown("**SQL：**")
+            st.code(row.get("sql_query") or "", language="sql")
+        with col2:
+            st.markdown("**評審理由：**")
+            st.info(row.get("sql_reasoning") or "")
+            if row.get("has_expected_plot"):
+                st.markdown(
+                    f"**圖表：** 預期 `{chart_name(row.get('expected_should_plot'), row.get('expected_chart_type'))}`，"
+                    f"實際 `{chart_name(row.get('actual_should_plot'), row.get('actual_chart_type'))}`"
+                )
+            st.markdown("**查詢結果：**")
+            st.code(json.dumps(row.get("sql_result"), ensure_ascii=False, default=str)[:3000], language="json")
 
 if kind == E2E:
     show_e2e(data, selected_file.parent / "e2e_summary.json")
