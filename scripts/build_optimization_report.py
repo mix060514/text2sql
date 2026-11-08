@@ -207,6 +207,9 @@ def main():
                          "few_shot": o.by_type(t_few_rows)},
             "complex": {"baseline": o.by_type(c_base_rows), "few_shot": o.by_type(c_few_rows)},
         },
+        "concurrency": [{k: v for k, v in row.items() if k != "requests_detail"}
+                        for row in json.loads((OUT / "concurrency.json").read_text(encoding="utf-8"))]
+                       if (OUT / "concurrency.json").exists() else [],
         "cases": cases,
         "complex_review": [
             {"seed_id": r["seed_id"], "question": r["question"], "reason": review[r["seed_id"]]["reason"],

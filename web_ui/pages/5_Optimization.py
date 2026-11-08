@@ -144,4 +144,27 @@ few = report.get("few_shot", {})
 few_shot_table(few.get("template"), "模板題")
 few_shot_table(few.get("complex"), "複雜題（34 種 SQL-first 題型，每種含原題與 2 個改寫）")
 
+conc = report.get("concurrency") or []
+if conc:
+    st.divider()
+    st.subheader("並發測試：同時處理幾個請求")
+    st.markdown(
+        "模型伺服器原本一次只處理一個請求，其他人要排隊。這裡用同一張 GPU、同樣的總上下文，"
+        "測試同時處理 1 到 N 個寫 SQL 請求（真實 prompt、思考上限與輸出上限）時的吞吐量與單一請求耗時。"
+    )
+    base = next((r for r in conc if r["parallel"] == 1), None)
+    st.dataframe(pd.DataFrame([
+        {"並發路數": r["parallel"], "請求數": r["requests"],
+         "總吞吐量 (tokens/秒)": r["aggregate_tps"],
+         "相對 1 路": f"{r['aggregate_tps'] / base['aggregate_tps']:.2f}×" if base else "–",
+         "單一請求平均耗時": sec(r["avg_request_seconds"]), "單一請求最長": sec(r["max_request_seconds"]),
+         "每路生成速度 (tokens/秒)": r["avg_decode_tps_per_request"],
+         "prompt 快取命中": f"{r['avg_cached_tokens']}/{r['avg_prompt_tokens']}",
+         "輸出被截斷": r["truncated"], "空答案": r["empty_answers"],
+         "顯存 (MiB)": r["gpu_mem_mib"]}
+        for r in conc
+    ]), hide_index=True, width="stretch")
+    st.caption("總吞吐量＝所有請求生成的 tokens ÷ 整批耗時；prompt 快取命中＝固定開頭（資料庫說明與範例）"
+               "直接沿用 KV cache、不需重算的 token 數。")
+
 st.caption(f"報告產生時間：{report.get('generated_at', '')}")
