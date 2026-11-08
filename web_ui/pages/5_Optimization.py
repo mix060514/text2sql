@@ -67,6 +67,18 @@ st.dataframe(table, hide_index=True, width="stretch")
 st.caption("成功率＝SQL 結果正確且圖表檢查通過；一次解決率＝第一次寫出的 SQL 就成功（不需重試）；"
            "平均耗時含 LLM 評審。2026-11-07 的評估當時尚未記錄耗時與重試次數。")
 
+cx = report["overall"].get("complex") or {}
+if cx.get("baseline"):
+    st.subheader("複雜題整體（34 種題型 × 原題與 2 個改寫）")
+    rows = [("基準（嚴格比對）", cx.get("baseline")), ("基準（人工複核後）", cx.get("baseline_reviewed")),
+            ("加入 few-shot 後（嚴格比對）", cx.get("few_shot")), ("加入 few-shot 後（人工複核後）", cx.get("few_shot_reviewed"))]
+    st.dataframe(pd.DataFrame([
+        {"階段": name, "題數": s["n"], "成功率": pct(s["success"]), "逾時率": pct(s["timeout"]),
+         "一次解決率": pct(s["first_try"]), "平均耗時": sec(s["avg_seconds"])}
+        for name, s in rows if s
+    ]), hide_index=True, width="stretch")
+    st.caption("嚴格比對＝結果逐列等於 SQLite 標準答案；人工複核見下方「複雜題標準答案過嚴」案例。")
+
 # ---- Cases ------------------------------------------------------------------------------
 st.divider()
 st.subheader("優化案例")
@@ -94,6 +106,13 @@ for case in report["cases"]:
             cols = st.columns(2)
             cols[0].metric("一般 CTE", plain_text)
             cols[1].metric("AS MATERIALIZED", f"{t['materialized']['seconds']:.2f} 秒")
+
+if report.get("complex_review"):
+    with st.expander("複雜題人工複核明細"):
+        st.dataframe(pd.DataFrame([
+            {"題目": r["question"], "複核理由": r["reason"], "轉換後與標準答案一致": "是" if r["accepted"] else "否"}
+            for r in report["complex_review"]
+        ]), hide_index=True, width="stretch")
 
 # ---- Few-shot ---------------------------------------------------------------------------
 st.divider()

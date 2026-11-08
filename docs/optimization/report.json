@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-08 11:51:49",
+  "generated_at": "2026-11-08 11:56:11",
   "overall": {
     "template": {
       "2026-11-07": {
@@ -20,7 +20,15 @@
         "first_try": 0.7524752475247525,
         "avg_seconds": 93.5
       },
-      "few_shot": null
+      "baseline_reviewed": {
+        "n": 102,
+        "success": 0.9705882352941176,
+        "timeout": 0.00980392156862745,
+        "first_try": 0.9108910891089109,
+        "avg_seconds": 93.5
+      },
+      "few_shot": null,
+      "few_shot_reviewed": null
     }
   },
   "by_type": {
@@ -404,11 +412,11 @@
       "fix": "在 few-shot 範例示範 WITH ... AS MATERIALIZED，前 N 名只算一次。",
       "timing": {
         "plain": {
-          "seconds": 19.522,
-          "finished": true
+          "seconds": 20.0,
+          "finished": false
         },
         "materialized": {
-          "seconds": 0.008,
+          "seconds": 0.009,
           "finished": true
         }
       },
@@ -449,21 +457,136 @@
         "after": null
       },
       "scope": "Q101–Q105、Q110"
+    },
+    {
+      "id": "complex_grading",
+      "title": "複雜題標準答案過嚴",
+      "problem": "複雜題用 SQLite 標準答案逐列比對，有些答案內容正確，卻因格式不同被判錯。",
+      "cause": "標準答案多帶題目沒問的欄位（名次、金額），標籤寫法不同（週一／星期一、01／2024-01），「下滑多少百分比」的正負號表示法不同。",
+      "fix": "逐題人工複核，並寫下該題允許的轉換（省略哪些欄、怎麼統一標籤）；程式只套用這些轉換重新比對，結果仍須完全一致才算對，數值錯的題目不會因複核變成正確。",
+      "metrics": {
+        "before": {
+          "n": 102,
+          "success": 0.8137254901960784,
+          "timeout": 0.00980392156862745,
+          "first_try": 0.7524752475247525,
+          "avg_seconds": 93.5
+        },
+        "after": {
+          "n": 102,
+          "success": 0.9705882352941176,
+          "timeout": 0.00980392156862745,
+          "first_try": 0.9108910891089109,
+          "avg_seconds": 93.5
+        }
+      },
+      "scope": "複雜題基準 102 題（嚴格比對 → 複核後）",
+      "labels": [
+        "成功率"
+      ]
+    }
+  ],
+  "complex_review": [
+    {
+      "seed_id": "X-category_top3_quantity",
+      "question": "每個產品類別裡，銷售量前三名的產品分別是哪些？",
+      "reason": "答案的產品與數量完全正確；oracle 多一個名次欄，題目沒有要求。",
+      "accepted": true
+    },
+    {
+      "seed_id": "X-category_top3_quantity",
+      "question": "各產品類別裡，賣出件數排前三的名單是什麼？",
+      "reason": "答案的產品與數量完全正確；oracle 多一個名次欄，題目沒有要求。",
+      "accepted": true
+    },
+    {
+      "seed_id": "X-category_top3_quantity",
+      "question": "列出每個類別銷量前三名的產品。",
+      "reason": "答案的產品與數量完全正確；oracle 多一個名次欄，題目沒有要求。",
+      "accepted": true
+    },
+    {
+      "seed_id": "X-country_decline",
+      "question": "哪些國家 2024 年的銷售額比 2023 年下滑？各下滑了多少百分比？",
+      "reason": "「下滑了多少百分比」回答 20.95%，oracle 記為 -20.95%；國家與數值相同，只差正負號表示法。",
+      "accepted": true
+    },
+    {
+      "seed_id": "X-country_decline",
+      "question": "2024 年比 2023 年營收掉的國家有哪些？掉了多少百分比？",
+      "reason": "「下滑了多少百分比」回答 20.95%，oracle 記為 -20.95%；國家與數值相同，只差正負號表示法。",
+      "accepted": true
+    },
+    {
+      "seed_id": "X-country_decline",
+      "question": "列出 2023 到 2024 銷售額衰退的國家及其下滑率。",
+      "reason": "「下滑了多少百分比」回答 20.95%，oracle 記為 -20.95%；國家與數值相同，只差正負號表示法。",
+      "accepted": true
+    },
+    {
+      "seed_id": "X-category_best_month-2024",
+      "question": "2024 年每個產品類別銷售額最高的月份分別是哪個月？",
+      "reason": "題目只問哪個月；回答「10」，oracle 是「2024-10」並附金額。",
+      "accepted": true
+    },
+    {
+      "seed_id": "X-category_best_month-2024",
+      "question": "2024 年各產品類別裡，哪個月營收最高？",
+      "reason": "題目只問哪個月；回答「10」，oracle 是「2024-10」並附金額。",
+      "accepted": true
+    },
+    {
+      "seed_id": "X-category_best_month-2024",
+      "question": "2024 年每個類別營收最高的月份是哪個月？",
+      "reason": "題目只問哪個月；回答「10」，oracle 是「2024-10」並附金額。",
+      "accepted": true
+    },
+    {
+      "seed_id": "X-weekday",
+      "question": "幫我看下從週一到週日，每天總共收了多少錢？畫個長條圖比較一下。",
+      "reason": "「週一」與 oracle 的「星期一」同義，金額完全相同。",
+      "accepted": true
+    },
+    {
+      "seed_id": "X-region_top_customers_orders-EMEA-2024-5",
+      "question": "EMEA 在 2024 年銷售額前五大的客戶是誰？他們各下了幾筆訂單？",
+      "reason": "題目問客戶是誰與訂單數；客戶與訂單數都正確，oracle 另附金額。",
+      "accepted": true
+    },
+    {
+      "seed_id": "X-region_top_customers_orders-EMEA-2024-5",
+      "question": "2024 年 EMEA 銷售額前 5 的客戶是誰？各自訂單幾筆？",
+      "reason": "題目問客戶是誰與訂單數；客戶與訂單數都正確，oracle 另附金額。",
+      "accepted": true
+    },
+    {
+      "seed_id": "X-countries_above_avg",
+      "question": "列出銷售額超過平均值的國家清單。",
+      "reason": "題目要國家清單；國家完全正確，oracle 另附金額。",
+      "accepted": true
+    },
+    {
+      "seed_id": "X-months_beat_last_year",
+      "question": "2024 年有哪些月份的銷售額超過 2023 年同一個月？",
+      "reason": "回答「2024-01」，oracle 寫「01」（同一份 oracle 在別題又用 2024-10），月份相同。",
+      "accepted": true
+    },
+    {
+      "seed_id": "X-months_beat_last_year",
+      "question": "2024 年哪些月份的營收比 2023 年同月還高？",
+      "reason": "回答「2024-01」，oracle 寫「01」（同一份 oracle 在別題又用 2024-10），月份相同。",
+      "accepted": true
+    },
+    {
+      "seed_id": "X-months_beat_last_year",
+      "question": "2024 年哪幾個月銷售額超過 2023 年同月？",
+      "reason": "回答「2024-01」，oracle 寫「01」（同一份 oracle 在別題又用 2024-10），月份相同。",
+      "accepted": true
     }
   ],
   "few_shot": {
     "template": {},
     "complex": {
-      "每個產品類別裡，銷售量前三名的產品分別是哪些？": {
-        "before": {
-          "n": 3,
-          "success": 0.0,
-          "timeout": 0.0,
-          "first_try": 0.0,
-          "avg_seconds": 76.6
-        },
-        "after": null
-      },
       "APAC 在 2024 年每個月的銷售額比前一個月成長了多少百分比？": {
         "before": {
           "n": 3,
@@ -487,9 +610,9 @@
       "哪些國家 2024 年的銷售額比 2023 年下滑？各下滑了多少百分比？": {
         "before": {
           "n": 3,
-          "success": 0.0,
+          "success": 1.0,
           "timeout": 0.0,
-          "first_try": 0.0,
+          "first_try": 1.0,
           "avg_seconds": 128.7
         },
         "after": null
@@ -514,16 +637,6 @@
         },
         "after": null
       },
-      "2024 年每個產品類別銷售額最高的月份分別是哪個月？": {
-        "before": {
-          "n": 3,
-          "success": 0.0,
-          "timeout": 0.0,
-          "first_try": 0.0,
-          "avg_seconds": 87.8
-        },
-        "after": null
-      },
       "Electronics 在 2024 年每一季與 2023 年同一季相比，銷售額成長率各是多少？": {
         "before": {
           "n": 3,
@@ -534,42 +647,12 @@
         },
         "after": null
       },
-      "星期一到星期日，每一天的總銷售額各是多少？請用長條圖比較。": {
-        "before": {
-          "n": 3,
-          "success": 0.6666666666666666,
-          "timeout": 0.0,
-          "first_try": 0.6666666666666666,
-          "avg_seconds": 73.4
-        },
-        "after": null
-      },
-      "EMEA 在 2024 年銷售額前五大的客戶是誰？他們各下了幾筆訂單？": {
-        "before": {
-          "n": 3,
-          "success": 0.3333333333333333,
-          "timeout": 0.0,
-          "first_try": 0.3333333333333333,
-          "avg_seconds": 63.4
-        },
-        "after": null
-      },
-      "哪些國家的總銷售額高於所有國家的平均值？": {
-        "before": {
-          "n": 3,
-          "success": 0.6666666666666666,
-          "timeout": 0.0,
-          "first_try": 0.6666666666666666,
-          "avg_seconds": 49.5
-        },
-        "after": null
-      },
       "2024 年有哪些月份的銷售額超過 2023 年同一個月？": {
         "before": {
           "n": 3,
-          "success": 0.0,
+          "success": 1.0,
           "timeout": 0.0,
-          "first_try": 0.0,
+          "first_try": 1.0,
           "avg_seconds": 129.4
         },
         "after": null

@@ -30,6 +30,20 @@ class FewShotTests(unittest.TestCase):
         for ex in prompts.SQL_EXAMPLES:
             self.assertNotIn(ex["question"], asked)
 
+    def test_examples_do_not_reproduce_any_oracle_answer(self):
+        """Same type, different content: no example returns the rows of an evaluation answer."""
+        answers = []
+        for path in (ROOT / "data/synthetic/runs").glob("*/dataset.jsonl"):
+            for line in path.open(encoding="utf-8"):
+                if line.strip():
+                    rows = (json.loads(line).get("ground_truth") or {}).get("rows")
+                    if rows:
+                        answers.append([list(r) for r in rows])
+        self.assertTrue(answers)
+        for ex in prompts.SQL_EXAMPLES:
+            rows = [list(r) for r in tools.read_sales(ex["sql"])["rows"]]
+            self.assertNotIn(rows, answers, ex["question"])
+
     def test_flag_controls_the_planner_prompt(self):
         from text2sql.agents.planned_agent import qwen_workflow as qw
         sql = prompts.SQL_EXAMPLES[0]["sql"]

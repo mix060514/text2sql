@@ -34,5 +34,26 @@ class OptReportTests(unittest.TestCase):
         self.assertFalse(r["passed"])
 
 
+    def test_review_accepts_only_the_declared_transformations(self):
+        item = {"ground_truth": {"columns": ["category", "rank", "product", "qty"],
+                                 "rows": [["A", 1, "x", 10], ["A", 2, "y", 5]]}}
+        review = {"S": {"drop": ["rank"], "normalize": [], "reason": ""}}
+        record = {"seed_id": "S", "workflow_status": "completed", "row_count": 2,
+                  "rows": [["A", "x", 10], ["A", "y", 5]]}
+        self.assertTrue(opt_report.review_passes(record, item, review))
+        wrong = dict(record, rows=[["A", "x", 10], ["A", "y", 6]])
+        self.assertFalse(opt_report.review_passes(wrong, item, review))
+        self.assertFalse(opt_report.review_passes(dict(record, seed_id="other"), item, review))
+        self.assertFalse(opt_report.review_passes(dict(record, workflow_status="failed"), item, review))
+
+    def test_review_label_and_sign_normalization(self):
+        item = {"ground_truth": {"columns": ["month", "pct"], "rows": [["01", -3.5], ["04", -1.0]]}}
+        review = {"S": {"drop": [], "normalize": ["month", "abs"], "reason": ""}}
+        ok = {"seed_id": "S", "workflow_status": "completed", "row_count": 2,
+              "rows": [["2024-01", 3.5], ["2024-04", 1.0]]}
+        self.assertTrue(opt_report.review_passes(ok, item, review))
+        self.assertFalse(opt_report.review_passes(dict(ok, rows=[["2024-02", 3.5], ["2024-04", 1.0]]), item, review))
+
+
 if __name__ == "__main__":
     unittest.main()

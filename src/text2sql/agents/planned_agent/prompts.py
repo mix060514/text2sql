@@ -89,6 +89,62 @@ ORDER BY t.customer_total DESC, s."Customer Name", s."Product Category"
                 "不是 N 位客戶合計的類別占比；先用 CTE 取前 N 名，再 JOIN 回明細。"
                 "帶 LIMIT 的 CTE 再 JOIN 時必須寫 AS MATERIALIZED，否則 SQLite 會對每一列重算而逾時。",
     },
+    {
+        "type": "期間成長率（月增率、季增率）",
+        "question": "Software 類別 2024 年每個月的銷售量比前一個月成長了多少百分比？",
+        "sql": """WITH monthly AS (
+  SELECT substr("Order Date", 1, 7) AS "Month", SUM("Quantity") AS qty
+  FROM sales_data
+  WHERE "Product Category" = 'Software' AND substr("Order Date", 1, 7) BETWEEN '2023-12' AND '2024-12'
+  GROUP BY substr("Order Date", 1, 7)
+),
+growth AS (
+  SELECT "Month", qty,
+         ROUND((qty - LAG(qty) OVER (ORDER BY "Month")) * 100.0
+               / NULLIF(LAG(qty) OVER (ORDER BY "Month"), 0), 2) AS "MoM Growth (%)"
+  FROM monthly
+)
+SELECT "Month", qty AS "Total Quantity", "MoM Growth (%)"
+FROM growth
+WHERE "Month" >= '2024-01'
+ORDER BY "Month"
+""",
+        "note": "先算出每期總額，範圍要多包含前一期（例如 2024 年 1 月要用 2023 年 12 月比較），再用 LAG 取前一期，最後篩掉多出的那一期。不要用遞迴 CTE 或 date() 產生月份；date() 不接受 YYYY-MM，會得到 NULL。季增率同理，以季度為一期。",
+    },
+    {
+        "type": "累計與累計占比（逐月累計、達到 X% 需要幾個）",
+        "question": "LATAM 的客戶按銷售額由高到低累加，至少要幾位客戶才能達到該區總銷售額的 50%？",
+        "sql": """WITH customer_sales AS (
+  SELECT "Customer Name", SUM("Total Revenue") AS revenue
+  FROM sales_data
+  WHERE "Region" = 'LATAM'
+  GROUP BY "Customer Name"
+),
+running AS (
+  SELECT "Customer Name", revenue,
+         SUM(revenue) OVER (ORDER BY revenue DESC, "Customer Name" ASC
+                            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) * 100.0
+           / SUM(revenue) OVER () AS cumulative_share
+  FROM customer_sales
+)
+SELECT COUNT(*) + 1 AS "Customers Needed"
+FROM running
+WHERE cumulative_share < 50
+""",
+        "note": "累計用視窗函數 SUM(...) OVER (ORDER BY ... ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)，總額用 SUM(...) OVER ()；不要寫相關子查詢逐列加總，會超過 5 秒上限。逐月累計同理，ORDER BY 月份。達到 X% 需要的個數＝累計占比低於 X 的個數 + 1。",
+    },
+    {
+        "type": "條件占比",
+        "question": "各產品類別中，單價 500 以上的交易占該類別銷售量的比例是多少？",
+        "sql": """SELECT "Product Category",
+       ROUND(SUM(CASE WHEN "ASP" >= 500 THEN "Quantity" ELSE 0 END) * 100.0
+             / NULLIF(SUM("Quantity"), 0), 2) AS "High-ASP Quantity Share (%)"
+FROM sales_data
+GROUP BY "Product Category"
+ORDER BY "Product Category"
+""",
+        "note": "條件占比在同一個 GROUP BY 裡用 SUM(CASE WHEN 條件 THEN 指標 ELSE 0 END) * 100.0 / SUM(指標) 計算，不需要子查詢或 JOIN。",
+    },
 ]
 
 

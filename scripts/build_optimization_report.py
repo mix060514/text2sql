@@ -97,8 +97,12 @@ def main():
     rejudged_map = {r["question"]: r for r in json.loads(rejudged.read_text(encoding="utf-8"))}
     t_base_rows = o.load_template(t_base) if t_base else []
     t_few_rows = o.load_template(t_few) if t_few else []
-    c_base_rows = o.load_synthetic(c_base, "complex") if c_base else []
-    c_few_rows = o.load_synthetic(c_few, "complex") if c_few else []
+    review_path = OUT / "complex_review.json"
+    review = {k: v for k, v in json.loads(review_path.read_text(encoding="utf-8")).items()
+              if not k.startswith("_")} if review_path.exists() else {}
+    c_base_rows = o.load_synthetic(c_base, "complex", review) if c_base else []
+    c_few_rows = o.load_synthetic(c_few, "complex", review) if c_few else []
+    reviewed = lambda rows: [dict(r, passed=r["reviewed"]) for r in rows]
 
     def compare(before, after):
         return {"before": o.stats(before) if before else None, "after": o.stats(after) if after else None}
@@ -162,14 +166,29 @@ def main():
                                pick(t_base_rows, q("各季度的總銷售額趨勢", "區域 2023 至 2024 年各季度", "請用圓餅圖表示"))),
             "scope": "Q101–Q105、Q110",
         },
+        {
+            "id": "complex_grading",
+            "title": "複雜題標準答案過嚴",
+            "problem": "複雜題用 SQLite 標準答案逐列比對，有些答案內容正確，卻因格式不同被判錯。",
+            "cause": "標準答案多帶題目沒問的欄位（名次、金額），標籤寫法不同（週一／星期一、01／2024-01），"
+                     "「下滑多少百分比」的正負號表示法不同。",
+            "fix": "逐題人工複核，並寫下該題允許的轉換（省略哪些欄、怎麼統一標籤）；程式只套用這些轉換重新比對，"
+                   "結果仍須完全一致才算對，數值錯的題目不會因複核變成正確。",
+            "metrics": compare(c_base_rows, reviewed(c_base_rows)) if c_base_rows else None,
+            "scope": "複雜題基準 102 題（嚴格比對 → 複核後）",
+            "labels": ["成功率"],
+        },
     ]
 
     hard_template = o.hard_types(t_base_rows) if t_base_rows else []
-    hard_complex = o.hard_types(c_base_rows) if c_base_rows else []
+    # Hard complex types are chosen on reviewed correctness: a grader artefact is not a
+    # reason to teach the model anything.
+    hard_complex = o.hard_types(reviewed(c_base_rows)) if c_base_rows else []
     few_shot = {
         "template": {t: compare([r for r in t_base_rows if r["type"] == t], [r for r in t_few_rows if r["type"] == t])
                      for t in hard_template},
-        "complex": {t: compare([r for r in c_base_rows if r["type"] == t], [r for r in c_few_rows if r["type"] == t])
+        "complex": {t: compare([r for r in reviewed(c_base_rows) if r["type"] == t],
+                               [r for r in reviewed(c_few_rows) if r["type"] == t])
                     for t in hard_complex},
     }
 
@@ -179,7 +198,9 @@ def main():
             "template": {"2026-11-07": o.stats(orig_rows), "baseline": o.stats(t_base_rows) if t_base_rows else None,
                          "few_shot": o.stats(t_few_rows) if t_few_rows else None},
             "complex": {"baseline": o.stats(c_base_rows) if c_base_rows else None,
-                        "few_shot": o.stats(c_few_rows) if c_few_rows else None},
+                        "baseline_reviewed": o.stats(reviewed(c_base_rows)) if c_base_rows else None,
+                        "few_shot": o.stats(c_few_rows) if c_few_rows else None,
+                        "few_shot_reviewed": o.stats(reviewed(c_few_rows)) if c_few_rows else None},
         },
         "by_type": {
             "template": {"2026-11-07": o.by_type(orig_rows), "baseline": o.by_type(t_base_rows),
@@ -187,6 +208,11 @@ def main():
             "complex": {"baseline": o.by_type(c_base_rows), "few_shot": o.by_type(c_few_rows)},
         },
         "cases": cases,
+        "complex_review": [
+            {"seed_id": r["seed_id"], "question": r["question"], "reason": review[r["seed_id"]]["reason"],
+             "accepted": r["reviewed"]}
+            for r in c_base_rows if not r["passed"] and r["seed_id"] in review
+        ],
         "few_shot": few_shot,
     }
     (OUT / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")

@@ -74,9 +74,24 @@ def load_template(path) -> list[dict]:
     return rows
 
 
-def load_synthetic(path, subset) -> list[dict]:
-    """eval_e2e.py --synthetic synthetic_results.json -> normalized rows of one subset."""
+def _synthetic_items():
+    out = {}
+    for path in sorted(SYNTHETIC_RUNS.glob("*/dataset.jsonl")):
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                item = json.loads(line)
+                out[item["question"]] = item
+    return out
+
+
+def load_synthetic(path, subset, review=None) -> list[dict]:
+    """eval_e2e.py --synthetic synthetic_results.json -> normalized rows of one subset.
+
+    With a review mapping, "reviewed" is True for passes and for strict-oracle failures
+    that review_passes() verifies; "passed" stays the strict oracle result.
+    """
     seeds = _seed_questions()
+    items = _synthetic_items() if review else {}
     rows = []
     for r in json.loads(Path(path).read_text(encoding="utf-8")):
         is_block = r.get("label") == "block"
@@ -89,6 +104,8 @@ def load_synthetic(path, subset) -> list[dict]:
             "type": r.get("category") if is_block else seeds.get(r.get("seed_id"), r.get("seed_id")),
             "seed_id": r.get("seed_id"),
             "passed": bool(r.get("passed")),
+            "reviewed": bool(r.get("passed")) or bool(
+                review and r["question"] in items and review_passes(r, items[r["question"]], review)),
             "timeout": "Timeout" in text,
             "seconds": r.get("seconds") or None,
             "attempts": r.get("sql_attempts") or None,
@@ -124,3 +141,33 @@ def hard_types(rows, max_seconds=120.0) -> list[str]:
                 or (s["avg_seconds"] or 0) > max_seconds:
             out.append(name)
     return out
+
+
+def _normalize(value, rules):
+    if isinstance(value, str):
+        if "month" in rules and len(value) == 7 and value[4] == "-" and value[:4].isdigit():
+            value = value[5:]
+        if "weekday" in rules:
+            value = value.replace("週", "星期")
+        return value
+    if isinstance(value, (int, float)) and "abs" in rules:
+        return abs(value)
+    return value
+
+
+def review_passes(record: dict, item: dict, review: dict) -> bool:
+    """A strict-oracle failure counts as correct only if the declared transformations make
+    the actual rows equal the oracle rows (same row count, values, membership)."""
+    import synthetic  # eval/ is on sys.path for both the builder and the tests
+
+    entry = review.get(record.get("seed_id"))
+    if not entry or record.get("workflow_status") != "completed":
+        return False
+    gt = item["ground_truth"]
+    keep = [j for j, c in enumerate(gt["columns"]) if c not in entry["drop"]]
+    rules = entry["normalize"]
+    expected = [[_normalize(row[j], rules) for j in keep] for row in gt["rows"]]
+    actual = [[_normalize(v, rules) for v in row] for row in record.get("rows") or []]
+    if len(actual) != (record.get("row_count") or 0):
+        return False  # stored rows were truncated; cannot verify
+    return synthetic.rows_match(expected, actual)
