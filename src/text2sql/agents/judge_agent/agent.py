@@ -2,12 +2,8 @@ from typing import List, Dict, Any, Optional
 
 from pydantic import BaseModel, Field
 from google.adk.agents import LlmAgent
-from google.adk.models.lite_llm import LiteLlm
-from text2sql.config import (
-    LLAMA_CPP_MODEL,
-    LLAMA_CPP_API_KEY,
-    LLAMA_CPP_API_BASE,
-)
+from text2sql.agents.planned_agent.qwen_workflow import model
+from text2sql.config import JUDGE_THINKING_BUDGET
 
 
 class JudgeResult(BaseModel):
@@ -32,11 +28,9 @@ class JudgeResult(BaseModel):
 JUDGE_OUTPUT_KEY = "judge_result"  # 用於從 session state 取得結果
 
 judge_agent = LlmAgent(
-    model=LiteLlm(
-        model=LLAMA_CPP_MODEL,
-        api_key=LLAMA_CPP_API_KEY,
-        api_base=LLAMA_CPP_API_BASE,
-    ),
+    # Same bounded streaming model as the workflow: an unbounded, non-streamed judge call
+    # once timed out and left an orphan generation that made the next judge calls fail too.
+    model=model(budget=JUDGE_THINKING_BUDGET),
     name="judge_agent",
     description="專業的商業資料分析評估員，評估 Agent 回答的正確性與品質",
     output_key=JUDGE_OUTPUT_KEY,  # structured output 會存到 session state

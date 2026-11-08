@@ -157,6 +157,9 @@ async def run_agent_and_get_state(
     return await run_question(runner, prompt, user_id)
 
 
+JUDGE_MISSING = "Judge Agent did not return result"
+
+
 async def judge_sql_result(
     question: str, expected: Any, actual_answer: str, sql_query: str, sql_result: Any
 ) -> tuple[bool, int, str]:
@@ -178,7 +181,7 @@ async def judge_sql_result(
         judge_result = state.get("judge_result", {})
 
         if not judge_result:
-            return False, 0, "Judge Agent did not return result"
+            return False, 0, f"{JUDGE_MISSING}: {state.get('workflow_error')}"
 
         is_correct = judge_result.get("is_correct", False)
         score = min(10, max(0, int(judge_result.get("confidence_score", 0))))
@@ -597,6 +600,61 @@ async def run_evaluation(
     return summary
 
 
+def _needs_rejudge(r: dict) -> bool:
+    reason = str(r.get("sql_reasoning") or "")
+    has_answer = bool(r.get("sql_query")) and r.get("sql_query") != "TIMEOUT"
+    return has_answer and (reason.startswith(JUDGE_MISSING) or reason.startswith("Judge error"))
+
+
+def _e2e_success(r: dict) -> bool:
+    if not r.get("has_expected_plot"):
+        return bool(r["sql_correct"])
+    ok = bool(r["sql_correct"]) and bool(r["plot_decision_correct"])
+    if r.get("expected_should_plot"):
+        ok = ok and all(r.get(k) for k in ("chart_json_valid", "trace_type_correct",
+                                            "x_order_correct", "trace_count_correct"))
+    return ok
+
+
+async def rejudge_run(run_dir) -> dict:
+    """Re-run only the judge for answered questions whose judge call failed; keep answers."""
+    run_dir = pathlib.Path(run_dir)
+    results_path = run_dir / "e2e_results.json"
+    summary_path = run_dir / "e2e_summary.json"
+    rows = json.loads(results_path.read_text(encoding="utf-8"))
+    backup = run_dir / "e2e_results.before_rejudge.json"
+    if not backup.exists():
+        backup.write_text(json.dumps(rows, indent=2, ensure_ascii=False), encoding="utf-8")
+    truth = {}
+    if EVAL_SET_PATH.exists():
+        for line in EVAL_SET_PATH.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                item = json.loads(line)
+                truth[item["question"]] = item.get("ground_truth")
+    todo = [r for r in rows if _needs_rejudge(r)]
+    print(f"Re-judging {len(todo)} of {len(rows)} questions in {run_dir}")
+    for i, r in enumerate(todo, 1):
+        correct, score, reason = await judge_sql_result(
+            r["question"], truth.get(r["question"]), r.get("answer") or "", r.get("sql_query") or "",
+            {"rows": r.get("sql_result")},
+        )
+        r.update(sql_correct=correct, sql_score=score, sql_reasoning=reason)
+        r["e2e_success"] = _e2e_success(r)
+        print(f"[{i}/{len(todo)}] {'✓' if correct else '✗'} {score}/10 {r['question'][:50]}")
+        results_path.write_text(json.dumps(rows, indent=2, ensure_ascii=False), encoding="utf-8")
+    metrics = E2EMetrics()
+    for r in rows:
+        metrics.add_result(E2EResult(**r))
+    old = json.loads(summary_path.read_text(encoding="utf-8")) if summary_path.exists() else {}
+    summary = metrics.get_summary()
+    summary["run_metadata"] = old.get("run_metadata", {})
+    summary["timestamp"] = old.get("timestamp", "")
+    summary["rejudged_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    summary_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"SQL Accuracy: {summary['sql_accuracy']:.1%}  E2E Success: {summary['e2e_success_rate']:.1%}")
+    return summary
+
+
 async def run_synthetic(run_dir=None, limit=None, label=None, reuse=True, timeout=300):
     """Run the synthetic golden + guardrail set; grade deterministically against its oracle."""
     import synthetic
@@ -686,7 +744,18 @@ if __name__ == "__main__":
     parser.add_argument("--label", choices=["allow", "block"], help="--synthetic: only this label")
     parser.add_argument("--no-reuse", action="store_true",
                         help="--synthetic: rerun everything, even items that passed before")
+    parser.add_argument(
+        "--rejudge", nargs="?", const="latest", default=None, metavar="RUN_DIR",
+        help="Re-run only failed judge calls in a finished run (default: newest e2e run); "
+             "answers are kept, original results backed up to e2e_results.before_rejudge.json",
+    )
     args = parser.parse_args()
+
+    if args.rejudge:
+        run_dir = (max((PROJECT_DIR / "eval" / "results").glob("e2e_*/e2e_results.json")).parent
+                   if args.rejudge == "latest" else args.rejudge)
+        asyncio.run(rejudge_run(run_dir))
+        raise SystemExit(0)
 
     if args.synthetic:
         asyncio.run(run_synthetic(
