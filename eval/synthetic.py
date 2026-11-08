@@ -246,6 +246,21 @@ def find_reusable(items, metadata, results_dir=RESULTS_DIR):
     return reused
 
 
+# Three question sets shown separately: template rewrites (eval_set_v3 seeds A..Q),
+# SQL-first complex queries (seed ids X-*), and guardrail block items.
+SUBSETS = ("template", "complex", "block")
+
+
+def subset_of(item) -> str:
+    if item["label"] == "block":
+        return "block"
+    return "complex" if str(item.get("seed_id") or "").startswith("X-") else "template"
+
+
+def select_items(items, subset=None):
+    return [item for item in items if subset is None or subset_of(item) == subset]
+
+
 def summarize(records):
     def rate(part):
         return {"passed": sum(r["passed"] for r in part), "total": len(part),

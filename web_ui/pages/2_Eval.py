@@ -11,6 +11,94 @@ eval_set_path = project_root / "data" / "eval_set_v3.jsonl"
 st.set_page_config(page_title="評估結果", page_icon="📊", layout="wide")
 st.title("📊 評估結果")
 
+GROUPS = {"模板問題": None, "攔截問題": "block", "複雜問題": "complex"}
+group = st.sidebar.radio("題組", list(GROUPS), help=(
+    "模板問題：132 題模板考卷（eval_set_v3）。攔截問題：不該查資料的輸入（寫入、閒聊、"
+    "提示注入、資料庫外問題），系統不得執行任何 SELECT。複雜問題：34 種 SQL-first 複雜查詢"
+    "與其改寫，標準答案由 SQL 與 pandas 雙重計算。"))
+BLOCK_KIND = {"write_request": "寫入／修改請求", "chitchat": "閒聊", "prompt_injection": "提示注入",
+              "not_in_data": "資料庫外的問題"}
+SYNTHETIC_RUNS = project_root / "data" / "synthetic" / "runs"
+
+
+def subset_of(record):
+    if record.get("subset"):
+        return record["subset"]
+    if record.get("label") == "block":
+        return "block"
+    return "complex" if str(record.get("seed_id") or "").startswith("X-") else "template"
+
+
+def seed_questions():
+    """Complex items are grouped by their seed question (3 rewrites each)."""
+    out = {}
+    for run in sorted(SYNTHETIC_RUNS.glob("*/dataset.jsonl")):
+        for line in run.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                item = json.loads(line)
+                if item.get("source") == "seed":
+                    out[item["seed_id"]] = item["question"]
+    return out
+
+
+def show_synthetic(subset, title):
+    runs = []
+    for path in sorted(results_dir.glob("synthetic*/synthetic_results.json"), reverse=True):
+        records = [r for r in json.loads(path.read_text(encoding="utf-8")) if subset_of(r) == subset]
+        if records:
+            runs.append((path.parent.name, path.parent / "synthetic_summary.json", records))
+    if not runs:
+        st.info(f"還沒有{title}的評估結果。")
+        st.stop()
+    name = st.sidebar.selectbox("選擇評估批次", [r[0] for r in runs])
+    _, summary_path, records = next(r for r in runs if r[0] == name)
+    summary = json.loads(summary_path.read_text(encoding="utf-8")) if summary_path.exists() else {}
+    meta = summary.get("run_metadata", {})
+    if meta:
+        model = str(meta.get("model", "")).removeprefix("openai/")
+        st.caption(f"模型 `{model}` · 題庫 `{meta.get('dataset')}` · {summary.get('timestamp', '')}")
+
+    df = pd.DataFrame(records)
+    df["_ok"] = df["passed"].astype(bool)
+    if subset == "block":
+        df["題型"] = df["category"].map(lambda c: BLOCK_KIND.get(c, c))
+        metric, note = "攔截成功", "攔截成功：系統沒有執行任何 SELECT，也沒有發布查詢結果。"
+    else:
+        seeds = seed_questions()
+        df["題型"] = df["seed_id"].map(lambda s: seeds.get(s, s))
+        metric, note = "答案正確", "答案正確：查詢結果與 SQL＋pandas 雙重計算的標準答案逐列相符（程式判定，不用 LLM 評審）。"
+    cols = st.columns(3)
+    cols[0].metric("題數", len(df))
+    cols[1].metric(metric, f"{df['_ok'].mean():.1%}")
+    cols[2].metric("原題／改寫", f"{(df['source'] == 'seed').sum()}／{(df['source'] == 'rewrite').sum()}")
+    st.caption(note)
+
+    by_type = df.groupby("題型", sort=False)["_ok"].agg(["count", "sum"])
+    by_type["通過率"] = (by_type["sum"] / by_type["count"]).map("{:.0%}".format)
+    st.dataframe(by_type.rename(columns={"count": "題數", "sum": "通過"}), width="stretch")
+
+    st.divider()
+    st.subheader("依題型的題目與結果")
+    for category, part in df.groupby("題型", sort=False):
+        shown = part[part["_ok"]]
+        if shown.empty:
+            continue
+        st.markdown(f"#### {category}（通過 {int(part['_ok'].sum())}/{len(part)}）")
+        for _, row in shown.iterrows():
+            tag = "原題" if row.get("source") == "seed" else "改寫"
+            with st.expander(f"✅ [{tag}] {row['question'][:90]}"):
+                st.markdown("**系統回答：**")
+                st.write(row.get("answer") or "")
+                if subset != "block":
+                    st.markdown("**SQL：**")
+                    st.code(row.get("sql_query") or "", language="sql")
+                st.caption(f"判定：{row.get('reason')}")
+    st.stop()
+
+
+if GROUPS[group]:
+    show_synthetic(GROUPS[group], group)
+
 # eval/eval_e2e.py writes <run>/e2e_results.json (+ e2e_summary.json); the older eval/eval.py
 # wrote <run>/eval_results.json. List current e2e runs first, newest first, then legacy ones.
 E2E, LEGACY = "e2e", "legacy"

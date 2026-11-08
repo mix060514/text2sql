@@ -666,7 +666,7 @@ async def rejudge_run(run_dir) -> dict:
     return summary
 
 
-async def run_synthetic(run_dir=None, limit=None, label=None, reuse=True, timeout=300):
+async def run_synthetic(run_dir=None, limit=None, label=None, reuse=True, timeout=300, subset=None):
     """Run the synthetic golden + guardrail set; grade deterministically against its oracle."""
     import synthetic
 
@@ -674,6 +674,7 @@ async def run_synthetic(run_dir=None, limit=None, label=None, reuse=True, timeou
     manifest, items = synthetic.load_run(run_dir)
     if label:
         items = [item for item in items if item["label"] == label]
+    items = synthetic.select_items(items, subset)
     if limit:
         items = items[:limit]
     metadata = {"workflow": run_metadata(EVAL_SET_PATH)["workflow"],
@@ -683,7 +684,8 @@ async def run_synthetic(run_dir=None, limit=None, label=None, reuse=True, timeou
                 "dataset_sha256": manifest["dataset_sha256"]}
     reused = synthetic.find_reusable(items, metadata) if reuse else {}
 
-    output_dir = PROJECT_DIR / "eval" / "results" / f"synthetic_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
+    tag = f"_{subset}" if subset else ""
+    output_dir = PROJECT_DIR / "eval" / "results" / f"synthetic{tag}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
     output_dir.mkdir(parents=True, exist_ok=True)
     print(f"\n{'='*70}")
     print(f"Synthetic Evaluation | run {run_dir.name} | Cases: {len(items)} | reused passes: {len(reused)}")
@@ -691,7 +693,7 @@ async def run_synthetic(run_dir=None, limit=None, label=None, reuse=True, timeou
     print(f"{'='*70}\n")
 
     def write(records):
-        summary = {**synthetic.summarize(records), "run_metadata": metadata,
+        summary = {**synthetic.summarize(records), "run_metadata": metadata, "subset": subset,
                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         (output_dir / "synthetic_results.json").write_text(
             json.dumps(records, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -714,6 +716,7 @@ async def run_synthetic(run_dir=None, limit=None, label=None, reuse=True, timeou
                           "workflow_status": "error"}
             print(("🟢 " if result["passed"] else "🔴 ") + result["reason"])
         records.append({"id": item["id"], "question": item["question"], "label": item["label"],
+                        "subset": synthetic.subset_of(item),
                         "category": item.get("category"), "difficulty": item.get("difficulty"),
                         "source": item.get("source"), "seed_id": item.get("seed_id"), **result})
         summary = write(records)
@@ -753,6 +756,8 @@ if __name__ == "__main__":
              "with deterministic grading instead of eval_set_v3",
     )
     parser.add_argument("--label", choices=["allow", "block"], help="--synthetic: only this label")
+    parser.add_argument("--subset", choices=["template", "complex", "block"],
+                        help="--synthetic: only template rewrites, SQL-first complex (X-*) or block items")
     parser.add_argument("--no-reuse", action="store_true",
                         help="--synthetic: rerun everything, even items that passed before")
     parser.add_argument(
@@ -771,7 +776,7 @@ if __name__ == "__main__":
     if args.synthetic:
         asyncio.run(run_synthetic(
             run_dir=None if args.synthetic == "latest" else args.synthetic,
-            limit=args.limit, label=args.label, reuse=not args.no_reuse,
+            limit=args.limit, label=args.label, reuse=not args.no_reuse, subset=args.subset,
         ))
         raise SystemExit(0)
 

@@ -99,3 +99,15 @@ class JudgePromptTests(unittest.IsolatedAsyncioTestCase):
             await eval_e2e.judge_sql_result("q", 1, "a", "SELECT 1", [[1]], chart_type="pie")
         self.assertIn("圖表由系統另外繪製", prompts[0])
         self.assertIn("pie", prompts[0])
+
+
+class SyntheticSubsetTests(unittest.TestCase):
+    def test_subsets_split_template_complex_and_block(self):
+        import synthetic
+        items = [{"label": "allow", "seed_id": "A-1"}, {"label": "allow", "seed_id": "X-region"},
+                 {"label": "block", "seed_id": "B01"}]
+        pick = lambda subset: [i["seed_id"] for i in synthetic.select_items(items, subset)]
+        self.assertEqual(pick("complex"), ["X-region"])
+        self.assertEqual(pick("template"), ["A-1"])
+        self.assertEqual(pick("block"), ["B01"])
+        self.assertEqual(pick(None), ["A-1", "X-region", "B01"])
