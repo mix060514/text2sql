@@ -15,8 +15,22 @@ st.markdown("""
 以自然語言查詢銷售資料，查看實際查詢結果與圖表。
 請從左側選擇 Chat、Eval、System Monitor 或 Data Dashboard。
 """)
-st.caption(f"分析模型：{ANALYSIS_MODEL}")
+# "openai/" is only LiteLLM's provider prefix for an OpenAI-compatible endpoint, not the model.
+MODEL_ALIAS = ANALYSIS_MODEL.split("/", 1)[1] if ANALYSIS_MODEL.startswith("openai/") else ANALYSIS_MODEL
 st.markdown("分析流程：SQL 規劃 → 唯讀查詢 → 語意審查 → 回答與圖表。")
+
+st.subheader("使用的模型")
+st.markdown(f"""
+目前分析模型：`{MODEL_ALIAS}`
+
+- **Swift 1.5**：UkisAI 以阿里巴巴開源的 **Qwen3.8-27B** 做後訓練的版本，思考 token 較少、回應較快。
+- 量化格式為 GSQ-RCO IQ3_XXS GGUF（約 10.4 GB，含 MTP 推測解碼），
+  由 **本機 llama.cpp** 伺服器執行，資料與問題都不會送到外部雲端服務。
+- 同一個模型分別擔任三個角色：SQL 規劃、語意審查、回答撰寫；SQL 執行與檢查由程式負責。
+- 模型來源：[Swift-1.5-Qwen3.8-27B-GSQ-RCO-GGUF](https://huggingface.co/ukisai/Swift-1.5-Qwen3.8-27B-GSQ-RCO-GGUF)
+
+註：設定裡的 `openai/` 前綴只代表「走 OpenAI 相容 API 格式」，與 OpenAI 公司的模型無關。
+""")
 st.sidebar.success("從左側選擇頁面開始。")
 
 st.divider()
