@@ -2,9 +2,6 @@ import streamlit as st
 import sys
 import os
 import pathlib
-import json
-import re
-import sqlparse
 import asyncio
 import uuid
 import time
@@ -53,9 +50,7 @@ if "runner" not in st.session_state:
 
     asyncio.run(init_session())
 
-# Sidebar settings
-st.sidebar.title("Settings")
-show_subagent = st.sidebar.checkbox("Show Analysis Details", value=True)
+FLOW_TITLE = "查看執行流程（點步驟看輸入／輸出）"
 
 
 # Only questions the default model (Swift 1.5) answered correctly in the 2026-11-07
@@ -107,11 +102,8 @@ for i, msg in enumerate(st.session_state.messages):
             except Exception as e:
                 st.error(f"Failed to render chart: {e}")
         if msg.get("workflow_trace"):
-            with st.expander("查看執行流程（點步驟看輸入／輸出）"):
+            with st.expander(FLOW_TITLE):
                 render_flow(msg["workflow_trace"], msg.get("backend", BACKEND))
-        if "subagent_output" in msg and show_subagent:
-            with st.expander("Analysis Details"):
-                st.text(msg["subagent_output"])
 
 # Chat Input
 chat_prompt = st.chat_input("Ask a question...")
@@ -132,144 +124,64 @@ if prompt:
     # Process Agent Response
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
-        subagent_placeholder = st.empty()
+        chart_placeholder = st.empty()
+        flow_placeholder = st.empty()
 
-        full_response = ""
-        subagent_logs = []
-
-        def plain(text) -> str:
-            """Model text as literal inline markdown (no headings, lists or emphasis)."""
-            text = " ".join(str(text).split())
-            return re.sub(r"([\\`*_#\[\]<>|~+=-])", r"\\\1", text)
-
-        def format_model_text(text: str) -> str:
-            """Show agent output readably; raw markdown made JSON lines into big headings."""
-            try:
-                data = json.loads(text)
-            except ValueError:
-                return plain(text)
-            if not isinstance(data, dict):
-                return f"```json\n{json.dumps(data, ensure_ascii=False, indent=2)}\n```"
-            lines = []
-            for key, value in data.items():
-                if key == "sql" and isinstance(value, str):
-                    sql = sqlparse.format(value, reindent=True, keyword_case="upper")
-                    lines.append(f"```sql\n{sql}\n```")
-                elif isinstance(value, (dict, list)):
-                    lines.append(f"- `{key}`\n\n```json\n{json.dumps(value, ensure_ascii=False, indent=2)}\n```")
-                else:
-                    lines.append(f"- `{key}`: {plain(value)}")
-            return "\n".join(lines)
-
-        def format_event(event) -> str:
-            """Formats an ADK event into a readable markdown string."""
-            log_lines = []
-
-            # Extract basic info
-            author = getattr(event, "author", "unknown")
-            # header = f"**[{author}]**"
-            # Simplified header to avoid noise, use author only if meaningful
-
-            content = getattr(event, "content", None)
-            if content and hasattr(content, "parts"):
-                for part in content.parts:
-                    # Text Content
-                    if getattr(part, "text", None) and not getattr(part, "thought", False):
-                        log_lines.append(f"**[{author}]**\n\n{format_model_text(part.text)}")
-
-                    # Function Call
-                    if hasattr(part, "function_call") and part.function_call:
-                        fc = part.function_call
-                        args = getattr(fc, "args", {})
-                        log_lines.append(f"**[{author}]** 🛠️ **Tool Call**: `{fc.name}`")
-                        log_lines.append(
-                            f"```json\n{json.dumps(args, ensure_ascii=False, indent=2)}\n```"
-                        )
-
-                    # Function Response
-                    if hasattr(part, "function_response") and part.function_response:
-                        fr = part.function_response
-                        response = getattr(fr, "response", {})
-                        log_lines.append(
-                            f"**[{author}]** 📋 **Tool Result**: `{fr.name}`"
-                        )
-                        # Truncate
-                        res_str = json.dumps(response, ensure_ascii=False, indent=2)
-                        if len(res_str) > 500:
-                            res_str = res_str[:500] + "... (truncated)"
-                        log_lines.append(f"```json\n{res_str}\n```")
-
-            return "\n\n".join(log_lines)
+        def show_flow(trace, expanded):
+            # The workflow streams a trace snapshot when each step starts and ends;
+            # redraw the diagram in place so the user sees which step is running.
+            with flow_placeholder.container():
+                with st.expander(FLOW_TITLE, expanded=expanded):
+                    render_flow(trace, BACKEND)
 
         async def run_chat():
-            response_text = ""
-            current_logs = []
             content = types.Content(role="user", parts=[types.Part(text=prompt)])
-
-            if show_subagent:
-                subagent_status = subagent_placeholder.expander(
-                    "Processing...", expanded=True
-                )
-                live_log_container = subagent_status.empty()
-
+            message_placeholder.markdown("⏳ 分析中…")
             async for event in stream_turn(
                 st.session_state.runner,
                 user_id="web_user",
                 session_id=st.session_state.session_id,
                 new_message=content,
             ):
-                # Format event
-                formatted_log = format_event(event)
-                if formatted_log:
-                    current_logs.append(formatted_log)
+                delta = event.actions.state_delta if event.actions else None
+                if delta and delta.get("workflow_trace"):
+                    show_flow(delta["workflow_trace"], expanded=True)
 
-                    if show_subagent:
-                        live_log_container.markdown("\n\n---\n\n".join(current_logs))
-
-            # Get final answer from session state
             session = await st.session_state.runner.session_service.get_session(
                 app_name="text2sql_chat",
                 user_id="web_user",
                 session_id=st.session_state.session_id,
             )
+            if not session:
+                return "No session found.", None, []
+            response_text = (
+                session.state.get("final_answer")
+                or session.state.get("answer")
+                or "No answer generated."
+            )
+            return (response_text, session.state.get("chart_json"),
+                    session.state.get("workflow_trace") or [])
 
-            chart_json = None
-            trace = []
-            if session:
-                trace = session.state.get("workflow_trace") or []
-                response_text = (
-                    session.state.get("final_answer")
-                    or session.state.get("answer")
-                    or "No answer generated."
-                )
-                chart_json = session.state.get("chart_json")
-            else:
-                response_text = "No session found."
-
-            return response_text, current_logs, chart_json, trace
-
-        full_response, subagent_logs, chart_json, trace = asyncio.run(run_chat())
+        full_response, chart_json, trace = asyncio.run(run_chat())
 
         message_placeholder.markdown(full_response)
 
-        # Display chart if available
-        # Display chart if available
         if chart_json:
             try:
                 fig = pio.from_json(chart_json)
-                st.plotly_chart(fig, use_container_width=True, key="latest_chart")
+                chart_placeholder.plotly_chart(fig, use_container_width=True, key="latest_chart")
             except Exception as e:
-                st.error(f"Failed to render chart: {e}")
+                chart_placeholder.error(f"Failed to render chart: {e}")
 
         if trace:
-            with st.expander("查看執行流程（點步驟看輸入／輸出）", expanded=True):
-                render_flow(trace, BACKEND)
+            show_flow(trace, expanded=True)
+        else:
+            flow_placeholder.empty()
 
         st.session_state.messages.append(
             {
                 "role": "assistant",
                 "content": full_response,
-                "subagent_output": "\n".join(subagent_logs),
                 "chart_json": chart_json,
                 "workflow_trace": trace,
                 "backend": BACKEND,

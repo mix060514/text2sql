@@ -7,7 +7,7 @@ from google.adk.runners import InMemoryRunner
 from google.genai import types
 
 from text2sql.agents.planned_agent.qwen_workflow import root_agent as qwen_root
-from text2sql.runtime import run_question
+from text2sql.runtime import run_question, stream_turn
 
 REGION_SQL = 'SELECT Region, SUM("Total Revenue") AS Revenue FROM sales_data GROUP BY Region ORDER BY Region'
 ACCEPT = json.dumps({"accepted": True, "reason": "ok"})
@@ -92,3 +92,18 @@ class QwenTraceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(steps(state)[-1], ("step_draw_chart", 1, "skipped"))
         json.dumps(state["workflow_trace"], ensure_ascii=False)  # serializable for the UI
 
+
+    async def test_stream_announces_each_llm_step_while_running(self):
+        """The chat page redraws the flow from streamed deltas, so a running step must appear first."""
+        runner = self.runner([self.sql(REGION_SQL)],
+                             [self.report(chart_type="bar", x_column="Region", y_column="Revenue")])
+        await runner.session_service.create_session(app_name=runner.app_name, user_id="u", session_id="s")
+        message = types.Content(role="user", parts=[types.Part(text="各區域營收")])
+        snapshots = []
+        async for event in stream_turn(runner, user_id="u", session_id="s", new_message=message):
+            delta = event.actions.state_delta if event.actions else None
+            if delta and "workflow_trace" in delta:
+                snapshots.append([(e["name"], e["status"]) for e in delta["workflow_trace"]])
+        running = [snap[-1][0] for snap in snapshots if snap and snap[-1][1] == "running"]
+        self.assertEqual(running, ["agent_sql", "agent_review", "agent_report"])
+        self.assertEqual(snapshots[-1][-1], ("step_draw_chart", "ok"))

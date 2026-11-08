@@ -111,6 +111,7 @@ class Text2SQLWorkflow(BaseAgent):
                 "previous_query_context": ctx.session.state.get("previous_query_context", "{}"),
                 "sql_feedback": feedback,
             })
+            yield self.update(ctx, traced())  # lets the UI show agent_sql as running
             try:
                 async for event in self.sub_agents[0].run_async(ctx):
                     yield event
@@ -130,6 +131,7 @@ class Text2SQLWorkflow(BaseAgent):
                     "user_question": ctx.session.state.get("user_question", ""),
                     "sql": result["sql"], **rows_preview(result["columns"], result["rows"]),
                 })
+                yield self.update(ctx, traced())
                 async for event in self.sub_agents[1].run_async(ctx):
                     yield event
                 review = SemanticReview.model_validate(ctx.session.state.get("semantic_review"))
@@ -156,6 +158,7 @@ class Text2SQLWorkflow(BaseAgent):
                 **rows_preview(ctx.session.state.get("column_names"), ctx.session.state.get("raw_query_result")),
                 "report_feedback": feedback,
             })
+            yield self.update(ctx, traced())
             try:
                 async for event in self.sub_agents[2].run_async(ctx):
                     yield event

@@ -30,10 +30,10 @@ TEMPLATE = r"""<!doctype html>
 <style>
 :root{--bg:#ffffff;--fg:#1f2328;--muted:#656d76;--line:#d0d7de;--panel:#f6f8fa;
 --agent:#ede7fb;--agent-b:#7c5cd6;--step:#e8f0fe;--step-b:#3b6fd9;--tool:#fff4e0;--tool-b:#c27c0e;
---ok:#1a7f37;--bad:#cf222e;--skip:#8c959f;--sel:#0969da}
+--ok:#1a7f37;--bad:#cf222e;--skip:#8c959f;--run:#0969da;--sel:#0969da}
 @media (prefers-color-scheme: dark){:root{--bg:#0e1117;--fg:#e6edf3;--muted:#9198a1;--line:#30363d;--panel:#161b22;
 --agent:#2a2143;--agent-b:#a78bfa;--step:#16253f;--step-b:#79a6f2;--tool:#33270f;--tool-b:#e3a43a;
---ok:#3fb950;--bad:#f85149;--skip:#6e7681;--sel:#58a6ff}}
+--ok:#3fb950;--bad:#f85149;--skip:#6e7681;--run:#58a6ff;--sel:#58a6ff}}
 *{box-sizing:border-box}
 body{margin:0;font-family:"Source Sans Pro",system-ui,-apple-system,"Noto Sans TC",sans-serif;color:var(--fg);background:var(--bg);font-size:14px}
 .legend{display:flex;gap:16px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin:2px 0 6px}
@@ -47,6 +47,10 @@ svg{width:100%;min-width:720px;height:auto;display:block}
 .name{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;fill:var(--fg)}
 .desc{font-size:12px;fill:var(--muted)}
 .loop-label{font-size:11px;fill:var(--muted)}
+.running .box{stroke:var(--run);stroke-width:2.5}
+.running .pulse{animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.running .pulse{animation:none}}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 8px}
 .chip{border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;cursor:pointer;background:var(--panel);color:var(--fg);font-family:ui-monospace,Menlo,monospace}
 .chip.sel{border-color:var(--sel);box-shadow:0 0 0 1px var(--sel)}
@@ -70,6 +74,7 @@ td,th{border:1px solid var(--line);padding:2px 6px;text-align:left}
   <span><i class="sw" style="background:var(--tool);border-color:var(--tool-b);border-style:dashed"></i>tool_：模型自己呼叫</span>
   <span><i class="dot" style="background:var(--ok)"></i>通過</span>
   <span><i class="dot" style="background:var(--bad)"></i>錯誤／拒絕</span>
+  <span><i class="dot" style="background:var(--run)"></i>執行中</span>
   <span><i class="dot" style="background:var(--skip)"></i>未執行／略過</span>
 </div>
 <div class="scroller"><svg id="flow" role="img" aria-label="執行流程圖"></svg></div>
@@ -81,6 +86,7 @@ const PIPE = __PIPE__;
 const NS = "http://www.w3.org/2000/svg";
 const KIND = {agent:"LLM agent", step:"程式步驟", tool:"Tool（模型呼叫）"};
 const STATUS = {ok:"通過", rejected:"審查拒絕", error:"錯誤", skipped:"略過", running:"執行中"};
+const statusColor = s => s==="ok" ? css("--ok") : s==="running" ? css("--run") : s==="skipped" ? css("--skip") : css("--bad");
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const kindOf = n => n.split("_")[0];
 const W = 132, H = 58, GAP = 40, X0 = 20, Y0 = 70;
@@ -115,21 +121,21 @@ function nodeStatus(name){
   const r = runs[name]; if(!r) return {color:css("--skip"), label:"未執行", count:0, hadFail:false};
   const last = TRACE[r[r.length-1]];
   const hadFail = r.some(i => ["error","rejected"].includes(TRACE[i].status));
-  const c = last.status==="ok" ? css("--ok") : (last.status==="skipped" ? css("--skip") : css("--bad"));
-  return {color:c, label:STATUS[last.status]||last.status, count:r.length, hadFail};
+  return {color:statusColor(last.status), label:STATUS[last.status]||last.status, count:r.length, hadFail,
+          running:last.status==="running"};
 }
 
 let selected = null, selectedEntry = null;
 const nodeEls = {};
 PIPE.nodes.forEach(([name, desc]) => {
   const p = pos[name], k = kindOf(name), st = nodeStatus(name);
-  const g = el("g", {class:"node", tabindex:"0", role:"button", "aria-label":`${name} ${desc} ${st.label}`});
+  const g = el("g", {class: st.running ? "node running" : "node", tabindex:"0", role:"button", "aria-label":`${name} ${desc} ${st.label}`});
   const fill = css(`--${k}`), stroke = css(`--${k}-b`);
   const box = el("rect", {class:"box", x:p.x, y:p.y, width:W, height:H, rx: k==="agent"?16:3, fill, stroke, "stroke-width":1.6,
     "stroke-dasharray": k==="tool"?"5 3":"none", opacity: st.count? 1 : 0.55}, g);
   text(name, {x:p.x+W/2, y:p.y+24, "text-anchor":"middle", class:"name"}, g);
   text(desc, {x:p.x+W/2, y:p.y+43, "text-anchor":"middle", class:"desc"}, g);
-  el("circle", {cx:p.x+W-10, cy:p.y+10, r:5, fill:st.color}, g);
+  el("circle", {cx:p.x+W-10, cy:p.y+10, r:5, fill:st.color, class:"pulse"}, g);
   if(st.count>1) text(`×${st.count}`, {x:p.x+W-4, y:p.y+H+16, "text-anchor":"end", class:"desc", style:`fill:${st.hadFail?css("--bad"):css("--muted")}`}, g);
   const ms = (runs[name]||[]).reduce((s,i)=>s+(TRACE[i].ms||0),0);
   if(ms) text(`${(ms/1000).toFixed(1)} 秒`, {x:p.x+4, y:p.y+H+16, class:"desc"}, g);
@@ -163,7 +169,7 @@ function renderValue(v){
     return wrap;
   }
   const pre = document.createElement("pre");
-  pre.textContent = v==null ? "（無）" : JSON.stringify(v, null, 2);
+  pre.textContent = v==null ? "（無）" : typeof v==="string" ? v : JSON.stringify(v, null, 2);
   wrap.appendChild(pre); return wrap;
 }
 
@@ -173,10 +179,10 @@ function showEntry(i){
   panel.replaceChildren();
   const h = document.createElement("h4"); h.textContent = `${e.name}（第 ${e.attempt} 次）`; panel.appendChild(h);
   const m = document.createElement("div"); m.className="meta";
-  m.textContent = `${KIND[e.kind]||e.kind}　·　${STATUS[e.status]||e.status}` + (e.ms!=null ? `　·　${(e.ms/1000).toFixed(2)} 秒` : "　·　在上一步內執行");
+  m.textContent = `${KIND[e.kind]||e.kind}　·　${STATUS[e.status]||e.status}` + (e.ms!=null ? `　·　${(e.ms/1000).toFixed(2)} 秒` : e.status==="running" ? "" : "　·　在上一步內執行");
   panel.appendChild(m);
   const io = document.createElement("div"); io.className="io";
-  [["輸入", e.input], ["輸出", e.output]].forEach(([label, v]) => {
+  [["輸入", e.input], ["輸出", e.status==="running" ? "等待模型回應…" : e.output]].forEach(([label, v]) => {
     const col = document.createElement("div"); const h5=document.createElement("h5"); h5.textContent=label;
     col.appendChild(h5); col.appendChild(renderValue(v)); io.appendChild(col);
   });
@@ -196,7 +202,7 @@ function select(name){
   r.forEach(i => {
     const e = TRACE[i], b = document.createElement("button"); b.className="chip"; b.dataset.i=i;
     const dot=document.createElement("i"); dot.className="dot";
-    dot.style.background = e.status==="ok"?css("--ok"):(e.status==="skipped"?css("--skip"):css("--bad"));
+    dot.style.background = statusColor(e.status);
     b.appendChild(dot); b.appendChild(document.createTextNode(`第 ${e.attempt} 次 · ${STATUS[e.status]||e.status}`));
     b.addEventListener("click", () => showEntry(i)); chips.appendChild(b);
   });
