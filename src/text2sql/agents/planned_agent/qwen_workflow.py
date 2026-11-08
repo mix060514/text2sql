@@ -12,7 +12,7 @@ from pydantic import ValidationError
 from text2sql.config import (
     LLAMA_CPP_MODEL, LLAMA_CPP_API_BASE, LLAMA_CPP_API_KEY,
     REPORT_ATTEMPTS, REPORT_THINKING, REVIEW_THINKING_BUDGET, SQL_ATTEMPTS,
-    SQL_FEW_SHOT, SQL_THINKING_BUDGET,
+    AGENT_TIMEOUT_SECONDS, SQL_FEW_SHOT, SQL_THINKING_BUDGET,
 )
 from .contracts import AnswerSubmission, SQLPlan, SemanticReview
 from .prompts import DOMAIN, REPORT_RULES, format_sql_examples
@@ -21,18 +21,17 @@ from .context import start_turn
 from .trace import Trace, record_chart, rows_preview
 
 
-MODEL_REQUEST_SECONDS = 120
-
-
 class _StreamingClient:
-    """Run each completion as a stream, aggregate it, and close it at a total deadline.
+    """Run each completion as a stream, aggregate it, and always close it.
 
     llama.cpp keeps generating a non-streamed request after the client gives up, so one
     timeout left an orphan holding the single slot and queued requests timed out in turn.
-    Closing a stream cancels the slot (verified live 2026-11-08).
+    Closing a stream cancels the slot (verified live 2026-11-08). The stream is closed on
+    any exit, including cancellation by the invocation deadline in runtime.stream_turn,
+    which is the only time limit (no per-request limit unless `seconds` is given).
     """
 
-    def __init__(self, inner, seconds: float):
+    def __init__(self, inner, seconds: float | None = None):
         self.inner, self.seconds = inner, seconds
 
     async def acompletion(self, **kwargs):
@@ -50,6 +49,8 @@ class _StreamingClient:
                         text.append(delta.get("content") or "")
                         finish = choice.get("finish_reason") or finish
         except TimeoutError:
+            if self.seconds is None:
+                raise
             raise TimeoutError(f"Model request exceeded {self.seconds:g} s; stream closed.") from None
         finally:
             await _close(stream)
@@ -71,9 +72,9 @@ async def _close(stream):
 
 
 class BoundedStreamingLiteLlm(LiteLlm):
-    """LiteLlm whose requests stream under a total deadline but yield one final response."""
+    """LiteLlm whose requests stream (closed on any exit) but yield one final response."""
 
-    request_seconds: float = MODEL_REQUEST_SECONDS
+    request_seconds: float | None = None
 
     async def generate_content_async(self, llm_request, stream=False):
         if not isinstance(self.llm_client, _StreamingClient):
@@ -90,7 +91,7 @@ def model(thinking: bool = True, budget: int = -1):
     else:
         extra = {}
     return BoundedStreamingLiteLlm(model=LLAMA_CPP_MODEL, api_base=LLAMA_CPP_API_BASE,
-                                   api_key=LLAMA_CPP_API_KEY, timeout=MODEL_REQUEST_SECONDS, **extra)
+                                   api_key=LLAMA_CPP_API_KEY, timeout=AGENT_TIMEOUT_SECONDS, **extra)
 
 
 SQL_TASK = """
@@ -112,9 +113,10 @@ agent_sql = LlmAgent(
     disallow_transfer_to_parent=True, disallow_transfer_to_peers=True,
     include_contents="none",
     instruction=sql_instruction(SQL_FEW_SHOT),
-    # Live monthly query exhausted 2048 completion tokens with no SQL text.
-    # Give planning more output headroom without changing invocation limits.
-    generate_content_config=types.GenerateContentConfig(temperature=0.1, max_output_tokens=4096),
+    # Thinking counts toward max_output_tokens: a monthly query once used all 2048 with no
+    # SQL text. Keep 2048 tokens for the answer beyond the thinking budget.
+    generate_content_config=types.GenerateContentConfig(temperature=0.1,
+                                                        max_output_tokens=SQL_THINKING_BUDGET + 2048),
 )
 
 agent_review = LlmAgent(

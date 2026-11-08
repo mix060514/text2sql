@@ -61,6 +61,26 @@ class BoundedStreamingTests(unittest.IsolatedAsyncioTestCase):
             await collect(model)
         self.assertTrue(fake.closed)
 
+    async def test_no_per_request_limit_by_default(self):
+        # The only time limit is the invocation deadline (runtime.stream_turn).
+        from text2sql.agents.planned_agent import qwen_workflow as qw
+
+        self.assertIsNone(BoundedStreamingLiteLlm(model="openai/x").request_seconds)
+        self.assertIsNone(qw.agent_sql.model.request_seconds)
+        model = BoundedStreamingLiteLlm(model="openai/x")
+        model.llm_client = FakeStream([chunk("a")] * 5 + [chunk(finish="stop")], delay=0.01)
+        self.assertEqual((await collect(model))[0].content.parts[0].text, "aaaaa")
+
+    async def test_invocation_deadline_closes_the_stream(self):
+        # When the outer turn deadline cancels the request, the stream is still closed,
+        # so llama.cpp frees the slot without a per-request timeout.
+        model = BoundedStreamingLiteLlm(model="openai/x")
+        model.llm_client = fake = FakeStream([chunk("a")] * 100, delay=0.05)
+        with self.assertRaises(TimeoutError):
+            async with asyncio.timeout(0.2):
+                await collect(model)
+        self.assertTrue(fake.closed)
+
 
 if __name__ == "__main__":
     unittest.main()

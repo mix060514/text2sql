@@ -236,3 +236,15 @@ class ThinkingConfigTests(unittest.TestCase):
         self.assertEqual(review_body.get("thinking_budget_tokens"), config.REVIEW_THINKING_BUDGET)
         self.assertNotIn("chat_template_kwargs", sql_body)
         self.assertNotIn("extra_body", qw.model(thinking=True, budget=-1)._additional_args)
+
+    def test_sql_thinking_budget_is_4096_and_leaves_room_for_the_answer(self):
+        # Thinking tokens count toward max_output_tokens; a full budget must not leave the
+        # SQL answer empty (see VALIDATION: candidates_token_count == limit, no parts).
+        from text2sql import config
+        from text2sql.agents.planned_agent import qwen_workflow as qw
+
+        self.assertEqual(config.SQL_THINKING_BUDGET, 4096)
+        for agent, budget in ((qw.agent_sql, config.SQL_THINKING_BUDGET),
+                              (qw.agent_review, config.REVIEW_THINKING_BUDGET)):
+            limit = agent.generate_content_config.max_output_tokens
+            self.assertGreaterEqual(limit - budget, 1024, agent.name)
