@@ -18,7 +18,8 @@ LLAMA_CPP_VL_API_KEY = os.getenv("LLAMA_CPP_VL_API_KEY", "aaa")
 LLAMA_CPP_VL_API_BASE = os.getenv("LLAMA_CPP_VL_API_BASE", "http://localhost:8082")
 
 MAX_LLM_CALLS = int(os.getenv("MAX_LLM_CALLS", "8"))
-AGENT_TIMEOUT_SECONDS = float(os.getenv("AGENT_TIMEOUT_SECONDS", "300"))
+# One time limit per question (user decision 2026-11-08: 600 s, so 4 questions can share the GPU).
+AGENT_TIMEOUT_SECONDS = float(os.getenv("AGENT_TIMEOUT_SECONDS", "600"))
 QUERY_TIMEOUT_SECONDS = float(os.getenv("QUERY_TIMEOUT_SECONDS", "5"))
 MAX_QUERY_ROWS = int(os.getenv("MAX_QUERY_ROWS", "200"))
 MAX_RESULT_BYTES = int(os.getenv("MAX_RESULT_BYTES", "20000"))

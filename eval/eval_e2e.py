@@ -34,6 +34,7 @@ from google.genai import types
 # Import Agents
 from text2sql.agents.planned_agent.agent import root_agent
 from text2sql.agents.judge_agent.agent import judge_agent
+from text2sql.config import AGENT_TIMEOUT_SECONDS
 from text2sql.runtime import run_question
 from common import verify_dataset, run_metadata
 
@@ -259,7 +260,7 @@ def validate_plotly_json(chart_json_str: str, expected_plot: dict) -> dict:
     }
 
 
-async def evaluate_single(entry: Dict, timeout: int = 300) -> E2EResult:
+async def evaluate_single(entry: Dict, timeout: float = AGENT_TIMEOUT_SECONDS) -> E2EResult:
     """Evaluate a single test case end-to-end and record how long it took."""
     started = time.monotonic()
     result = await _evaluate_single(entry, timeout)
@@ -267,7 +268,7 @@ async def evaluate_single(entry: Dict, timeout: int = 300) -> E2EResult:
     return result
 
 
-async def _evaluate_single(entry: Dict, timeout: int = 300) -> E2EResult:
+async def _evaluate_single(entry: Dict, timeout: float = AGENT_TIMEOUT_SECONDS) -> E2EResult:
     question = entry["question"]
     ground_truth = entry.get("ground_truth")
     eval_type = entry.get("eval_type", "unknown")
@@ -685,7 +686,7 @@ async def rejudge_run(run_dir) -> dict:
     return summary
 
 
-async def run_synthetic(run_dir=None, limit=None, label=None, reuse=True, timeout=300, subset=None,
+async def run_synthetic(run_dir=None, limit=None, label=None, reuse=True, timeout=AGENT_TIMEOUT_SECONDS, subset=None,
                         concurrency=1):
     """Run the synthetic golden + guardrail set; grade deterministically against its oracle."""
     import synthetic

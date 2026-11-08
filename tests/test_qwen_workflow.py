@@ -202,6 +202,21 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("訂單數是多少", runner.agent.sub_agents[1].model.prompts[1])
 
 
+    def test_question_time_limit_is_600_seconds_everywhere(self):
+        # One time limit per question, set by the user (2026-11-08); the app runtime and
+        # both eval paths use the same value.
+        import inspect
+        import sys
+        from pathlib import Path
+        from text2sql import config
+
+        self.assertEqual(config.AGENT_TIMEOUT_SECONDS, 600)
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "eval"))
+        import eval_e2e
+
+        for fn in (eval_e2e.evaluate_single, eval_e2e.run_synthetic):
+            self.assertEqual(inspect.signature(fn).parameters["timeout"].default, config.AGENT_TIMEOUT_SECONDS)
+
     async def test_invocation_timeout_cannot_publish_answer(self):
         runner = self.runner([self.sql()], [self.report()])
         runner.agent.sub_agents[2].model.delay = 1
