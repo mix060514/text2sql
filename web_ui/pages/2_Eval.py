@@ -142,11 +142,8 @@ def show_e2e(data, summary_path):
     by_type["整題答對"] = (by_type["sum"] / by_type["count"]).map("{:.0%}".format)
     st.dataframe(by_type.rename(columns={"count": "題數", "sum": "答對"}), width="stretch")
 
-    view = st.radio("顯示", ["隱藏答錯的題目", "全部題目", "只看答錯的題目"], horizontal=True,
-                    help="只影響下方逐題清單；上方指標一律以全部題目計算。")
     for category, group in df.groupby("題型", sort=False):
-        shown = group[group["_ok"]] if view == "隱藏答錯的題目" else (
-            group[~group["_ok"]] if view == "只看答錯的題目" else group)
+        shown = group[group["_ok"]]
         if shown.empty:
             continue
         st.markdown(f"#### {category}（答對 {int(group['_ok'].sum())}/{len(group)}）")
