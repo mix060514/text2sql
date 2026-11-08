@@ -162,7 +162,8 @@ JUDGE_MISSING = "Judge Agent did not return result"
 
 
 async def judge_sql_result(
-    question: str, expected: Any, actual_answer: str, sql_query: str, sql_result: Any
+    question: str, expected: Any, actual_answer: str, sql_query: str, sql_result: Any,
+    chart_type: str | None = None,
 ) -> tuple[bool, int, str]:
     """Use Judge Agent to evaluate SQL result correctness."""
     try:
@@ -177,6 +178,9 @@ async def judge_sql_result(
 **SQL 結果**: {json.dumps(sql_result, ensure_ascii=False) if sql_result else "無法取得"}
 
 **Agent 回答**: {actual_answer}
+
+**圖表**: {chart_type or "無"}（圖表由系統另外繪製，並由另一項程式檢查評分；
+你看不到圖，不要因為文字回答沒有附圖或沒提到圖而扣分，只評估數據與文字。）
 """
         state = await run_agent_and_get_state(judge_runner, prompt)
         judge_result = state.get("judge_result", {})
@@ -276,9 +280,11 @@ async def evaluate_single(entry: Dict, timeout: int = 300) -> E2EResult:
 
         # Judge SQL result
         if state.get("workflow_status") == "completed":
+            plot = state.get("plot_decision") or {}
             sql_correct, sql_score, sql_reasoning = await judge_sql_result(
                 question, ground_truth, final_answer, sql_query,
                 {"columns": state.get("column_names", []), "rows": sql_result},
+                chart_type=plot.get("chart_type") if plot.get("should_plot") else None,
             )
         else:
             sql_correct, sql_score, sql_reasoning = False, 0, str(state.get("workflow_error"))
@@ -641,6 +647,7 @@ async def rejudge_run(run_dir) -> dict:
         correct, score, reason = await judge_sql_result(
             r["question"], truth.get(r["question"]), r.get("answer") or "", r.get("sql_query") or "",
             {"rows": r.get("sql_result")},
+            chart_type=r.get("actual_chart_type") if r.get("actual_should_plot") else None,
         )
         r.update(sql_correct=correct, sql_score=score, sql_reasoning=reason)
         r["e2e_success"] = _e2e_success(r)

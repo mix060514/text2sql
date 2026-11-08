@@ -44,7 +44,7 @@ class RejudgeTests(unittest.IsolatedAsyncioTestCase):
             (run / "e2e_summary.json").write_text(json.dumps({"run_metadata": {"model": "m"}}), encoding="utf-8")
             calls = []
 
-            async def fake_judge(question, *args):
+            async def fake_judge(question, *args, **kwargs):
                 calls.append(question)
                 return True, 9, "re-judged"
 
@@ -83,3 +83,19 @@ class XOrderTests(unittest.TestCase):
 
     def test_different_labels_still_fail(self):
         self.assertFalse(self.check(["2023-01", "2023-02"], ["2023 Q1", "2023 Q2"]))
+
+
+class JudgePromptTests(unittest.IsolatedAsyncioTestCase):
+    """Q110: a pie chart was drawn, but the judge only sees the text and docked points for 'no pie'."""
+
+    async def test_judge_is_told_charts_are_checked_separately(self):
+        prompts = []
+
+        async def fake_run(runner, prompt, user_id="eval_user"):
+            prompts.append(prompt)
+            return {"judge_result": {"is_correct": True, "confidence_score": 10, "reasoning": "ok"}}
+
+        with patch.object(eval_e2e, "run_agent_and_get_state", fake_run):
+            await eval_e2e.judge_sql_result("q", 1, "a", "SELECT 1", [[1]], chart_type="pie")
+        self.assertIn("圖表由系統另外繪製", prompts[0])
+        self.assertIn("pie", prompts[0])
