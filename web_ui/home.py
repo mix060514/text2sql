@@ -26,8 +26,6 @@ st.markdown(f"""
   由 **本機 llama.cpp** 伺服器執行，資料與問題都不會送到外部雲端服務。
 - 同一個模型分別擔任三個角色：SQL 規劃、語意審查、回答撰寫；SQL 執行與檢查由程式負責。
 - 模型來源：[Swift-1.5-Qwen3.8-27B-GSQ-RCO-GGUF](https://huggingface.co/ukisai/Swift-1.5-Qwen3.8-27B-GSQ-RCO-GGUF)
-
-註：設定裡的 `openai/` 前綴只代表「走 OpenAI 相容 API 格式」，與 OpenAI 公司的模型無關。
 """)
 st.sidebar.success("從左側選擇頁面開始。")
 
