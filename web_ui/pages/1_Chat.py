@@ -20,8 +20,9 @@ try:
     from google.genai import types
     from text2sql.agents.planned_agent.agent import root_agent
     from text2sql.runtime import stream_turn
-    from text2sql.config import BACKEND
+    from text2sql.config import BACKEND, LLAMA_CPP_API_BASE, LLAMA_CPP_MODEL
     from flow_view import render_flow
+    from model_status import model_status
 except ImportError as e:
     st.error("服務暫時無法啟動，請稍後再試。")
     print(f"chat page import failed: {e}", file=sys.stderr)
@@ -81,6 +82,19 @@ SUGGESTED_QUESTIONS = [
     "各區域的銷售額占比分別是多少？請用圓餅圖呈現。",
     "2024 年各產品類別的銷售額占比分別是多少？",
 ]
+
+@st.fragment(run_every=5)
+def show_model_status():
+    """Poll the router's read-only status endpoints so nobody waits blind behind a queue."""
+    if BACKEND != "qwen27b":
+        return
+    state, icon, text = model_status(LLAMA_CPP_API_BASE, LLAMA_CPP_MODEL)
+    st.markdown(f"**模型狀態**　{icon} {text}")
+    st.caption("每 5 秒更新；本機模型一次只處理一個問題。")
+
+
+with st.sidebar:
+    show_model_status()
 
 selected_suggestion = st.sidebar.selectbox(
     "範例問題", [""] + SUGGESTED_QUESTIONS
