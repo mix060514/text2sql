@@ -39,11 +39,12 @@ def metric_row(before, after, labels=("成功率", "逾時率", "平均耗時"))
             "平均耗時": ("avg_seconds", "sec", "inverse"), "一次解決率": ("first_try", "pct", "normal")}
     for col, label in zip(cols, labels):
         key, fmt, color = spec[label]
+        show = pct if fmt == "pct" else sec
         value = (after or {}).get(key)
-        shown = pct(value) if fmt == "pct" else sec(value)
         before_v = (before or {}).get(key)
-        help_text = f"優化前：{pct(before_v) if fmt == 'pct' else sec(before_v)}"
-        col.metric(label, shown, delta(before, after, key, fmt), delta_color=color, help=help_text)
+        # Show "before → after" directly; a lone after-value hides what changed.
+        shown = show(value) if before_v is None else f"{show(before_v)} → {show(value)}"
+        col.metric(label, shown, delta(before, after, key, fmt), delta_color=color)
 
 
 st.markdown(
