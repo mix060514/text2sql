@@ -34,8 +34,7 @@
 **尚待**
 - 新 router 設定上的答對率：攔截題已跑（125/126，平均 7.3 秒，`block_router_mtp4.json`）；
   複雜題、模板題使用者決定晚點再跑（與加入意圖後的結果比，設定只差視覺模組與記憶體上限）。
-- 使用者考慮把 router 從 systemd 改成 Docker（帳號在 docker 群組、已有 nvidia runtime），以免每次重啟都要 sudo；
-  需要使用者先 `sudo systemctl disable --now llama-server-qwen` 一次。尚未決定。
+- ~~把 router 從 systemd 改成 Docker~~：2026-11-09 已切換，見下方「router 設定」。
 
 ## 2026-11-09 意圖判斷（攔截題）
 
@@ -148,7 +147,23 @@ DFlash2（2026-11-09）：`--model-draft Qwen3.8-27B-DFlash2-Q4_K_M.gguf --spec-
 
 ### router 設定
 
-- 設定：`/mnt/data1/llama-config/acer-two-profiles.ini`，systemd 系統服務 `llama-server-qwen`（不是 Docker），重啟需使用者 sudo。
+- 設定：`/mnt/data1/llama-config/acer-two-profiles.ini`。
+- **執行方式（2026-11-09 起）：Docker 容器 `llama-router-llama-router-1`，改設定或重啟都不需要 sudo。**
+  原本的 systemd 服務 `llama-server-qwen` 已 `disable --now`（unit 檔保留，供回退）。
+  - compose：`/mnt/data1/llama-config/docker-compose.llama-router.yml`；映像由同目錄 `Dockerfile.llama-router` 建置
+    （`nvidia/cuda:12.8.1-runtime-ubuntu24.04`＋`libgomp1`；b10941 需要 GLIBC 2.38，Ubuntu 22.04 映像不能用）。
+  - 執行的仍是掛進去的 `/mnt/data1/llama-b10941/llama-server`，參數與 systemd 相同（router、`--models-max 1`、`-lv 4`、port 18080）。
+    `network_mode: host`：主機用 `127.0.0.1:18080`，web UI 容器用 `host.docker.internal:18080`，都不必改。
+  - 在 `/mnt/data1/llama-config` 下執行：
+    - 改 ini 後重啟：`docker compose -f docker-compose.llama-router.yml restart`
+    - 日誌（取代 journalctl）：`docker compose -f docker-compose.llama-router.yml logs -f`
+    - 子程序參數：`docker exec llama-router-llama-router-1 ps -eo pid,args`
+    - 另開測試 router（不影響正式）：`LLAMA_ROUTER_PORT=18095 docker compose -p llama-router-test -f docker-compose.llama-router.yml up -d`
+      （GPU 只有 16 GB，正式 router 有載入模型時測試 router 不可載入）
+  - 回退：`docker compose -f docker-compose.llama-router.yml down`，再由使用者 `sudo systemctl enable --now llama-server-qwen`。
+  - 切換後驗證：`/slots` 4 路、每路 65,536；顯存 14,561 MiB（systemd 時 14,559）；
+    `run_planned_agent.py 'EMEA 的總銷售額是多少？'` 得 31,087,500.60；prd／dev web UI 容器實際對話成功。
+  - 備份：`/mnt/data1/llama-config-backup-20261109-before-docker.tgz`。
 - 2026-11-08 備份：`acer-two-profiles.before-text2sql-sleep-20261108.ini`。
 - 使用者決定把 `[swift15-27b-iq3-xxs]` 改成 64k、`sleep-idle-seconds = 600`、`parallel = 4`、`kv-unified = true`；
   已生效（ps／`/slots` 確認 4 路、每路 65,536）。
@@ -373,7 +388,8 @@ DFlash2（2026-11-09）：`--model-draft Qwen3.8-27B-DFlash2-Q4_K_M.gguf --spec-
 - 宣稱完成要附證據（指令輸出、測試結果）。
 - 本機模型一次只能處理一個請求：模型相關工作不可平行執行。
 - 端點：`http://127.0.0.1:18080/v1`，模型 `swift15-27b-iq3-xxs`（2026-11-07 前為 `qwen3.8-27b-iq3-xxs`）。
-- 模型部署：router 設定 `/mnt/data1/llama-config/acer-two-profiles.ini`（`--models-max 1`，一次只載入一個模型），
+- 模型部署：Docker 容器（2026-11-09 起，重啟不需 sudo，見「router 設定」），
+  router 設定 `/mnt/data1/llama-config/acer-two-profiles.ini`（`--models-max 1`，一次只載入一個模型），
   改前備份 `acer-two-profiles.before-swift15-20261107.ini`；模型檔在 `/mnt/data1/models/`。
 
 ## 複習資料
