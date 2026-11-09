@@ -148,7 +148,7 @@ DFlash2（2026-11-09）：`--model-draft Qwen3.8-27B-DFlash2-Q4_K_M.gguf --spec-
 ### router 設定
 
 - 設定：`~/infra/ai-stack/llama-router/config/acer-two-profiles.ini`（2026-11-09 起由 git 管理，容器內掛在 `/config`，唯讀）。
-  舊檔 `/mnt/data1/llama-config/acer-two-profiles.ini` 與 `.before-*.ini` 備份仍保留；之後改設定改 git 版並 commit。
+  `/mnt/data1/llama-config/` 已刪（2026-11-09）；本文提到的 `.before-*.ini` 都只留在 `/mnt/data1/llama-config-backup-20261109-before-docker.tgz`。之後改設定改 git 版並 commit。
 - **執行方式（2026-11-09 起）：Docker 容器 `llama-router`（`~/infra/ai-stack/docker-compose.yml` 的 `llama-router` 服務），改設定或重啟都不需要 sudo。**
   原本的 systemd 服務 `llama-server-qwen` 已於 2026-11-09 移除（不再保留回退）。
   - compose：`~/infra/ai-stack/docker-compose.yml`（專案名 `ai-stack`）；映像由 `~/infra/ai-stack/llama-router/Dockerfile` 建置
