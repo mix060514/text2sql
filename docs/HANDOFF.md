@@ -147,7 +147,9 @@ DFlash2（2026-11-09）：`--model-draft Qwen3.8-27B-DFlash2-Q4_K_M.gguf --spec-
 
 ### router 設定
 
-- 設定：`/mnt/data1/llama-config/acer-two-profiles.ini`。
+- 設定：`~/infra/ai-stack/llama-router/config/acer-two-profiles.ini`（2026-11-09 起由 git 管理，容器內掛在 `/config`，唯讀）。
+  舊檔 `/mnt/data1/llama-config/acer-two-profiles.ini` 與 `.before-*.ini` 備份仍保留；之後改設定改 git 版並 commit。
+  回退用的 systemd drop-in 仍指向 `/mnt/data1` 舊檔，可能與 git 版不同步（改 unit 的 sudo 指令見 `~/infra/ai-stack/README.md`）。
 - **執行方式（2026-11-09 起）：Docker 容器 `llama-router`（`~/infra/ai-stack/docker-compose.yml` 的 `llama-router` 服務），改設定或重啟都不需要 sudo。**
   原本的 systemd 服務 `llama-server-qwen` 已 `disable --now`（unit 檔保留，供回退）。
   - compose：`~/infra/ai-stack/docker-compose.yml`（專案名 `ai-stack`）；映像由 `~/infra/ai-stack/llama-router/Dockerfile` 建置
@@ -393,7 +395,7 @@ DFlash2（2026-11-09）：`--model-draft Qwen3.8-27B-DFlash2-Q4_K_M.gguf --spec-
 - 本機模型一次只能處理一個請求：模型相關工作不可平行執行。
 - 端點：`http://127.0.0.1:18080/v1`，模型 `swift15-27b-iq3-xxs`（2026-11-07 前為 `qwen3.8-27b-iq3-xxs`）。
 - 模型部署：Docker 容器（2026-11-09 起，重啟不需 sudo，見「router 設定」），
-  router 設定 `/mnt/data1/llama-config/acer-two-profiles.ini`（`--models-max 1`，一次只載入一個模型），
+  router 設定 `~/infra/ai-stack/llama-router/config/acer-two-profiles.ini`（2026-11-09 前在 `/mnt/data1/llama-config/`；`--models-max 1`，一次只載入一個模型），
   改前備份 `acer-two-profiles.before-swift15-20261107.ini`；模型檔在 `/mnt/data1/models/`。
 
 ## 複習資料
