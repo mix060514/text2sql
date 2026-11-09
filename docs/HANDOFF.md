@@ -2,6 +2,41 @@
 
 新 session 先讀這份，再讀 README.md 與 CLAUDE.md。
 
+## 2026-11-09 router 設定：每種 50 題的並發掃描
+
+原本照 12 個請求的結果打算改 DFlash2 2 路；使用者要求改用每種 50 題、從 1 路加到放不下為止重測。
+`scripts/bench_concurrency.py --requests 50 --question-set synthetic`（合成考卷放行題固定抽 50 題），
+臨時伺服器都不載入視覺模組、加 `--ctx-checkpoints 4 --cache-ram 2048`；只量寫 SQL 這一步的速度。
+證據 `docs/optimization/concurrency_sweep.json`、`concurrency_sweep_smallctx.json`，頁面「並發掃描」有流程圖。
+
+| 設定 | 總吞吐量 | 單題中位數／平均 | 顯存 |
+|---|---|---|---|
+| MTP 1／2／3 路 | 29.7／36.2／54.7 tok/s | 21.8／33.5／30.7 秒；24.4／43.2／41.7 | 13.0–14.2 GB |
+| **MTP 4 路（採用）** | **60.8** | **33.2／46.2** | 14.8 GB |
+| MTP 5／6 路 | 66.7／66.5 | 42.3／46.9；63.6／59.6 | 15.2／15.8 GB |
+| MTP 7 路（48k、token_embd 在 CPU） | 68.9 | 57.0／72.8 | — |
+| DFlash2 1／2／3 路 | 29.3／50.0／58.6 | 19.2／21.4／28.9；25.2／32.4／43.9 | 13.7–15.6 GB |
+
+- 放不下：MTP 7（64k，差 294 MiB；token_embd 放 CPU 能啟動但執行時 OOM）、MTP 8（48k 執行時 OOM）、
+  DFlash2 4（64k，差 165 MiB；token_embd 放 CPU 執行時 OOM；32k 跑到約 45/50 未崩潰，使用者決定停止，無數字）。
+- 選法（測試前先講好）：吞吐量最高者的 10% 以內，挑單題最快 → MTP 4 路。
+- DFlash2 沒有 12 請求時量到的 1.5 倍（1 路 29.3 對 MTP 29.7）。整輪 GPU 過熱降頻：89°C、核心約 1 GHz／2.1 GHz，
+  `SW Thermal Slowdown: Active`；散熱是下一個最大的加速空間，處理後要重測。
+- 50 題平均生成約 780 tokens（舊 8 題約 420），所以單題時間比舊表長。
+
+**router 已套用**（`/mnt/data1/llama-config/acer-two-profiles.ini` 的 `[swift15-27b-iq3-xxs]`）：MTP 4 路、64k kv-unified、
+`ctx-checkpoints = 4`、`cache-ram = 2048`、`no-mmproj = true`（text2sql 沒用到視覺；圖片頁接的是另一台 8082）。
+備份：`acer-two-profiles.before-dflash2-np2-20261109.ini`（改前，MTP 4 路＋mmproj、無上限）、
+`acer-two-profiles.before-mtp-np4-nommproj-20261109.ini`（中間短暫套用過的 DFlash2 2 路）。
+使用者 15:39 重啟；以 `/v1/models` 參數、子程序 ps（`--spec-type draft-mtp --parallel 4 --cache-ram 2048
+--swa-checkpoints 4 --no-mmproj-auto`）與 `/slots`（4 路、每路 65,536）確認，顯存 14.6 GB。
+
+**尚待**
+- 新 router 設定上的答對率：攔截題已跑（125/126，平均 7.3 秒，`block_router_mtp4.json`）；
+  複雜題、模板題使用者決定晚點再跑（與加入意圖後的結果比，設定只差視覺模組與記憶體上限）。
+- 使用者考慮把 router 從 systemd 改成 Docker（帳號在 docker 群組、已有 nvidia runtime），以免每次重啟都要 sudo；
+  需要使用者先 `sudo systemctl disable --now llama-server-qwen` 一次。尚未決定。
+
 ## 2026-11-09 意圖判斷（攔截題）
 
 在 agent_sql 前加 `agent_intent`（本機模型、不思考、輸出 `IntentDecision{intent, reason}`）。
@@ -117,7 +152,7 @@ DFlash2（2026-11-09）：`--model-draft Qwen3.8-27B-DFlash2-Q4_K_M.gguf --spec-
 - 2026-11-08 備份：`acer-two-profiles.before-text2sql-sleep-20261108.ini`。
 - 使用者決定把 `[swift15-27b-iq3-xxs]` 改成 64k、`sleep-idle-seconds = 600`、`parallel = 4`、`kv-unified = true`；
   已生效（ps／`/slots` 確認 4 路、每路 65,536）。
-- **未解決：主記憶體上限尚未加入 ini。** 4 路跑約 15 分鐘後 checkpoint（每份約 150 MiB、每路最多 32 份）＋8 GB
+- ~~未解決：主記憶體上限尚未加入 ini~~（2026-11-09 已加入並套用，見上方「router 設定」）。 4 路跑約 15 分鐘後 checkpoint（每份約 150 MiB、每路最多 32 份）＋8 GB
   prompt 快取用到 9.9 GB，主機在 HDD swap 上卡死（95c2389）。需要使用者在該段加 `ctx-checkpoints = 4`、
   `cache-ram = 2048` 並 `sudo systemctl restart llama-server-qwen`、`sudo swapoff -a && sudo swapon -a`。
   加上限的臨時伺服器跑完 6 小時定版評估，伺服器 RSS 最高 5.2 GB，swap 未增加。
@@ -125,7 +160,7 @@ DFlash2（2026-11-09）：`--model-draft Qwen3.8-27B-DFlash2-Q4_K_M.gguf --spec-
 
 ### 尚待
 
-- DFlash2＋2 路若要上 router，先跑一次模板題確認答對率不變。
+- ~~DFlash2＋2 路若要上 router~~：50 題重測後改採 MTP 4 路（見上方）。
 - `SQL_FEW_SHOT` 預設已改為 true（2026-11-09 使用者決定）；設 false 可關閉。
 - ~~意圖判斷~~（2026-11-09 完成）；日本名次類的「先排名再篩選」範例仍待做。
 - 並發 2／4 路加測到每種 36 個請求，數字較可信。

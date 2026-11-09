@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-09 11:39:03",
+  "generated_at": "2026-11-09 15:40:59",
   "overall": {
     "template": {
       "2026-11-07": {
@@ -873,6 +873,196 @@
       "measured_at": "2026-11-08 17:19:54"
     }
   ],
+  "concurrency_sweep": {
+    "rows": [
+      {
+        "drafting": "dflash2",
+        "parallel": 1,
+        "requests": 50,
+        "variant": "64k，token_embd 在 GPU",
+        "aggregate_tps": 29.3,
+        "median_seconds": 19.2,
+        "avg_seconds": 25.2,
+        "p90_seconds": 47.8,
+        "max_seconds": 88.3,
+        "avg_completion_tokens": 739,
+        "gpu_mem_mib": 13685,
+        "server_rss_mib": 3633,
+        "truncated": 0,
+        "empty_answers": 0
+      },
+      {
+        "drafting": "dflash2",
+        "parallel": 2,
+        "requests": 50,
+        "variant": "64k，token_embd 在 GPU",
+        "aggregate_tps": 50.0,
+        "median_seconds": 21.4,
+        "avg_seconds": 32.4,
+        "p90_seconds": 51.2,
+        "max_seconds": 175.0,
+        "avg_completion_tokens": 841,
+        "gpu_mem_mib": 14643,
+        "server_rss_mib": 3413,
+        "truncated": 0,
+        "empty_answers": 0
+      },
+      {
+        "drafting": "dflash2",
+        "parallel": 3,
+        "requests": 50,
+        "variant": "64k，token_embd 在 GPU",
+        "aggregate_tps": 58.6,
+        "median_seconds": 28.9,
+        "avg_seconds": 43.9,
+        "p90_seconds": 112.0,
+        "max_seconds": 216.3,
+        "avg_completion_tokens": 915,
+        "gpu_mem_mib": 15583,
+        "server_rss_mib": 4165,
+        "truncated": 0,
+        "empty_answers": 0
+      },
+      {
+        "drafting": "mtp",
+        "parallel": 1,
+        "requests": 50,
+        "variant": "64k，token_embd 在 GPU",
+        "aggregate_tps": 29.7,
+        "median_seconds": 21.8,
+        "avg_seconds": 24.4,
+        "p90_seconds": 45.7,
+        "max_seconds": 88.1,
+        "avg_completion_tokens": 724,
+        "gpu_mem_mib": 12997,
+        "server_rss_mib": 2183,
+        "truncated": 0,
+        "empty_answers": 0
+      },
+      {
+        "drafting": "mtp",
+        "parallel": 2,
+        "requests": 50,
+        "variant": "64k，token_embd 在 GPU",
+        "aggregate_tps": 36.2,
+        "median_seconds": 33.5,
+        "avg_seconds": 43.2,
+        "p90_seconds": 89.2,
+        "max_seconds": 142.7,
+        "avg_completion_tokens": 798,
+        "gpu_mem_mib": 13595,
+        "server_rss_mib": 3500,
+        "truncated": 0,
+        "empty_answers": 0
+      },
+      {
+        "drafting": "mtp",
+        "parallel": 3,
+        "requests": 50,
+        "variant": "64k，token_embd 在 GPU",
+        "aggregate_tps": 54.7,
+        "median_seconds": 30.7,
+        "avg_seconds": 41.7,
+        "p90_seconds": 88.3,
+        "max_seconds": 149.2,
+        "avg_completion_tokens": 780,
+        "gpu_mem_mib": 14193,
+        "server_rss_mib": 3420,
+        "truncated": 0,
+        "empty_answers": 0
+      },
+      {
+        "drafting": "mtp",
+        "parallel": 4,
+        "requests": 50,
+        "variant": "64k，token_embd 在 GPU",
+        "aggregate_tps": 60.8,
+        "median_seconds": 33.2,
+        "avg_seconds": 46.2,
+        "p90_seconds": 110.1,
+        "max_seconds": 161.9,
+        "avg_completion_tokens": 765,
+        "gpu_mem_mib": 14791,
+        "server_rss_mib": 4874,
+        "truncated": 0,
+        "empty_answers": 0
+      },
+      {
+        "drafting": "mtp",
+        "parallel": 5,
+        "requests": 50,
+        "variant": "64k，token_embd 在 GPU",
+        "aggregate_tps": 66.7,
+        "median_seconds": 42.3,
+        "avg_seconds": 63.6,
+        "p90_seconds": 131.8,
+        "max_seconds": 308.1,
+        "avg_completion_tokens": 922,
+        "gpu_mem_mib": 15169,
+        "server_rss_mib": 4717,
+        "truncated": 0,
+        "empty_answers": 0
+      },
+      {
+        "drafting": "mtp",
+        "parallel": 6,
+        "requests": 50,
+        "variant": "64k，token_embd 在 GPU",
+        "aggregate_tps": 66.5,
+        "median_seconds": 46.9,
+        "avg_seconds": 59.6,
+        "p90_seconds": 129.6,
+        "max_seconds": 186.6,
+        "avg_completion_tokens": 775,
+        "gpu_mem_mib": 15767,
+        "server_rss_mib": 6161,
+        "truncated": 0,
+        "empty_answers": 0
+      },
+      {
+        "drafting": "mtp",
+        "parallel": 7,
+        "requests": 50,
+        "variant": "ctx 49152 kv-unified, token_embd on CPU, no mmproj, ctx-checkpoints 4, cache-ram 2048",
+        "aggregate_tps": 68.9,
+        "median_seconds": 57.0,
+        "avg_seconds": 72.8,
+        "p90_seconds": 173.4,
+        "max_seconds": 283.9,
+        "avg_completion_tokens": 884,
+        "gpu_mem_mib": 15535,
+        "server_rss_mib": 7211,
+        "truncated": 0,
+        "empty_answers": 0
+      }
+    ],
+    "failures": [
+      {
+        "設定": "MTP 7 路，64k",
+        "結果": "啟動失敗：顯存差 293.68 MiB"
+      },
+      {
+        "設定": "MTP 7 路，64k，token_embd 放 CPU（省 388 MiB）",
+        "結果": "能啟動，第一批請求時 CUDA out of memory 崩潰"
+      },
+      {
+        "設定": "MTP 8 路，48k，token_embd 放 CPU",
+        "結果": "執行中 CUDA out of memory 崩潰"
+      },
+      {
+        "設定": "DFlash2 4 路，64k",
+        "結果": "啟動失敗：顯存差 165.00 MiB"
+      },
+      {
+        "設定": "DFlash2 4 路，64k，token_embd 放 CPU",
+        "結果": "能啟動，第一批請求時 CUDA out of memory 崩潰"
+      },
+      {
+        "設定": "DFlash2 4 路，32k，token_embd 放 CPU",
+        "結果": "約 45/50 題未崩潰，使用者決定停止，沒有完整數字"
+      }
+    ]
+  },
   "sleep": {
     "sleep_idle_seconds": 30,
     "vram_awake_mib": 13901,
@@ -944,11 +1134,11 @@
       "fix": "在 few-shot 範例示範 WITH ... AS MATERIALIZED，前 N 名只算一次。",
       "timing": {
         "plain": {
-          "seconds": 16.889,
+          "seconds": 15.51,
           "finished": true
         },
         "materialized": {
-          "seconds": 0.007,
+          "seconds": 0.006,
           "finished": true
         }
       },

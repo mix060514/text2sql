@@ -33,6 +33,15 @@ def delta(before, after, key, fmt, better="up"):
     return text
 
 
+def flow(dot: str, caption: str):
+    """A small left-to-right flow chart describing how a measurement was made."""
+    st.graphviz_chart("digraph { rankdir=LR; bgcolor=transparent; "
+                      "node [shape=box, style=\"rounded,filled\", fillcolor=\"#eef2ff\", color=\"#6b7bd6\", "
+                      "fontname=\"Noto Sans TC\", fontsize=11]; edge [color=\"#8c959f\", fontsize=10, "
+                      "fontname=\"Noto Sans TC\"]; " + dot + " }", width="stretch")
+    st.caption(caption)
+
+
 def metric_row(before, after, labels=("成功率", "逾時率", "平均耗時")):
     cols = st.columns(len(labels))
     spec = {"成功率": ("success", "pct", "normal"), "逾時率": ("timeout", "pct", "inverse"),
@@ -180,6 +189,18 @@ if ib.get("before") or ib.get("after"):
     st.markdown("不該執行查詢的問題（改資料、資料庫沒有的資料、閒聊、提示注入）：成功＝沒有執行任何 SELECT 就拒絕。"
                 "2026-11-09 在寫 SQL 之前加入「意圖判斷」步驟：模型只輸出類別，拒答由程式用固定文字執行，不寫也不執行 SQL。")
     metric_row(ib.get("before"), ib.get("after"), ("成功率", "逾時率", "平均耗時"))
+    with st.expander("怎麼測的（流程圖）", expanded=False):
+        flow('q [label="使用者問題"]; i [label="agent_intent\\n本機模型、不思考"]; '
+             'r [label="程式固定文字拒答\\n不寫、不執行 SQL", fillcolor="#fde8e8", color="#cf222e"]; '
+             'w [label="agent_sql → 唯讀執行 → 審查\\n→ 報告 → 發布"]; '
+             'q -> i; i -> r [label="改資料／資料沒有／閒聊／注入"]; i -> w [label="sales_query"];',
+             "加入的步驟：模型只輸出類別與理由，拒答由程式執行；理由只進執行紀錄，不進回答。")
+        flow('d [label="合成考卷 354 題\\n＋模板考卷 132 題"]; s [label="臨時伺服器 18090\\nrouter 同參數、一次 4 題"]; '
+             'b [label="攔截 126 題\\n沒有任何 SELECT 成功＝擋下"]; c [label="複雜 102 題\\n資料列與 SQLite 標準答案比對\\n＋人工複核規則"]; '
+             't [label="模板 132 題\\nLLM 評審＋程式檢查圖表"]; v [label="與加入前的定版逐題比較\\n誤擋＝回答是固定拒答文字"]; '
+             'x [label="逾時題單獨重跑\\n分辨並發還是題目本身"]; '
+             'd -> s; s -> b; s -> c; s -> t; b -> v; c -> v; t -> v; v -> x;',
+             "評估流程：同一份考卷、同一組伺服器參數，只差有沒有意圖判斷；由對變錯的題目逐題寫原因。")
     rows = []
     for label, cats, overall in (("加入前", ib.get("before_by_category") or {}, ib.get("before")),
                                  ("加入後", ib.get("after_by_category") or {}, ib.get("after"))):
@@ -259,6 +280,15 @@ if tools.get("tools"):
                 "主記憶體": f"{e['model_rss_mb']:,} MB" if "model_rss_mb" in e else "不新增",
                 "顯存": "0（CPU）" if "model_rss_mb" in e else "不新增（沿用已載入模型）",
                 "每題延遲 p50": f"{e['lat_ms_p50']:.0f} ms"})
+    with st.expander("怎麼測的（流程圖）", expanded=False):
+        flow('seed [label="種子題\\n攔截 42＋放行 76"]; tune [label="只用種子調整\\n選項說明／提示"]; '
+             'cpu [label="CPU 工具\\n獨立 venv、torch CPU 版\\nCUDA_VISIBLE_DEVICES 為空"]; '
+             'ft [label="Laya 微調\\n種子分組 2 折"]; llm [label="本機模型\\n不思考、一次短呼叫"]; '
+             'ev [label="離線分類 486 題\\n攔截 126＋放行 360\\n不執行 SQL"]; '
+             'm [label="攔截率、誤擋率、類別正確\\n主記憶體（RSS）、延遲\\nnvidia-smi 確認無 GPU 程序"]; '
+             'seed -> tune; tune -> cpu; tune -> llm; seed -> ft; cpu -> ev; ft -> ev [label="只評未參與訓練的題"]; '
+             'llm -> ev; ev -> m;',
+             "工具比較流程：調整只看種子，成績只看考卷；微調模型只用沒見過的種子改寫題評分，避免拿訓練題考自己。")
     st.dataframe(pd.DataFrame(trs), hide_index=True, width="stretch")
     st.success("採用：" + tools.get("decision", ""))
     g = tools.get("gpu_evidence") or {}
@@ -318,8 +348,9 @@ if conc:
                 f"吞吐量和延遲都勝過 MTP {best['parallel']} 路（{best['aggregate_tps']}、{best['avg_request_seconds']:.0f} 秒）。"
                 "代價：草稿模型多佔顯存，最多 2 路（4 路試了 5 種省顯存設定，不是開不起來就是第一個請求就崩潰，見下方）。"
                 "草稿模型是為原版 Qwen3.8-27B 訓練、這裡配 Swift 1.5，接受率仍有約 50–75%；推測解碼由主模型逐 token 驗證，理論上輸出不變（未另跑答對率評估）；每種只有 12 個請求，倍數要保守看待。"
-                "router 尚未改用 DFlash2（需使用者決定）。")
-        st.info("2026-11-08 已套用到模型服務：4 路、各路共用 64k 上下文（kv-unified）、閒置 10 分鐘自動休眠釋放顯存。"
+                "之後改用每種 50 題重測，DFlash2 沒有這個優勢，router 最後選 MTP 4 路（見下方「並發掃描」）。")
+        st.info("2026-11-08 已套用到模型服務：4 路、各路共用 64k 上下文（kv-unified）、閒置 10 分鐘自動休眠釋放顯存"
+                "（2026-11-09 再加主記憶體上限、拿掉視覺模組）。"
                 "套用後以伺服器程序參數與 /slots 確認：4 路、每路可用 65,536 tokens，顯存 15.7 GB。")
         st.warning(
             "套用後真實運行才發現的副作用：4 路同時跑評估約 15 分鐘後，伺服器在**主記憶體**為每一路保存的 "
@@ -332,5 +363,48 @@ if conc:
         st.warning(f"{r.get('drafting', 'mtp').upper()} {r['parallel']} 路：{r['failed']}")
     st.caption("總吞吐量＝所有請求生成的 tokens ÷ 整批耗時；prompt 快取命中＝固定開頭（資料庫說明與範例）"
                "直接沿用 KV cache、不需重算的 token 數。")
+
+sweep = report.get("concurrency_sweep") or {}
+if sweep.get("rows"):
+    st.divider()
+    st.subheader("並發掃描：每種 50 題，找出 router 的設定（2026-11-09）")
+    st.markdown(
+        "上面的並發測試每種只有 12 個請求、題目 8 題輪流。這裡改用合成考卷固定抽出的 50 題，"
+        "MTP 與 DFlash2 各從 1 路加到放不下為止；伺服器都不載入視覺模組、加主記憶體上限（與 router 相同）。"
+        "只量「寫 SQL」這一步的速度，不評答對率。")
+    with st.expander("怎麼測的（流程圖）", expanded=False):
+        flow('q [label="固定 50 題\\n合成考卷放行題\\n固定亂數種子"]; srv [label="啟動臨時伺服器\\nMTP 或 DFlash2、N 路\\n不載入視覺模組、主記憶體上限"]; '
+             'ok [label="health 正常？", shape=diamond, fillcolor="#fff4e0", color="#c27c0e"]; '
+             'run [label="N 個客戶端同時送\\n真實 agent_sql 請求\\n一個回來就送下一個"]; '
+             'rec [label="記錄總吞吐量、每題耗時\\n顯存、伺服器主記憶體\\n截斷、空答案"]; '
+             'stop [label="放不下或崩潰\\n記錄原因、換下一種", fillcolor="#fde8e8", color="#cf222e"]; '
+             'pick [label="選設定：吞吐量最高的 10% 內\\n挑單題最快"]; '
+             'q -> srv [label="N＝1"]; srv -> ok; ok -> run [label="是"]; run -> rec; rec -> pick; '
+             'rec -> srv [label="N＋1，重開", constraint=false, style=dashed]; '
+             'ok -> stop [label="否"]; run -> stop [label="CUDA OOM"]; stop -> pick;',
+             "掃描流程：每個設定都重開伺服器，讓 N 路一直塞滿；放不下時再試 token_embd 放 CPU、縮小 context。")
+    rows = sweep["rows"]
+    best = max(r["aggregate_tps"] for r in rows)
+    st.dataframe(pd.DataFrame([{
+        "草稿方式": r["drafting"].upper(), "路數": r["parallel"], "條件": r["variant"],
+        "總吞吐量 (tokens/秒)": r["aggregate_tps"], "相對最高": f"{r['aggregate_tps'] / best:.0%}",
+        "單題中位數": sec(r["median_seconds"]), "單題平均": sec(r["avg_seconds"]),
+        "最慢 10%": sec(r["p90_seconds"]), "最慢": sec(r["max_seconds"]),
+        "平均生成 tokens": r["avg_completion_tokens"], "顯存 (MiB)": r["gpu_mem_mib"],
+        "伺服器主記憶體 (MiB)": r["server_rss_mib"], "截斷": r["truncated"], "空答案": r["empty_answers"]}
+        for r in sorted(rows, key=lambda r: (r["drafting"], r["parallel"]))]), hide_index=True, width="stretch")
+    with st.expander("放不下或崩潰的設定"):
+        st.dataframe(pd.DataFrame(sweep.get("failures") or []), hide_index=True, width="stretch")
+    st.success(
+        "選定 MTP 4 路（已套用到 router，2026-11-09 15:39 重啟後以程序參數與 /slots 確認 4 路、每路 65,536）。"
+        "規則：先找總吞吐量最高者，再從相差 10% 以內的設定中選單題最快者。MTP 5～7 路吞吐量只多約 10–13%，"
+        "單題卻多等 4–6 成；DFlash2 2／3 路單題較快，但總吞吐量少 18%／4%（3 路單題平均也不比 MTP 4 路快）。")
+    st.warning(
+        "DFlash2 這次沒有之前量到的優勢（1 路 29.3 對 MTP 29.7 tokens/秒）。之前的 1.5 倍只有 12 個請求。"
+        "整輪測試時 GPU 都在過熱降頻：89°C、核心時脈約 1 GHz（上限 2.1 GHz），驅動回報 SW Thermal Slowdown；"
+        "所有設定在同樣狀態下比較，但絕對數字會比散熱良好時低。這次的 50 題比 8 題難，平均生成約 780 tokens（之前約 420），"
+        "所以單題時間也比上面的表長。")
+    st.info("拿掉視覺模組省約 1.2 GB 顯存；MTP 6 路因此放得下（之前差 885 MiB）。"
+            "加主記憶體上限後，伺服器主記憶體最高 6.2 GB（6 路），主機沒有再進 swap。")
 
 st.caption(f"報告產生時間：{report.get('generated_at', '')}")

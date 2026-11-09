@@ -144,6 +144,39 @@ def intent_section(b_before, b_rows, t_few_rows, t_int, c_few_rows, c_int, revie
     return out
 
 
+def sweep_rows() -> list[dict]:
+    """2026-11-09 sweep: 50 fixed synthetic questions per setting, no mmproj, RAM caps."""
+    rows = []
+    for name, variant in (("concurrency_sweep.json", "64k，token_embd 在 GPU"),
+                          ("concurrency_sweep_smallctx.json", None)):
+        path = OUT / name
+        if not path.exists():
+            continue
+        for r in json.loads(path.read_text(encoding="utf-8")):
+            secs = sorted(x["seconds"] for x in r["requests_detail"])
+            n = len(secs)
+            rows.append({
+                "drafting": r.get("drafting", "mtp"), "parallel": r["parallel"], "requests": r["requests"],
+                "variant": variant or r.get("note", ""), "aggregate_tps": r["aggregate_tps"],
+                "median_seconds": round((secs[n // 2 - 1] + secs[n // 2]) / 2 if n % 2 == 0 else secs[n // 2], 1),
+                "avg_seconds": r["avg_request_seconds"], "p90_seconds": secs[int(n * 0.9)],
+                "max_seconds": secs[-1], "avg_completion_tokens": round(sum(
+                    x["completion_tokens"] for x in r["requests_detail"]) / n),
+                "gpu_mem_mib": r["gpu_mem_mib"], "server_rss_mib": r.get("server_rss_mib"),
+                "truncated": r["truncated"], "empty_answers": r["empty_answers"]})
+    return rows
+
+
+SWEEP_FAILURES = [
+    {"設定": "MTP 7 路，64k", "結果": "啟動失敗：顯存差 293.68 MiB"},
+    {"設定": "MTP 7 路，64k，token_embd 放 CPU（省 388 MiB）", "結果": "能啟動，第一批請求時 CUDA out of memory 崩潰"},
+    {"設定": "MTP 8 路，48k，token_embd 放 CPU", "結果": "執行中 CUDA out of memory 崩潰"},
+    {"設定": "DFlash2 4 路，64k", "結果": "啟動失敗：顯存差 165.00 MiB"},
+    {"設定": "DFlash2 4 路，64k，token_embd 放 CPU", "結果": "能啟動，第一批請求時 CUDA out of memory 崩潰"},
+    {"設定": "DFlash2 4 路，32k，token_embd 放 CPU", "結果": "約 45/50 題未崩潰，使用者決定停止，沒有完整數字"},
+]
+
+
 def b_final_path() -> Path:
     return OUT / "block_final.json"
 
@@ -330,6 +363,7 @@ def main():
         "concurrency": [{k: v for k, v in row.items() if k != "requests_detail"}
                         for row in json.loads((OUT / "concurrency.json").read_text(encoding="utf-8"))]
                        if (OUT / "concurrency.json").exists() else [],
+        "concurrency_sweep": {"rows": sweep_rows(), "failures": SWEEP_FAILURES},
         "sleep": json.loads((OUT / "sleep_test.json").read_text(encoding="utf-8"))
                  if (OUT / "sleep_test.json").exists() else None,
         "cases": cases,
