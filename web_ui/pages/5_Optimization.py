@@ -239,7 +239,7 @@ if conc:
                 f"{d_one['avg_request_seconds']:.0f} 秒（MTP 1 路 {base['aggregate_tps']}、{base['avg_request_seconds']:.0f} 秒）；"
                 f"{d_best['parallel']} 路 {d_best['aggregate_tps']} tokens/秒、單一請求 {d_best['avg_request_seconds']:.0f} 秒，"
                 f"吞吐量和延遲都勝過 MTP {best['parallel']} 路（{best['aggregate_tps']}、{best['avg_request_seconds']:.0f} 秒）。"
-                "代價：草稿模型多佔顯存，4 路放不下（拿掉視覺模組也一樣），最多 2 路。"
+                "代價：草稿模型多佔顯存，最多 2 路（4 路試了 5 種省顯存設定，不是開不起來就是第一個請求就崩潰，見下方）。"
                 "草稿模型是為原版 Qwen3.8-27B 訓練、這裡配 Swift 1.5，接受率仍有約 50–75%；推測解碼由主模型逐 token 驗證，理論上輸出不變（未另跑答對率評估）；每種只有 12 個請求，倍數要保守看待。"
                 "router 尚未改用 DFlash2（需使用者決定）。")
         st.info("2026-11-08 已套用到模型服務：4 路、各路共用 64k 上下文（kv-unified）、閒置 10 分鐘自動休眠釋放顯存。"

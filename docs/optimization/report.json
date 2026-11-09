@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-09 07:09:32",
+  "generated_at": "2026-11-09 07:16:37",
   "overall": {
     "template": {
       "2026-11-07": {
@@ -803,12 +803,7 @@
     {
       "drafting": "dflash2",
       "parallel": 4,
-      "failed": "啟動失敗：顯存不足（草稿模型的 KV cache 還需配置 165 MiB，cudaMalloc out of memory）"
-    },
-    {
-      "drafting": "dflash2-no-mmproj",
-      "parallel": 4,
-      "failed": "啟動失敗：顯存不足（草稿模型的 KV cache 還需配置 165 MiB，cudaMalloc out of memory）；拿掉視覺模組 mmproj 後仍然不足"
+      "failed": "放不下：草稿 KV f16 差 165 MiB、q8_0 差 88 MiB、q4_0 差 46 MiB（拿掉 mmproj 也一樣，失敗在 mmproj 載入之前）；上下文降到 48k 並拿掉 mmproj 可以啟動，但第一個請求就因顯存不足崩潰（CUDA out of memory）。結論：這張 GPU 上 DFlash2 最多 2 路。"
     },
     {
       "parallel": 1,
@@ -949,7 +944,7 @@
       "fix": "在 few-shot 範例示範 WITH ... AS MATERIALIZED，前 N 名只算一次。",
       "timing": {
         "plain": {
-          "seconds": 16.337,
+          "seconds": 12.9,
           "finished": true
         },
         "materialized": {

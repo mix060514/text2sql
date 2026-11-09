@@ -58,7 +58,7 @@
 | 6 | 啟動時顯存不足（差 885 MiB） | | |
 | DFlash2 1 | 37.9 tok/s（MTP 1 路的 1.52×） | 9.9 s | 14.8 GB |
 | DFlash2 2 | 59.1 tok/s（2.36×，勝過 MTP 4 路） | 14.5 s | 15.8 GB |
-| DFlash2 4 | 啟動時顯存不足（草稿 KV 差 165 MiB，拿掉 mmproj 也一樣） | | |
+| DFlash2 4 | 放不下：草稿 KV f16／q8_0／q4_0 各差 165／88／46 MiB；48k＋無 mmproj 能啟動但第一個請求就 CUDA OOM 崩潰 | | |
 
 DFlash2（2026-11-09）：`--model-draft Qwen3.8-27B-DFlash2-Q4_K_M.gguf --spec-type draft-dflash --spec-draft-n-max 5`，
 草稿 KV f16，主模型仍是 Swift 1.5；接受率約 50–75%。只量速度，沒跑答對率評估。
