@@ -148,21 +148,25 @@ DFlash2（2026-11-09）：`--model-draft Qwen3.8-27B-DFlash2-Q4_K_M.gguf --spec-
 ### router 設定
 
 - 設定：`/mnt/data1/llama-config/acer-two-profiles.ini`。
-- **執行方式（2026-11-09 起）：Docker 容器 `llama-router-llama-router-1`，改設定或重啟都不需要 sudo。**
+- **執行方式（2026-11-09 起）：Docker 容器 `llama-router`（`~/infra/ai-stack/docker-compose.yml` 的 `llama-router` 服務），改設定或重啟都不需要 sudo。**
   原本的 systemd 服務 `llama-server-qwen` 已 `disable --now`（unit 檔保留，供回退）。
-  - compose：`/mnt/data1/llama-config/docker-compose.llama-router.yml`；映像由同目錄 `Dockerfile.llama-router` 建置
+  - compose：`~/infra/ai-stack/docker-compose.yml`（專案名 `ai-stack`）；映像由 `~/infra/ai-stack/llama-router/Dockerfile` 建置
     （`nvidia/cuda:12.8.1-runtime-ubuntu24.04`＋`libgomp1`；b10941 需要 GLIBC 2.38，Ubuntu 22.04 映像不能用）。
+    同檔的 ollama／llama-cpp／llama-cpp-vl／open-webui 都放在 profile 裡，預設 `docker compose up -d` 只起 router（GPU 只有 16 GB）。
   - 執行的仍是掛進去的 `/mnt/data1/llama-b10941/llama-server`，參數與 systemd 相同（router、`--models-max 1`、`-lv 4`、port 18080）。
     `network_mode: host`：主機用 `127.0.0.1:18080`，web UI 容器用 `host.docker.internal:18080`，都不必改。
-  - 在 `/mnt/data1/llama-config` 下執行：
-    - 改 ini 後重啟：`docker compose -f docker-compose.llama-router.yml restart`
-    - 日誌（取代 journalctl）：`docker compose -f docker-compose.llama-router.yml logs -f`
-    - 子程序參數：`docker exec llama-router-llama-router-1 ps -eo pid,args`
-    - 另開測試 router（不影響正式）：`LLAMA_ROUTER_PORT=18095 docker compose -p llama-router-test -f docker-compose.llama-router.yml up -d`
+  - 在 `~/infra/ai-stack` 下執行：
+    - 改 ini 後重啟：`docker compose restart llama-router`
+    - 日誌（取代 journalctl）：`docker compose logs -f --tail 200 llama-router`
+    - 子程序參數：`docker exec llama-router ps -eo pid,args`
+    - 另開測試 router（不影響正式）：`LLAMA_ROUTER_PORT=18095 docker compose -p llama-router-test up -d llama-router`
       （GPU 只有 16 GB，正式 router 有載入模型時測試 router 不可載入）
-  - 回退：`docker compose -f docker-compose.llama-router.yml down`，再由使用者 `sudo systemctl enable --now llama-server-qwen`。
+    - **不要**對 ai-stack 下 `docker compose down`：prd／dev web UI 容器掛在 `ai-stack_default` 網路上。
+  - 回退：`docker compose stop llama-router`，再由使用者 `sudo systemctl enable --now llama-server-qwen`。
   - 切換後驗證：`/slots` 4 路、每路 65,536；顯存 14,561 MiB（systemd 時 14,559）；
     `run_planned_agent.py 'EMEA 的總銷售額是多少？'` 得 31,087,500.60；prd／dev web UI 容器實際對話成功。
+  - 2026-11-09 稍後整合進 ai-stack 後重驗：`/health` ok、`/v1/models` 三個 preset、swift15 `/slots` 4 路 65,536、顯存 14,385 MiB、
+    prd／dev web UI 容器內 `host.docker.internal:18080/health` ok。原本 `/mnt/data1/llama-config/*llama-router*` 與 `~/infra/llama-router/` 已刪。
   - 備份：`/mnt/data1/llama-config-backup-20261109-before-docker.tgz`。
 - 2026-11-08 備份：`acer-two-profiles.before-text2sql-sleep-20261108.ini`。
 - 使用者決定把 `[swift15-27b-iq3-xxs]` 改成 64k、`sleep-idle-seconds = 600`、`parallel = 4`、`kv-unified = true`；
