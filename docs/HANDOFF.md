@@ -16,7 +16,10 @@
 | 季度公式寫入 DOMAIN；X 軸比對忽略分隔符；評審提示圖表另由程式檢查 | Q94、Q101–105、Q110 | 同上 |
 | 同題型、不同內容的 few-shot（5 個，`SQL_FEW_SHOT`） | 跨年逐月、前 N 大客戶占比、期間成長率、累計占比、條件占比難一次解決 | c5de570、0c1536a |
 | 複雜題人工複核檔 `docs/optimization/complex_review.json` | 標準答案過嚴（多帶欄位、標籤寫法、正負號）；程式只套用宣告的轉換再比對 | 0c1536a |
-| 拿掉每次請求 120 秒，只留每題 300 秒；SQL 思考上限 2048→4096，輸出上限＝上限＋2048 | 使用者決定只要一種時間限制；整題到期仍會關閉串流（有測試） | 4fd14d6 |
+| 拿掉每次請求 120 秒，只留每題時限；SQL 思考上限 2048→4096，輸出上限＝上限＋2048 | 使用者決定只要一種時間限制；整題到期仍會關閉串流（有測試） | 4fd14d6 |
+| 每題時限 300→600 秒（app 與兩條 eval 共用 `AGENT_TIMEOUT_SECONDS`） | 使用者決定；4 題並發時 300 秒不夠 | b18696b |
+| `eval_e2e.py --concurrency N` | 用上伺服器的 4 路並發，同批題目約快 1.6 倍 | 787c215 |
+| 複核規則加英文星期、可省略年份欄；`regression_notes.json` 逐題人工原因 | 定版由對變錯的題目要附可查證的原因 | 42ffbf4、b32122e |
 | 並發與休眠測試（`scripts/bench_concurrency.py`） | 評估能否多人同時使用 | 3fb7cf1–c3d667f |
 
 ### 評估結果
@@ -26,7 +29,24 @@
 | 模板題 2026-11-07（修正前） | 65.9% | 13.6% | `template_2026-11-07_original.json` |
 | 模板題基準（基礎設施修正後） | 92.4%（122/132） | 3.0% | `template_baseline.json`（436a573） |
 | 複雜題基準 | 嚴格 81.4%（83/102）、複核後 97.1% | 1.0% | `complex_baseline.json`（a9062d2） |
-| 定版（few-shot＋單一時限＋思考 4096） | 待定版評估完成後填入 | | |
+| 模板題定版 | 93.9%（124/132），一次解決 94.6% | 2.3% | `template_fewshot.json`（e2e_2026-11-09_01-53-40） |
+| 複雜題定版 | 嚴格 79.4%（81/102）、複核後 95.1%（97/102） | 2.0% | `complex_fewshot.json`（synthetic_complex_2026-11-09_00-45-08） |
+| 攔截題定版（第一次） | 7.9%（10/126） | 27.0% | `block_final.json`（synthetic_block_2026-11-09_03-09-44） |
+
+定版設定：`SQL_FEW_SHOT=true`、每題 600 秒、SQL 思考 4096、`--concurrency 4`；跑在臨時伺服器 port 18090
+（router 同參數＋4 路、`--ctx-checkpoints 4 --cache-ram 2048`），router 設定未改。基準是一次 1 題，
+所以定版的平均耗時（模板 136.7 秒、複雜 151.7 秒）是並發下每題的時間，不可直接比較。
+
+由對變錯（原因在 `docs/optimization/regression_notes.json`，頁面「逐題變化」）：
+- 5 題（模板 3、複雜 2）是 4 題並發下跑滿 600 秒；單獨重跑 37–136 秒全部答對（`timeout_reruns_alone.json`）。
+- 日本在區域的名次 ×2：真 SQL 錯誤，ROW_NUMBER 在 `WHERE Country='Japan'` 之後算，名次永遠是 1。
+- 下半年比上半年「多賣」×1：模型用數量（數字正確），標準答案用營收；題意歧義。
+- 2024 類別占比圓餅 ×1：數字對，切片按名稱排而非金額由大到小。
+- 修好：模板 6 題（跨年逐月 4）、複雜題 APAC 月增率 3 題（few-shot 的 LAG 範例）。
+
+攔截題結論：流程沒有意圖判斷，四類（改資料、資料沒有、閒聊、注入）都直接寫 SQL。寫入全被 READ_ONLY 擋下，
+資料安全；但平均 418 秒、會把詩寫進 `SELECT '…' FROM sales_data`、把過去成長率當「預測」。
+**下一步候選（需使用者決定）：在 agent_sql 前加意圖判斷，直接拒答這四類。**
 
 ### 並發與休眠（MTP、64k、kv-unified，臨時伺服器 port 18090 實測）
 
@@ -47,11 +67,18 @@
 - 設定：`/mnt/data1/llama-config/acer-two-profiles.ini`，systemd 系統服務 `llama-server-qwen`（不是 Docker），重啟需使用者 sudo。
 - 2026-11-08 備份：`acer-two-profiles.before-text2sql-sleep-20261108.ini`。
 - 使用者決定把 `[swift15-27b-iq3-xxs]` 改成 64k、`sleep-idle-seconds = 600`、`parallel = 4`、`kv-unified = true`；
-  是否已生效以 `ps` 看子程序參數或 `/slots` 為準。
+  已生效（ps／`/slots` 確認 4 路、每路 65,536）。
+- **未解決：主記憶體上限尚未加入 ini。** 4 路跑約 15 分鐘後 checkpoint（每份約 150 MiB、每路最多 32 份）＋8 GB
+  prompt 快取用到 9.9 GB，主機在 HDD swap 上卡死（95c2389）。需要使用者在該段加 `ctx-checkpoints = 4`、
+  `cache-ram = 2048` 並 `sudo systemctl restart llama-server-qwen`、`sudo swapoff -a && sudo swapon -a`。
+  加上限的臨時伺服器跑完 6 小時定版評估，伺服器 RSS 最高 5.2 GB，swap 未增加。
+  在加上限之前，router 的 swift15 不要長時間 4 路滿載。
 
 ### 尚待
 
 - DFlash2 與 MTP 對照（同一並發測試，`--drafting dflash2`），記錄到優化成果頁。
+- 是否把 `SQL_FEW_SHOT` 預設改為 true（定版結果支持；預設仍是 false）。
+- 意圖判斷（攔截題）與日本名次類的「先排名再篩選」範例。
 - 並發 2／4 路加測到每種 36 個請求，數字較可信。
 
 ## 現況
