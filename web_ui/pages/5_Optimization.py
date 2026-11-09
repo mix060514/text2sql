@@ -344,10 +344,9 @@ if conc:
     if base and mtp_rows:
         best = max(mtp_rows, key=lambda r: r["aggregate_tps"])
         st.success(
-            f"建議：多人使用時設 {best['parallel']} 路。總吞吐量 {best['aggregate_tps']} tokens/秒，是 1 路的 "
+            f"結果：MTP {best['parallel']} 路總吞吐量 {best['aggregate_tps']} tokens/秒，是 1 路的 "
             f"{best['aggregate_tps'] / base['aggregate_tps']:.1f} 倍；代價是單一請求平均 {best['avg_request_seconds']:.0f} 秒"
-            f"（1 路 {base['avg_request_seconds']:.0f} 秒），顯存 {best['gpu_mem_mib']:,} MiB。"
-            "只有一個人使用（例如面試 demo）時 1 路最快。")
+            f"（1 路 {base['avg_request_seconds']:.0f} 秒），顯存 {best['gpu_mem_mib']:,} MiB。")
         dfl = [r for r in conc if r.get("drafting") == "dflash2"]
         if dfl:
             d_best = max(dfl, key=lambda r: r["aggregate_tps"])
