@@ -6,7 +6,12 @@ Every number on the page is computed here from result files copied into docs/opt
 
     uv run python scripts/build_optimization_report.py \
         [--template-baseline eval/results/e2e_<ts>] [--complex-baseline eval/results/synthetic_complex_<ts>] \
-        [--template-fewshot <run>] [--complex-fewshot <run>]
+        [--template-fewshot <run>] [--complex-fewshot <run>] [--block-final <run>] \
+        [--template-intent <run>] [--complex-intent <run>]
+
+--block-final is the block run with the intent gate; the first block run (no gate) is kept as
+block_before_intent.json. --template-intent / --complex-intent are the allow runs with the gate,
+compared with the few-shot runs to list every false block (answer == a fixed refusal text).
 """
 
 import argparse
@@ -76,6 +81,73 @@ def cte_timing() -> dict:
     return out
 
 
+def refusal_kind(answer) -> str | None:
+    """The intent whose fixed refusal text this answer is, else None (model text never matches)."""
+    from text2sql.agents.planned_agent.qwen_workflow import REFUSALS
+    return next((k for k, v in REFUSALS.items() if v == (answer or "").strip()), None)
+
+
+def intent_section(b_before, b_rows, t_few_rows, t_int, c_few_rows, c_int, review, reviewed) -> dict:
+    """Intent gate evidence: tool comparison, block before/after, allow before/after and false blocks."""
+    tools_path = OUT / "intent_tools.json"
+    out = {"tools": json.loads(tools_path.read_text(encoding="utf-8")) if tools_path.exists() else None}
+    before_rows = o.load_synthetic(b_before, "block") if b_before else []
+    out["block"] = {"before": o.stats(before_rows) if before_rows else None,
+                    "after": o.stats(b_rows) if b_rows else None,
+                    "before_by_category": o.by_type(before_rows), "after_by_category": o.by_type(b_rows)}
+    if b_rows and b_before:
+        raw = {r["question"]: r for r in json.loads(Path(b_final_path()).read_text(encoding="utf-8"))}
+        out["block"]["missed"] = [
+            {"question": r["question"], "category": r["type"], "answer": (raw.get(r["question"]) or {}).get("answer", "")[:300],
+             "sql": (raw.get(r["question"]) or {}).get("sql_query", "")[:300]}
+            for r in b_rows if not r["passed"]]
+        out["block"]["refused_by_gate"] = sum(1 for r in raw.values() if refusal_kind(r.get("answer")))
+    allow = {}
+    if t_int:
+        t_raw = json.loads(t_int.read_text(encoding="utf-8"))
+        t_rows = o.load_template(t_int)
+        before = {r["question"]: r for r in t_few_rows}
+        allow["template"] = {
+            "before": o.stats(t_few_rows) if t_few_rows else None, "after": o.stats(t_rows),
+            "false_blocks": [{"question": r["question"], "refused_as": refusal_kind(r.get("answer")),
+                              "was_correct_before": bool(before.get(r["question"], {}).get("passed"))}
+                             for r in t_raw if refusal_kind(r.get("answer"))],
+            "regressed": [r["question"] for r in t_rows
+                          if before.get(r["question"], {}).get("passed") and not r["passed"]],
+            "fixed": [r["question"] for r in t_rows
+                      if r["question"] in before and not before[r["question"]]["passed"] and r["passed"]],
+        }
+    if c_int:
+        c_raw = json.loads(c_int.read_text(encoding="utf-8"))
+        c_rows = reviewed(o.load_synthetic(c_int, "complex", review))
+        before = {r["question"]: r for r in reviewed(c_few_rows)}
+        allow["complex"] = {
+            "before": o.stats(reviewed(c_few_rows)) if c_few_rows else None, "after": o.stats(c_rows),
+            "false_blocks": [{"question": r["question"], "seed_id": r.get("seed_id"),
+                              "refused_as": refusal_kind(r.get("answer")),
+                              "was_correct_before": bool(before.get(r["question"], {}).get("passed"))}
+                             for r in c_raw if r.get("label") != "block" and refusal_kind(r.get("answer"))],
+            "regressed": [r["question"] for r in c_rows
+                          if before.get(r["question"], {}).get("passed") and not r["passed"]],
+            "fixed": [r["question"] for r in c_rows
+                      if r["question"] in before and not before[r["question"]]["passed"] and r["passed"]],
+        }
+    notes_path = OUT / "regression_notes.json"
+    notes = json.loads(notes_path.read_text(encoding="utf-8")) if notes_path.exists() else {}
+    why = notes.get("_intent_regressions", {})
+    for a in allow.values():
+        a["regressed"] = [{"question": q, "reason": why.get(q, "（未複核）")} for q in a["regressed"]]
+        for r in a["false_blocks"]:
+            r["reason"] = why.get(r["question"], "（未複核）")
+    out["allow"] = allow
+    out["timeout_reruns"] = notes.get("_intent_timeout_reruns", [])
+    return out
+
+
+def b_final_path() -> Path:
+    return OUT / "block_final.json"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--template-baseline", type=Path)
@@ -83,6 +155,8 @@ def main():
     ap.add_argument("--template-fewshot", type=Path)
     ap.add_argument("--complex-fewshot", type=Path)
     ap.add_argument("--block-final", type=Path)
+    ap.add_argument("--template-intent", type=Path)
+    ap.add_argument("--complex-intent", type=Path)
     args = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
 
@@ -93,6 +167,9 @@ def main():
     t_few = copy(args.template_fewshot and args.template_fewshot / "e2e_results.json", "template_fewshot.json")
     c_few = copy(args.complex_fewshot and args.complex_fewshot / "synthetic_results.json", "complex_fewshot.json")
     b_final = copy(args.block_final and args.block_final / "synthetic_results.json", "block_final.json")
+    b_before = copy(None, "block_before_intent.json")
+    t_int = copy(args.template_intent and args.template_intent / "e2e_results.json", "template_intent.json")
+    c_int = copy(args.complex_intent and args.complex_intent / "synthetic_results.json", "complex_intent.json")
     streaming = OUT / "timeout_questions_after_streaming.jsonl"
 
     orig_rows = o.load_template(original)
@@ -234,6 +311,7 @@ def main():
         return "結果與標準答案不同（人工複核規則也不成立）：SQL " + str(r.get("sql_query") or "")[:200]
 
     b_rows = o.load_synthetic(b_final, "block") if b_final else []
+    intent = intent_section(b_before, b_rows, t_few_rows, t_int, c_few_rows, c_int, review, reviewed)
     report = {
         "generated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
         "overall": {
@@ -268,6 +346,7 @@ def main():
         "block": {"overall": o.stats(b_rows) if b_rows else None, "by_category": o.by_type(b_rows),
                   "examples": json.loads(notes_path.read_text(encoding="utf-8")).get("_block_examples", [])
                   if notes_path.exists() else []},
+        "intent": intent,
         "timeout_reruns": json.loads(notes_path.read_text(encoding="utf-8")).get("_timeout_reruns", [])
         if notes_path.exists() else [],
         "question_seconds": config.AGENT_TIMEOUT_SECONDS,

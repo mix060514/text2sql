@@ -24,6 +24,9 @@
 ```text
 UI / API
 └─ Text2SQLWorkflow（deterministic controller）
+   ├─ agent_intent → IntentDecision（不思考；2026-11-09 加入）
+   │  └─ write_request / not_in_data / chitchat / prompt_injection：程式用固定文字拒答，
+   │     不寫、不執行 SQL，清除結果；輸出不合法時放行（仍受唯讀查詢限制）
    ├─ agent_sql → SQLPlan
    │  └─ schema / SQL error：回饋 planner
    ├─ step_run_sql(sql)：必定由程式直接執行
@@ -41,8 +44,10 @@ reviewer 明確取得原問題、追問上下文、DOMAIN 業務定義及實際 
 controller 只在本次 query_success 且 strict review 明確接受後進 report，
 發布時比對 reviewed_query 與當前執行結果；拒絕、解析失敗及耗盡均不發布分析。
 每次嘗試、回合開始與失敗清除 review、結果及圖表，不能沿用前次接受。
-查詢修正與報告修正分開，後者不重查或重審；維持 8 calls / 300 秒總限制。
-正常路徑 3 calls，最壞 3 × (planner + reviewer) + 2 report = 8。
+查詢修正與報告修正分開，後者不重查或重審；每題 9 calls / 600 秒總限制。
+正常路徑 4 calls（意圖 1 + SQL + 審查 + 報告），最壞 1 + 3 × (planner + reviewer) + 2 report = 9；拒答路徑 1 call。
+意圖判斷的理由只寫入 trace，公開回答一律是程式的固定拒答文字，注入內容不會被回顯。
+意圖步驟的工具選擇（CPU 分類器與本機模型的比較）見 docs/optimization/intent_tools.json。
 語義 reviewer 仍是同一 Qwen 的判斷，可能與 planner 有共同盲點，並非一般 SQL 正確性的證明。
 
 命名規則：`agent_*` = LLM、`tool_*` = 模型自己呼叫的工具、`step_*` = controller 一定執行的程式。

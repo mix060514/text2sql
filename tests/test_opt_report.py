@@ -73,3 +73,16 @@ class OptReportTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class IntentReportTests(unittest.TestCase):
+    def test_refusal_kind_matches_only_fixed_refusal_text(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+        import build_optimization_report as b
+        from text2sql.agents.planned_agent.qwen_workflow import REFUSALS
+        for kind, text in REFUSALS.items():
+            self.assertEqual(b.refusal_kind(text), kind)
+            self.assertEqual(b.refusal_kind(text + "\n"), kind)
+        self.assertIsNone(b.refusal_kind("EMEA 的總銷售額為 31,087,500.60。"))
+        self.assertIsNone(b.refusal_kind(None))
+        self.assertIsNone(b.refusal_kind(REFUSALS["chitchat"] + " 另外營收是 10。"))

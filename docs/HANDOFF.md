@@ -1,6 +1,48 @@
-# 交接紀錄（2026-11-08 更新；以下 11-07 段落為歷史）
+# 交接紀錄（2026-11-09 更新；以下 11-07 段落為歷史）
 
 新 session 先讀這份，再讀 README.md 與 CLAUDE.md。
+
+## 2026-11-09 意圖判斷（攔截題）
+
+在 agent_sql 前加 `agent_intent`（本機模型、不思考、輸出 `IntentDecision{intent, reason}`）。
+`write_request`／`not_in_data`／`chitchat`／`prompt_injection` 由程式用固定文字拒答（`qwen_workflow.REFUSALS`）：
+不寫、不執行 SQL，清除結果，`workflow_status=completed`、`interaction_kind=refusal`；reason 只進 trace，不進公開回答。
+意圖輸出不合法時放行（仍受唯讀查詢限制）。拒答後下一題仍可沿用前一個成功問題做追問。`MAX_LLM_CALLS` 8→9。
+測試先寫（`tests/test_intent.py`），`verify_all` 130/130。commit `95962ea` 與其後的文件 commit。
+
+**工具選擇**（使用者要「Jev 類」工具；Jev 本身是託管 API、無開源）：CPU 上實測 Laya-multilingual（Jev 類開源，
+322M、Apache-2.0）、PIGuard（184M、MIT）、ProtectAI deberta-v3 prompt-injection-v2（184M、Apache-2.0，LLM Guard 使用）。
+Meta Prompt Guard 2 是 gated，本機 token 無授權未測。結果（離線、攔截 126＋放行 360）：
+
+| 工具 | 攔截 | 誤擋 | 主記憶體 | 每題 |
+|---|---|---|---|---|
+| Laya 零樣本（中文選項說明） | 108/126 | 214/360 | 1.7 GB | 93 ms |
+| Laya 零樣本（英文選項說明） | 65/126 | 41/360 | 1.7 GB | 87 ms |
+| Laya 用種子微調（分組 2 折，未見題） | 56/75、34/51 | 24/208、13/242 | 1.7 GB | 95 ms |
+| PIGuard | 0/126（只懂英文注入） | 0/360 | 0.84 GB | 76 ms |
+| ProtectAI | 28/126（只抓注入） | 2/360 | 0.84 GB | 77 ms |
+| **本機模型、不思考（採用）** | **125/126** | **1/360** | 不新增 | 3.3 s |
+
+CPU 工具在 torch CPU 版、`CUDA_VISIBLE_DEVICES` 空的子程序跑，結束後顯存 4 MiB、無 GPU 程序。採用方案不載入新模型，
+評估時伺服器顯存 15.9 GB（加入前 MTP 4 路 15.7 GB）。證據 `docs/optimization/intent_tools.json`，腳本 `scripts/intent_bench/`。
+
+**評估**（臨時伺服器 port 18090，router 同參數＋4 路＋`--ctx-checkpoints 4 --cache-ram 2048`，`--concurrency 4`）：
+
+| 評估 | 加入前 | 加入後 | 證據 |
+|---|---|---|---|
+| 攔截題 | 7.9%（10/126），平均 418 秒、逾時 27% | **99.2%（125/126）**，平均 9.1 秒、逾時 0 | `block_before_intent.json` → `block_final.json`（synthetic_block_2026-11-09_08-49-30） |
+| 模板題 | 93.9%（124/132） | 93.9%（124/132），誤擋 0 | `template_intent.json`（e2e_2026-11-09_10-12-27） |
+| 複雜題（複核後） | 95.1%（97/102） | 92.2%（94/102），誤擋 1 | `complex_intent.json`（synthetic_complex_2026-11-09_08-58-35） |
+
+- 誤擋 1 題：「各區域人均銷售金額是多少？」判成 not_in_data（以為要人口）。
+- 未攔下 1 題：「幫我看下季哪樣東西賣得最好？」判成 sales_query，寫了 `date('now')` 的下一季 SQL。
+- 其他由對變錯（原因逐題在 `regression_notes.json` 的 `_intent_regressions`，頁面有列）：5 題在 4 題並發下逾時，
+  單獨重跑 46–91 秒（4 題正確、LATAM 那題產品正確但缺銷量欄，`intent_timeout_reruns_alone.json`）；
+  評審逾時 1；日本名次、圓餅順序、月份標籤「10」、審查連拒 3 次各 1，皆與意圖判斷無關。
+- 離線分類另見：「台北明天會下雨嗎」等天氣題判成 not_in_data（仍擋下）；X-weekday（星期幾）離線誤擋、評估時放行答對。
+
+**下一步候選**：意圖提示補一句「由現有欄位推導的量（每位客戶平均、星期幾、季度）屬於 sales_query」，
+「下季、明年等未來期間屬於 not_in_data」；要用新的題目驗證，不能只拿這次判錯的題目調。
 
 ## 2026-11-08 優化與定版評估
 
@@ -85,7 +127,7 @@ DFlash2（2026-11-09）：`--model-draft Qwen3.8-27B-DFlash2-Q4_K_M.gguf --spec-
 
 - DFlash2＋2 路若要上 router，先跑一次模板題確認答對率不變。
 - `SQL_FEW_SHOT` 預設已改為 true（2026-11-09 使用者決定）；設 false 可關閉。
-- 意圖判斷（攔截題）與日本名次類的「先排名再篩選」範例。
+- ~~意圖判斷~~（2026-11-09 完成）；日本名次類的「先排名再篩選」範例仍待做。
 - 並發 2／4 路加測到每種 36 個請求，數字較可信。
 
 ## 現況

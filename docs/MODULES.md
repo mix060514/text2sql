@@ -44,6 +44,6 @@ M4 內部流程（哪一步是 LLM、哪一步是程式）見 `docs/ARCHITECTURE
 
 ## 已知缺口（2026-11-08）
 
-- **M4 沒有拒答機制**：寫 SQL 的 agent 只能輸出一條非空 SQL，因此攔截題只有在 SQL 剛好連續執行失敗時才會通過，攔截率量不到真正的拒答能力。
+- ~~M4 沒有拒答機制~~：2026-11-09 在 agent_sql 前加入意圖判斷（agent_intent），四類由程式直接拒答；攔截題 7.9% → 99.2%。
 - **M5 評估結果頁讀不到合成考卷的成績單**：頁面只讀 `e2e_results.json` 與舊版 `eval_results.json`，沒有讀 `synthetic_results.json`。
 - 合成考卷的完整實測尚未執行。
