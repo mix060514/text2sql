@@ -54,6 +54,12 @@ class OptReportTests(unittest.TestCase):
         self.assertTrue(opt_report.review_passes(ok, item, review))
         self.assertFalse(opt_report.review_passes(dict(ok, rows=[["2024-02", 3.5], ["2024-04", 1.0]]), item, review))
 
+    def test_regression_reason_prefers_manual_note_and_states_the_real_limit(self):
+        self.assertEqual(opt_report.timeout_reason(600.0), "逾時（超過每題 600 秒）")
+        notes = {"q1": "SQL 先篩選再排名，名次永遠是 1"}
+        self.assertEqual(opt_report.regression_reason("q1", "自動原因", notes), "SQL 先篩選再排名，名次永遠是 1")
+        self.assertEqual(opt_report.regression_reason("q2", "自動原因", notes), "自動原因")
+
     def test_review_weekday_accepts_english_names_but_not_wrong_days(self):
         item = {"ground_truth": {"columns": ["weekday", "v"], "rows": [["星期一", 1.0], ["星期日", 7.0]]}}
         review = {"S": {"drop": [], "normalize": ["weekday"], "reason": ""}}

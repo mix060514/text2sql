@@ -21,6 +21,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "eval"))
 import opt_report as o  # noqa: E402
 
+sys.path.insert(0, str(ROOT / "src"))
+from text2sql import config  # noqa: E402
+
 OUT = ROOT / "docs" / "optimization"
 ORIGINAL_RUN = ROOT / "eval" / "results" / "e2e_2026-11-07_17-23-39"
 
@@ -99,6 +102,9 @@ def main():
     rejudged_map = {r["question"]: r for r in json.loads(rejudged.read_text(encoding="utf-8"))}
     t_base_rows = o.load_template(t_base) if t_base else []
     t_few_rows = o.load_template(t_few) if t_few else []
+    notes_path = OUT / "regression_notes.json"
+    notes = {k: v for k, v in json.loads(notes_path.read_text(encoding="utf-8")).items()
+             if not k.startswith("_")} if notes_path.exists() else {}
     review_path = OUT / "complex_review.json"
     review = {k: v for k, v in json.loads(review_path.read_text(encoding="utf-8")).items()
               if not k.startswith("_")} if review_path.exists() else {}
@@ -204,7 +210,7 @@ def main():
                 continue
             key = "fixed" if a["passed"] else "regressed"
             out[key].append({"question": b["question"], "type": b["type"],
-                             "reason": "" if a["passed"] else why(a["question"])})
+                             "reason": "" if a["passed"] else o.regression_reason(a["question"], why(a["question"]), notes)})
         return out
 
     t_final_raw = {r["question"]: r for r in json.loads(t_few.read_text(encoding="utf-8"))} if t_few else {}
@@ -213,7 +219,7 @@ def main():
     def t_why(q):
         r = t_final_raw.get(q, {})
         if r.get("sql_query") == "TIMEOUT" or "Timeout" in str(r.get("sql_reasoning")):
-            return "逾時（超過每題 300 秒）"
+            return o.timeout_reason(config.AGENT_TIMEOUT_SECONDS)
         if not r.get("sql_correct"):
             return "答案錯誤：" + str(r.get("sql_reasoning") or "")[:160]
         return "圖表檢查未通過（類型、X 軸順序或系列數）"
@@ -222,7 +228,7 @@ def main():
         r = c_final_raw.get(q, {})
         text = json.dumps(r.get("error") or "", ensure_ascii=False) + str(r.get("reason") or "")
         if "Timeout" in text:
-            return "逾時（超過每題 300 秒）"
+            return o.timeout_reason(config.AGENT_TIMEOUT_SECONDS)
         if r.get("workflow_status") != "completed":
             return "未完成：" + str((r.get("error") or {}).get("message", r.get("reason")))[:160]
         return "結果與標準答案不同（人工複核規則也不成立）：SQL " + str(r.get("sql_query") or "")[:200]
@@ -259,7 +265,12 @@ def main():
             "template": changes(t_base_rows, t_few_rows, t_why) if t_few_rows else None,
             "complex": changes(reviewed(c_base_rows), reviewed(c_few_rows), c_why) if c_few_rows else None,
         },
-        "block": {"overall": o.stats(b_rows) if b_rows else None, "by_category": o.by_type(b_rows)},
+        "block": {"overall": o.stats(b_rows) if b_rows else None, "by_category": o.by_type(b_rows),
+                  "examples": json.loads(notes_path.read_text(encoding="utf-8")).get("_block_examples", [])
+                  if notes_path.exists() else []},
+        "timeout_reruns": json.loads(notes_path.read_text(encoding="utf-8")).get("_timeout_reruns", [])
+        if notes_path.exists() else [],
+        "question_seconds": config.AGENT_TIMEOUT_SECONDS,
     }
     (OUT / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"wrote {OUT / 'report.json'}: {len(cases)} cases, hard template types {hard_template}, "

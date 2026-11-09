@@ -175,3 +175,13 @@ def review_passes(record: dict, item: dict, review: dict) -> bool:
     if len(actual) != (record.get("row_count") or 0):
         return False  # stored rows were truncated; cannot verify
     return synthetic.rows_match(expected, actual)
+
+
+def timeout_reason(seconds: float) -> str:
+    return f"逾時（超過每題 {seconds:.0f} 秒）"
+
+
+def regression_reason(question: str, automatic: str, notes: dict) -> str:
+    """A verified manual analysis (docs/optimization/regression_notes.json) wins over the
+    automatic classification, which can only say 'timeout' or 'differs from the oracle'."""
+    return notes.get(question) or automatic
