@@ -84,7 +84,7 @@ DFlash2（2026-11-09）：`--model-draft Qwen3.8-27B-DFlash2-Q4_K_M.gguf --spec-
 ### 尚待
 
 - DFlash2＋2 路若要上 router，先跑一次模板題確認答對率不變。
-- 是否把 `SQL_FEW_SHOT` 預設改為 true（定版結果支持；預設仍是 false）。
+- `SQL_FEW_SHOT` 預設已改為 true（2026-11-09 使用者決定）；設 false 可關閉。
 - 意圖判斷（攔截題）與日本名次類的「先排名再篩選」範例。
 - 並發 2／4 路加測到每種 36 個請求，數字較可信。
 

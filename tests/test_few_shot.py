@@ -51,5 +51,14 @@ class FewShotTests(unittest.TestCase):
         self.assertIn(sql, qw.sql_instruction(True))
         self.assertTrue(qw.sql_instruction(False).startswith(prompts.DOMAIN))
 
+    def test_few_shot_is_on_by_default_and_can_be_turned_off(self):
+        from text2sql import config
+        env = {k: v for k, v in os.environ.items() if k != "SQL_FEW_SHOT"}
+        with patch.dict(os.environ, env, clear=True):
+            self.assertTrue(importlib.reload(config).SQL_FEW_SHOT)
+        with patch.dict(os.environ, {"SQL_FEW_SHOT": "false"}):
+            self.assertFalse(importlib.reload(config).SQL_FEW_SHOT)
+        importlib.reload(config)
+
 if __name__ == "__main__":
     unittest.main()
