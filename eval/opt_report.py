@@ -143,12 +143,16 @@ def hard_types(rows, max_seconds=120.0) -> list[str]:
     return out
 
 
+_WEEKDAYS_EN = {d: "星期" + c for d, c in zip(
+    ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"), "一二三四五六日")}
+
+
 def _normalize(value, rules):
     if isinstance(value, str):
         if "month" in rules and len(value) == 7 and value[4] == "-" and value[:4].isdigit():
             value = value[5:]
         if "weekday" in rules:
-            value = value.replace("週", "星期")
+            value = _WEEKDAYS_EN.get(value.strip().lower(), value.replace("週", "星期"))
         return value
     if isinstance(value, (int, float)) and "abs" in rules:
         return abs(value)

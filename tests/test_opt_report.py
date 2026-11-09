@@ -54,6 +54,16 @@ class OptReportTests(unittest.TestCase):
         self.assertTrue(opt_report.review_passes(ok, item, review))
         self.assertFalse(opt_report.review_passes(dict(ok, rows=[["2024-02", 3.5], ["2024-04", 1.0]]), item, review))
 
+    def test_review_weekday_accepts_english_names_but_not_wrong_days(self):
+        item = {"ground_truth": {"columns": ["weekday", "v"], "rows": [["星期一", 1.0], ["星期日", 7.0]]}}
+        review = {"S": {"drop": [], "normalize": ["weekday"], "reason": ""}}
+        ok = {"seed_id": "S", "workflow_status": "completed", "row_count": 2,
+              "rows": [["Sunday", 7.0], ["Monday", 1.0]]}
+        self.assertTrue(opt_report.review_passes(ok, item, review))
+        self.assertTrue(opt_report.review_passes(dict(ok, rows=[["週一", 1.0], ["週日", 7.0]]), item, review))
+        swapped = dict(ok, rows=[["Monday", 7.0], ["Sunday", 1.0]])
+        self.assertFalse(opt_report.review_passes(swapped, item, review))
+
 
 if __name__ == "__main__":
     unittest.main()

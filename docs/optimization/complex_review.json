@@ -3,8 +3,9 @@
   "X-category_top3_quantity": {"drop": ["rank"], "normalize": [], "reason": "答案的產品與數量完全正確；oracle 多一個名次欄，題目沒有要求。"},
   "X-country_decline": {"drop": [], "normalize": ["abs"], "reason": "「下滑了多少百分比」回答 20.95%，oracle 記為 -20.95%；國家與數值相同，只差正負號表示法。"},
   "X-category_best_month-2024": {"drop": ["total_revenue"], "normalize": ["month"], "reason": "題目只問哪個月；回答「10」，oracle 是「2024-10」並附金額。"},
-  "X-weekday": {"drop": [], "normalize": ["weekday"], "reason": "「週一」與 oracle 的「星期一」同義，金額完全相同。"},
+  "X-weekday": {"drop": [], "normalize": ["weekday"], "reason": "「週一」或英文「Monday」與 oracle 的「星期一」同義，金額完全相同。"},
   "X-region_top_customers_orders-EMEA-2024-5": {"drop": ["total_revenue"], "normalize": [], "reason": "題目問客戶是誰與訂單數；客戶與訂單數都正確，oracle 另附金額。"},
   "X-countries_above_avg": {"drop": ["total_revenue"], "normalize": [], "reason": "題目要國家清單；國家完全正確，oracle 另附金額。"},
-  "X-months_beat_last_year": {"drop": [], "normalize": ["month"], "reason": "回答「2024-01」，oracle 寫「01」（同一份 oracle 在別題又用 2024-10），月份相同。"}
+  "X-months_beat_last_year": {"drop": [], "normalize": ["month"], "reason": "回答「2024-01」，oracle 寫「01」（同一份 oracle 在別題又用 2024-10），月份相同。"},
+  "X-best_month_each_year": {"drop": ["year"], "normalize": [], "reason": "月份欄已寫成「2023-10」含年份，金額相同；oracle 另列一個年份欄。"}
 }
