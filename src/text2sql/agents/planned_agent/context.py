@@ -15,7 +15,7 @@ def start_turn(callback_context):
     previous = {}
     if state.get("workflow_status") == "completed" and state.get("query_success"):
         previous = {"question": state.get("user_question", ""), "sql": state.get("sql_query", "")}
-    elif state.get("interaction_kind") == "greeting":
+    elif state.get("interaction_kind") in ("greeting", "refusal"):
         previous = json.loads(state.get("previous_query_context", "{}"))
     clear_query_state(state)
     parts = callback_context.user_content.parts if callback_context.user_content else []

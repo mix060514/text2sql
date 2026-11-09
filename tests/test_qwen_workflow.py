@@ -33,6 +33,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         agent.sub_agents[0].model = FakeModel(model="fake_sql", replies=sql_replies)
         agent.sub_agents[1].model = FakeModel(model="fake_review", replies=review_replies if review_replies is not None else [json.dumps({"accepted": True, "reason": "Matches requested metric and scope"})] * len(sql_replies))
         agent.sub_agents[2].model = FakeModel(model="fake_report", replies=report_replies)
+        agent.sub_agents[3].model = FakeModel(model="fake_intent", replies=[json.dumps({"intent": "sales_query", "reason": "查詢"})] * 4)
         return InMemoryRunner(agent=agent, app_name="workflow_test")
 
     def sql(self, query='SELECT COUNT(*) AS Orders FROM sales_data'):
@@ -169,7 +170,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(runner.agent.sub_agents[2].model.calls, 0)
                 self.assertEqual(state["raw_query_result"], [])
 
-    async def test_query_and_report_repairs_fit_original_eight_call_budget(self):
+    async def test_query_and_report_repairs_fit_nine_call_budget(self):
         query = 'SELECT Region, SUM("Total Revenue") AS Revenue FROM sales_data GROUP BY Region ORDER BY Region'
         runner = self.runner([self.sql(query)] * 3,
                              [self.report(), self.report(chart_type="bar", x_column="Region", y_column="Revenue")],
@@ -177,7 +178,8 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
                              [json.dumps({"accepted": True, "reason": "Scope matches"})])
         state = await run_question(runner, "各區域營收")
         self.assertEqual(state["workflow_status"], "completed")
-        self.assertEqual([agent.model.calls for agent in runner.agent.sub_agents], [3, 3, 2])
+        # intent 1 + (sql + review) x 3 + report x 2 = 9 calls, the worst path within MAX_LLM_CALLS.
+        self.assertEqual([agent.model.calls for agent in runner.agent.sub_agents], [3, 3, 2, 1])
         self.assertEqual(state["sql_attempts"], 3)
         self.assertEqual(state["report_attempts"], 2)
 

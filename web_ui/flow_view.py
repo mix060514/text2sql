@@ -11,6 +11,7 @@ import json
 PIPELINES = {
     "qwen27b": {
         "nodes": [
+            ("agent_intent", "判斷意圖（四類直接拒答）"),
             ("agent_sql", "寫 SQL"),
             ("step_run_sql", "唯讀執行 SQL"),
             ("agent_review", "語意審查"),

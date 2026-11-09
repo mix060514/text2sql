@@ -4,6 +4,16 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
+Intent = Literal["sales_query", "write_request", "not_in_data", "chitchat", "prompt_injection"]
+
+
+class IntentDecision(BaseModel):
+    """The intent gate's output; only "sales_query" may reach SQL generation."""
+    model_config = ConfigDict(extra="forbid", strict=True)
+    intent: Intent
+    reason: str = Field(min_length=1, max_length=1000)
+
+
 class SQLPlan(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     sql: str = Field(min_length=1, max_length=20000)

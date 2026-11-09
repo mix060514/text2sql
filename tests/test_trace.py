@@ -12,6 +12,7 @@ from text2sql.runtime import run_question, stream_turn
 REGION_SQL = 'SELECT Region, SUM("Total Revenue") AS Revenue FROM sales_data GROUP BY Region ORDER BY Region'
 ACCEPT = json.dumps({"accepted": True, "reason": "ok"})
 REJECT = json.dumps({"accepted": False, "reason": "wrong metric"})
+INTENT_OK = json.dumps({"intent": "sales_query", "reason": "查詢銷售資料"}, ensure_ascii=False)
 
 
 def steps(state):
@@ -32,6 +33,7 @@ class QwenTraceTests(unittest.IsolatedAsyncioTestCase):
         agent.sub_agents[1].model = FakeModel(model="fake_review",
                                               replies=review_replies or [ACCEPT] * len(sql_replies))
         agent.sub_agents[2].model = FakeModel(model="fake_report", replies=report_replies)
+        agent.sub_agents[3].model = FakeModel(model="fake_intent", replies=[INTENT_OK] * 4)
         return InMemoryRunner(agent=agent, app_name="trace_test")
 
     def sql(self, query="SELECT COUNT(*) AS Orders FROM sales_data"):
@@ -45,6 +47,7 @@ class QwenTraceTests(unittest.IsolatedAsyncioTestCase):
                              [self.report(chart_type="bar", x_column="Region", y_column="Revenue")])
         state = await run_question(runner, "各區域營收")
         self.assertEqual(steps(state), [
+            ("agent_intent", 1, "ok"),
             ("agent_sql", 1, "ok"), ("step_run_sql", 1, "ok"), ("agent_review", 1, "ok"),
             ("agent_report", 1, "ok"), ("step_publish", 1, "ok"), ("step_draw_chart", 1, "ok"),
         ])
@@ -68,13 +71,14 @@ class QwenTraceTests(unittest.IsolatedAsyncioTestCase):
         state = await run_question(runner, "各區域營收")
         self.assertEqual(state["workflow_status"], "completed")
         self.assertEqual(steps(state), [
+            ("agent_intent", 1, "ok"),
             ("agent_sql", 1, "ok"), ("step_run_sql", 1, "error"),
             ("agent_sql", 2, "ok"), ("step_run_sql", 2, "ok"), ("agent_review", 2, "rejected"),
             ("agent_sql", 3, "ok"), ("step_run_sql", 3, "ok"), ("agent_review", 3, "ok"),
             ("agent_report", 1, "ok"), ("step_publish", 1, "error"),
             ("agent_report", 2, "ok"), ("step_publish", 2, "ok"), ("step_draw_chart", 2, "ok"),
         ])
-        trace = state["workflow_trace"]
+        trace = state["workflow_trace"][1:]  # [0] is agent_intent
         self.assertIn("no such column", trace[1]["output"]["error"]["message"])
         self.assertIn("no such column", trace[2]["input"]["sql_feedback"])
         self.assertEqual(trace[4]["output"]["reason"], "wrong metric")
@@ -84,7 +88,7 @@ class QwenTraceTests(unittest.IsolatedAsyncioTestCase):
         runner = self.runner([self.sql("DELETE FROM sales_data")] * 3, [])
         state = await run_question(runner, "訂單數是多少？")
         self.assertEqual(state["workflow_status"], "failed")
-        self.assertEqual([name for name, _, _ in steps(state)], ["agent_sql", "step_run_sql"] * 3)
+        self.assertEqual([name for name, _, _ in steps(state)], ["agent_intent"] + ["agent_sql", "step_run_sql"] * 3)
 
     async def test_new_turn_starts_empty_trace(self):
         runner = self.runner([self.sql()], [self.report()])
@@ -105,5 +109,5 @@ class QwenTraceTests(unittest.IsolatedAsyncioTestCase):
             if delta and "workflow_trace" in delta:
                 snapshots.append([(e["name"], e["status"]) for e in delta["workflow_trace"]])
         running = [snap[-1][0] for snap in snapshots if snap and snap[-1][1] == "running"]
-        self.assertEqual(running, ["agent_sql", "agent_review", "agent_report"])
+        self.assertEqual(running, ["agent_intent", "agent_sql", "agent_review", "agent_report"])
         self.assertEqual(snapshots[-1][-1], ("step_draw_chart", "ok"))
