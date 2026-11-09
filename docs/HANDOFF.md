@@ -149,9 +149,8 @@ DFlash2（2026-11-09）：`--model-draft Qwen3.8-27B-DFlash2-Q4_K_M.gguf --spec-
 
 - 設定：`~/infra/ai-stack/llama-router/config/acer-two-profiles.ini`（2026-11-09 起由 git 管理，容器內掛在 `/config`，唯讀）。
   舊檔 `/mnt/data1/llama-config/acer-two-profiles.ini` 與 `.before-*.ini` 備份仍保留；之後改設定改 git 版並 commit。
-  回退用的 systemd drop-in 仍指向 `/mnt/data1` 舊檔，可能與 git 版不同步（改 unit 的 sudo 指令見 `~/infra/ai-stack/README.md`）。
 - **執行方式（2026-11-09 起）：Docker 容器 `llama-router`（`~/infra/ai-stack/docker-compose.yml` 的 `llama-router` 服務），改設定或重啟都不需要 sudo。**
-  原本的 systemd 服務 `llama-server-qwen` 已 `disable --now`（unit 檔保留，供回退）。
+  原本的 systemd 服務 `llama-server-qwen` 已於 2026-11-09 移除（不再保留回退）。
   - compose：`~/infra/ai-stack/docker-compose.yml`（專案名 `ai-stack`）；映像由 `~/infra/ai-stack/llama-router/Dockerfile` 建置
     （`nvidia/cuda:12.8.1-runtime-ubuntu24.04`＋`libgomp1`；b10941 需要 GLIBC 2.38，Ubuntu 22.04 映像不能用）。
     同檔的 ollama／llama-cpp／llama-cpp-vl／open-webui 都放在 profile 裡，預設 `docker compose up -d` 只起 router（GPU 只有 16 GB）。
@@ -164,7 +163,7 @@ DFlash2（2026-11-09）：`--model-draft Qwen3.8-27B-DFlash2-Q4_K_M.gguf --spec-
     - 另開測試 router（不影響正式）：`LLAMA_ROUTER_PORT=18095 docker compose -p llama-router-test up -d llama-router`
       （GPU 只有 16 GB，正式 router 有載入模型時測試 router 不可載入）
     - **不要**對 ai-stack 下 `docker compose down`：prd／dev web UI 容器掛在 `ai-stack_default` 網路上。
-  - 回退：`docker compose stop llama-router`，再由使用者 `sudo systemctl enable --now llama-server-qwen`。
+  - 設定改壞：在 ~/infra 用 git 退回 compose／ini，再 `docker compose restart llama-router`。
   - 切換後驗證：`/slots` 4 路、每路 65,536；顯存 14,561 MiB（systemd 時 14,559）；
     `run_planned_agent.py 'EMEA 的總銷售額是多少？'` 得 31,087,500.60；prd／dev web UI 容器實際對話成功。
   - 2026-11-09 稍後整合進 ai-stack 後重驗：`/health` ok、`/v1/models` 三個 preset、swift15 `/slots` 4 路 65,536、顯存 14,385 MiB、
