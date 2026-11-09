@@ -417,6 +417,46 @@ if sweep.get("rows"):
     st.info("拿掉視覺模組省約 1.2 GB 顯存；MTP 6 路因此放得下（之前差 885 MiB）。"
             "加主記憶體上限後，伺服器主記憶體最高 6.2 GB（6 路），主機沒有再進 swap。")
 
+router = report.get("router") or {}
+if router:
+    st.divider()
+    st.subheader("驗收：搬到 Docker 的 router（MTP 4 路）")
+    st.markdown(
+        "router 從 systemd 改成 Docker 容器 `llama-router`（同一個 llama.cpp 執行檔、同一份設定檔），"
+        "設定是上方掃描選出的 MTP 4 路、不載入視覺模組、主記憶體上限。三份考卷直接打正式的 18080，"
+        "與加入意圖判斷後的結果比較。那一輪跑在臨時伺服器：同樣 MTP 4 路、64k、主記憶體上限，"
+        "差別只有當時載入了視覺模組、不在 Docker 裡。")
+    with st.expander("怎麼測的（流程圖）", expanded=False):
+        flow('r [label="Docker router 18080\\nMTP 4 路、無視覺、主記憶體上限"]; '
+             'b [label="攔截 126 題"]; c [label="複雜 102 題\\n＋人工複核規則"]; t [label="模板 132 題"]; '
+             'v [label="與加入意圖後的結果\\n逐題比較"]; x [label="由對變錯逐題寫原因\\n逾時題單獨重跑"]; '
+             'r -> b; r -> c; r -> t; b -> v; c -> v; t -> v; v -> x;',
+             "驗收流程：同樣的考卷與一次 4 題，只換成正式 router；變化逐題寫原因。")
+    rows = []
+    for key, name in (("block", "攔截題"), ("complex", "複雜題（複核後）"), ("template", "模板題")):
+        a = router.get(key)
+        if not a:
+            continue
+        for label, st_ in (("加入意圖後（臨時伺服器）", a.get("before")), ("Docker router", a.get("after"))):
+            if st_:
+                rows.append({"考卷": name, "版本": label, "題數": st_["n"], "成功率": pct(st_["success"]),
+                             "逾時率": pct(st_["timeout"]), "平均耗時": sec(st_["avg_seconds"]),
+                             "誤擋": str(len(a.get("false_blocks") or [])) if label == "Docker router" and key != "block" else "–"})
+    st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
+    for key, name in (("complex", "複雜題"), ("template", "模板題")):
+        a = router.get(key) or {}
+        if a.get("regressed"):
+            with st.expander(f"{name}由對變錯 {len(a['regressed'])} 題與原因"):
+                st.dataframe(pd.DataFrame([{"題目": r["question"], "原因": r["reason"]} for r in a["regressed"]]),
+                             hide_index=True, width="stretch",
+                             column_config={"原因": st.column_config.TextColumn(width="large")})
+        if a.get("fixed"):
+            with st.expander(f"{name}由錯變對 {len(a['fixed'])} 題"):
+                st.dataframe(pd.DataFrame({"題目": a["fixed"]}), hide_index=True, width="stretch")
+    if router.get("timeout_reruns"):
+        with st.expander("Docker router 上逾時的題目：單獨重跑"):
+            st.dataframe(pd.DataFrame(router["timeout_reruns"]), hide_index=True, width="stretch")
+
 st.caption(f"報告產生時間：{report.get('generated_at', '')}")
 
 with st.sidebar:

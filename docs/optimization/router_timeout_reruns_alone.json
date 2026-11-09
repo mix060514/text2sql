@@ -1,0 +1,305 @@
+[
+ {
+  "q": "2024 年哪幾個月銷售額超過 2023 年同月？",
+  "status": "completed",
+  "sec": 92,
+  "sql": "SELECT CAST(substr(\"Order Date\", 6, 2) AS INTEGER) AS \"Month\",\n       SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" END) AS \"Revenue 2024\",\n       SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" END) AS \"Revenue 2023\"\nFROM sales_data\nWHERE substr(\"Order Date\", 1, 4) IN ('2023', '2024')\nGROUP BY CAST(substr(\"Order Date\", 6, 2) AS INTEGER)\nHAVING SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" END)\n       > SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" END)\nORDER BY \"Month\"",
+  "rows": [
+   [
+    1,
+    4338003.76,
+    3578066.96
+   ],
+   [
+    4,
+    3572966.46,
+    3272525.35
+   ],
+   [
+    5,
+    3720037.53,
+    3317275.0
+   ],
+   [
+    6,
+    3319938.58,
+    3261806.64
+   ],
+   [
+    12,
+    5673876.5,
+    5639635.67
+   ]
+  ],
+  "answer": "2024 年有 5 個月的銷售額超過 2023 年同月，分別是 1 月、4 月、5 月、6 月與 12 月。其中 1 月 2024 年銷售額為 4,338,003.76 元，高於 2023 年的 3,578,066.96 元；12 月 2024 年銷售額為 5,673,876.50 元，高於 2023 年的 5,639,635.67 元。\n\n| Month   | Revenue 2024   | Revenue 2023   |\n|:--------|:---------------|:---------------|\n| 1       | 4,338,003.76   | 3,578,0",
+  "intent": "sales_query",
+  "oracle_passed": true,
+  "oracle_reason": "rows match oracle"
+ },
+ {
+  "q": "單價超過五百的訂單，各產品類別分別有幾筆？",
+  "status": "completed",
+  "sec": 48,
+  "sql": "SELECT \"Product Category\", COUNT(DISTINCT \"Order ID\") AS \"Order Count\"\nFROM sales_data\nWHERE \"ASP\" > 500\nGROUP BY \"Product Category\"\nORDER BY \"Product Category\"",
+  "rows": [
+   [
+    "Electronics",
+    10179
+   ],
+   [
+    "Office Supplies",
+    2272
+   ],
+   [
+    "Software",
+    2347
+   ]
+  ],
+  "answer": "單價超過五百的訂單中，Electronics 有 10,179 筆，Office Supplies 有 2,272 筆，Software 有 2,347 筆。\n\n| Product Category   | Order Count   |\n|:-------------------|:--------------|\n| Electronics        | 10,179        |\n| Office Supplies    | 2,272         |\n| Software           | 2,347         |",
+  "intent": "sales_query",
+  "oracle_passed": true,
+  "oracle_reason": "rows match oracle"
+ },
+ {
+  "q": "各區域平均每位客戶貢獻多少銷售額？",
+  "status": "completed",
+  "sec": 52,
+  "sql": "SELECT \"Region\",\n       ROUND(SUM(\"Total Revenue\") * 1.0 / NULLIF(COUNT(DISTINCT \"Customer Name\"), 0), 2) AS \"Average Revenue per Customer\"\nFROM sales_data\nGROUP BY \"Region\"\nORDER BY \"Region\"",
+  "rows": [
+   [
+    "APAC",
+    54872.35
+   ],
+   [
+    "EMEA",
+    65447.37
+   ],
+   [
+    "LATAM",
+    15177.93
+   ],
+   [
+    "North America",
+    83665.41
+   ]
+  ],
+  "answer": "各區域平均每位客戶貢獻的銷售額如下：\n- North America：83,665.41\n- EMEA：65,447.37\n- APAC：54,872.35\n- LATAM：15,177.93\n\nNorth America 最高，LATAM 最低，兩者差額為 68,487.48。\n\n| Region        | Average Revenue per Customer   |\n|:--------------|:-------------------------------|\n| APAC          | 54,872.35                      |\n| EME",
+  "intent": "sales_query",
+  "oracle_passed": true,
+  "oracle_reason": "rows match oracle"
+ },
+ {
+  "q": "請呈現 Electronics 類別在 2023 至 2024 年的月銷售額趨勢。",
+  "status": "completed",
+  "sec": 56,
+  "sql": "SELECT substr(\"Order Date\", 1, 7) AS \"Month\", SUM(\"Total Revenue\") AS \"Total Revenue\"\nFROM sales_data\nWHERE \"Product Category\" = 'Electronics' AND substr(\"Order Date\", 1, 4) IN ('2023', '2024')\nGROUP BY substr(\"Order Date\", 1, 7)\nORDER BY \"Month\"",
+  "rows": [
+   [
+    "2023-01",
+    2250196.86
+   ],
+   [
+    "2023-02",
+    1882487.1199999999
+   ],
+   [
+    "2023-03",
+    2390160.42
+   ],
+   [
+    "2023-04",
+    2115432.07
+   ],
+   [
+    "2023-05",
+    1978043.16
+   ],
+   [
+    "2023-06",
+    1890174.31
+   ],
+   [
+    "2023-07",
+    2049275.2
+   ],
+   [
+    "2023-08",
+    2786933.94
+   ],
+   [
+    "2023-09",
+    1958577.72
+   ],
+   [
+    "2023-10",
+    3459884.13
+   ],
+   [
+    "2023-11",
+    3205230.84
+   ],
+   [
+    "2023-12",
+    3029205.14
+   ],
+   [
+    "2024-01",
+    2467423.44
+   ],
+   [
+    "2024-02",
+    2019035.17
+   ],
+   [
+    "2024-03",
+    2224218.34
+   ],
+   [
+    "2024-04",
+    1767958.89
+   ],
+   [
+    "2024-05",
+    2244984.44
+   ],
+   [
+    "2024-06",
+    1808159.0
+   ],
+   [
+    "2024-07",
+    2328441.65
+   ],
+   [
+    "2024-08",
+    2332283.44
+   ],
+   [
+    "2024-09",
+    2127707.99
+   ],
+   [
+    "2024-10",
+    3229179.13
+   ],
+   [
+    "2024-11",
+    3016799.79
+   ],
+   [
+    "2024-12",
+    3058464.93
+   ]
+  ],
+  "answer": "Electronics 類別在 2023 至 2024 年的月銷售額趨勢如下：\n\n2023 年：\n- 最高：2023-10 月，3,459,884.13 元\n- 最低：2023-02 月，1,882,487.12 元\n- 首月（2023-01）：2,250,196.86 元\n- 末月（2023-12）：3,029,205.14 元\n\n2024 年：\n- 最高：2024-10 月，3,229,179.13 元\n- 最低：2024-04 月，1,767,958.89 元\n- 首月（2024-01）：2,467,423.44 元\n- 末月（2024-12）：3,058,464.93 元\n\n整體而言，",
+  "intent": "sales_query"
+ },
+ {
+  "q": "請呈現 Office Supplies 類別在 2023 至 2024 年的月銷售額趨勢。",
+  "status": "completed",
+  "sec": 49,
+  "sql": "SELECT substr(\"Order Date\", 1, 7) AS \"Month\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Product Category\" = 'Office Supplies' AND substr(\"Order Date\", 1, 4) IN ('2023', '2024') GROUP BY substr(\"Order Date\", 1, 7) ORDER BY \"Month\"",
+  "rows": [
+   [
+    "2023-01",
+    498829.33
+   ],
+   [
+    "2023-02",
+    435546.96
+   ],
+   [
+    "2023-03",
+    483640.77
+   ],
+   [
+    "2023-04",
+    454930.75
+   ],
+   [
+    "2023-05",
+    509642.3
+   ],
+   [
+    "2023-06",
+    538001.14
+   ],
+   [
+    "2023-07",
+    478250.93
+   ],
+   [
+    "2023-08",
+    480105.57
+   ],
+   [
+    "2023-09",
+    623274.6
+   ],
+   [
+    "2023-10",
+    833480.66
+   ],
+   [
+    "2023-11",
+    715247.49
+   ],
+   [
+    "2023-12",
+    734079.82
+   ],
+   [
+    "2024-01",
+    528060.04
+   ],
+   [
+    "2024-02",
+    589417.91
+   ],
+   [
+    "2024-03",
+    531712.36
+   ],
+   [
+    "2024-04",
+    509413.5
+   ],
+   [
+    "2024-05",
+    496057.07
+   ],
+   [
+    "2024-06",
+    415290.13
+   ],
+   [
+    "2024-07",
+    517647.86
+   ],
+   [
+    "2024-08",
+    395610.77
+   ],
+   [
+    "2024-09",
+    533647.08
+   ],
+   [
+    "2024-10",
+    731465.54
+   ],
+   [
+    "2024-11",
+    546216.68
+   ],
+   [
+    "2024-12",
+    801840.39
+   ]
+  ],
+  "answer": "Office Supplies 類別在 2023 至 2024 年的月銷售額共 24 筆資料。2023 年最高為 2023-10 的 833,480.66，最低為 2023-02 的 435,546.96；2024 年最高為 2024-12 的 801,840.39，最低為 2024-08 的 395,610.77。整體最高為 2023-10 的 833,480.66，最低為 2024-08 的 395,610.77，差額為 437,869.89。\n\n| Month   | Total Revenue   |\n|:--------|:----------------|\n| 2023-01 | ",
+  "intent": "sales_query",
+  "oracle_passed": true,
+  "oracle_reason": "rows match oracle"
+ }
+]

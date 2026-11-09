@@ -177,6 +177,43 @@ SWEEP_FAILURES = [
 ]
 
 
+def router_section(review, reviewed) -> dict | None:
+    """Acceptance of the Docker router (MTP 4 slots, no mmproj, RAM caps) against the intent-gate runs."""
+    notes_path = OUT / "regression_notes.json"
+    notes = json.loads(notes_path.read_text(encoding="utf-8")) if notes_path.exists() else {}
+    why = notes.get("_router_regressions", {})
+    out = {}
+    block_path = OUT / "block_router_mtp4.json"
+    if block_path.exists():
+        before = o.load_synthetic(OUT / "block_final.json", "block") if (OUT / "block_final.json").exists() else []
+        out["block"] = {"before": o.stats(before) if before else None,
+                        "after": o.stats(o.load_synthetic(block_path, "block"))}
+    for key, before_name, after_name in (("template", "template_intent.json", "template_router.json"),
+                                         ("complex", "complex_intent.json", "complex_router.json")):
+        if not (OUT / after_name).exists() or not (OUT / before_name).exists():
+            continue
+        if key == "template":
+            b_rows, a_rows = o.load_template(OUT / before_name), o.load_template(OUT / after_name)
+            raw = json.loads((OUT / after_name).read_text(encoding="utf-8"))
+        else:
+            b_rows = reviewed(o.load_synthetic(OUT / before_name, "complex", review))
+            a_rows = reviewed(o.load_synthetic(OUT / after_name, "complex", review))
+            raw = [r for r in json.loads((OUT / after_name).read_text(encoding="utf-8")) if r.get("label") != "block"]
+        before = {r["question"]: r for r in b_rows}
+        out[key] = {
+            "before": o.stats(b_rows), "after": o.stats(a_rows),
+            "false_blocks": [{"question": r["question"], "refused_as": refusal_kind(r.get("answer")),
+                              "reason": why.get(r["question"], "（未複核）")}
+                             for r in raw if refusal_kind(r.get("answer"))],
+            "regressed": [{"question": r["question"], "reason": why.get(r["question"], "（未複核）")} for r in a_rows
+                          if before.get(r["question"], {}).get("passed") and not r["passed"]],
+            "fixed": [r["question"] for r in a_rows
+                      if r["question"] in before and not before[r["question"]]["passed"] and r["passed"]],
+        }
+    out["timeout_reruns"] = notes.get("_router_timeout_reruns", [])
+    return out or None
+
+
 def b_final_path() -> Path:
     return OUT / "block_final.json"
 
@@ -190,6 +227,8 @@ def main():
     ap.add_argument("--block-final", type=Path)
     ap.add_argument("--template-intent", type=Path)
     ap.add_argument("--complex-intent", type=Path)
+    ap.add_argument("--template-router", type=Path, help="template run on the Docker router (MTP 4 slots)")
+    ap.add_argument("--complex-router", type=Path, help="complex run on the Docker router (MTP 4 slots)")
     args = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
 
@@ -202,6 +241,8 @@ def main():
     b_final = copy(args.block_final and args.block_final / "synthetic_results.json", "block_final.json")
     b_before = copy(None, "block_before_intent.json")
     t_int = copy(args.template_intent and args.template_intent / "e2e_results.json", "template_intent.json")
+    copy(args.template_router and args.template_router / "e2e_results.json", "template_router.json")
+    copy(args.complex_router and args.complex_router / "synthetic_results.json", "complex_router.json")
     c_int = copy(args.complex_intent and args.complex_intent / "synthetic_results.json", "complex_intent.json")
     streaming = OUT / "timeout_questions_after_streaming.jsonl"
 
@@ -381,6 +422,7 @@ def main():
                   "examples": json.loads(notes_path.read_text(encoding="utf-8")).get("_block_examples", [])
                   if notes_path.exists() else []},
         "intent": intent,
+        "router": router_section(review, reviewed),
         "timeout_reruns": json.loads(notes_path.read_text(encoding="utf-8")).get("_timeout_reruns", [])
         if notes_path.exists() else [],
         "question_seconds": config.AGENT_TIMEOUT_SECONDS,
