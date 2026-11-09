@@ -230,6 +230,18 @@ if conc:
             f"{best['aggregate_tps'] / base['aggregate_tps']:.1f} 倍；代價是單一請求平均 {best['avg_request_seconds']:.0f} 秒"
             f"（1 路 {base['avg_request_seconds']:.0f} 秒），顯存 {best['gpu_mem_mib']:,} MiB。"
             "只有一個人使用（例如面試 demo）時 1 路最快。")
+        dfl = [r for r in conc if r.get("drafting") == "dflash2"]
+        if dfl:
+            d_best = max(dfl, key=lambda r: r["aggregate_tps"])
+            d_one = next((r for r in dfl if r["parallel"] == 1), None)
+            st.success(
+                f"DFlash2（另一種草稿模型，2026-11-09 測）：1 路 {d_one['aggregate_tps']} tokens/秒、單一請求 "
+                f"{d_one['avg_request_seconds']:.0f} 秒（MTP 1 路 {base['aggregate_tps']}、{base['avg_request_seconds']:.0f} 秒）；"
+                f"{d_best['parallel']} 路 {d_best['aggregate_tps']} tokens/秒、單一請求 {d_best['avg_request_seconds']:.0f} 秒，"
+                f"吞吐量和延遲都勝過 MTP {best['parallel']} 路（{best['aggregate_tps']}、{best['avg_request_seconds']:.0f} 秒）。"
+                "代價：草稿模型多佔顯存，4 路放不下（拿掉視覺模組也一樣），最多 2 路。"
+                "草稿模型是為原版 Qwen3.8-27B 訓練、這裡配 Swift 1.5，接受率仍有約 50–75%；推測解碼由主模型逐 token 驗證，理論上輸出不變（未另跑答對率評估）；每種只有 12 個請求，倍數要保守看待。"
+                "router 尚未改用 DFlash2（需使用者決定）。")
         st.info("2026-11-08 已套用到模型服務：4 路、各路共用 64k 上下文（kv-unified）、閒置 10 分鐘自動休眠釋放顯存。"
                 "套用後以伺服器程序參數與 /slots 確認：4 路、每路可用 65,536 tokens，顯存 15.7 GB。")
         st.warning(

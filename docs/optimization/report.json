@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-09 07:01:26",
+  "generated_at": "2026-11-09 07:09:32",
   "overall": {
     "template": {
       "2026-11-07": {
@@ -761,6 +761,58 @@
     {
       "parallel": 1,
       "requests": 12,
+      "wall_seconds": 119.3,
+      "aggregate_tps": 37.9,
+      "avg_request_seconds": 9.9,
+      "max_request_seconds": 16.6,
+      "avg_decode_tps_per_request": 40.8,
+      "avg_prompt_tokens": 2004,
+      "avg_cached_tokens": 1889,
+      "max_completion_tokens": 668,
+      "truncated": 0,
+      "empty_answers": 0,
+      "n_ctx_per_slot": 65536,
+      "ctx_size_total": 65536,
+      "gpu_mem_mib": 14841,
+      "sql_thinking_budget": 4096,
+      "max_output_tokens": 6144,
+      "measured_at": "2026-11-09 07:05:50",
+      "drafting": "dflash2"
+    },
+    {
+      "parallel": 2,
+      "requests": 12,
+      "wall_seconds": 88.1,
+      "aggregate_tps": 59.1,
+      "avg_request_seconds": 14.5,
+      "max_request_seconds": 42.2,
+      "avg_decode_tps_per_request": 35.8,
+      "avg_prompt_tokens": 2004,
+      "avg_cached_tokens": 1729,
+      "max_completion_tokens": 1251,
+      "truncated": 0,
+      "empty_answers": 0,
+      "n_ctx_per_slot": 65536,
+      "ctx_size_total": 65536,
+      "gpu_mem_mib": 15779,
+      "sql_thinking_budget": 4096,
+      "max_output_tokens": 6144,
+      "measured_at": "2026-11-09 07:08:33",
+      "drafting": "dflash2"
+    },
+    {
+      "drafting": "dflash2",
+      "parallel": 4,
+      "failed": "啟動失敗：顯存不足（草稿模型的 KV cache 還需配置 165 MiB，cudaMalloc out of memory）"
+    },
+    {
+      "drafting": "dflash2-no-mmproj",
+      "parallel": 4,
+      "failed": "啟動失敗：顯存不足（草稿模型的 KV cache 還需配置 165 MiB，cudaMalloc out of memory）；拿掉視覺模組 mmproj 後仍然不足"
+    },
+    {
+      "parallel": 1,
+      "requests": 12,
       "wall_seconds": 212.3,
       "aggregate_tps": 25.0,
       "avg_request_seconds": 17.7,
@@ -897,11 +949,11 @@
       "fix": "在 few-shot 範例示範 WITH ... AS MATERIALIZED，前 N 名只算一次。",
       "timing": {
         "plain": {
-          "seconds": 16.015,
+          "seconds": 16.337,
           "finished": true
         },
         "materialized": {
-          "seconds": 0.007,
+          "seconds": 0.006,
           "finished": true
         }
       },
