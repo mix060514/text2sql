@@ -42,6 +42,15 @@ def flow(dot: str, caption: str):
     st.caption(caption)
 
 
+toc: list[tuple[int, str, str]] = []  # (level, title, anchor) for the sidebar table of contents
+
+
+def section(title: str, anchor: str):
+    """A subheader that is also listed in the sidebar table of contents."""
+    st.subheader(title, anchor=anchor)
+    toc.append((0, title, anchor))
+
+
 def metric_row(before, after, labels=("成功率", "逾時率", "平均耗時")):
     cols = st.columns(len(labels))
     spec = {"成功率": ("success", "pct", "normal"), "逾時率": ("timeout", "pct", "inverse"),
@@ -64,7 +73,7 @@ st.markdown(
 
 # ---- Overview ---------------------------------------------------------------------------
 overall = report["overall"]["template"]
-st.subheader("模板題整體（132 題）")
+section("模板題整體（132 題）", "overall-template")
 stages = [("2026-11-07 第一次完整評估", overall.get("2026-11-07")),
           ("基礎設施與評分修正後", overall.get("baseline")),
           ("定版（few-shot＋單一時限＋思考 4096）", overall.get("few_shot"))]
@@ -84,7 +93,7 @@ st.caption("定版評估一次送 4 題（伺服器 4 路並發），每題時�
 
 cx = report["overall"].get("complex") or {}
 if cx.get("baseline"):
-    st.subheader("複雜題整體（34 種題型 × 原題與 2 個改寫）")
+    section("複雜題整體（34 種題型 × 原題與 2 個改寫）", "overall-complex")
     rows = [("基準（嚴格比對）", cx.get("baseline")), ("基準（人工複核後）", cx.get("baseline_reviewed")),
             ("定版（嚴格比對）", cx.get("few_shot")), ("定版（人工複核後）", cx.get("few_shot_reviewed"))]
     st.dataframe(pd.DataFrame([
@@ -96,10 +105,12 @@ if cx.get("baseline"):
 
 # ---- Cases ------------------------------------------------------------------------------
 st.divider()
-st.subheader("優化案例")
-for case in report["cases"]:
+section("優化案例", "cases")
+for i, case in enumerate(report["cases"], 1):
     with st.container(border=True):
-        st.markdown(f"#### {case['title']}")
+        # Streamlit rewrites heading ids, so the anchor is a separate element in the same block.
+        st.markdown(f'<span id="case-{i}" style="display:block; scroll-margin-top:4.5rem"></span>\n\n#### {case["title"]}', unsafe_allow_html=True)
+        toc.append((1, case["title"], f"case-{i}"))
         st.caption(f"範圍：{case.get('scope', '')}")
         c1, c2, c3 = st.columns(3)
         c1.markdown(f"**問題**\n\n{case['problem']}")
@@ -131,7 +142,7 @@ if report.get("complex_review"):
 
 # ---- Few-shot ---------------------------------------------------------------------------
 st.divider()
-st.subheader("Few-shot：難題型加入同類範例")
+section("Few-shot：難題型加入同類範例", "few-shot")
 st.markdown(
     "以「基礎設施與評分修正後」的評估為基準，找出**有失敗、需要重試或平均超過 120 秒**的題型，"
     "為它們各寫一個**同題型、不同內容**的範例（例如考題問 LATAM，範例用 Japan；考題問前五大，範例用前三大），"
@@ -162,7 +173,7 @@ few_shot_table(few.get("complex"), "複雜題（34 種 SQL-first 題型，每種
 changes = report.get("changes") or {}
 if any(changes.values()):
     st.divider()
-    st.subheader("逐題變化：基準 → 定版")
+    section("逐題變化：基準 → 定版", "changes")
     st.markdown("同一批題目在基準與定版各跑一次。除了看整體成功率，也逐題檢查**原本答對、定版答錯**的題目與原因，"
                 "確認優化沒有把原本對的題目改壞；模型生成本身有隨機性，少數翻轉可能只是波動。")
     for key, name in (("template", "模板題"), ("complex", "複雜題（人工複核後）")):
@@ -185,7 +196,7 @@ names = {"write_request": "要求改資料", "not_in_data": "資料庫沒有的�
          "chitchat": "閒聊、寫詩", "prompt_injection": "提示注入、越權"}
 if ib.get("before") or ib.get("after"):
     st.divider()
-    st.subheader("攔截題：加入意圖判斷前後")
+    section("攔截題：加入意圖判斷前後", "intent-block")
     st.markdown("不該執行查詢的問題（改資料、資料庫沒有的資料、閒聊、提示注入）：成功＝沒有執行任何 SELECT 就拒絕。"
                 "2026-11-09 在寫 SQL 之前加入「意圖判斷」步驟：模型只輸出類別，拒答由程式用固定文字執行，不寫也不執行 SQL。")
     metric_row(ib.get("before"), ib.get("after"), ("成功率", "逾時率", "平均耗時"))
@@ -224,7 +235,7 @@ if ib.get("before") or ib.get("after"):
 
 allow = intent.get("allow") or {}
 if allow:
-    st.subheader("放行題有沒有被誤擋")
+    section("放行題有沒有被誤擋", "intent-allow")
     st.markdown("同一份模板考卷與複雜題，跟加入意圖判斷前的定版比較。誤擋＝回答是固定拒答文字（逐題列出）。")
     rows = []
     for key, name in (("template", "模板題"), ("complex", "複雜題（複核後）")):
@@ -261,7 +272,7 @@ if allow:
 
 tools = (intent.get("tools") or {})
 if tools.get("tools"):
-    st.subheader("意圖判斷用什麼工具：實測比較")
+    section("意圖判斷用什麼工具：實測比較", "intent-tools")
     st.markdown(
         "條件：不能佔用 GPU、不能影響本機模型。先試 Jev 類型的開源判斷模型（Jev 本身只有託管 API；開源對應是 Laya）"
         "與兩個開源提示注入分類器，全部在 CPU 上跑；再與「用已載入的本機模型判斷」比較。"
@@ -303,14 +314,14 @@ if tools.get("tools"):
 reruns = report.get("timeout_reruns") or []
 if reruns:
     st.divider()
-    st.subheader("逾時題單獨重跑")
+    section("逾時題單獨重跑", "timeout-reruns")
     st.markdown("定版評估一次送 4 題；為了分清逾時是並發造成還是題目本身難，把定版逾時的放行題在同一台伺服器上一次只送 1 題重跑。")
     st.dataframe(pd.DataFrame(reruns), hide_index=True, width="stretch")
 
 conc = report.get("concurrency") or []
 if conc:
     st.divider()
-    st.subheader("並發測試：同時處理幾個請求")
+    section("並發測試：同時處理幾個請求", "concurrency")
     st.markdown(
         "模型伺服器原本一次只處理一個請求，其他人要排隊。這裡用同一張 GPU、同樣的總上下文，"
         "測試同時處理 1 到 N 個寫 SQL 請求（真實 prompt、思考上限與輸出上限）時的吞吐量與單一請求耗時。"
@@ -367,7 +378,7 @@ if conc:
 sweep = report.get("concurrency_sweep") or {}
 if sweep.get("rows"):
     st.divider()
-    st.subheader("並發掃描：每種 50 題，找出 router 的設定（2026-11-09）")
+    section("並發掃描：每種 50 題，找出 router 的設定（2026-11-09）", "concurrency-sweep")
     st.markdown(
         "上面的並發測試每種只有 12 個請求、題目 8 題輪流。這裡改用合成考卷固定抽出的 50 題，"
         "MTP 與 DFlash2 各從 1 路加到放不下為止；伺服器都不載入視覺模組、加主記憶體上限（與 router 相同）。"
@@ -408,3 +419,7 @@ if sweep.get("rows"):
             "加主記憶體上限後，伺服器主記憶體最高 6.2 GB（6 路），主機沒有再進 swap。")
 
 st.caption(f"報告產生時間：{report.get('generated_at', '')}")
+
+with st.sidebar:
+    st.markdown("**本頁目錄**\n\n" + "\n".join(
+        f"{'    ' * level}- [{title}](#{anchor})" for level, title, anchor in toc))
