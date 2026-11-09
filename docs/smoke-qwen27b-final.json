@@ -1,0 +1,151 @@
+{
+  "workflow": "qwen27b",
+  "model": "openai/qwen3.8-27b-iq3-xxs",
+  "timestamp_utc": "2026-10-03T16:57:24.019380+00:00",
+  "database_sha256": "72f64a081fa0d20741a09528ec7a8d03eba976fde47d08a8be920e1c4ba1fb7a",
+  "passed": 2,
+  "total": 2,
+  "scope": "Actual SQL result values and chart generation; does not prove every natural-language claim.",
+  "results": [
+    {
+      "case": "Monthly trend",
+      "question": "請列出 North America 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+      "passed": true,
+      "data_correct": true,
+      "chart_correct": true,
+      "seconds": 106.56,
+      "sql": "SELECT strftime('%Y-%m', \"Order Date\") AS \"Month\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Region\" = 'North America' AND \"Order Date\" >= '2023-01-01' AND \"Order Date\" < '2025-01-01' GROUP BY strftime('%Y-%m', \"Order Date\") ORDER BY \"Month\";",
+      "columns": [
+        "Month",
+        "Total Revenue"
+      ],
+      "rows": [
+        [
+          "2023-01",
+          1422750.01
+        ],
+        [
+          "2023-02",
+          1703698.18
+        ],
+        [
+          "2023-03",
+          1649602.2
+        ],
+        [
+          "2023-04",
+          1363564.73
+        ],
+        [
+          "2023-05",
+          1343364.69
+        ],
+        [
+          "2023-06",
+          1152089.38
+        ],
+        [
+          "2023-07",
+          1737229.4
+        ],
+        [
+          "2023-08",
+          1636011.89
+        ],
+        [
+          "2023-09",
+          1269881.03
+        ],
+        [
+          "2023-10",
+          2633914.13
+        ],
+        [
+          "2023-11",
+          2453619.22
+        ],
+        [
+          "2023-12",
+          2025156.34
+        ],
+        [
+          "2024-01",
+          1632386.63
+        ],
+        [
+          "2024-02",
+          1509838.7
+        ],
+        [
+          "2024-03",
+          1628673.75
+        ],
+        [
+          "2024-04",
+          1427858.95
+        ],
+        [
+          "2024-05",
+          1502422.25
+        ],
+        [
+          "2024-06",
+          1291091.24
+        ],
+        [
+          "2024-07",
+          1657652.86
+        ],
+        [
+          "2024-08",
+          1461540.01
+        ],
+        [
+          "2024-09",
+          1381661.19
+        ],
+        [
+          "2024-10",
+          2352431.47
+        ],
+        [
+          "2024-11",
+          2036051.79
+        ],
+        [
+          "2024-12",
+          2639897.28
+        ]
+      ],
+      "answer": "North America 在 2023 至 2024 年共有 24 個月的 Total Revenue 數據，總計 40,912,387.32，月均 1,704,682.81。最高為 2024-12 的 2,639,897.28，最低為 2023-06 的 1,152,089.38。2023 年總計 20,390,881.20，2024 年總計 20,521,506.12，2024 年較 2023 年增加 130,624.92，約 0.64%。整體趨勢在每年 Q4 明顯升高，其中 2023-10、2023-11、2024-10 與 2024-12 表現特別強。\n\n| Month   | Total Revenue   |\n|:--------|:----------------|\n| 2023-01 | 1,422,750.01    |\n| 2023-02 | 1,703,698.18    |\n| 2023-03 | 1,649,602.20    |\n| 2023-04 | 1,363,564.73    |\n| 2023-05 | 1,343,364.69    |\n| 2023-06 | 1,152,089.38    |\n| 2023-07 | 1,737,229.40    |\n| 2023-08 | 1,636,011.89    |\n| 2023-09 | 1,269,881.03    |\n| 2023-10 | 2,633,914.13    |\n| 2023-11 | 2,453,619.22    |\n| 2023-12 | 2,025,156.34    |\n| 2024-01 | 1,632,386.63    |\n| 2024-02 | 1,509,838.70    |\n| 2024-03 | 1,628,673.75    |\n| 2024-04 | 1,427,858.95    |\n| 2024-05 | 1,502,422.25    |\n| 2024-06 | 1,291,091.24    |\n| 2024-07 | 1,657,652.86    |\n| 2024-08 | 1,461,540.01    |\n| 2024-09 | 1,381,661.19    |\n| 2024-10 | 2,352,431.47    |\n| 2024-11 | 2,036,051.79    |\n| 2024-12 | 2,639,897.28    |",
+      "chart_type": "line",
+      "sql_attempts": 1,
+      "report_attempts": 1,
+      "sql_feedback": "",
+      "report_feedback": "",
+      "error": null,
+      "harness": null
+    },
+    {
+      "case": "Empty result",
+      "question": "請列出 Country 是 Atlantis 的所有不同客戶名稱。",
+      "passed": true,
+      "data_correct": true,
+      "chart_correct": true,
+      "seconds": 25.46,
+      "sql": "SELECT DISTINCT \"Customer Name\" FROM sales_data WHERE \"Country\" = 'Atlantis' ORDER BY \"Customer Name\" ASC",
+      "columns": [
+        "Customer Name"
+      ],
+      "rows": [],
+      "answer": "沒有符合條件的資料：Country 為 Atlantis 的 Customer Name 不存在。\n\n查詢結果：0 筆符合條件的資料。",
+      "chart_type": "none",
+      "sql_attempts": 1,
+      "report_attempts": 1,
+      "sql_feedback": "",
+      "report_feedback": "",
+      "error": null,
+      "harness": null
+    }
+  ]
+}

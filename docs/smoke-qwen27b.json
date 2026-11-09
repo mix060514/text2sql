@@ -1,0 +1,400 @@
+{
+  "workflow": "qwen27b",
+  "model": "openai/qwen3.8-27b-iq3-xxs",
+  "timestamp_utc": "2026-10-03T16:44:07.590890+00:00",
+  "database_sha256": "72f64a081fa0d20741a09528ec7a8d03eba976fde47d08a8be920e1c4ba1fb7a",
+  "passed": 8,
+  "total": 8,
+  "scope": "Actual SQL result values and chart generation; does not prove every natural-language claim.",
+  "results": [
+    {
+      "case": "LATAM revenue",
+      "question": "南美 的總銷售額是多少？",
+      "passed": true,
+      "data_correct": true,
+      "chart_correct": true,
+      "seconds": 15.31,
+      "sql": "SELECT SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Region\" = 'LATAM';",
+      "columns": [
+        "Total Revenue"
+      ],
+      "rows": [
+        [
+          4872116.29
+        ]
+      ],
+      "answer": "南美的總銷售額為 4,872,116.29，約 4.87M。",
+      "chart_type": "none",
+      "sql_attempts": 1,
+      "report_attempts": 1,
+      "sql_feedback": "",
+      "report_feedback": "",
+      "error": null,
+      "harness": null
+    },
+    {
+      "case": "EMEA quantity ranking",
+      "question": "歐非中東 銷售量最高的前三個產品是什麼？",
+      "passed": true,
+      "data_correct": true,
+      "chart_correct": true,
+      "seconds": 28.13,
+      "sql": "SELECT \"Product Name\", SUM(\"Quantity\") AS \"Quantity\" FROM sales_data WHERE \"Region\" = 'EMEA' GROUP BY \"Product Name\" ORDER BY SUM(\"Quantity\") DESC, \"Product Name\" ASC LIMIT 3",
+      "columns": [
+        "Product Name",
+        "Quantity"
+      ],
+      "rows": [
+        [
+          "Enterprise Laptop X1",
+          6940
+        ],
+        [
+          "Pro Smartphone 15",
+          6259
+        ],
+        [
+          "Team Collaboration Tool",
+          4929
+        ]
+      ],
+      "answer": "歐非中東（EMEA）銷售量最高的前三個產品為：1. Enterprise Laptop X1：6,940；2. Pro Smartphone 15：6,259；3. Team Collaboration Tool：4,929。",
+      "chart_type": "bar",
+      "sql_attempts": 1,
+      "report_attempts": 1,
+      "sql_feedback": "",
+      "report_feedback": "",
+      "error": null,
+      "harness": null
+    },
+    {
+      "case": "Order count",
+      "question": "Canada 訂單數量最多的客戶是誰？",
+      "passed": true,
+      "data_correct": true,
+      "chart_correct": true,
+      "seconds": 18.57,
+      "sql": "SELECT \"Customer Name\" FROM sales_data WHERE \"Country\" = 'Canada' GROUP BY \"Customer Name\" ORDER BY COUNT(DISTINCT \"Order ID\") DESC, \"Customer Name\" ASC LIMIT 1;",
+      "columns": [
+        "Customer Name"
+      ],
+      "rows": [
+        [
+          "Next Gamma Inc."
+        ]
+      ],
+      "answer": "Canada 訂單數量最多的客戶是 Next Gamma Inc.。",
+      "chart_type": "none",
+      "sql_attempts": 1,
+      "report_attempts": 1,
+      "sql_feedback": "",
+      "report_feedback": "",
+      "error": null,
+      "harness": null
+    },
+    {
+      "case": "Year comparison",
+      "question": "請列出 Electronics 類別在各年份的銷售額總計。",
+      "passed": true,
+      "data_correct": true,
+      "chart_correct": true,
+      "seconds": 34.05,
+      "sql": "SELECT substr(\"Order Date\", 1, 4) AS \"Year\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Product Category\" = 'Electronics' GROUP BY substr(\"Order Date\", 1, 4) ORDER BY \"Year\" ASC;",
+      "columns": [
+        "Year",
+        "Total Revenue"
+      ],
+      "rows": [
+        [
+          "2023",
+          28995600.91
+        ],
+        [
+          "2024",
+          28624656.21
+        ]
+      ],
+      "answer": "Electronics 類別各年份銷售額總計：2023 年為 28,995,600.91（約 29.00M），2024 年為 28,624,656.21（約 28.62M）。",
+      "chart_type": "bar",
+      "sql_attempts": 1,
+      "report_attempts": 1,
+      "sql_feedback": "",
+      "report_feedback": "",
+      "error": null,
+      "harness": null
+    },
+    {
+      "case": "Single-year quarter labels",
+      "question": "請給我 2023 年每季的銷售額趨勢。",
+      "passed": true,
+      "data_correct": true,
+      "chart_correct": true,
+      "seconds": 61.6,
+      "sql": "WITH quarters AS (\n  SELECT 1 AS q\n  UNION ALL SELECT 2\n  UNION ALL SELECT 3\n  UNION ALL SELECT 4\n),\nq AS (\n  SELECT 'Q' || q AS \"Quarter\", q AS \"QuarterNum\"\n  FROM quarters\n),\nsales AS (\n  SELECT ((CAST(strftime('%m', \"Order Date\") AS INTEGER) - 1) / 3 + 1) AS \"QuarterNum\",\n         SUM(\"Total Revenue\") AS \"Total Revenue\"\n  FROM sales_data\n  WHERE strftime('%Y', \"Order Date\") = '2023'\n  GROUP BY \"QuarterNum\"\n)\nSELECT q.\"Quarter\" AS \"Quarter\", COALESCE(s.\"Total Revenue\", 0) AS \"Total Revenue\"\nFROM q\nLEFT JOIN sales s ON q.\"QuarterNum\" = s.\"QuarterNum\"\nORDER BY q.\"QuarterNum\";",
+      "columns": [
+        "Quarter",
+        "Total Revenue"
+      ],
+      "rows": [
+        [
+          "Q1",
+          11672548.84
+        ],
+        [
+          "Q2",
+          9851606.99
+        ],
+        [
+          "Q3",
+          11792600.63
+        ],
+        [
+          "Q4",
+          18089592.8
+        ]
+      ],
+      "answer": "2023 年每季銷售額趨勢如下：Q1 為 11,672,548.84（約 11.67M），Q2 為 9,851,606.99（約 9.85M），Q3 為 11,792,600.63（約 11.79M），Q4 為 18,089,592.80（約 18.09M）。整體趨勢為 Q2 較 Q1 下降，Q3 回升，Q4 明顯成長並達到全年最高。",
+      "chart_type": "line",
+      "sql_attempts": 1,
+      "report_attempts": 1,
+      "sql_feedback": "",
+      "report_feedback": "",
+      "error": null,
+      "harness": null
+    },
+    {
+      "case": "Monthly trend",
+      "question": "請列出 North America 區域在 2023 至 2024 年每個月的銷售趨勢數據。",
+      "passed": true,
+      "data_correct": true,
+      "chart_correct": true,
+      "seconds": 82.88,
+      "sql": "SELECT substr(\"Order Date\", 1, 7) AS \"Month\", SUM(\"Total Revenue\") AS \"Total Revenue\", SUM(\"Quantity\") AS \"Quantity\", COUNT(DISTINCT \"Order ID\") AS \"Order Count\" FROM sales_data WHERE \"Region\" = 'North America' AND \"Order Date\" >= '2023-01-01' AND \"Order Date\" <= '2024-12-31' GROUP BY substr(\"Order Date\", 1, 7) ORDER BY \"Month\" ASC;",
+      "columns": [
+        "Month",
+        "Total Revenue",
+        "Quantity",
+        "Order Count"
+      ],
+      "rows": [
+        [
+          "2023-01",
+          1422750.01,
+          2086,
+          491
+        ],
+        [
+          "2023-02",
+          1703698.18,
+          2075,
+          453
+        ],
+        [
+          "2023-03",
+          1649602.2,
+          2182,
+          489
+        ],
+        [
+          "2023-04",
+          1363564.73,
+          1983,
+          455
+        ],
+        [
+          "2023-05",
+          1343364.69,
+          1933,
+          419
+        ],
+        [
+          "2023-06",
+          1152089.38,
+          1872,
+          432
+        ],
+        [
+          "2023-07",
+          1737229.4,
+          2212,
+          470
+        ],
+        [
+          "2023-08",
+          1636011.89,
+          2255,
+          471
+        ],
+        [
+          "2023-09",
+          1269881.03,
+          1901,
+          407
+        ],
+        [
+          "2023-10",
+          2633914.13,
+          3307,
+          704
+        ],
+        [
+          "2023-11",
+          2453619.22,
+          3216,
+          670
+        ],
+        [
+          "2023-12",
+          2025156.34,
+          2700,
+          622
+        ],
+        [
+          "2024-01",
+          1632386.63,
+          2291,
+          511
+        ],
+        [
+          "2024-02",
+          1509838.7,
+          2172,
+          454
+        ],
+        [
+          "2024-03",
+          1628673.75,
+          2136,
+          490
+        ],
+        [
+          "2024-04",
+          1427858.95,
+          2105,
+          439
+        ],
+        [
+          "2024-05",
+          1502422.25,
+          2071,
+          445
+        ],
+        [
+          "2024-06",
+          1291091.24,
+          1701,
+          419
+        ],
+        [
+          "2024-07",
+          1657652.86,
+          2154,
+          479
+        ],
+        [
+          "2024-08",
+          1461540.01,
+          1951,
+          428
+        ],
+        [
+          "2024-09",
+          1381661.19,
+          1862,
+          447
+        ],
+        [
+          "2024-10",
+          2352431.47,
+          2886,
+          636
+        ],
+        [
+          "2024-11",
+          2036051.79,
+          2818,
+          626
+        ],
+        [
+          "2024-12",
+          2639897.28,
+          3259,
+          666
+        ]
+      ],
+      "answer": "North America 2023 至 2024 年每月銷售趨勢數據如下：\n\n| Month | Total Revenue | Quantity | Order Count |\n|---|---:|---:|---:|\n| 2023-01 | 1,422,750.01 | 2,086 | 491 |\n| 2023-02 | 1,703,698.18 | 2,075 | 453 |\n| 2023-03 | 1,649,602.20 | 2,182 | 489 |\n| 2023-04 | 1,363,564.73 | 1,983 | 455 |\n| 2023-05 | 1,343,364.69 | 1,933 | 419 |\n| 2023-06 | 1,152,089.38 | 1,872 | 432 |\n| 2023-07 | 1,737,229.40 | 2,212 | 470 |\n| 2023-08 | 1,636,011.89 | 2,255 | 471 |\n| 2023-09 | 1,269,881.03 | 1,901 | 407 |\n| 2023-10 | 2,633,914.13 | 3,307 | 704 |\n| 2023-11 | 2,453,619.22 | 3,216 | 670 |\n| 2023-12 | 2,025,156.34 | 2,700 | 622 |\n| 2024-01 | 1,632,386.63 | 2,291 | 511 |\n| 2024-02 | 1,509,838.70 | 2,172 | 454 |\n| 2024-03 | 1,628,673.75 | 2,136 | 490 |\n| 2024-04 | 1,427,858.95 | 2,105 | 439 |\n| 2024-05 | 1,502,422.25 | 2,071 | 445 |\n| 2024-06 | 1,291,091.24 | 1,701 | 419 |\n| 2024-07 | 1,657,652.86 | 2,154 | 479 |\n| 2024-08 | 1,461,540.01 | 1,951 | 428 |\n| 2024-09 | 1,381,661.19 | 1,862 | 447 |\n| 2024-10 | 2,352,431.47 | 2,886 | 636 |\n| 2024-11 | 2,036,051.79 | 2,818 | 626 |\n| 2024-12 | 2,639,897.28 | 3,259 | 666 |",
+      "chart_type": "line",
+      "sql_attempts": 1,
+      "report_attempts": 1,
+      "sql_feedback": "",
+      "report_feedback": "",
+      "error": null,
+      "harness": null
+    },
+    {
+      "case": "Region proportions",
+      "question": "各區域的銷售額佔比是多少？",
+      "passed": true,
+      "data_correct": true,
+      "chart_correct": true,
+      "seconds": 65.21,
+      "sql": "WITH total AS (SELECT SUM(\"Total Revenue\") AS total_revenue FROM sales_data) SELECT s.\"Region\", SUM(s.\"Total Revenue\") AS \"Total Revenue\", ROUND(SUM(s.\"Total Revenue\") * 100.0 / NULLIF(t.total_revenue, 0), 2) AS \"Sales Share %\" FROM sales_data s CROSS JOIN total t GROUP BY s.\"Region\" ORDER BY \"Total Revenue\" DESC;",
+      "columns": [
+        "Region",
+        "Total Revenue",
+        "Sales Share %"
+      ],
+      "rows": [
+        [
+          "North America",
+          40912387.32,
+          40.2
+        ],
+        [
+          "EMEA",
+          31087500.6,
+          30.54
+        ],
+        [
+          "APAC",
+          24912047.29,
+          24.48
+        ],
+        [
+          "LATAM",
+          4872116.29,
+          4.79
+        ]
+      ],
+      "answer": "各區域的銷售額佔比如下：North America 為 40.20%（Total Revenue 40,912,387.32，約 40.91M）；EMEA 為 30.54%（Total Revenue 31,087,500.60，約 31.09M）；APAC 為 24.48%（Total Revenue 24,912,047.29，約 24.91M）；LATAM 為 4.79%（Total Revenue 4,872,116.29，約 4.87M）。",
+      "chart_type": "pie",
+      "sql_attempts": 1,
+      "report_attempts": 1,
+      "sql_feedback": "",
+      "report_feedback": "",
+      "error": null,
+      "harness": null
+    },
+    {
+      "case": "Empty result",
+      "question": "請列出 Country 是 Atlantis 的所有不同客戶名稱。",
+      "passed": true,
+      "data_correct": true,
+      "chart_correct": true,
+      "seconds": 20.83,
+      "sql": "SELECT DISTINCT \"Customer Name\" FROM sales_data WHERE \"Country\" = 'Atlantis' ORDER BY \"Customer Name\" ASC;",
+      "columns": [
+        "Customer Name"
+      ],
+      "rows": [],
+      "answer": "沒有符合條件的資料。",
+      "chart_type": "none",
+      "sql_attempts": 1,
+      "report_attempts": 1,
+      "sql_feedback": "",
+      "report_feedback": "",
+      "error": null,
+      "harness": null
+    }
+  ]
+}

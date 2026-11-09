@@ -1,52 +1,57 @@
-import streamlit as st
+"""GPU summary for the machine that runs the model.
+
+Only aggregate numbers are shown; the raw nvidia-smi table would expose the host's
+process list on a public page. A fragment reruns every few seconds instead of a
+blocking loop, so each open tab does not hold a server thread forever.
+"""
 import subprocess
-import time
 
-st.set_page_config(page_title="System Monitor", page_icon="🖥️", layout="wide")
+import streamlit as st
 
-st.title("🖥️ GPU System Monitor")
+st.set_page_config(page_title="系統監控", page_icon="🖥️", layout="wide")
+st.title("🖥️ 系統監控")
+st.markdown("問答系統的模型在這張 GPU 上執行。提問時可以在這裡看到使用率與顯示記憶體上升。")
 
-st.markdown("Live view of `nvidia-smi`. Toggle the switch below to start monitoring.")
+FIELDS = "name,utilization.gpu,memory.used,memory.total,temperature.gpu,power.draw"
+REFRESH_SECONDS = 2
 
-run_monitor = st.toggle("Start Monitoring", value=True)
-monitor_placeholder = st.empty()
 
-if run_monitor:
-    while True:
-        try:
-            # Run nvidia-smi
-            result = subprocess.run(
-                ["nvidia-smi"],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-            )
-            output = result.stdout
+def read_gpus():
+    result = subprocess.run(
+        ["nvidia-smi", f"--query-gpu={FIELDS}", "--format=csv,noheader,nounits"],
+        capture_output=True, text=True, timeout=5,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(result.stderr.strip())
+    return [[v.strip() for v in line.split(",")] for line in result.stdout.strip().splitlines()]
 
-            # If command failed (e.g. no nvidia driver), show error
-            if result.returncode != 0:
-                output = f"Error running nvidia-smi:\n{result.stderr}"
-                if not output.strip():
-                    output = "Error: nvidia-smi return non-zero exit code. Is NVIDIA driver installed?"
 
-        except FileNotFoundError:
-            output = "Error: `nvidia-smi` command not found. Are you on a machine with NVIDIA GPU?"
-        except Exception as e:
-            output = f"Error: {e}"
+def number(text):
+    try:
+        return float(text)
+    except ValueError:
+        return None
 
-        # Update display
-        monitor_placeholder.code(output, language="text")
 
-        # Sleep 1s
-        time.sleep(1)
+@st.fragment(run_every=REFRESH_SECONDS)
+def gpu_panel():
+    try:
+        gpus = read_gpus()
+    except Exception:
+        st.warning("目前無法讀取 GPU 狀態。")
+        return
+    for name, util, used, total, temp, power in gpus:
+        st.subheader(name)
+        used_mb, total_mb = number(used), number(total)
+        cols = st.columns(4)
+        cols[0].metric("GPU 使用率", f"{util}%")
+        cols[1].metric(f"顯示記憶體（共 {total_mb / 1024:.0f} GB）" if total_mb else "顯示記憶體",
+                       f"{used_mb / 1024:.1f} GB" if used_mb is not None else "–")
+        cols[2].metric("溫度", f"{temp} °C")
+        cols[3].metric("功耗", f"{number(power):.0f} W" if number(power) is not None else "–")
+        if used_mb is not None and total_mb:
+            st.progress(min(used_mb / total_mb, 1.0), text="顯示記憶體使用量")
+    st.caption(f"每 {REFRESH_SECONDS} 秒自動更新。")
 
-        # Check if toggle changed state requires a rerun to break loop cleanly?
-        # Streamlit scripts are rerun on interaction.
-        # Inside a while loop, we might block interactions unless we yield or use st.empty correctly.
-        # Actually in Streamlit, a long running loop blocks other interactions unless we are careful.
-        # But for a simple "watch" page, this is usually acceptable as long as the user can kill the tab or stop via UI if implemented with st.experimental_rerun (deprecated) or just reliance on Streamlit's interruption model.
-        # Better approach for responsiveness: use st.empty and check value, but the toggle value won't update *inside* the loop unless script restarts.
-        # So we need to break periodically or just rely on the fact that changing the toggle triggers a re-run which kills the current script execution.
-        # Yes, toggling the widget updates the session state and restarts the script, interrupting the loop.
-else:
-    monitor_placeholder.info("Monitoring stopped.")
+
+gpu_panel()

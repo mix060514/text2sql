@@ -12,6 +12,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 from text2sql.agents.planned_agent.agent import root_agent
+from text2sql.runtime import stream_turn
 from google.adk.sessions import InMemorySessionService
 from google.adk.runners import Runner
 from google.genai import types
@@ -43,7 +44,8 @@ async def debug_run():
     print("=" * 60)
 
     event_count = 0
-    async for event in runner.run_async(
+    async for event in stream_turn(
+        runner,
         user_id=USER_ID, session_id=session_id, new_message=content
     ):
         event_count += 1
@@ -83,7 +85,6 @@ async def debug_run():
 
         if is_final:
             print("\n*** FINAL RESPONSE ***")
-            break
 
     print("\n" + "=" * 60)
     print(f"Total events: {event_count}")

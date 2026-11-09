@@ -1,0 +1,35 @@
+
+name: text2sql-dev
+
+services:
+  webui:
+    container_name: text2sql-webui-dev
+    build: .
+    restart: always
+    ports:
+      - "8502:8501"
+    volumes:
+      - .:/app
+      - /app/.venv
+    environment:
+      - WATCH_FILES=true
+      # The local llama router runs on the host (0.0.0.0:18080), not in ai-stack.
+      - LLAMA_CPP_API_BASE=http://host.docker.internal:18080/v1
+      - LLAMA_CPP_MODEL=openai/swift15-27b-iq3-xxs
+      - LLAMA_CPP_VL_API_BASE=http://llama-cpp-vl:8080
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - default
+      - ai-stack_default
+
+networks:
+  ai-stack_default:
+    external: true

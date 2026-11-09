@@ -1,0 +1,11 @@
+vram before start: 4
+loaded, vram 13727
+request while awake: 200 0.557045
+idle 10 s (< 30): vram 13901
+idle 45 s (> 30): vram 211
+0.34.596.491 I que    start_loop: entering sleeping state
+0.34.596.626 I srv  handle_sleep: server is entering sleeping state
+first request after sleep (cold start): 200 3.743214
+vram after wake: 13901
+second request: 200 0.429357
+vram after stop: 4

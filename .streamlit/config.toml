@@ -21,3 +21,7 @@ gatherUsageStats = false
 
 # 禁用自動開啟瀏覽器
 serverAddress = "0.0.0.0"
+
+[client]
+# 對外服務：程式錯誤只顯示簡短訊息，不把 traceback 給訪客看
+showErrorDetails = "none"

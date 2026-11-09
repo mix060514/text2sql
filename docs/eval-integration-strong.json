@@ -1,0 +1,50 @@
+{
+  "summary": {
+    "total_cases": 1,
+    "sql_accuracy": 1.0,
+    "plot_decision_accuracy": null,
+    "chart_json_valid_rate": null,
+    "trace_type_accuracy": null,
+    "x_order_accuracy": null,
+    "trace_count_accuracy": null,
+    "e2e_success_rate": 1.0,
+    "cases_with_plot_gt": 0,
+    "cases_with_expected_plot": 0,
+    "run_metadata": {
+      "workflow": "strong",
+      "model": "gpt-6-sol",
+      "database_sha256": "72f64a081fa0d20741a09528ec7a8d03eba976fde47d08a8be920e1c4ba1fb7a",
+      "dataset": "eval_set_v3.jsonl",
+      "dataset_sha256": "cc219234cb030386ce9e62818ce819690ef2cd34b060a8ec941500bb8892cc25"
+    },
+    "timestamp": "2026-10-03 17:08:01"
+  },
+  "results": [
+    {
+      "question": "EMEA 的總銷售額是多少？",
+      "eval_type": "number",
+      "difficulty": "simple",
+      "sql_query": "SELECT SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Region\" = 'EMEA'",
+      "sql_result": [
+        [
+          31087500.6
+        ]
+      ],
+      "answer": "EMEA 的總銷售額為 31,087,500.60。\n\n| Total Revenue   |\n|:----------------|\n| 31,087,500.60   |",
+      "sql_correct": true,
+      "sql_score": 10,
+      "sql_reasoning": "Agent 提供的總銷售額與預期答案和 SQL 結果完全一致，僅有千分位與小數位數的格式差異。回答簡潔且完整。",
+      "has_expected_plot": false,
+      "expected_should_plot": false,
+      "actual_should_plot": false,
+      "expected_chart_type": null,
+      "actual_chart_type": null,
+      "plot_decision_correct": true,
+      "chart_json_valid": true,
+      "trace_type_correct": true,
+      "x_order_correct": true,
+      "trace_count_correct": true,
+      "e2e_success": true
+    }
+  ]
+}

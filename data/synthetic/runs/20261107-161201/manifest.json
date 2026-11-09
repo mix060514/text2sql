@@ -1,0 +1,28 @@
+{
+  "run_id": "20261107-161201",
+  "status": "complete",
+  "prompt_version": "rewrite-v3+label-v4+semantic-v3+sql-v3",
+  "prompt_versions": {
+    "rewrite": "v3",
+    "label": "v4",
+    "semantic": "v3",
+    "sql": "v3"
+  },
+  "model": "swift15-27b-iq3-xxs",
+  "llm_calls": 110,
+  "variants": 2,
+  "max_rounds": 3,
+  "seconds": 371.70713233947754,
+  "seeds": {
+    "/home/mix060514/pj/text2sql/data/seeds/complex_seeds.jsonl": "f7ca99ab105e81cdc58bb5036b2b94c7396e7132330f454ff8dcc7b62c6cc3af",
+    "/home/mix060514/pj/text2sql/data/seeds/golden_seeds.jsonl": "ef423fec51086a63236b54ef814142ce1a12d2c9298f25dffea995894a69fa86",
+    "/home/mix060514/pj/text2sql/data/seeds/guardrail_seeds.jsonl": "bc173efed2723ba62c94309fd8815ce3a997abf85f0561b0aee415b617601bcd"
+  },
+  "database_sha256": "72f64a081fa0d20741a09528ec7a8d03eba976fde47d08a8be920e1c4ba1fb7a",
+  "dataset_sha256": "eeba09004245807a806569266b7b29e6aa6c305617e0fbda480a06f35d49ad58",
+  "items": 354,
+  "resume_from": "20261107-155802",
+  "recheck_layers": [
+    "sql"
+  ]
+}

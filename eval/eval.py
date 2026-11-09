@@ -23,12 +23,13 @@ from google.adk.runners import InMemoryRunner
 from google.genai import types
 
 # Setup path to import local src
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../eval")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 # Import Agents
 from text2sql.agents.planned_agent.agent import root_agent
-from judge.agent import judge_agent
+from text2sql.agents.judge_agent.agent import judge_agent
+from text2sql.runtime import run_question
+from common import verify_dataset, run_metadata
 
 
 # Shared runner instances (using ADK built-in InMemoryRunner)
@@ -40,29 +41,13 @@ async def run_agent_and_get_state(
     runner: InMemoryRunner, prompt: str, user_id: str = "eval_user"
 ) -> dict:
     """執行 agent 並返回 session state"""
-    session_id = f"{runner.app_name}_{int(time.time()*1000)}_{uuid.uuid4().hex[:6]}"
-
-    await runner.session_service.create_session(
-        app_name=runner.app_name, user_id=user_id, session_id=session_id
-    )
-
-    content = types.Content(role="user", parts=[types.Part(text=prompt)])
-
-    # 消費完整 event stream
-    async for _ in runner.run_async(
-        user_id=user_id, session_id=session_id, new_message=content
-    ):
-        pass
-
-    session = await runner.session_service.get_session(
-        app_name=runner.app_name, user_id=user_id, session_id=session_id
-    )
-    return session.state if session else {}
+    return await run_question(runner, prompt, user_id)
 
 
 PROJECT_DIR = pathlib.Path(__file__).parent.parent.resolve()
 DATA_DIR = PROJECT_DIR / "data"
-ground_truth_set = DATA_DIR / "eval_set_v2.jsonl"
+ground_truth_set = DATA_DIR / "eval_set_v3.jsonl"
+verify_dataset(ground_truth_set)
 
 # Load Eval Set
 with open(ground_truth_set, "r", encoding="utf-8") as f:
@@ -240,8 +225,10 @@ async def evaluate_question(
     result = AgentResult(
         final_text=state.get("final_answer", ""),
         executed_sql=state.get("sql_query"),
-        sql_result=state.get("query_result"),
+        sql_result={"columns": state.get("column_names", []), "rows": state.get("raw_query_result", [])},
     )
+    if state.get("workflow_status") != "completed":
+        return result, JudgeResult(0, False, str(state.get("workflow_error")), False)
     judge_result = await judge_confidence(
         question=question,
         expected_answer=expected,
@@ -335,6 +322,7 @@ async def run_evaluation(agent: Agent, eval_set: List[Dict]):
 
     # 最終報告
     summary = metrics.get_summary()
+    summary["run_metadata"] = run_metadata(ground_truth_set)
     print(f"\n{'='*60}")
     print(
         f"準確率: {summary['accuracy']:.1%} | 平均信心: {summary['avg_confidence']:.1f}/10"

@@ -1,0 +1,1 @@
+{"seed_id": "X-product_growth_amount-3", "round": 2, "style": "口語", "question": "哪三個產品在 2024 年比 2023 年的銷售金額增加最多？請列出各增加了多少。", "status": null, "reasons": [], "label_check": {"category": "sales_query", "reason": "該問題要求比較 2023 年與 2024 年的銷售金額，屬於 sales_data 表中的歷史數據查詢範圍。"}}

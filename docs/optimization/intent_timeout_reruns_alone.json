@@ -1,0 +1,156 @@
+[
+ {
+  "q": "在拉丁美洲這片區域裡，每個國家銷量最高的產品各是哪一個？",
+  "status": "completed",
+  "sec": 57,
+  "sql": "WITH product_totals AS (\n  SELECT \"Country\", \"Product Name\", SUM(\"Quantity\") AS total_qty\n  FROM sales_data\n  WHERE \"Region\" = 'LATAM'\n  GROUP BY \"Country\", \"Product Name\"\n),\nranked AS (\n  SELECT \"Country\", \"Product Name\", total_qty,\n         ROW_NUMBER() OVER (PARTITION BY \"Country\" ORDER BY total_qty DESC, \"Product Name\" ASC) AS rn\n  FROM product_totals\n)\nSELECT \"Country\", \"Product Name\"\nFROM ranked\nWHERE rn = 1\nORDER BY \"Country\" ASC",
+  "rows": [
+   [
+    "Brazil",
+    "Enterprise Laptop X1"
+   ],
+   [
+    "Mexico",
+    "Enterprise Laptop X1"
+   ]
+  ],
+  "answer": "在拉丁美洲區域，巴西與墨西哥銷量最高的產品均為 Enterprise Laptop X1。\n\n| Country   | Product Name         |\n|:----------|:---------------------|\n| Brazil    | Enterprise Laptop X1 |\n| Mexico    | Enterprise Laptop X1 |",
+  "intent": "sales_query",
+  "oracle_passed": false,
+  "oracle_reason": "rows differ from oracle"
+ },
+ {
+  "q": "2024 年比 2023 年銷售額增加最多的三個產品是哪些？各增加多少？",
+  "status": "completed",
+  "sec": 62,
+  "sql": "SELECT \"Product Name\",\n       SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END)\n       - SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END) AS \"Revenue Increase\"\nFROM sales_data\nWHERE substr(\"Order Date\", 1, 4) IN ('2023', '2024')\nGROUP BY \"Product Name\"\nORDER BY \"Revenue Increase\" DESC, \"Product Name\" ASC\nLIMIT 3",
+  "rows": [
+   [
+    "Security Suite",
+    548956.6600000001
+   ],
+   [
+    "4K Monitor 27\"",
+    153661.16999999993
+   ],
+   [
+    "Standing Desk",
+    46226.110000000335
+   ]
+  ],
+  "answer": "2024 年比 2023 年銷售額增加最多的三個產品依序為：Security Suite 增加 548,956.66 元、4K Monitor 27\" 增加 153,661.17 元、Standing Desk 增加 46,226.11 元。\n\n| Product Name   | Revenue Increase   |\n|:---------------|:-------------------|\n| Security Suite | 548,956.66         |\n| 4K Monitor 27\" | 153,661.17         |\n| Standing Desk  ",
+  "intent": "sales_query",
+  "oracle_passed": true,
+  "oracle_reason": "rows match oracle"
+ },
+ {
+  "q": "跟2023年比，2024年產品營收多出來最多的前三名是誰？各增加了多少錢？",
+  "status": "completed",
+  "sec": 91,
+  "sql": "SELECT \"Product Name\",\n       ROUND(SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END)\n             - SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END), 2) AS \"Revenue Increase\"\nFROM sales_data\nWHERE substr(\"Order Date\", 1, 4) IN ('2023', '2024')\nGROUP BY \"Product Name\"\nHAVING (SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END)\n        - SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END)) > 0\nORDER BY \"Revenue Increase\" DESC, \"Product Name\" ASC\nLIMIT 3",
+  "rows": [
+   [
+    "Security Suite",
+    548956.66
+   ],
+   [
+    "4K Monitor 27\"",
+    153661.17
+   ],
+   [
+    "Standing Desk",
+    46226.11
+   ]
+  ],
+  "answer": "與 2023 年相比，2024 年產品營收增加最多的前三名產品為：\n1. Security Suite：增加 548,956.66 元\n2. 4K Monitor 27\"：增加 153,661.17 元\n3. Standing Desk：增加 46,226.11 元\n\n| Product Name   | Revenue Increase   |\n|:---------------|:-------------------|\n| Security Suite | 548,956.66         |\n| 4K Monitor 27\" | 153,661.17         |\n| Sta",
+  "intent": "sales_query",
+  "oracle_passed": true,
+  "oracle_reason": "rows match oracle"
+ },
+ {
+  "q": "請呈現 2023 至 2024 年各季度的總銷售額趨勢。",
+  "status": "completed",
+  "sec": 46,
+  "sql": "SELECT substr(\"Order Date\", 1, 4) || '-Q' || ((CAST(substr(\"Order Date\", 6, 2) AS INTEGER) + 2) / 3) AS \"Quarter\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE substr(\"Order Date\", 1, 4) IN ('2023', '2024') GROUP BY substr(\"Order Date\", 1, 4) || '-Q' || ((CAST(substr(\"Order Date\", 6, 2) AS INTEGER) + 2) / 3) ORDER BY \"Quarter\"",
+  "rows": [
+   [
+    "2023-Q1",
+    11672548.84
+   ],
+   [
+    "2023-Q2",
+    9851606.99
+   ],
+   [
+    "2023-Q3",
+    11792600.63
+   ],
+   [
+    "2023-Q4",
+    18089592.8
+   ],
+   [
+    "2024-Q1",
+    11904701.6
+   ],
+   [
+    "2024-Q2",
+    10612942.57
+   ],
+   [
+    "2024-Q3",
+    11459193.96
+   ],
+   [
+    "2024-Q4",
+    16400864.11
+   ]
+  ],
+  "answer": "2023 至 2024 年各季度總銷售額如下：2023-Q1 為 11,672,548.84，2023-Q2 為 9,851,606.99，2023-Q3 為 11,792,600.63，2023-Q4 為 18,089,592.80；2024-Q1 為 11,904,701.60，2024-Q2 為 10,612,942.57，2024-Q3 為 11,459,193.96，2024-Q4 為 16,400,864.11。最高值為 2023-Q4 的 18,089,592.80，最低值為 2023-Q2 的 9,851,606.99。\n\n| Quarter   | Total Revenue",
+  "intent": "sales_query",
+  "oracle_passed": true,
+  "oracle_reason": "rows match oracle"
+ },
+ {
+  "q": "請呈現 APAC 區域 2023 至 2024 年各季度的銷售額趨勢。",
+  "status": "completed",
+  "sec": 50,
+  "sql": "SELECT substr(\"Order Date\", 1, 4) || '-Q' || ((CAST(substr(\"Order Date\", 6, 2) AS INTEGER) + 2) / 3) AS \"Quarter\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE \"Region\" = 'APAC' AND substr(\"Order Date\", 1, 4) IN ('2023', '2024') GROUP BY substr(\"Order Date\", 1, 4) || '-Q' || ((CAST(substr(\"Order Date\", 6, 2) AS INTEGER) + 2) / 3) ORDER BY \"Quarter\"",
+  "rows": [
+   [
+    "2023-Q1",
+    3204198.98
+   ],
+   [
+    "2023-Q2",
+    2268418.96
+   ],
+   [
+    "2023-Q3",
+    3036646.07
+   ],
+   [
+    "2023-Q4",
+    4559111.49
+   ],
+   [
+    "2024-Q1",
+    3040540.37
+   ],
+   [
+    "2024-Q2",
+    2567085.34
+   ],
+   [
+    "2024-Q3",
+    2663464.65
+   ],
+   [
+    "2024-Q4",
+    3572581.43
+   ]
+  ],
+  "answer": "APAC 區域 2023 至 2024 年各季度銷售額如下：2023-Q1 為 3,204,198.98，2023-Q2 為 2,268,418.96，2023-Q3 為 3,036,646.07，2023-Q4 為 4,559,111.49；2024-Q1 為 3,040,540.37，2024-Q2 為 2,567,085.34，2024-Q3 為 2,663,464.65，2024-Q4 為 3,572,581.43。最高值為 2023-Q4 的 4,559,111.49，最低值為 2023-Q2 的 2,268,418.96，兩者差額為 2,290,692.53。\n\n| Quarter",
+  "intent": "sales_query"
+ }
+]

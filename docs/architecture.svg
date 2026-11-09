@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="770" viewBox="0 0 680 770" role="img">
+<title>text2sql 架構：模組、產出與區塊</title>
+<desc>M1 出題程式產出模板考卷；從模板考卷挑 42 題成為黃金種子，加上攔截與複雜種子，由 M2 合成程式產出合成考卷。M3 評估器用兩份考卷考 M4 問答系統並產出成績單。使用者透過 M5 網頁服務向 M4 提問並取得答案。銷售資料供 M1 算答案、供 M4 查詢。</desc>
+<style>
+text { font-family: "Noto Sans TC", "Noto Sans CJK TC", "Microsoft JhengHei", "PingFang TC", sans-serif; }
+.th { font-size: 14px; font-weight: 500; fill: #2C2C2A; }
+.ts { font-size: 12px; font-weight: 400; fill: #5F5E5A; }
+.arr { stroke: #73726C; stroke-width: 1.2; fill: none; }
+.out rect { fill: #FFFFFF; stroke: #B4B2A9; stroke-width: 0.8; stroke-dasharray: 4 3; }
+.purple rect { fill: #EEEDFE; stroke: #534AB7; stroke-width: 0.8; }
+.purple .th { fill: #3C3489; } .purple .ts { fill: #534AB7; }
+.teal rect { fill: #E1F5EE; stroke: #0F6E56; stroke-width: 0.8; }
+.teal .th { fill: #085041; } .teal .ts { fill: #0F6E56; }
+.coral rect { fill: #FAECE7; stroke: #993C1D; stroke-width: 0.8; }
+.coral .th { fill: #712B13; } .coral .ts { fill: #993C1D; }
+.amber rect { fill: #FAEEDA; stroke: #854F0B; stroke-width: 0.8; } .amber .th { fill: #633806; }
+.green rect { fill: #EAF3DE; stroke: #3B6D11; stroke-width: 0.8; } .green .th { fill: #27500A; }
+</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#73726C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<rect x="0" y="0" width="680" height="770" fill="#FFFFFF"/>
+
+<g class="amber"><rect x="34" y="200" width="612" height="210" rx="12"/><text class="th" x="636" y="222" text-anchor="end">合成出題區：種子 → 改寫 → 檢查</text></g>
+<g class="green"><rect x="450" y="420" width="196" height="282" rx="12"/><text class="th" x="548" y="438" text-anchor="middle">產品區：使用者會用到的</text></g>
+
+<g class="purple"><rect x="40" y="30" width="180" height="56" rx="8"/><text class="th" x="130" y="50" text-anchor="middle" dominant-baseline="central">M1 出題程式</text><text class="ts" x="130" y="69" text-anchor="middle" dominant-baseline="central">題型填空 + 算答案</text></g>
+<g class="out"><rect x="460" y="30" width="180" height="56" rx="8"/><text class="th" x="550" y="50" text-anchor="middle" dominant-baseline="central">銷售資料</text><text class="ts" x="550" y="69" text-anchor="middle" dominant-baseline="central">3 萬筆，2023–2024</text></g>
+<line x1="458" y1="58" x2="224" y2="58" class="arr" marker-end="url(#arrow)"/>
+<text class="ts" x="340" y="48" text-anchor="middle">算標準答案</text>
+<path d="M640 58 L662 58 L662 568 L644 568" class="arr" marker-end="url(#arrow)"/>
+
+<line x1="130" y1="88" x2="130" y2="116" class="arr" marker-end="url(#arrow)"/>
+<g class="out"><rect x="40" y="120" width="180" height="56" rx="8"/><text class="th" x="130" y="140" text-anchor="middle" dominant-baseline="central">模板考卷</text><text class="ts" x="130" y="159" text-anchor="middle" dominant-baseline="central">132 題</text></g>
+<line x1="130" y1="178" x2="130" y2="236" class="arr" marker-end="url(#arrow)"/>
+<text class="ts" x="142" y="192" text-anchor="start">挑 42 題</text>
+
+<g class="out"><rect x="40" y="240" width="180" height="56" rx="8"/><text class="th" x="130" y="260" text-anchor="middle" dominant-baseline="central">黃金種子 42</text><text class="ts" x="130" y="279" text-anchor="middle" dominant-baseline="central">補 SQL，雙重驗證</text></g>
+<g class="out"><rect x="250" y="240" width="180" height="56" rx="8"/><text class="th" x="340" y="260" text-anchor="middle" dominant-baseline="central">攔截種子 42</text><text class="ts" x="340" y="279" text-anchor="middle" dominant-baseline="central">手寫，該拒答的題</text></g>
+<g class="out"><rect x="460" y="240" width="180" height="56" rx="8"/><text class="th" x="550" y="260" text-anchor="middle" dominant-baseline="central">複雜種子 34 型</text><text class="ts" x="550" y="279" text-anchor="middle" dominant-baseline="central">先寫 SQL 再出題</text></g>
+
+<path d="M130 298 L130 364 L246 364" class="arr" marker-end="url(#arrow)"/>
+<line x1="340" y1="298" x2="340" y2="332" class="arr" marker-end="url(#arrow)"/>
+<path d="M550 298 L550 364 L434 364" class="arr" marker-end="url(#arrow)"/>
+
+<g class="purple"><rect x="250" y="336" width="180" height="56" rx="8"/><text class="th" x="340" y="356" text-anchor="middle" dominant-baseline="central">M2 合成程式</text><text class="ts" x="340" y="375" text-anchor="middle" dominant-baseline="central">Qwen 改寫 + 檢查</text></g>
+<line x1="340" y1="394" x2="340" y2="446" class="arr" marker-end="url(#arrow)"/>
+
+<g class="out"><rect x="250" y="450" width="180" height="56" rx="8"/><text class="th" x="340" y="470" text-anchor="middle" dominant-baseline="central">合成考卷</text><text class="ts" x="340" y="489" text-anchor="middle" dominant-baseline="central">354 題，含攔截題</text></g>
+<line x1="340" y1="508" x2="340" y2="536" class="arr" marker-end="url(#arrow)"/>
+
+<g class="teal"><rect x="460" y="450" width="180" height="56" rx="8"/><text class="th" x="550" y="470" text-anchor="middle" dominant-baseline="central">M5 網頁服務</text><text class="ts" x="550" y="489" text-anchor="middle" dominant-baseline="central">使用者從這裡提問</text></g>
+<line x1="550" y1="510" x2="550" y2="536" class="arr" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+
+<path d="M40 148 L24 148 L24 568 L246 568" class="arr" marker-end="url(#arrow)"/>
+
+<g class="coral"><rect x="250" y="540" width="180" height="56" rx="8"/><text class="th" x="340" y="560" text-anchor="middle" dominant-baseline="central">M3 評估器</text><text class="ts" x="340" y="579" text-anchor="middle" dominant-baseline="central">模板卷 judge／合成卷對答案</text></g>
+<line x1="434" y1="568" x2="456" y2="568" class="arr" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<g class="teal"><rect x="460" y="540" width="180" height="56" rx="8"/><text class="th" x="550" y="560" text-anchor="middle" dominant-baseline="central">M4 問答系統</text><text class="ts" x="550" y="579" text-anchor="middle" dominant-baseline="central">查資料、回答</text></g>
+
+<line x1="340" y1="598" x2="340" y2="626" class="arr" marker-end="url(#arrow)"/>
+<line x1="550" y1="598" x2="550" y2="626" class="arr" marker-end="url(#arrow)"/>
+<g class="out"><rect x="250" y="630" width="180" height="56" rx="8"/><text class="th" x="340" y="650" text-anchor="middle" dominant-baseline="central">成績單</text><text class="ts" x="340" y="669" text-anchor="middle" dominant-baseline="central">答對 + 攔截 + 誤擋率</text></g>
+<g class="out"><rect x="460" y="630" width="180" height="56" rx="8"/><text class="th" x="550" y="650" text-anchor="middle" dominant-baseline="central">答案</text><text class="ts" x="550" y="669" text-anchor="middle" dominant-baseline="central">表格 + 圖 + 說明</text></g>
+
+<text class="ts" x="340" y="730" text-anchor="middle">實線彩色框 = 模組（有編號）　虛線框 = 資料或產出（沒編號）</text>
+<text class="ts" x="340" y="752" text-anchor="middle">琥珀底 = 合成出題區　綠底 = 產品區　紫 = 出考卷　青 = 產品　橘 = 閱卷</text>
+</svg>

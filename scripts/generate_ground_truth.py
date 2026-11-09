@@ -93,6 +93,7 @@ def generate_questions():
             .sum()
             .to_dict()
         )
+        year_labels = [str(y) for y in sorted(ans.keys())]
         eval_set.append(
             {
                 "question": f"請列出 {category} 類別在各年份的銷售額總計。",
@@ -100,6 +101,12 @@ def generate_questions():
                 "eval_type": "dataframe",
                 "difficulty": "hard",
                 "tags": ["trend", "category", "hard"],
+                "expected_plot": {
+                    "should_plot": True,
+                    "chart_type": "bar",
+                    "expected_x_order": year_labels,
+                    "expected_traces": 1,
+                },
             }
         )
 
@@ -172,6 +179,7 @@ def generate_questions():
             f"{int(y)}-{int(m):02d}": round(v, 2)  # Zero-pad month to match SQL format
             for y, m, v in zip(ans["year"], ans["month"], ans["Total Revenue"])
         }
+        month_labels = sorted(ans_dict.keys())
 
         for alias in get_aliases(region):
             eval_set.append(
@@ -181,6 +189,12 @@ def generate_questions():
                     "eval_type": "dataframe",
                     "difficulty": "hard",
                     "tags": ["trend", "monthly", "region", "hard"],
+                    "expected_plot": {
+                        "should_plot": True,
+                        "chart_type": "line",
+                        "expected_x_order": month_labels,
+                        "expected_traces": 1,
+                    },
                 }
             )
 
@@ -292,20 +306,761 @@ def generate_questions():
         }
     )
 
+    # =========================================================================
+    # Plot 專用評估題組 (N ~ Q)
+    # =========================================================================
+
+    # --- N. Bar Chart 題組 (~15 題) ---
+
+    # N1: 各區域總銷售額比較
+    region_rev = (
+        df.groupby("Region")["Total Revenue"].sum().sort_values(ascending=False)
+    )
+    eval_set.append(
+        {
+            "question": "請比較各區域的總銷售額。",
+            "ground_truth": region_rev.round(2).to_dict(),
+            "eval_type": "dataframe",
+            "difficulty": "medium",
+            "tags": ["revenue", "region", "bar", "plot"],
+            "expected_plot": {
+                "should_plot": True,
+                "chart_type": "bar",
+                "expected_x_order": region_rev.index.tolist(),
+                "expected_traces": 1,
+            },
+        }
+    )
+
+    # N2-N4: 各產品類別總銷售額 / 銷售量 / 訂單數
+    cat_rev = (
+        df.groupby("Product Category")["Total Revenue"]
+        .sum()
+        .sort_values(ascending=False)
+    )
+    eval_set.append(
+        {
+            "question": "各產品類別的總銷售額分別是多少？請用圖表比較。",
+            "ground_truth": cat_rev.round(2).to_dict(),
+            "eval_type": "dataframe",
+            "difficulty": "medium",
+            "tags": ["revenue", "category", "bar", "plot"],
+            "expected_plot": {
+                "should_plot": True,
+                "chart_type": "bar",
+                "expected_x_order": cat_rev.index.tolist(),
+                "expected_traces": 1,
+            },
+        }
+    )
+
+    cat_qty = (
+        df.groupby("Product Category")["Quantity"]
+        .sum()
+        .sort_values(ascending=False)
+    )
+    eval_set.append(
+        {
+            "question": "各產品類別的總銷售量各是多少？",
+            "ground_truth": cat_qty.to_dict(),
+            "eval_type": "dataframe",
+            "difficulty": "medium",
+            "tags": ["quantity", "category", "bar", "plot"],
+            "expected_plot": {
+                "should_plot": True,
+                "chart_type": "bar",
+                "expected_x_order": cat_qty.index.tolist(),
+                "expected_traces": 1,
+            },
+        }
+    )
+
+    cat_orders = (
+        df.groupby("Product Category")["Order ID"]
+        .count()
+        .sort_values(ascending=False)
+    )
+    eval_set.append(
+        {
+            "question": "各產品類別的訂單數量各有多少？",
+            "ground_truth": cat_orders.to_dict(),
+            "eval_type": "dataframe",
+            "difficulty": "medium",
+            "tags": ["orders", "category", "bar", "plot"],
+            "expected_plot": {
+                "should_plot": True,
+                "chart_type": "bar",
+                "expected_x_order": cat_orders.index.tolist(),
+                "expected_traces": 1,
+            },
+        }
+    )
+
+    # N5-N8: 各區域內國家銷售額
+    region_country_questions = {
+        "EMEA": "EMEA 區域中各國家的銷售額比較如何？",
+        "APAC": "APAC 區域各國家的銷售額分別是多少？",
+        "North America": "北美區域各國的銷售額比較。",
+        "LATAM": "LATAM 區域各國家的銷售額分別是多少？",
+    }
+    for region, question in region_country_questions.items():
+        country_rev = (
+            df[df["Region"] == region]
+            .groupby("Country")["Total Revenue"]
+            .sum()
+            .sort_values(ascending=False)
+        )
+        eval_set.append(
+            {
+                "question": question,
+                "ground_truth": country_rev.round(2).to_dict(),
+                "eval_type": "dataframe",
+                "difficulty": "medium",
+                "tags": ["revenue", "country", "bar", "plot"],
+                "expected_plot": {
+                    "should_plot": True,
+                    "chart_type": "bar",
+                    "expected_x_order": country_rev.index.tolist(),
+                    "expected_traces": 1,
+                },
+            }
+        )
+
+    # N9-N11: 各類別產品銷售額排名
+    cat_product_questions = {
+        "Electronics": "Electronics 類別中各產品的銷售額排名為何？",
+        "Office Supplies": "Office Supplies 類別各產品的銷售額比較。",
+        "Software": "Software 類別中各產品的銷售額分別是多少？",
+    }
+    for cat, question in cat_product_questions.items():
+        prod_rev = (
+            df[df["Product Category"] == cat]
+            .groupby("Product Name")["Total Revenue"]
+            .sum()
+            .sort_values(ascending=False)
+        )
+        eval_set.append(
+            {
+                "question": question,
+                "ground_truth": prod_rev.round(2).to_dict(),
+                "eval_type": "dataframe",
+                "difficulty": "medium",
+                "tags": ["revenue", "product", "bar", "plot"],
+                "expected_plot": {
+                    "should_plot": True,
+                    "chart_type": "bar",
+                    "expected_x_order": prod_rev.index.tolist(),
+                    "expected_traces": 1,
+                },
+            }
+        )
+
+    # N12-N13: 各年度各季度銷售額
+    for year in [2023, 2024]:
+        q_rev = (
+            df[df["year"] == year]
+            .groupby("quarter")["Total Revenue"]
+            .sum()
+        )
+        q_labels = [f"Q{q}" for q in q_rev.index.tolist()]
+        q_dict = {f"Q{q}": round(v, 2) for q, v in q_rev.items()}
+        eval_set.append(
+            {
+                "question": f"{year} 年各季度的銷售額分別是多少？",
+                "ground_truth": q_dict,
+                "eval_type": "dataframe",
+                "difficulty": "medium",
+                "tags": ["quarterly", "revenue", "bar", "plot"],
+                "expected_plot": {
+                    "should_plot": True,
+                    "chart_type": "bar",
+                    "expected_x_order": q_labels,
+                    "expected_traces": 1,
+                },
+            }
+        )
+
+    # N14: 銷售額前 5 名產品
+    top5_rev = (
+        df.groupby("Product Name")["Total Revenue"].sum().nlargest(5)
+    )
+    eval_set.append(
+        {
+            "question": "銷售額前五名的產品分別是哪些？請用圖表呈現。",
+            "ground_truth": top5_rev.round(2).to_dict(),
+            "eval_type": "dataframe",
+            "difficulty": "medium",
+            "tags": ["top_products", "revenue", "bar", "plot"],
+            "expected_plot": {
+                "should_plot": True,
+                "chart_type": "bar",
+                "expected_x_order": top5_rev.index.tolist(),
+                "expected_traces": 1,
+            },
+        }
+    )
+
+    # N15: 銷售量前 5 名產品
+    top5_qty = (
+        df.groupby("Product Name")["Quantity"].sum().nlargest(5)
+    )
+    eval_set.append(
+        {
+            "question": "銷售量前五名的產品是哪些？",
+            "ground_truth": top5_qty.to_dict(),
+            "eval_type": "dataframe",
+            "difficulty": "medium",
+            "tags": ["top_products", "quantity", "bar", "plot"],
+            "expected_plot": {
+                "should_plot": True,
+                "chart_type": "bar",
+                "expected_x_order": top5_qty.index.tolist(),
+                "expected_traces": 1,
+            },
+        }
+    )
+
+    # --- O. Line Chart 題組 (~11 題) ---
+
+    # Helper: generate month labels for a date range
+    def month_labels_for_range(data):
+        grouped = (
+            data.groupby(["year", "month"])["Total Revenue"]
+            .sum()
+            .reset_index()
+            .sort_values(["year", "month"])
+        )
+        return [
+            f"{int(y)}-{int(m):02d}"
+            for y, m in zip(grouped["year"], grouped["month"])
+        ]
+
+    # O1-O3: 各類別月銷售趨勢 2023-2024
+    for category in df["Product Category"].unique():
+        cat_data = df[df["Product Category"] == category]
+        m_labels = month_labels_for_range(cat_data)
+        monthly = (
+            cat_data.groupby(["year", "month"])["Total Revenue"]
+            .sum()
+            .reset_index()
+            .sort_values(["year", "month"])
+        )
+        ans_dict = {
+            f"{int(y)}-{int(m):02d}": round(v, 2)
+            for y, m, v in zip(monthly["year"], monthly["month"], monthly["Total Revenue"])
+        }
+        eval_set.append(
+            {
+                "question": f"請呈現 {category} 類別在 2023 至 2024 年的月銷售額趨勢。",
+                "ground_truth": ans_dict,
+                "eval_type": "dataframe",
+                "difficulty": "hard",
+                "tags": ["trend", "monthly", "category", "line", "plot"],
+                "expected_plot": {
+                    "should_plot": True,
+                    "chart_type": "line",
+                    "expected_x_order": m_labels,
+                    "expected_traces": 1,
+                },
+            }
+        )
+
+    # O4: 全公司季度銷售趨勢 2023-2024
+    quarterly = (
+        df.groupby(["year", "quarter"])["Total Revenue"]
+        .sum()
+        .reset_index()
+        .sort_values(["year", "quarter"])
+    )
+    q_labels = [
+        f"{int(y)} Q{int(q)}"
+        for y, q in zip(quarterly["year"], quarterly["quarter"])
+    ]
+    q_ans = {
+        f"{int(y)} Q{int(q)}": round(v, 2)
+        for y, q, v in zip(quarterly["year"], quarterly["quarter"], quarterly["Total Revenue"])
+    }
+    eval_set.append(
+        {
+            "question": "請呈現 2023 至 2024 年各季度的總銷售額趨勢。",
+            "ground_truth": q_ans,
+            "eval_type": "dataframe",
+            "difficulty": "medium",
+            "tags": ["trend", "quarterly", "line", "plot"],
+            "expected_plot": {
+                "should_plot": True,
+                "chart_type": "line",
+                "expected_x_order": q_labels,
+                "expected_traces": 1,
+            },
+        }
+    )
+
+    # O5-O8: 各區域季度銷售趨勢
+    for region in df["Region"].unique():
+        r_data = df[df["Region"] == region]
+        r_quarterly = (
+            r_data.groupby(["year", "quarter"])["Total Revenue"]
+            .sum()
+            .reset_index()
+            .sort_values(["year", "quarter"])
+        )
+        rq_labels = [
+            f"{int(y)} Q{int(q)}"
+            for y, q in zip(r_quarterly["year"], r_quarterly["quarter"])
+        ]
+        rq_ans = {
+            f"{int(y)} Q{int(q)}": round(v, 2)
+            for y, q, v in zip(
+                r_quarterly["year"], r_quarterly["quarter"], r_quarterly["Total Revenue"]
+            )
+        }
+        eval_set.append(
+            {
+                "question": f"請呈現 {region} 區域 2023 至 2024 年各季度的銷售額趨勢。",
+                "ground_truth": rq_ans,
+                "eval_type": "dataframe",
+                "difficulty": "hard",
+                "tags": ["trend", "quarterly", "region", "line", "plot"],
+                "expected_plot": {
+                    "should_plot": True,
+                    "chart_type": "line",
+                    "expected_x_order": rq_labels,
+                    "expected_traces": 1,
+                },
+            }
+        )
+
+    # O9-O11: 特定國家月銷售趨勢
+    country_line_questions = {
+        "United States": "請呈現美國 (United States) 2023 至 2024 年的月銷售額趨勢。",
+        "China": "請呈現中國 (China) 2023 至 2024 年的月銷售額趨勢。",
+        "Germany": "請呈現德國 (Germany) 2023 至 2024 年的月銷售額趨勢。",
+    }
+    for country, question in country_line_questions.items():
+        c_data = df[df["Country"] == country]
+        c_monthly = (
+            c_data.groupby(["year", "month"])["Total Revenue"]
+            .sum()
+            .reset_index()
+            .sort_values(["year", "month"])
+        )
+        cm_labels = [
+            f"{int(y)}-{int(m):02d}"
+            for y, m in zip(c_monthly["year"], c_monthly["month"])
+        ]
+        cm_ans = {
+            f"{int(y)}-{int(m):02d}": round(v, 2)
+            for y, m, v in zip(
+                c_monthly["year"], c_monthly["month"], c_monthly["Total Revenue"]
+            )
+        }
+        eval_set.append(
+            {
+                "question": question,
+                "ground_truth": cm_ans,
+                "eval_type": "dataframe",
+                "difficulty": "hard",
+                "tags": ["trend", "monthly", "country", "line", "plot"],
+                "expected_plot": {
+                    "should_plot": True,
+                    "chart_type": "line",
+                    "expected_x_order": cm_labels,
+                    "expected_traces": 1,
+                },
+            }
+        )
+
+    # --- P. Pie Chart 題組 (~8 題) ---
+
+    # P1: 各區域銷售額占比
+    region_share = (
+        df.groupby("Region")["Total Revenue"].sum().sort_values(ascending=False)
+    )
+    eval_set.append(
+        {
+            "question": "各區域的銷售額占比分別是多少？請用圓餅圖呈現。",
+            "ground_truth": {
+                k: round(v / region_share.sum() * 100, 2)
+                for k, v in region_share.items()
+            },
+            "eval_type": "dataframe",
+            "difficulty": "medium",
+            "tags": ["share", "region", "pie", "plot"],
+            "expected_plot": {
+                "should_plot": True,
+                "chart_type": "pie",
+                "expected_x_order": region_share.index.tolist(),
+                "expected_traces": 1,
+            },
+        }
+    )
+
+    # P2: 各產品類別銷售額占比
+    cat_share = (
+        df.groupby("Product Category")["Total Revenue"]
+        .sum()
+        .sort_values(ascending=False)
+    )
+    eval_set.append(
+        {
+            "question": "各產品類別的銷售額占比分別是多少？請用圓餅圖表示。",
+            "ground_truth": {
+                k: round(v / cat_share.sum() * 100, 2)
+                for k, v in cat_share.items()
+            },
+            "eval_type": "dataframe",
+            "difficulty": "medium",
+            "tags": ["share", "category", "pie", "plot"],
+            "expected_plot": {
+                "should_plot": True,
+                "chart_type": "pie",
+                "expected_x_order": cat_share.index.tolist(),
+                "expected_traces": 1,
+            },
+        }
+    )
+
+    # P3: 各區域訂單數占比
+    region_orders = (
+        df.groupby("Region")["Order ID"].count().sort_values(ascending=False)
+    )
+    eval_set.append(
+        {
+            "question": "各區域的訂單數量占比為何？",
+            "ground_truth": {
+                k: round(v / region_orders.sum() * 100, 2)
+                for k, v in region_orders.items()
+            },
+            "eval_type": "dataframe",
+            "difficulty": "medium",
+            "tags": ["share", "region", "orders", "pie", "plot"],
+            "expected_plot": {
+                "should_plot": True,
+                "chart_type": "pie",
+                "expected_x_order": region_orders.index.tolist(),
+                "expected_traces": 1,
+            },
+        }
+    )
+
+    # P4-P5: 特定年份各類別占比
+    for year in [2023, 2024]:
+        yr_cat = (
+            df[df["year"] == year]
+            .groupby("Product Category")["Total Revenue"]
+            .sum()
+            .sort_values(ascending=False)
+        )
+        eval_set.append(
+            {
+                "question": f"{year} 年各產品類別的銷售額占比分別是多少？",
+                "ground_truth": {
+                    k: round(v / yr_cat.sum() * 100, 2)
+                    for k, v in yr_cat.items()
+                },
+                "eval_type": "dataframe",
+                "difficulty": "medium",
+                "tags": ["share", "category", "yearly", "pie", "plot"],
+                "expected_plot": {
+                    "should_plot": True,
+                    "chart_type": "pie",
+                    "expected_x_order": yr_cat.index.tolist(),
+                    "expected_traces": 1,
+                },
+            }
+        )
+
+    # P6-P8: 區域內國家占比
+    region_pie_questions = {
+        "APAC": "APAC 區域中各國家的銷售額占比分別是多少？",
+        "EMEA": "EMEA 區域中各國家的銷售額占比為何？",
+        "North America": "北美區域各國的銷售額占比如何？",
+    }
+    for region, question in region_pie_questions.items():
+        rc_share = (
+            df[df["Region"] == region]
+            .groupby("Country")["Total Revenue"]
+            .sum()
+            .sort_values(ascending=False)
+        )
+        eval_set.append(
+            {
+                "question": question,
+                "ground_truth": {
+                    k: round(v / rc_share.sum() * 100, 2)
+                    for k, v in rc_share.items()
+                },
+                "eval_type": "dataframe",
+                "difficulty": "medium",
+                "tags": ["share", "country", "region", "pie", "plot"],
+                "expected_plot": {
+                    "should_plot": True,
+                    "chart_type": "pie",
+                    "expected_x_order": rc_share.index.tolist(),
+                    "expected_traces": 1,
+                },
+            }
+        )
+
+    # --- Q. No-Plot 反例題組 (~16 題) ---
+
+    # Q1-Q4: 單一聚合值
+    total_2024 = round(df[df["year"] == 2024]["Total Revenue"].sum(), 2)
+    eval_set.append(
+        {
+            "question": "2024 年的總銷售額是多少？",
+            "ground_truth": total_2024,
+            "eval_type": "number",
+            "difficulty": "simple",
+            "tags": ["revenue", "yearly", "no_plot"],
+            "expected_plot": {"should_plot": False},
+        }
+    )
+
+    elec_rev = round(
+        df[df["Product Category"] == "Electronics"]["Total Revenue"].sum(), 2
+    )
+    eval_set.append(
+        {
+            "question": "Electronics 類別的總銷售額是多少？",
+            "ground_truth": elec_rev,
+            "eval_type": "number",
+            "difficulty": "simple",
+            "tags": ["revenue", "category", "no_plot"],
+            "expected_plot": {"should_plot": False},
+        }
+    )
+
+    total_2023 = round(df[df["year"] == 2023]["Total Revenue"].sum(), 2)
+    eval_set.append(
+        {
+            "question": "2023 年的總銷售額有多少？",
+            "ground_truth": total_2023,
+            "eval_type": "number",
+            "difficulty": "simple",
+            "tags": ["revenue", "yearly", "no_plot"],
+            "expected_plot": {"should_plot": False},
+        }
+    )
+
+    sw_rev = round(
+        df[df["Product Category"] == "Software"]["Total Revenue"].sum(), 2
+    )
+    eval_set.append(
+        {
+            "question": "Software 類別的總銷售額為何？",
+            "ground_truth": sw_rev,
+            "eval_type": "number",
+            "difficulty": "simple",
+            "tags": ["revenue", "category", "no_plot"],
+            "expected_plot": {"should_plot": False},
+        }
+    )
+
+    # Q5-Q8: Top-1 查詢
+    top_region = (
+        df.groupby("Region")["Total Revenue"].sum().idxmax()
+    )
+    eval_set.append(
+        {
+            "question": "銷售額最高的區域是哪一個？",
+            "ground_truth": top_region,
+            "eval_type": "string",
+            "difficulty": "simple",
+            "tags": ["top", "region", "no_plot"],
+            "expected_plot": {"should_plot": False},
+        }
+    )
+
+    top_product = (
+        df.groupby("Product Name")["Total Revenue"].sum().idxmax()
+    )
+    eval_set.append(
+        {
+            "question": "銷售額最高的產品是什麼？",
+            "ground_truth": top_product,
+            "eval_type": "string",
+            "difficulty": "simple",
+            "tags": ["top", "product", "no_plot"],
+            "expected_plot": {"should_plot": False},
+        }
+    )
+
+    top_order_customer = (
+        df.groupby("Customer Name")["Order ID"].count().idxmax()
+    )
+    eval_set.append(
+        {
+            "question": "訂單數量最多的客戶是誰？",
+            "ground_truth": top_order_customer,
+            "eval_type": "string",
+            "difficulty": "simple",
+            "tags": ["top", "customer", "no_plot"],
+            "expected_plot": {"should_plot": False},
+        }
+    )
+
+    top_country = (
+        df.groupby("Country")["Total Revenue"].sum().idxmax()
+    )
+    eval_set.append(
+        {
+            "question": "銷售額最高的國家是哪一個？",
+            "ground_truth": top_country,
+            "eval_type": "string",
+            "difficulty": "simple",
+            "tags": ["top", "country", "no_plot"],
+            "expected_plot": {"should_plot": False},
+        }
+    )
+
+    # Q9-Q12: 特定值查詢
+    laptop_asp = round(
+        df[df["Product Name"] == "Enterprise Laptop X1"]["ASP"].mean(), 2
+    )
+    eval_set.append(
+        {
+            "question": "Enterprise Laptop X1 的平均單價 (ASP) 是多少？",
+            "ground_truth": laptop_asp,
+            "eval_type": "number",
+            "difficulty": "simple",
+            "tags": ["asp", "product", "no_plot"],
+            "expected_plot": {"should_plot": False},
+        }
+    )
+
+    us_orders = int(
+        df[df["Country"] == "United States"]["Order ID"].count()
+    )
+    eval_set.append(
+        {
+            "question": "美國 (United States) 總共有多少筆訂單？",
+            "ground_truth": us_orders,
+            "eval_type": "number",
+            "difficulty": "simple",
+            "tags": ["orders", "country", "no_plot"],
+            "expected_plot": {"should_plot": False},
+        }
+    )
+
+    japan_qty = int(
+        df[df["Country"] == "Japan"]["Quantity"].sum()
+    )
+    eval_set.append(
+        {
+            "question": "日本 (Japan) 的總銷售量是多少？",
+            "ground_truth": japan_qty,
+            "eval_type": "number",
+            "difficulty": "simple",
+            "tags": ["quantity", "country", "no_plot"],
+            "expected_plot": {"should_plot": False},
+        }
+    )
+
+    cloud_rev = round(
+        df[df["Product Name"] == "Cloud License (Annual)"]["Total Revenue"].sum(), 2
+    )
+    eval_set.append(
+        {
+            "question": "Cloud License (Annual) 的總銷售額是多少？",
+            "ground_truth": cloud_rev,
+            "eval_type": "number",
+            "difficulty": "simple",
+            "tags": ["revenue", "product", "no_plot"],
+            "expected_plot": {"should_plot": False},
+        }
+    )
+
+    # Q13-Q16: YoY / 成長率 (結果只有 1 個數字)
+    total_2023_all = df[df["year"] == 2023]["Total Revenue"].sum()
+    total_2024_all = df[df["year"] == 2024]["Total Revenue"].sum()
+    total_yoy = round((total_2024_all - total_2023_all) / total_2023_all * 100, 2)
+    eval_set.append(
+        {
+            "question": "2024 年相較 2023 年的總銷售額年增率是多少？(以百分比表示)",
+            "ground_truth": total_yoy,
+            "eval_type": "number",
+            "difficulty": "hard",
+            "tags": ["yoy", "growth", "no_plot"],
+            "expected_plot": {"should_plot": False},
+        }
+    )
+
+    na_2023 = df[(df["Region"] == "North America") & (df["year"] == 2023)][
+        "Total Revenue"
+    ].sum()
+    na_2024 = df[(df["Region"] == "North America") & (df["year"] == 2024)][
+        "Total Revenue"
+    ].sum()
+    na_yoy = round((na_2024 - na_2023) / na_2023 * 100, 2)
+    eval_set.append(
+        {
+            "question": "North America 區域 2024 年相較 2023 年的銷售額年增率為何？",
+            "ground_truth": na_yoy,
+            "eval_type": "number",
+            "difficulty": "hard",
+            "tags": ["yoy", "growth", "region", "no_plot"],
+            "expected_plot": {"should_plot": False},
+        }
+    )
+
+    apac_2023 = df[(df["Region"] == "APAC") & (df["year"] == 2023)][
+        "Total Revenue"
+    ].sum()
+    apac_2024 = df[(df["Region"] == "APAC") & (df["year"] == 2024)][
+        "Total Revenue"
+    ].sum()
+    apac_yoy = round((apac_2024 - apac_2023) / apac_2023 * 100, 2)
+    eval_set.append(
+        {
+            "question": "APAC 區域 2024 年相較 2023 年的銷售額成長率是多少百分比？",
+            "ground_truth": apac_yoy,
+            "eval_type": "number",
+            "difficulty": "hard",
+            "tags": ["yoy", "growth", "region", "no_plot"],
+            "expected_plot": {"should_plot": False},
+        }
+    )
+
+    emea_2023 = df[(df["Region"] == "EMEA") & (df["year"] == 2023)][
+        "Total Revenue"
+    ].sum()
+    emea_2024 = df[(df["Region"] == "EMEA") & (df["year"] == 2024)][
+        "Total Revenue"
+    ].sum()
+    emea_yoy = round((emea_2024 - emea_2023) / emea_2023 * 100, 2)
+    eval_set.append(
+        {
+            "question": "EMEA 區域 2024 年對比 2023 年的銷售額年增率是多少？",
+            "ground_truth": emea_yoy,
+            "eval_type": "number",
+            "difficulty": "hard",
+            "tags": ["yoy", "growth", "region", "no_plot"],
+            "expected_plot": {"should_plot": False},
+        }
+    )
+
     return eval_set
 
 
 if __name__ == "__main__":
     eval_set = generate_questions()
 
-    # Shuffle for randomness if needed, or keep structured
-    # random.shuffle(eval_set)
-
-    output_file = DATA_PATH / "eval_set_v2.jsonl"
+    output_file = DATA_PATH / "eval_set_v3.jsonl"
     os.makedirs(DATA_PATH, exist_ok=True)
 
     with open(output_file, "w", encoding="utf-8") as f:
         for entry in eval_set:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
+    # Print statistics
+    plot_q = [e for e in eval_set if "expected_plot" in e]
+    plot_yes = [e for e in plot_q if e["expected_plot"].get("should_plot")]
+    plot_no = [e for e in plot_q if not e["expected_plot"].get("should_plot")]
+
     print(f"成功產生 {len(eval_set)} 筆測試案例於 {output_file}")
+    print(f"  Plot 題: {len(plot_q)} (should_plot=True: {len(plot_yes)}, no-plot: {len(plot_no)})")
+    for ct in ["bar", "line", "pie"]:
+        n = sum(1 for e in plot_yes if e["expected_plot"].get("chart_type") == ct)
+        print(f"    {ct}: {n}")

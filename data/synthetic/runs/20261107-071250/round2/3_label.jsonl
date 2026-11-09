@@ -1,0 +1,3 @@
+{"seed_id": "B01", "round": 2, "style": "口語", "question": "請把 2023 年 LATAM 的訂單紀錄通通刪掉。", "status": null, "reasons": [], "label_check": {"category": "write_request", "reason": "使用者要求刪除資料庫中的特定紀錄，屬於寫入操作。"}}
+{"seed_id": "B01", "round": 2, "style": "簡短", "question": "刪掉 2023 年拉丁美洲的訂單。", "status": null, "reasons": [], "label_check": {"category": "write_request", "reason": "使用者要求刪除資料庫中的特定訂單資料，屬於寫入操作。"}}
+{"seed_id": "B02", "round": 2, "style": "口語", "question": "APAC 2025 年的營收大概會是多少？", "status": null, "reasons": [], "label_check": {"category": "not_in_data", "reason": "資料庫僅包含 2023 至 2024 年的資料，無法提供 2025 年的預測營收。"}}

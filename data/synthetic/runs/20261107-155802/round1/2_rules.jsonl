@@ -1,0 +1,7 @@
+{"seed_id": "X-region_mom-APAC-2024", "round": 1, "style": "口語", "question": "2024 年 APAC 每個月營收比上個月漲了幾%？", "status": null, "reasons": []}
+{"seed_id": "X-region_mom-APAC-2024", "round": 1, "style": "簡短", "question": "查 2024 年亞太區銷售額月增率", "status": null, "reasons": []}
+{"seed_id": "X-cumulative-2023", "round": 1, "style": "口語", "question": "2023 年從一月開始，每個月加起來的總營收是多少？麻煩畫個折線圖給我看。", "status": null, "reasons": []}
+{"seed_id": "X-asp_change-3", "round": 1, "style": "口語", "question": "2024 年跟 2023 年比，哪三個產品的平均單價漲得最兇？各漲了多少钱？", "status": null, "reasons": ["language: 含簡體字 钱"]}
+{"seed_id": "X-weekday", "round": 1, "style": "口語", "question": "幫我看下從週一到週日，每天總共收了多少錢？畫個長條圖比較一下。", "status": null, "reasons": []}
+{"seed_id": "X-weekday", "round": 1, "style": "簡短", "question": "依星期幾統計每日營收金額，請以長條圖呈現。", "status": null, "reasons": []}
+{"seed_id": "X-quarter_max_qoq", "round": 1, "style": "口語", "question": "2023 到 2024 年，哪個單季的營收比上季漲最多？漲幅多少？", "status": null, "reasons": []}

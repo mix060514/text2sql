@@ -1,0 +1,224 @@
+[
+ {
+  "q": "2023 到 2024 期間，哪一個季度的營收比上一季漲最多？漲幅幾%？",
+  "status": "completed",
+  "err": null,
+  "sec": 96.0,
+  "steps": {
+   "agent_sql1": 48816,
+   "step_run_sql1": 34,
+   "agent_review1": 42337,
+   "agent_report1": 4730,
+   "step_publish1": 49,
+   "step_draw_chart1": null
+  },
+  "sql": "WITH quarterly AS (\n  SELECT\n    substr(\"Order Date\", 1, 4) || '-Q' || ((CAST(substr(\"Order Date\", 6, 2) AS INTEGER) + 2) / 3) AS \"Quarter\",\n    SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  WHERE substr(\"Order Date\", 1, 4) IN ('2022', '2023', '2024')\n  GROUP BY\n    substr(\"Order Date\", 1, 4) || '-Q' || ((CAST(substr(\"Order Date\", 6, 2) AS INTEGER) + 2) / 3)\n),\ngrowth AS (\n  SELECT\n    \"Quarter\",\n    revenue,\n    ROUND(\n      (revenue - LAG(revenue) OVER (ORDER BY \"Quarter\")) * 100.0\n      / NULLIF(LAG(revenue) OVER (ORDER BY \"Quarter\"), 0),\n      2\n    ) AS \"QoQ Growth (%)\"\n  FROM quarterly\n)\nSELECT\n  \"Quarter\",\n  \"QoQ Growth (%)\"\nFROM growth\nWHERE \"Quarter\" >= '2023-Q1'\n  AND \"QoQ Growth (%)\" IS NOT NULL\nORDER BY\n  \"QoQ Growth (%)\" DESC,\n  \"Quarter\" ASC\nLIMIT 1;",
+  "rows": [
+   [
+    "2023-Q4",
+    53.4
+   ]
+  ],
+  "answer": "2023 到 2024 期間，營收比上一季漲最多的季度是 2023-Q4，漲幅為 53.40%。\n\n| Quarter   | QoQ Growth (%)   |\n|:----------|:-----------------|\n| 2023-Q4   | 53.40            |"
+ },
+ {
+  "q": "2023 到 2024 年，哪個單季的營收比上季漲最多？漲幅多少？",
+  "status": "completed",
+  "err": null,
+  "sec": 135.6,
+  "steps": {
+   "agent_sql1": 82193,
+   "step_run_sql1": 19,
+   "agent_review1": 47902,
+   "agent_report1": 5510,
+   "step_publish1": 0,
+   "step_draw_chart1": null
+  },
+  "sql": "WITH quarterly AS (\n  SELECT\n    substr(\"Order Date\", 1, 4) || '-Q' || ((CAST(substr(\"Order Date\", 6, 2) AS INTEGER) + 2) / 3) AS \"Quarter\",\n    SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  WHERE (substr(\"Order Date\", 1, 4) = '2022'\n         AND ((CAST(substr(\"Order Date\", 6, 2) AS INTEGER) + 2) / 3) = 4)\n     OR substr(\"Order Date\", 1, 4) IN ('2023', '2024')\n  GROUP BY substr(\"Order Date\", 1, 4) || '-Q' || ((CAST(substr(\"Order Date\", 6, 2) AS INTEGER) + 2) / 3)\n),\ngrowth AS (\n  SELECT \"Quarter\", revenue,\n         ROUND((revenue - LAG(revenue) OVER (ORDER BY \"Quarter\")) * 100.0\n               / NULLIF(LAG(revenue) OVER (ORDER BY \"Quarter\"), 0), 2) AS \"QoQ Growth (%)\"\n  FROM quarterly\n)\nSELECT \"Quarter\", \"QoQ Growth (%)\"\nFROM growth\nWHERE \"Quarter\" BETWEEN '2023-Q1' AND '2024-Q4'\nORDER BY \"QoQ Growth (%)\" DESC, \"Quarter\" ASC\nLIMIT 1",
+  "rows": [
+   [
+    "2023-Q4",
+    53.4
+   ]
+  ],
+  "answer": "2023 到 2024 年間，單季營收比上季漲幅最大的是 2023-Q4，漲幅為 53.40%。\n\n| Quarter   | QoQ Growth (%)   |\n|:----------|:-----------------|\n| 2023-Q4   | 53.40            |"
+ },
+ {
+  "q": "請呈現中國 (China) 2023 至 2024 年的月銷售額趨勢。",
+  "status": "completed",
+  "err": null,
+  "sec": 37.3,
+  "steps": {
+   "agent_sql1": 13147,
+   "step_run_sql1": 5,
+   "agent_review1": 13863,
+   "agent_report1": 9070,
+   "step_publish1": 1233,
+   "step_draw_chart1": null
+  },
+  "sql": "SELECT substr(\"Order Date\", 1, 7) AS \"Month\", SUM(\"Total Revenue\") AS \"Total Revenue\"\nFROM sales_data\nWHERE \"Country\" = 'China' AND substr(\"Order Date\", 1, 4) IN ('2023', '2024')\nGROUP BY substr(\"Order Date\", 1, 7)\nORDER BY \"Month\";",
+  "rows": [
+   [
+    "2023-01",
+    122271.43000000001
+   ],
+   [
+    "2023-02",
+    217997.97
+   ],
+   [
+    "2023-03",
+    155798.93
+   ],
+   [
+    "2023-04",
+    159711.65
+   ],
+   [
+    "2023-05",
+    90498.47
+   ],
+   [
+    "2023-06",
+    119211.23
+   ],
+   [
+    "2023-07",
+    184845.86
+   ],
+   [
+    "2023-08",
+    159351.14
+   ],
+   [
+    "2023-09",
+    202680.49
+   ],
+   [
+    "2023-10",
+    242055.77
+   ],
+   [
+    "2023-11",
+    343885.79
+   ],
+   [
+    "2023-12",
+    313509.62
+   ],
+   [
+    "2024-01",
+    202387.33
+   ],
+   [
+    "2024-02",
+    189908.91
+   ],
+   [
+    "2024-03",
+    156728.95
+   ],
+   [
+    "2024-04",
+    227440.45
+   ],
+   [
+    "2024-05",
+    177640.05
+   ],
+   [
+    "2024-06",
+    146046.1
+   ],
+   [
+    "2024-07",
+    200251.88
+   ],
+   [
+    "2024-08",
+    172708.6
+   ],
+   [
+    "2024-09",
+    179663.09
+   ],
+   [
+    "2024-10",
+    319273.98
+   ],
+   [
+    "2024-11",
+    180883.74
+   ],
+   [
+    "2024-12",
+    346299.11
+   ]
+  ],
+  "answer": "中國 (China) 2023 至 2024 年共 24 個月的月銷售額範圍為 90,498.47 至 346,299.11。2023 年最高為 11 月（343,885.79），最低為 5 月（90,498.47）；2024 年最高為 12 月（346,299.11），最低為 6 月（146,046.10）。\n\n| Month   | Total Revenue   |\n|:--------|:----------------|\n| 2023-01 | 122,271.43      |\n| 2023-02 | 217,997.97      |\n| 2023-03 | 155,798.93      |\n| 2023-04 | 159,711.65      |\n| 2023-05 | 90,498.47       |\n| 2023-06 | 119,211.23      |\n| 2023-07 | 184,845.86      |\n| 2023-08 | 159,351.14      |\n| 2023-09 | 202,680.49      |\n| 2023-10 | 242,055.77      |\n| 2023-11 | 343,885.79      |\n| 2023-12 | 313,509.62      |\n| 2024-01 | 202,387.33      |\n| 2024-02 | 189,908.91      |\n| 2024-03 | 156,728.95      |\n| 2024-04 | 227,440.45      |\n| 2024-05 | 177,640.05      |\n| 2024-06 | 146,046.10      |\n| 2024-07 | 200,251.88      |\n| 2024-08 | 172,708.60      |\n| 2024-09 | 179,663.09      |\n| 2024-10 | 319,273.98      |\n| 2024-11 | 180,883.74      |\n| 2024-12 | 346,299.11      |"
+ },
+ {
+  "q": "各區域的銷售額占比分別是多少？請用圓餅圖呈現。",
+  "status": "completed",
+  "err": null,
+  "sec": 53.6,
+  "steps": {
+   "agent_sql1": 27625,
+   "step_run_sql1": 23,
+   "agent_review1": 20795,
+   "agent_report1": 5108,
+   "step_publish1": 30,
+   "step_draw_chart1": null
+  },
+  "sql": "SELECT \"Region\",\n       ROUND(SUM(\"Total Revenue\") * 100.0 / NULLIF((SELECT SUM(\"Total Revenue\") FROM sales_data), 0), 2) AS \"Revenue Share (%)\"\nFROM sales_data\nGROUP BY \"Region\"\nORDER BY SUM(\"Total Revenue\") DESC, \"Region\" ASC",
+  "rows": [
+   [
+    "North America",
+    40.2
+   ],
+   [
+    "EMEA",
+    30.54
+   ],
+   [
+    "APAC",
+    24.48
+   ],
+   [
+    "LATAM",
+    4.79
+   ]
+  ],
+  "answer": "各區域銷售額占比如下：North America 40.20%、EMEA 30.54%、APAC 24.48%、LATAM 4.79%。\n\n| Region        | Revenue Share (%)   |\n|:--------------|:--------------------|\n| North America | 40.20               |\n| EMEA          | 30.54               |\n| APAC          | 24.48               |\n| LATAM         | 4.79                |"
+ },
+ {
+  "q": "各產品類別的銷售額占比分別是多少？請用圓餅圖表示。",
+  "status": "completed",
+  "err": null,
+  "sec": 55.6,
+  "steps": {
+   "agent_sql1": 26931,
+   "step_run_sql1": 20,
+   "agent_review1": 23758,
+   "agent_report1": 4869,
+   "step_publish1": 30,
+   "step_draw_chart1": null
+  },
+  "sql": "SELECT \"Product Category\",\n       ROUND(SUM(\"Total Revenue\") * 100.0 / NULLIF((SELECT SUM(\"Total Revenue\") FROM sales_data), 0), 2) AS \"Revenue Share (%)\"\nFROM sales_data\nGROUP BY \"Product Category\"\nORDER BY SUM(\"Total Revenue\") DESC, \"Product Category\" ASC",
+  "rows": [
+   [
+    "Electronics",
+    56.61
+   ],
+   [
+    "Software",
+    30.24
+   ],
+   [
+    "Office Supplies",
+    13.15
+   ]
+  ],
+  "answer": "各產品類別的銷售額占比如下：Electronics 占 56.61%，Software 占 30.24%，Office Supplies 占 13.15%。\n\n| Product Category   | Revenue Share (%)   |\n|:-------------------|:--------------------|\n| Electronics        | 56.61               |\n| Software           | 30.24               |\n| Office Supplies    | 13.15               |"
+ }
+]

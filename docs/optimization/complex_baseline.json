@@ -1,0 +1,4533 @@
+[
+  {
+    "id": "X-region_top_product-2024-seed",
+    "question": "2024 年各區域銷售額最高的產品分別是什麼？金額是多少？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-region_top_product-2024",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH product_region AS (\n  SELECT \"Region\", \"Product Name\", SUM(\"Total Revenue\") AS \"Revenue\"\n  FROM sales_data\n  WHERE substr(\"Order Date\", 1, 4) = '2024'\n  GROUP BY \"Region\", \"Product Name\"\n),\nranked AS (\n  SELECT \"Region\", \"Product Name\", \"Revenue\",\n         ROW_NUMBER() OVER (PARTITION BY \"Region\" ORDER BY \"Revenue\" DESC, \"Product Name\" ASC) AS rn\n  FROM product_region\n)\nSELECT \"Region\", \"Product Name\", \"Revenue\"\nFROM ranked\nWHERE rn = 1\nORDER BY \"Region\" ASC;",
+    "column_names": [
+      "Region",
+      "Product Name",
+      "Revenue"
+    ],
+    "rows": [
+      [
+        "APAC",
+        "Enterprise Laptop X1",
+        3472414.49
+      ],
+      [
+        "EMEA",
+        "Enterprise Laptop X1",
+        4321901.75
+      ],
+      [
+        "LATAM",
+        "Enterprise Laptop X1",
+        662295.87
+      ],
+      [
+        "North America",
+        "Enterprise Laptop X1",
+        6509019.16
+      ]
+    ],
+    "row_count": 4,
+    "answer": "2024 年各區域銷售額最高的產品均為 Enterprise Laptop X1。各區域金額如下：\n- APAC：3,472,414.49\n- EMEA：4,321,901.75\n- LATAM：662,295.87\n- North America：6,509,019.16\n\n| Region        | Product Name         | Revenue      |\n|:--------------|:---------------------|:-------------|\n| APAC          | Enterprise Laptop X1 | 3,472,414.49 |\n| EMEA          | Enterprise Laptop X1 | 4,321,901.75 |\n| LATAM         | Enterprise Laptop X1 | 662,295.87   |\n| North America | Enterprise Laptop X1 | 6,509,019.16 |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 50.8
+  },
+  {
+    "id": "X-region_top_product-2024-v1",
+    "question": "2024 年哪個產品在每個區域的營收最高？告訴我金額。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-region_top_product-2024",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Region\", \"Product Name\", \"Revenue\"\nFROM (\n    SELECT\n        \"Region\",\n        \"Product Name\",\n        SUM(\"Total Revenue\") AS \"Revenue\",\n        ROW_NUMBER() OVER (\n            PARTITION BY \"Region\"\n            ORDER BY SUM(\"Total Revenue\") DESC, \"Product Name\" ASC\n        ) AS rn\n    FROM sales_data\n    WHERE substr(\"Order Date\", 1, 4) = '2024'\n    GROUP BY \"Region\", \"Product Name\"\n)\nWHERE rn = 1\nORDER BY \"Region\" ASC;",
+    "column_names": [
+      "Region",
+      "Product Name",
+      "Revenue"
+    ],
+    "rows": [
+      [
+        "APAC",
+        "Enterprise Laptop X1",
+        3472414.49
+      ],
+      [
+        "EMEA",
+        "Enterprise Laptop X1",
+        4321901.75
+      ],
+      [
+        "LATAM",
+        "Enterprise Laptop X1",
+        662295.87
+      ],
+      [
+        "North America",
+        "Enterprise Laptop X1",
+        6509019.16
+      ]
+    ],
+    "row_count": 4,
+    "answer": "2024 年各區域營收最高的產品均為 Enterprise Laptop X1，金額分別為：North America 6,509,019.16 美元、EMEA 4,321,901.75 美元、APAC 3,472,414.49 美元、LATAM 662,295.87 美元。\n\n| Region        | Product Name         | Revenue      |\n|:--------------|:---------------------|:-------------|\n| APAC          | Enterprise Laptop X1 | 3,472,414.49 |\n| EMEA          | Enterprise Laptop X1 | 4,321,901.75 |\n| LATAM         | Enterprise Laptop X1 | 662,295.87   |\n| North America | Enterprise Laptop X1 | 6,509,019.16 |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 63.4
+  },
+  {
+    "id": "X-region_top_product-2024-v2",
+    "question": "查 2024 年各區銷售額最高的產品及其金額。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-region_top_product-2024",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH rev AS (\n  SELECT\n    \"Region\",\n    \"Product Name\",\n    SUM(\"Total Revenue\") AS \"Total Revenue\"\n  FROM sales_data\n  WHERE substr(\"Order Date\", 1, 4) = '2024'\n  GROUP BY \"Region\", \"Product Name\"\n),\nranked AS (\n  SELECT\n    \"Region\",\n    \"Product Name\",\n    \"Total Revenue\",\n    ROW_NUMBER() OVER (\n      PARTITION BY \"Region\"\n      ORDER BY \"Total Revenue\" DESC, \"Product Name\" ASC\n    ) AS rn\n  FROM rev\n)\nSELECT\n  \"Region\",\n  \"Product Name\",\n  \"Total Revenue\"\nFROM ranked\nWHERE rn = 1;",
+    "column_names": [
+      "Region",
+      "Product Name",
+      "Total Revenue"
+    ],
+    "rows": [
+      [
+        "APAC",
+        "Enterprise Laptop X1",
+        3472414.49
+      ],
+      [
+        "EMEA",
+        "Enterprise Laptop X1",
+        4321901.75
+      ],
+      [
+        "LATAM",
+        "Enterprise Laptop X1",
+        662295.87
+      ],
+      [
+        "North America",
+        "Enterprise Laptop X1",
+        6509019.16
+      ]
+    ],
+    "row_count": 4,
+    "answer": "2024 年各區銷售額最高的產品均為 Enterprise Laptop X1。各區金額如下：\n- North America：6,509,019.16 元\n- EMEA：4,321,901.75 元\n- APAC：3,472,414.49 元\n- LATAM：662,295.87 元\n\nNorth America 金額最高，LATAM 最低，兩者差額為 5,846,723.29 元。\n\n| Region        | Product Name         | Total Revenue   |\n|:--------------|:---------------------|:----------------|\n| APAC          | Enterprise Laptop X1 | 3,472,414.49    |\n| EMEA          | Enterprise Laptop X1 | 4,321,901.75    |\n| LATAM         | Enterprise Laptop X1 | 662,295.87      |\n| North America | Enterprise Laptop X1 | 6,509,019.16    |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 55.7
+  },
+  {
+    "id": "X-category_top3_quantity-seed",
+    "question": "每個產品類別裡，銷售量前三名的產品分別是哪些？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-category_top3_quantity",
+    "passed": false,
+    "reason": "rows differ from oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH product_sales AS (\n  SELECT\n    \"Product Category\",\n    \"Product Name\",\n    SUM(\"Quantity\") AS total_quantity\n  FROM sales_data\n  GROUP BY\n    \"Product Category\",\n    \"Product Name\"\n),\nranked AS (\n  SELECT\n    \"Product Category\",\n    \"Product Name\",\n    total_quantity,\n    ROW_NUMBER() OVER (\n      PARTITION BY \"Product Category\"\n      ORDER BY total_quantity DESC, \"Product Name\" ASC\n    ) AS rn\n  FROM product_sales\n)\nSELECT\n  \"Product Category\",\n  \"Product Name\",\n  total_quantity\nFROM ranked\nWHERE rn <= 3\nORDER BY\n  \"Product Category\" ASC,\n  rn ASC;",
+    "column_names": [
+      "Product Category",
+      "Product Name",
+      "total_quantity"
+    ],
+    "rows": [
+      [
+        "Electronics",
+        "Enterprise Laptop X1",
+        25023
+      ],
+      [
+        "Electronics",
+        "Pro Smartphone 15",
+        20924
+      ],
+      [
+        "Electronics",
+        "4K Monitor 27\"",
+        15834
+      ],
+      [
+        "Office Supplies",
+        "Ergonomic Chair",
+        13955
+      ],
+      [
+        "Office Supplies",
+        "Standing Desk",
+        10292
+      ],
+      [
+        "Office Supplies",
+        "Meeting Whiteboard",
+        5445
+      ],
+      [
+        "Software",
+        "Team Collaboration Tool",
+        15949
+      ],
+      [
+        "Software",
+        "Security Suite",
+        8318
+      ],
+      [
+        "Software",
+        "Cloud License (Annual)",
+        3011
+      ]
+    ],
+    "row_count": 9,
+    "answer": "各產品類別銷售量前三名如下：\n\n1. **Electronics**\n   - 第 1 名：Enterprise Laptop X1（25,023 件）\n   - 第 2 名：Pro Smartphone 15（20,924 件）\n   - 第 3 名：4K Monitor 27\"（15,834 件）\n\n2. **Office Supplies**\n   - 第 1 名：Ergonomic Chair（13,955 件）\n   - 第 2 名：Standing Desk（10,292 件）\n   - 第 3 名：Meeting Whiteboard（5,445 件）\n\n3. **Software**\n   - 第 1 名：Team Collaboration Tool（15,949 件）\n   - 第 2 名：Security Suite（8,318 件）\n   - 第 3 名：Cloud License (Annual)（3,011 件）\n\n| Product Category   | Product Name            | total_quantity   |\n|:-------------------|:------------------------|:-----------------|\n| Electronics        | Enterprise Laptop X1    | 25,023           |\n| Electronics        | Pro Smartphone 15       | 20,924           |\n| Electronics        | 4K Monitor 27\"          | 15,834           |\n| Office Supplies    | Ergonomic Chair         | 13,955           |\n| Office Supplies    | Standing Desk           | 10,292           |\n| Office Supplies    | Meeting Whiteboard      | 5,445            |\n| Software           | Team Collaboration Tool | 15,949           |\n| Software           | Security Suite          | 8,318            |\n| Software           | Cloud License (Annual)  | 3,011            |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 68.3
+  },
+  {
+    "id": "X-category_top3_quantity-v1",
+    "question": "各產品類別裡，賣出件數排前三的名單是什麼？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-category_top3_quantity",
+    "passed": false,
+    "reason": "rows differ from oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH product_qty AS (\n  SELECT\n    \"Product Category\",\n    \"Product Name\",\n    SUM(\"Quantity\") AS \"Quantity\"\n  FROM sales_data\n  GROUP BY \"Product Category\", \"Product Name\"\n),\nranked AS (\n  SELECT\n    \"Product Category\",\n    \"Product Name\",\n    \"Quantity\",\n    ROW_NUMBER() OVER (\n      PARTITION BY \"Product Category\"\n      ORDER BY \"Quantity\" DESC, \"Product Name\" ASC\n    ) AS \"Rank\"\n  FROM product_qty\n)\nSELECT\n  \"Product Category\",\n  \"Product Name\",\n  \"Quantity\"\nFROM ranked\nWHERE \"Rank\" <= 3\nORDER BY \"Product Category\" ASC, \"Rank\" ASC;",
+    "column_names": [
+      "Product Category",
+      "Product Name",
+      "Quantity"
+    ],
+    "rows": [
+      [
+        "Electronics",
+        "Enterprise Laptop X1",
+        25023
+      ],
+      [
+        "Electronics",
+        "Pro Smartphone 15",
+        20924
+      ],
+      [
+        "Electronics",
+        "4K Monitor 27\"",
+        15834
+      ],
+      [
+        "Office Supplies",
+        "Ergonomic Chair",
+        13955
+      ],
+      [
+        "Office Supplies",
+        "Standing Desk",
+        10292
+      ],
+      [
+        "Office Supplies",
+        "Meeting Whiteboard",
+        5445
+      ],
+      [
+        "Software",
+        "Team Collaboration Tool",
+        15949
+      ],
+      [
+        "Software",
+        "Security Suite",
+        8318
+      ],
+      [
+        "Software",
+        "Cloud License (Annual)",
+        3011
+      ]
+    ],
+    "row_count": 9,
+    "answer": "各產品類別賣出件數前三名如下：\n\n1. Electronics：\n   - Enterprise Laptop X1：25,023 件\n   - Pro Smartphone 15：20,924 件\n   - 4K Monitor 27\"：15,834 件\n\n2. Office Supplies：\n   - Ergonomic Chair：13,955 件\n   - Standing Desk：10,292 件\n   - Meeting Whiteboard：5,445 件\n\n3. Software：\n   - Team Collaboration Tool：15,949 件\n   - Security Suite：8,318 件\n   - Cloud License (Annual)：3,011 件\n\n| Product Category   | Product Name            | Quantity   |\n|:-------------------|:------------------------|:-----------|\n| Electronics        | Enterprise Laptop X1    | 25,023     |\n| Electronics        | Pro Smartphone 15       | 20,924     |\n| Electronics        | 4K Monitor 27\"          | 15,834     |\n| Office Supplies    | Ergonomic Chair         | 13,955     |\n| Office Supplies    | Standing Desk           | 10,292     |\n| Office Supplies    | Meeting Whiteboard      | 5,445      |\n| Software           | Team Collaboration Tool | 15,949     |\n| Software           | Security Suite          | 8,318      |\n| Software           | Cloud License (Annual)  | 3,011      |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 88.5
+  },
+  {
+    "id": "X-category_top3_quantity-v2",
+    "question": "列出每個類別銷量前三名的產品。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-category_top3_quantity",
+    "passed": false,
+    "reason": "rows differ from oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH ranked AS (\n  SELECT\n    \"Product Category\",\n    \"Product Name\",\n    SUM(\"Quantity\") AS \"Quantity\",\n    ROW_NUMBER() OVER (\n      PARTITION BY \"Product Category\"\n      ORDER BY SUM(\"Quantity\") DESC, \"Product Name\" ASC\n    ) AS rn\n  FROM sales_data\n  GROUP BY \"Product Category\", \"Product Name\"\n)\nSELECT\n  \"Product Category\",\n  \"Product Name\",\n  \"Quantity\"\nFROM ranked\nWHERE rn <= 3\nORDER BY \"Product Category\" ASC, \"Quantity\" DESC, \"Product Name\" ASC;",
+    "column_names": [
+      "Product Category",
+      "Product Name",
+      "Quantity"
+    ],
+    "rows": [
+      [
+        "Electronics",
+        "Enterprise Laptop X1",
+        25023
+      ],
+      [
+        "Electronics",
+        "Pro Smartphone 15",
+        20924
+      ],
+      [
+        "Electronics",
+        "4K Monitor 27\"",
+        15834
+      ],
+      [
+        "Office Supplies",
+        "Ergonomic Chair",
+        13955
+      ],
+      [
+        "Office Supplies",
+        "Standing Desk",
+        10292
+      ],
+      [
+        "Office Supplies",
+        "Meeting Whiteboard",
+        5445
+      ],
+      [
+        "Software",
+        "Team Collaboration Tool",
+        15949
+      ],
+      [
+        "Software",
+        "Security Suite",
+        8318
+      ],
+      [
+        "Software",
+        "Cloud License (Annual)",
+        3011
+      ]
+    ],
+    "row_count": 9,
+    "answer": "Electronics 類別銷量前三名：Enterprise Laptop X1（25,023）、Pro Smartphone 15（20,924）、4K Monitor 27\"（15,834）；Office Supplies 類別前三名：Ergonomic Chair（13,955）、Standing Desk（10,292）、Meeting Whiteboard（5,445）；Software 類別前三名：Team Collaboration Tool（15,949）、Security Suite（8,318）、Cloud License (Annual)（3,011）。\n\n| Product Category   | Product Name            | Quantity   |\n|:-------------------|:------------------------|:-----------|\n| Electronics        | Enterprise Laptop X1    | 25,023     |\n| Electronics        | Pro Smartphone 15       | 20,924     |\n| Electronics        | 4K Monitor 27\"          | 15,834     |\n| Office Supplies    | Ergonomic Chair         | 13,955     |\n| Office Supplies    | Standing Desk           | 10,292     |\n| Office Supplies    | Meeting Whiteboard      | 5,445      |\n| Software           | Team Collaboration Tool | 15,949     |\n| Software           | Security Suite          | 8,318      |\n| Software           | Cloud License (Annual)  | 3,011      |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 73.0
+  },
+  {
+    "id": "X-region_mom-APAC-2024-seed",
+    "question": "APAC 在 2024 年每個月的銷售額比前一個月成長了多少百分比？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-region_mom-APAC-2024",
+    "passed": false,
+    "reason": "rows differ from oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH RECURSIVE months(month) AS (\n  SELECT '2023-12'\n  UNION ALL\n  SELECT strftime('%Y-%m', date(month, '+1 month'))\n  FROM months\n  WHERE month < '2024-12'\n),\nmonthly AS (\n  SELECT substr(\"Order Date\", 1, 7) AS month,\n         SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  WHERE \"Region\" = 'APAC'\n    AND substr(\"Order Date\", 1, 7) BETWEEN '2023-12' AND '2024-12'\n  GROUP BY substr(\"Order Date\", 1, 7)\n)\nSELECT m.month AS \"Month\",\n       COALESCE(cur.revenue, 0) AS \"Revenue\",\n       COALESCE(prev.revenue, 0) AS \"Previous Month Revenue\",\n       (COALESCE(cur.revenue, 0) - COALESCE(prev.revenue, 0)) * 100.0 / NULLIF(COALESCE(prev.revenue, 0), 0) AS \"Growth Percentage\"\nFROM months m\nLEFT JOIN monthly cur ON cur.month = m.month\nLEFT JOIN monthly prev ON prev.month = strftime('%Y-%m', date(m.month, '-1 month'))\nWHERE m.month BETWEEN '2024-01' AND '2024-12'\nORDER BY m.month;",
+    "column_names": [
+      "Month",
+      "Revenue",
+      "Previous Month Revenue",
+      "Growth Percentage"
+    ],
+    "rows": [],
+    "row_count": 0,
+    "answer": "查詢結果為空，沒有符合條件的資料。\n\n查詢結果：0 筆符合條件的資料。",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 175.8
+  },
+  {
+    "id": "X-region_mom-APAC-2024-v1",
+    "question": "2024 年亞太區的銷售額，一個月比上個月漲了百分之幾？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-region_mom-APAC-2024",
+    "passed": false,
+    "reason": "TimeoutError: ",
+    "workflow_status": "error",
+    "seconds": 300.0
+  },
+  {
+    "id": "X-region_mom-APAC-2024-v2",
+    "question": "查 APAC 2024 各月營收的月增率。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-region_mom-APAC-2024",
+    "passed": false,
+    "reason": "not published: {\"code\": \"REPORT_ATTEMPTS_EXHAUSTED\", \"message\": \"Invalid report or chart: The y column must contain finite numeric values in every row.\"}",
+    "workflow_status": "failed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "",
+    "column_names": [],
+    "rows": [],
+    "row_count": 0,
+    "answer": "這次未能取得可確認的分析結果，請重新提問。",
+    "chart_type": null,
+    "error": {
+      "code": "REPORT_ATTEMPTS_EXHAUSTED",
+      "message": "Invalid report or chart: The y column must contain finite numeric values in every row."
+    },
+    "runtime_error": false,
+    "seconds": 162.5
+  },
+  {
+    "id": "X-cumulative-2023-seed",
+    "question": "2023 年從一月起逐月累計的銷售額是多少？請用折線圖呈現。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-cumulative-2023",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 2,
+    "sql_executed": 2,
+    "sql_query": "WITH months AS (\n  SELECT '2023-01' AS month\n  UNION ALL SELECT '2023-02'\n  UNION ALL SELECT '2023-03'\n  UNION ALL SELECT '2023-04'\n  UNION ALL SELECT '2023-05'\n  UNION ALL SELECT '2023-06'\n  UNION ALL SELECT '2023-07'\n  UNION ALL SELECT '2023-08'\n  UNION ALL SELECT '2023-09'\n  UNION ALL SELECT '2023-10'\n  UNION ALL SELECT '2023-11'\n  UNION ALL SELECT '2023-12'\n),\nmonthly AS (\n  SELECT substr(\"Order Date\", 1, 7) AS month,\n         SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  WHERE substr(\"Order Date\", 1, 4) = '2023'\n  GROUP BY substr(\"Order Date\", 1, 7)\n)\nSELECT m.month AS \"Month\",\n       COALESCE(SUM(r.revenue) OVER (ORDER BY m.month), 0) AS \"Cumulative Revenue\"\nFROM months m\nLEFT JOIN monthly r ON r.month = m.month\nORDER BY m.month;",
+    "column_names": [
+      "Month",
+      "Cumulative Revenue"
+    ],
+    "rows": [
+      [
+        "2023-01",
+        3578066.96
+      ],
+      [
+        "2023-02",
+        7775759.68
+      ],
+      [
+        "2023-03",
+        11672548.84
+      ],
+      [
+        "2023-04",
+        14945074.19
+      ],
+      [
+        "2023-05",
+        18262349.19
+      ],
+      [
+        "2023-06",
+        21524155.83
+      ],
+      [
+        "2023-07",
+        25626697.54
+      ],
+      [
+        "2023-08",
+        29794015.32
+      ],
+      [
+        "2023-09",
+        33316756.46
+      ],
+      [
+        "2023-10",
+        40156231.55
+      ],
+      [
+        "2023-11",
+        45766713.59
+      ],
+      [
+        "2023-12",
+        51406349.26
+      ]
+    ],
+    "row_count": 12,
+    "answer": "2023 年 1 月至 12 月的逐月累計銷售額如下：1 月為 3,578,066.96 元，2 月為 7,775,759.68 元，3 月為 11,672,548.84 元，4 月為 14,945,074.19 元，5 月為 18,262,349.19 元，6 月為 21,524,155.83 元，7 月為 25,626,697.54 元，8 月為 29,794,015.32 元，9 月為 33,316,756.46 元，10 月為 40,156,231.55 元，11 月為 45,766,713.59 元，12 月為 51,406,349.26 元。全年累計銷售額為 51,406,349.26 元（約 51.41M）。\n\n| Month   | Cumulative Revenue   |\n|:--------|:---------------------|\n| 2023-01 | 3,578,066.96         |\n| 2023-02 | 7,775,759.68         |\n| 2023-03 | 11,672,548.84        |\n| 2023-04 | 14,945,074.19        |\n| 2023-05 | 18,262,349.19        |\n| 2023-06 | 21,524,155.83        |\n| 2023-07 | 25,626,697.54        |\n| 2023-08 | 29,794,015.32        |\n| 2023-09 | 33,316,756.46        |\n| 2023-10 | 40,156,231.55        |\n| 2023-11 | 45,766,713.59        |\n| 2023-12 | 51,406,349.26        |",
+    "chart_type": "line",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 234.8
+  },
+  {
+    "id": "X-cumulative-2023-v1",
+    "question": "2023 年逐月累計銷售額，用折線圖顯示。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-cumulative-2023",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH RECURSIVE months(month) AS (\n  SELECT '2023-01'\n  UNION ALL\n  SELECT strftime('%Y-%m', date(month || '-01', '+1 month'))\n  FROM months\n  WHERE month < '2023-12'\n),\nmonthly AS (\n  SELECT strftime('%Y-%m', \"Order Date\") AS month,\n         SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  WHERE \"Order Date\" >= '2023-01-01' AND \"Order Date\" < '2024-01-01'\n  GROUP BY strftime('%Y-%m', \"Order Date\")\n)\nSELECT m.month AS \"Month\",\n       COALESCE(SUM(r.revenue) OVER (ORDER BY m.month), 0) AS \"Cumulative Revenue\"\nFROM months AS m\nLEFT JOIN monthly AS r ON m.month = r.month\nORDER BY m.month;",
+    "column_names": [
+      "Month",
+      "Cumulative Revenue"
+    ],
+    "rows": [
+      [
+        "2023-01",
+        3578066.96
+      ],
+      [
+        "2023-02",
+        7775759.68
+      ],
+      [
+        "2023-03",
+        11672548.84
+      ],
+      [
+        "2023-04",
+        14945074.19
+      ],
+      [
+        "2023-05",
+        18262349.19
+      ],
+      [
+        "2023-06",
+        21524155.83
+      ],
+      [
+        "2023-07",
+        25626697.54
+      ],
+      [
+        "2023-08",
+        29794015.32
+      ],
+      [
+        "2023-09",
+        33316756.46
+      ],
+      [
+        "2023-10",
+        40156231.55
+      ],
+      [
+        "2023-11",
+        45766713.59
+      ],
+      [
+        "2023-12",
+        51406349.26
+      ]
+    ],
+    "row_count": 12,
+    "answer": "2023 年逐月累計銷售額從 1 月的 3,578,066.96 元持續上升至 12 月的 51,406,349.26 元，全年累計約 51.41M 元。\n\n| Month   | Cumulative Revenue   |\n|:--------|:---------------------|\n| 2023-01 | 3,578,066.96         |\n| 2023-02 | 7,775,759.68         |\n| 2023-03 | 11,672,548.84        |\n| 2023-04 | 14,945,074.19        |\n| 2023-05 | 18,262,349.19        |\n| 2023-06 | 21,524,155.83        |\n| 2023-07 | 25,626,697.54        |\n| 2023-08 | 29,794,015.32        |\n| 2023-09 | 33,316,756.46        |\n| 2023-10 | 40,156,231.55        |\n| 2023-11 | 45,766,713.59        |\n| 2023-12 | 51,406,349.26        |",
+    "chart_type": "line",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 101.5
+  },
+  {
+    "id": "X-cumulative-2023-v2",
+    "question": "2023 年從頭到尾，每個月累積賣了多少錢？用折線圖畫出來。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-cumulative-2023",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 2,
+    "sql_executed": 2,
+    "sql_query": "WITH RECURSIVE months(n) AS (\n  SELECT 1\n  UNION ALL\n  SELECT n + 1 FROM months WHERE n < 12\n),\nmonthly AS (\n  SELECT strftime('%Y-%m', \"Order Date\") AS month,\n         SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  WHERE \"Order Date\" >= '2023-01-01'\n    AND \"Order Date\" < '2024-01-01'\n  GROUP BY strftime('%Y-%m', \"Order Date\")\n)\nSELECT strftime('%Y-%m', date('2023-01-01', '+' || (m.n - 1) || ' months')) AS month,\n       COALESCE(SUM(COALESCE(mo.revenue, 0)) OVER (ORDER BY m.n), 0) AS cumulative_revenue\nFROM months m\nLEFT JOIN monthly mo\n  ON mo.month = strftime('%Y-%m', date('2023-01-01', '+' || (m.n - 1) || ' months'))\nORDER BY m.n;",
+    "column_names": [
+      "month",
+      "cumulative_revenue"
+    ],
+    "rows": [
+      [
+        "2023-01",
+        3578066.96
+      ],
+      [
+        "2023-02",
+        7775759.68
+      ],
+      [
+        "2023-03",
+        11672548.84
+      ],
+      [
+        "2023-04",
+        14945074.19
+      ],
+      [
+        "2023-05",
+        18262349.19
+      ],
+      [
+        "2023-06",
+        21524155.83
+      ],
+      [
+        "2023-07",
+        25626697.54
+      ],
+      [
+        "2023-08",
+        29794015.32
+      ],
+      [
+        "2023-09",
+        33316756.46
+      ],
+      [
+        "2023-10",
+        40156231.55
+      ],
+      [
+        "2023-11",
+        45766713.59
+      ],
+      [
+        "2023-12",
+        51406349.26
+      ]
+    ],
+    "row_count": 12,
+    "answer": "2023 年 1 月至 12 月的累計營收從 3,578,066.96 元持續上升至 51,406,349.26 元，全年累計約 51.41M 元。\n\n| month   | cumulative_revenue   |\n|:--------|:---------------------|\n| 2023-01 | 3,578,066.96         |\n| 2023-02 | 7,775,759.68         |\n| 2023-03 | 11,672,548.84        |\n| 2023-04 | 14,945,074.19        |\n| 2023-05 | 18,262,349.19        |\n| 2023-06 | 21,524,155.83        |\n| 2023-07 | 25,626,697.54        |\n| 2023-08 | 29,794,015.32        |\n| 2023-09 | 33,316,756.46        |\n| 2023-10 | 40,156,231.55        |\n| 2023-11 | 45,766,713.59        |\n| 2023-12 | 51,406,349.26        |",
+    "chart_type": "line",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 219.3
+  },
+  {
+    "id": "X-country_decline-seed",
+    "question": "哪些國家 2024 年的銷售額比 2023 年下滑？各下滑了多少百分比？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-country_decline",
+    "passed": false,
+    "reason": "rows differ from oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT\n  \"Country\",\n  ROUND(\n    (\n      SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END)\n      - SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END)\n    ) * 100.0\n    / NULLIF(SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END), 0),\n    2\n  ) AS \"Decline Percentage\"\nFROM sales_data\nWHERE substr(\"Order Date\", 1, 4) IN ('2023', '2024')\nGROUP BY \"Country\"\nHAVING\n  SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END) > 0\n  AND SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END)\n    < SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END)\nORDER BY \"Decline Percentage\" DESC, \"Country\" ASC;",
+    "column_names": [
+      "Country",
+      "Decline Percentage"
+    ],
+    "rows": [
+      [
+        "Australia",
+        20.95
+      ],
+      [
+        "Japan",
+        13.17
+      ],
+      [
+        "India",
+        9.4
+      ],
+      [
+        "Singapore",
+        8.89
+      ],
+      [
+        "France",
+        7.04
+      ],
+      [
+        "Germany",
+        5.01
+      ],
+      [
+        "United Kingdom",
+        4.1
+      ],
+      [
+        "Canada",
+        3.33
+      ]
+    ],
+    "row_count": 8,
+    "answer": "2024 年銷售額較 2023 年下滑的國家共有 8 個，依下滑幅度由高至低分別為：Australia（20.95%）、Japan（13.17%）、India（9.40%）、Singapore（8.89%）、France（7.04%）、Germany（5.01%）、United Kingdom（4.10%）與 Canada（3.33%）。\n\n| Country        | Decline Percentage   |\n|:---------------|:---------------------|\n| Australia      | 20.95                |\n| Japan          | 13.17                |\n| India          | 9.40                 |\n| Singapore      | 8.89                 |\n| France         | 7.04                 |\n| Germany        | 5.01                 |\n| United Kingdom | 4.10                 |\n| Canada         | 3.33                 |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 113.7
+  },
+  {
+    "id": "X-country_decline-v1",
+    "question": "2024 年比 2023 年營收掉的國家有哪些？掉了多少百分比？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-country_decline",
+    "passed": false,
+    "reason": "rows differ from oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH rev AS (\n  SELECT\n    \"Country\",\n    SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END) AS revenue_2023,\n    SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END) AS revenue_2024\n  FROM sales_data\n  WHERE substr(\"Order Date\", 1, 4) IN ('2023', '2024')\n  GROUP BY \"Country\"\n)\nSELECT\n  \"Country\",\n  revenue_2023,\n  revenue_2024,\n  (revenue_2023 - revenue_2024) * 100.0 / NULLIF(revenue_2023, 0) AS drop_percentage\nFROM rev\nWHERE revenue_2024 < revenue_2023\n  AND revenue_2023 > 0\nORDER BY drop_percentage DESC, \"Country\" ASC;",
+    "column_names": [
+      "Country",
+      "revenue_2023",
+      "revenue_2024",
+      "drop_percentage"
+    ],
+    "rows": [
+      [
+        "Australia",
+        2791726.86,
+        2206962.62,
+        20.946327105940437
+      ],
+      [
+        "Japan",
+        2443071.06,
+        2121261.8,
+        13.172324999830346
+      ],
+      [
+        "India",
+        2854640.31,
+        2586332.05,
+        9.39902162314804
+      ],
+      [
+        "Singapore",
+        2667118.92,
+        2429883.13,
+        8.894833605694643
+      ],
+      [
+        "France",
+        3825079.2600000002,
+        3555851.18,
+        7.038496765685323
+      ],
+      [
+        "Germany",
+        4117828.54,
+        3911628.09,
+        5.0075045135317895
+      ],
+      [
+        "United Kingdom",
+        3972457.41,
+        3809729.98,
+        4.096392061759075
+      ],
+      [
+        "Canada",
+        10233716.21,
+        9892460.2,
+        3.3346245195517454
+      ]
+    ],
+    "row_count": 8,
+    "answer": "2024 年營收較 2023 年下降的國家共有 8 個，依下降幅度排序如下：\n\n1. Australia：2023 年營收 2,791,726.86，2024 年營收 2,206,962.62，下降 20.95%。\n2. Japan：2023 年營收 2,443,071.06，2024 年營收 2,121,261.80，下降 13.17%。\n3. India：2023 年營收 2,854,640.31，2024 年營收 2,586,332.05，下降 9.40%。\n4. Singapore：2023 年營收 2,667,118.92，2024 年營收 2,429,883.13，下降 8.89%。\n5. France：2023 年營收 3,825,079.26，2024 年營收 3,555,851.18，下降 7.04%。\n6. Germany：2023 年營收 4,117,828.54，2024 年營收 3,911,628.09，下降 5.01%。\n7. United Kingdom：2023 年營收 3,972,457.41，2024 年營收 3,809,729.98，下降 4.10%。\n8. Canada：2023 年營收 10,233,716.21，2024 年營收 9,892,460.20，下降 3.33%。\n\n| Country        | revenue_2023   | revenue_2024   | drop_percentage   |\n|:---------------|:---------------|:---------------|:------------------|\n| Australia      | 2,791,726.86   | 2,206,962.62   | 20.95             |\n| Japan          | 2,443,071.06   | 2,121,261.80   | 13.17             |\n| India          | 2,854,640.31   | 2,586,332.05   | 9.40              |\n| Singapore      | 2,667,118.92   | 2,429,883.13   | 8.89              |\n| France         | 3,825,079.26   | 3,555,851.18   | 7.04              |\n| Germany        | 4,117,828.54   | 3,911,628.09   | 5.01              |\n| United Kingdom | 3,972,457.41   | 3,809,729.98   | 4.10              |\n| Canada         | 10,233,716.21  | 9,892,460.20   | 3.33              |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 121.0
+  },
+  {
+    "id": "X-country_decline-v2",
+    "question": "列出 2023 到 2024 銷售額衰退的國家及其下滑率。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-country_decline",
+    "passed": false,
+    "reason": "rows differ from oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Country\", (SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END) - SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END)) * 100.0 / NULLIF(SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END), 0) AS \"Decline Rate\" FROM sales_data WHERE substr(\"Order Date\", 1, 4) IN ('2023', '2024') GROUP BY \"Country\" HAVING SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END) > 0 AND SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END) < SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END) ORDER BY \"Country\" ASC;",
+    "column_names": [
+      "Country",
+      "Decline Rate"
+    ],
+    "rows": [
+      [
+        "Australia",
+        20.946327105940437
+      ],
+      [
+        "Canada",
+        3.3346245195517454
+      ],
+      [
+        "France",
+        7.038496765685323
+      ],
+      [
+        "Germany",
+        5.0075045135317895
+      ],
+      [
+        "India",
+        9.39902162314804
+      ],
+      [
+        "Japan",
+        13.172324999830346
+      ],
+      [
+        "Singapore",
+        8.894833605694643
+      ],
+      [
+        "United Kingdom",
+        4.096392061759075
+      ]
+    ],
+    "row_count": 8,
+    "answer": "2023 到 2024 銷售額衰退的國家共有 8 個，下滑率最高為 Australia（20.95%），最低為 Canada（3.33%）。\n\n| Country        | Decline Rate   |\n|:---------------|:---------------|\n| Australia      | 20.95          |\n| Canada         | 3.33           |\n| France         | 7.04           |\n| Germany        | 5.01           |\n| India          | 9.40           |\n| Japan          | 13.17          |\n| Singapore      | 8.89           |\n| United Kingdom | 4.10           |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 151.3
+  },
+  {
+    "id": "X-all_categories-2024-seed",
+    "question": "2024 年三種產品類別都有買過的客戶有幾位？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-all_categories-2024",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT COUNT(*) FROM (SELECT \"Customer Name\" FROM sales_data WHERE substr(\"Order Date\", 1, 4) = '2024' GROUP BY \"Customer Name\" HAVING COUNT(DISTINCT \"Product Category\") = 3) AS t",
+    "column_names": [
+      "COUNT(*)"
+    ],
+    "rows": [
+      [
+        323
+      ]
+    ],
+    "row_count": 1,
+    "answer": "2024 年三種產品類別都有買過的客戶共有 323 位。\n\n| COUNT(*)   |\n|:-----------|\n| 323        |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 89.4
+  },
+  {
+    "id": "X-all_categories-2024-v1",
+    "question": "2024 年有幾位客戶三種產品都買過？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-all_categories-2024",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT COUNT(*) AS customer_count\nFROM (\n  SELECT \"Customer Name\"\n  FROM sales_data\n  WHERE \"Order Date\" BETWEEN '2024-01-01' AND '2024-12-31'\n  GROUP BY \"Customer Name\"\n  HAVING COUNT(DISTINCT \"Product Category\") = 3\n) AS customers",
+    "column_names": [
+      "customer_count"
+    ],
+    "rows": [
+      [
+        323
+      ]
+    ],
+    "row_count": 1,
+    "answer": "2024 年有 323 位客戶三種產品都買過。\n\n| customer_count   |\n|:-----------------|\n| 323              |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 116.3
+  },
+  {
+    "id": "X-all_categories-2024-v2",
+    "question": "2024 年買齊三類產品的客戶總數",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-all_categories-2024",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT COUNT(*) AS customer_count\nFROM (\n  SELECT \"Customer Name\"\n  FROM sales_data\n  WHERE \"Order Date\" >= '2024-01-01'\n    AND \"Order Date\" <= '2024-12-31'\n  GROUP BY \"Customer Name\"\n  HAVING COUNT(DISTINCT \"Product Category\") = 3\n) AS customers;",
+    "column_names": [
+      "customer_count"
+    ],
+    "rows": [
+      [
+        323
+      ]
+    ],
+    "row_count": 1,
+    "answer": "2024 年買齊三類產品的客戶總數為 323 位。\n\n| customer_count   |\n|:-----------------|\n| 323              |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 87.4
+  },
+  {
+    "id": "X-retained-seed",
+    "question": "2023 年和 2024 年都有下過單的客戶共有多少位？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-retained",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT COUNT(*) FROM (SELECT \"Customer Name\" FROM sales_data WHERE substr(\"Order Date\", 1, 4) IN ('2023', '2024') GROUP BY \"Customer Name\" HAVING SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN 1 ELSE 0 END) > 0 AND SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN 1 ELSE 0 END) > 0) AS customers",
+    "column_names": [
+      "COUNT(*)"
+    ],
+    "rows": [
+      [
+        490
+      ]
+    ],
+    "row_count": 1,
+    "answer": "2023 年和 2024 年都有下過單的客戶共有 490 位。\n\n| COUNT(*)   |\n|:-----------|\n| 490        |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 45.6
+  },
+  {
+    "id": "X-retained-v1",
+    "question": "統計 2023 與 2024 皆下單的客戶人數。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-retained",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT COUNT(DISTINCT \"Customer Name\")\nFROM sales_data\nWHERE substr(\"Order Date\", 1, 4) = '2023'\n  AND \"Customer Name\" IN (\n    SELECT \"Customer Name\"\n    FROM sales_data\n    WHERE substr(\"Order Date\", 1, 4) = '2024'\n  );",
+    "column_names": [
+      "COUNT(DISTINCT \"Customer Name\")"
+    ],
+    "rows": [
+      [
+        490
+      ]
+    ],
+    "row_count": 1,
+    "answer": "2023 與 2024 皆有下單的客戶共 490 人。\n\n| COUNT(DISTINCT \"Customer Name\")   |\n|:----------------------------------|\n| 490                               |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 57.5
+  },
+  {
+    "id": "X-retained-v2",
+    "question": "請問 2023 跟 2024 這兩年都有下單的客戶，一共有幾個人？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-retained",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT COUNT(DISTINCT \"Customer Name\")\nFROM sales_data\nWHERE \"Customer Name\" IN (\n    SELECT \"Customer Name\"\n    FROM sales_data\n    WHERE substr(\"Order Date\", 1, 4) = '2023'\n)\nAND \"Customer Name\" IN (\n    SELECT \"Customer Name\"\n    FROM sales_data\n    WHERE substr(\"Order Date\", 1, 4) = '2024'\n);",
+    "column_names": [
+      "COUNT(DISTINCT \"Customer Name\")"
+    ],
+    "rows": [
+      [
+        490
+      ]
+    ],
+    "row_count": 1,
+    "answer": "2023 年與 2024 年都有下單的客戶共有 490 人。\n\n| COUNT(DISTINCT \"Customer Name\")   |\n|:----------------------------------|\n| 490                               |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 46.5
+  },
+  {
+    "id": "X-new_customers-2024-seed",
+    "question": "哪些客戶是 2024 年才第一次下單的新客戶？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-new_customers-2024",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Customer Name\"\nFROM sales_data\nGROUP BY \"Customer Name\"\nHAVING MIN(\"Order Date\") LIKE '2024-%'\nORDER BY \"Customer Name\" ASC;",
+    "column_names": [
+      "Customer Name"
+    ],
+    "rows": [
+      [
+        "Beta Summit Group"
+      ],
+      [
+        "Elite Next Solutions"
+      ]
+    ],
+    "row_count": 2,
+    "answer": "2024 年才第一次下單的新客戶共有 2 位，依字母順序為 Beta Summit Group 與 Elite Next Solutions。\n\n| Customer Name        |\n|:---------------------|\n| Beta Summit Group    |\n| Elite Next Solutions |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 69.2
+  },
+  {
+    "id": "X-new_customers-2024-v1",
+    "question": "麻煩查一下，哪些客人是 2024 年才剛開始下單的？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-new_customers-2024",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Customer Name\" FROM sales_data GROUP BY \"Customer Name\" HAVING MIN(\"Order Date\") >= '2024-01-01' AND MIN(\"Order Date\") < '2025-01-01' ORDER BY \"Customer Name\" ASC;",
+    "column_names": [
+      "Customer Name"
+    ],
+    "rows": [
+      [
+        "Beta Summit Group"
+      ],
+      [
+        "Elite Next Solutions"
+      ]
+    ],
+    "row_count": 2,
+    "answer": "2024 年才剛開始下單的客人共有 2 位，依字母順序排列為 Beta Summit Group 與 Elite Next Solutions。\n\n| Customer Name        |\n|:---------------------|\n| Beta Summit Group    |\n| Elite Next Solutions |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 62.2
+  },
+  {
+    "id": "X-new_customers-2024-v2",
+    "question": "2024 年首次下單的客戶有哪些？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-new_customers-2024",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT DISTINCT \"Customer Name\"\nFROM sales_data\nWHERE \"Customer Name\" IN (\n    SELECT \"Customer Name\"\n    FROM sales_data\n    GROUP BY \"Customer Name\"\n    HAVING MIN(\"Order Date\") >= '2024-01-01'\n       AND MIN(\"Order Date\") <= '2024-12-31'\n)\nORDER BY \"Customer Name\" ASC;",
+    "column_names": [
+      "Customer Name"
+    ],
+    "rows": [
+      [
+        "Beta Summit Group"
+      ],
+      [
+        "Elite Next Solutions"
+      ]
+    ],
+    "row_count": 2,
+    "answer": "2024 年首次下單的客戶共有 2 位，依字母順序排列為 Beta Summit Group 與 Elite Next Solutions。\n\n| Customer Name        |\n|:---------------------|\n| Beta Summit Group    |\n| Elite Next Solutions |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 80.9
+  },
+  {
+    "id": "X-aov_region-seed",
+    "question": "各區域平均每筆訂單的金額是多少？由高到低排列。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-aov_region",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Region\", SUM(\"Total Revenue\") / COUNT(DISTINCT \"Order ID\") AS \"Average Revenue per Order\" FROM sales_data GROUP BY \"Region\" ORDER BY \"Average Revenue per Order\" DESC;",
+    "column_names": [
+      "Region",
+      "Average Revenue per Order"
+    ],
+    "rows": [
+      [
+        "EMEA",
+        3495.7270437422694
+      ],
+      [
+        "North America",
+        3374.7741747092305
+      ],
+      [
+        "APAC",
+        3318.0670338305804
+      ],
+      [
+        "LATAM",
+        3300.891795392954
+      ]
+    ],
+    "row_count": 4,
+    "answer": "各區域平均每筆訂單金額由高到低排列如下：\n1. EMEA：3,495.73 元\n2. North America：3,374.77 元\n3. APAC：3,318.07 元\n4. LATAM：3,300.89 元\n\nEMEA 的平均每筆訂單金額最高，LATAM 最低，兩者相差 194.84 元。\n\n| Region        | Average Revenue per Order   |\n|:--------------|:----------------------------|\n| EMEA          | 3,495.73                    |\n| North America | 3,374.77                    |\n| APAC          | 3,318.07                    |\n| LATAM         | 3,300.89                    |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 48.2
+  },
+  {
+    "id": "X-aov_region-v1",
+    "question": "想知道每個區域平均每張訂單大概花多少錢，請把金額比較高的排在前面。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-aov_region",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Region\", SUM(\"Total Revenue\") / COUNT(DISTINCT \"Order ID\") AS \"Average Revenue Per Order\" FROM sales_data GROUP BY \"Region\" ORDER BY \"Average Revenue Per Order\" DESC, \"Region\" ASC;",
+    "column_names": [
+      "Region",
+      "Average Revenue Per Order"
+    ],
+    "rows": [
+      [
+        "EMEA",
+        3495.7270437422694
+      ],
+      [
+        "North America",
+        3374.7741747092305
+      ],
+      [
+        "APAC",
+        3318.0670338305804
+      ],
+      [
+        "LATAM",
+        3300.891795392954
+      ]
+    ],
+    "row_count": 4,
+    "answer": "各區域平均每張訂單金額由高至低為：EMEA 3,495.73 元、North America 3,374.77 元、APAC 3,318.07 元、LATAM 3,300.89 元。\n\n| Region        | Average Revenue Per Order   |\n|:--------------|:----------------------------|\n| EMEA          | 3,495.73                    |\n| North America | 3,374.77                    |\n| APAC          | 3,318.07                    |\n| LATAM         | 3,300.89                    |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 43.4
+  },
+  {
+    "id": "X-aov_region-v2",
+    "question": "列出各區域的平均訂單金額，按金高低排序。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-aov_region",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Region\", SUM(\"Total Revenue\") / COUNT(DISTINCT \"Order ID\") AS \"Average Order Amount\" FROM sales_data GROUP BY \"Region\" ORDER BY \"Average Order Amount\" DESC, \"Region\" ASC;",
+    "column_names": [
+      "Region",
+      "Average Order Amount"
+    ],
+    "rows": [
+      [
+        "EMEA",
+        3495.7270437422694
+      ],
+      [
+        "North America",
+        3374.7741747092305
+      ],
+      [
+        "APAC",
+        3318.0670338305804
+      ],
+      [
+        "LATAM",
+        3300.891795392954
+      ]
+    ],
+    "row_count": 4,
+    "answer": "各區域的平均訂單金額（依金額由高至低排序）如下：\n\n1. EMEA：3,495.73\n2. North America：3,374.77\n3. APAC：3,318.07\n4. LATAM：3,300.89\n\nEMEA 的平均訂單金額最高，LATAM 最低，兩者相差 194.84。\n\n| Region        | Average Order Amount   |\n|:--------------|:-----------------------|\n| EMEA          | 3,495.73               |\n| North America | 3,374.77               |\n| APAC          | 3,318.07               |\n| LATAM         | 3,300.89               |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 50.7
+  },
+  {
+    "id": "X-region_share_of_category-2024-Software-seed",
+    "question": "2024 年 Software 的銷售額中，各區域各占多少百分比？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-region_share_of_category-2024-Software",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH region_rev AS (\n  SELECT \"Region\", SUM(\"Total Revenue\") AS \"Revenue\"\n  FROM sales_data\n  WHERE substr(\"Order Date\", 1, 4) = '2024'\n    AND \"Product Category\" = 'Software'\n  GROUP BY \"Region\"\n),\ntotal_rev AS (\n  SELECT SUM(\"Revenue\") AS \"Total Revenue\"\n  FROM region_rev\n)\nSELECT\n  r.\"Region\",\n  r.\"Revenue\",\n  ROUND(r.\"Revenue\" * 100.0 / NULLIF(t.\"Total Revenue\", 0), 2) AS \"Percentage\"\nFROM region_rev r\nCROSS JOIN total_rev t\nORDER BY \"Percentage\" DESC, \"Region\" ASC;",
+    "column_names": [
+      "Region",
+      "Revenue",
+      "Percentage"
+    ],
+    "rows": [
+      [
+        "North America",
+        6201873.25,
+        40.92
+      ],
+      [
+        "EMEA",
+        5146479.08,
+        33.96
+      ],
+      [
+        "APAC",
+        3087499.03,
+        20.37
+      ],
+      [
+        "LATAM",
+        720815.34,
+        4.76
+      ]
+    ],
+    "row_count": 4,
+    "answer": "2024 年 Software 銷售額總計 15,156,666.70 元。各區域占比如下：North America 40.92%（6,201,873.25 元）、EMEA 33.96%（5,146,479.08 元）、APAC 20.37%（3,087,499.03 元）、LATAM 4.76%（720,815.34 元）。\n\n| Region        | Revenue      | Percentage   |\n|:--------------|:-------------|:-------------|\n| North America | 6,201,873.25 | 40.92        |\n| EMEA          | 5,146,479.08 | 33.96        |\n| APAC          | 3,087,499.03 | 20.37        |\n| LATAM         | 720,815.34   | 4.76         |",
+    "chart_type": "pie",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 70.3
+  },
+  {
+    "id": "X-region_share_of_category-2024-Software-v1",
+    "question": "2024 軟體銷售額各區域占比多少？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-region_share_of_category-2024-Software",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Region\", SUM(\"Total Revenue\") AS \"Revenue\", SUM(\"Total Revenue\") * 100.0 / NULLIF((SELECT SUM(\"Total Revenue\") FROM sales_data WHERE LOWER(\"Product Category\") = 'software' AND \"Order Date\" >= '2024-01-01' AND \"Order Date\" <= '2024-12-31'), 0) AS \"Percentage\" FROM sales_data WHERE LOWER(\"Product Category\") = 'software' AND \"Order Date\" >= '2024-01-01' AND \"Order Date\" <= '2024-12-31' GROUP BY \"Region\" ORDER BY \"Revenue\" DESC;",
+    "column_names": [
+      "Region",
+      "Revenue",
+      "Percentage"
+    ],
+    "rows": [
+      [
+        "North America",
+        6201873.25,
+        40.91845108660996
+      ],
+      [
+        "EMEA",
+        5146479.08,
+        33.9552170794915
+      ],
+      [
+        "APAC",
+        3087499.03,
+        20.37056756021428
+      ],
+      [
+        "LATAM",
+        720815.34,
+        4.7557642736842665
+      ]
+    ],
+    "row_count": 4,
+    "answer": "2024 年軟體銷售額各區域占比如下：\n- North America：6,201,873.25 元，占比 40.92%\n- EMEA：5,146,479.08 元，占比 33.96%\n- APAC：3,087,499.03 元，占比 20.37%\n- LATAM：720,815.34 元，占比 4.76%\n\n| Region        | Revenue      | Percentage   |\n|:--------------|:-------------|:-------------|\n| North America | 6,201,873.25 | 40.92        |\n| EMEA          | 5,146,479.08 | 33.96        |\n| APAC          | 3,087,499.03 | 20.37        |\n| LATAM         | 720,815.34   | 4.76         |",
+    "chart_type": "pie",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 92.9
+  },
+  {
+    "id": "X-region_share_of_category-2024-Software-v2",
+    "question": "2024 年 Software 的銷售額，各區域各占幾%？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-region_share_of_category-2024-Software",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT\n  \"Region\",\n  SUM(\"Total Revenue\") AS \"Sales\",\n  ROUND(SUM(\"Total Revenue\") * 100.0 / NULLIF((SELECT SUM(\"Total Revenue\") FROM sales_data WHERE substr(\"Order Date\", 1, 4) = '2024' AND \"Product Category\" = 'Software'), 0), 2) AS \"Percentage\"\nFROM sales_data\nWHERE substr(\"Order Date\", 1, 4) = '2024'\n  AND \"Product Category\" = 'Software'\nGROUP BY \"Region\"\nORDER BY \"Region\" ASC;",
+    "column_names": [
+      "Region",
+      "Sales",
+      "Percentage"
+    ],
+    "rows": [
+      [
+        "APAC",
+        3087499.03,
+        20.37
+      ],
+      [
+        "EMEA",
+        5146479.08,
+        33.96
+      ],
+      [
+        "LATAM",
+        720815.34,
+        4.76
+      ],
+      [
+        "North America",
+        6201873.25,
+        40.92
+      ]
+    ],
+    "row_count": 4,
+    "answer": "2024 年 Software 的銷售額總計為 15,156,666.70 美元。各區域佔比如下：\n- North America：6,201,873.25 美元，佔 40.92%\n- EMEA：5,146,479.08 美元，佔 33.96%\n- APAC：3,087,499.03 美元，佔 20.37%\n- LATAM：720,815.34 美元，佔 4.76%\n\n| Region        | Sales        | Percentage   |\n|:--------------|:-------------|:-------------|\n| APAC          | 3,087,499.03 | 20.37        |\n| EMEA          | 5,146,479.08 | 33.96        |\n| LATAM         | 720,815.34   | 4.76         |\n| North America | 6,201,873.25 | 40.92        |",
+    "chart_type": "pie",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 84.0
+  },
+  {
+    "id": "X-region_yoy-seed",
+    "question": "各區域 2024 年相較 2023 年的銷售額年增率是多少？請由高到低用長條圖比較。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-region_yoy",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT\n  \"Region\",\n  SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END) AS \"2023 Revenue\",\n  SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END) AS \"2024 Revenue\",\n  (SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END) - SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END)) * 100.0 / NULLIF(SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END), 0) AS \"YoY Growth %\"\nFROM sales_data\nWHERE substr(\"Order Date\", 1, 4) IN ('2023', '2024')\nGROUP BY \"Region\"\nORDER BY \"YoY Growth %\" DESC, \"Region\" ASC;",
+    "column_names": [
+      "Region",
+      "2023 Revenue",
+      "2024 Revenue",
+      "YoY Growth %"
+    ],
+    "rows": [
+      [
+        "LATAM",
+        2336682.86,
+        2535433.43,
+        8.505671582663995
+      ],
+      [
+        "North America",
+        20390881.2,
+        20521506.12,
+        0.6406045855438646
+      ],
+      [
+        "EMEA",
+        15610409.7,
+        15477090.9,
+        -0.8540378027362017
+      ],
+      [
+        "APAC",
+        13068375.5,
+        11843671.79,
+        -9.37150688698837
+      ]
+    ],
+    "row_count": 4,
+    "answer": "2024 年相較 2023 年，各區域銷售額年增率由高到低為：LATAM 8.51%、North America 0.64%、EMEA -0.85%、APAC -9.37%。\n\n| Region        | 2023 Revenue   | 2024 Revenue   | YoY Growth %   |\n|:--------------|:---------------|:---------------|:---------------|\n| LATAM         | 2,336,682.86   | 2,535,433.43   | 8.51           |\n| North America | 20,390,881.20  | 20,521,506.12  | 0.64           |\n| EMEA          | 15,610,409.70  | 15,477,090.90  | -0.85          |\n| APAC          | 13,068,375.50  | 11,843,671.79  | -9.37          |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 82.3
+  },
+  {
+    "id": "X-region_yoy-v1",
+    "question": "請以長條圖呈現各區域2024對比2023的銷售額年增率，依序由高至低排列。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-region_yoy",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT\n  \"Region\",\n  SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END) AS \"2024 Revenue\",\n  SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END) AS \"2023 Revenue\",\n  (SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END) - SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END)) * 100.0 / NULLIF(SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END), 0) AS \"YoY Growth Rate (%)\"\nFROM sales_data\nWHERE substr(\"Order Date\", 1, 4) IN ('2023', '2024')\nGROUP BY \"Region\"\nORDER BY \"YoY Growth Rate (%)\" DESC;",
+    "column_names": [
+      "Region",
+      "2024 Revenue",
+      "2023 Revenue",
+      "YoY Growth Rate (%)"
+    ],
+    "rows": [
+      [
+        "LATAM",
+        2535433.43,
+        2336682.86,
+        8.505671582663995
+      ],
+      [
+        "North America",
+        20521506.12,
+        20390881.2,
+        0.6406045855438646
+      ],
+      [
+        "EMEA",
+        15477090.9,
+        15610409.7,
+        -0.8540378027362017
+      ],
+      [
+        "APAC",
+        11843671.79,
+        13068375.5,
+        -9.37150688698837
+      ]
+    ],
+    "row_count": 4,
+    "answer": "2024年各區域銷售額年增率由高至低排列如下：\n1. LATAM：8.51%（2024年 2,535,433.43 元，2023年 2,336,682.86 元）\n2. North America：0.64%（2024年 20,521,506.12 元，2023年 20,390,881.20 元）\n3. EMEA：-0.85%（2024年 15,477,090.90 元，2023年 15,610,409.70 元）\n4. APAC：-9.37%（2024年 11,843,671.79 元，2023年 13,068,375.50 元）\n\nLATAM 年增率最高，APAC 年增率最低，兩者相差 17.88 個百分點。\n\n| Region        | 2024 Revenue   | 2023 Revenue   | YoY Growth Rate (%)   |\n|:--------------|:---------------|:---------------|:----------------------|\n| LATAM         | 2,535,433.43   | 2,336,682.86   | 8.51                  |\n| North America | 20,521,506.12  | 20,390,881.20  | 0.64                  |\n| EMEA          | 15,477,090.90  | 15,610,409.70  | -0.85                 |\n| APAC          | 11,843,671.79  | 13,068,375.50  | -9.37                 |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 79.4
+  },
+  {
+    "id": "X-region_yoy-v2",
+    "question": "幫我看下2023年跟2024年各區域營收的年增率，請用長條圖從高到低比較。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-region_yoy",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT\n  r.\"Region\" AS \"Region\",\n  r.\"2023 Revenue\" AS \"2023 Revenue\",\n  r.\"2024 Revenue\" AS \"2024 Revenue\",\n  (r.\"2024 Revenue\" - r.\"2023 Revenue\") * 100.0 / NULLIF(r.\"2023 Revenue\", 0) AS \"YoY Growth Rate (%)\"\nFROM (\n  SELECT\n    \"Region\",\n    SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END) AS \"2023 Revenue\",\n    SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END) AS \"2024 Revenue\"\n  FROM sales_data\n  WHERE substr(\"Order Date\", 1, 4) IN ('2023', '2024')\n  GROUP BY \"Region\"\n) r\nORDER BY \"YoY Growth Rate (%)\" DESC, \"Region\" ASC;",
+    "column_names": [
+      "Region",
+      "2023 Revenue",
+      "2024 Revenue",
+      "YoY Growth Rate (%)"
+    ],
+    "rows": [
+      [
+        "LATAM",
+        2336682.86,
+        2535433.43,
+        8.505671582663995
+      ],
+      [
+        "North America",
+        20390881.2,
+        20521506.12,
+        0.6406045855438646
+      ],
+      [
+        "EMEA",
+        15610409.7,
+        15477090.9,
+        -0.8540378027362017
+      ],
+      [
+        "APAC",
+        13068375.5,
+        11843671.79,
+        -9.37150688698837
+      ]
+    ],
+    "row_count": 4,
+    "answer": "2024年各區域營收年增率由高到低排序如下：\n1. LATAM：+8.51%（2023年 2,336,682.86 → 2024年 2,535,433.43）\n2. North America：+0.64%（2023年 20,390,881.20 → 2024年 20,521,506.12）\n3. EMEA：-0.85%（2023年 15,610,409.70 → 2024年 15,477,090.90）\n4. APAC：-9.37%（2023年 13,068,375.50 → 2024年 11,843,671.79）\n\nLATAM 與 North America 為正成長，EMEA 與 APAC 為負成長。\n\n| Region        | 2023 Revenue   | 2024 Revenue   | YoY Growth Rate (%)   |\n|:--------------|:---------------|:---------------|:----------------------|\n| LATAM         | 2,336,682.86   | 2,535,433.43   | 8.51                  |\n| North America | 20,390,881.20  | 20,521,506.12  | 0.64                  |\n| EMEA          | 15,610,409.70  | 15,477,090.90  | -0.85                 |\n| APAC          | 13,068,375.50  | 11,843,671.79  | -9.37                 |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 64.7
+  },
+  {
+    "id": "X-top_customer_concentration-10-seed",
+    "question": "前十大客戶的銷售額加起來占全部銷售額的百分之幾？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-top_customer_concentration-10",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH customer_sales AS (\n  SELECT\n    \"Customer Name\",\n    SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  GROUP BY \"Customer Name\"\n)\nSELECT\n  (SELECT SUM(revenue) FROM (\n    SELECT revenue\n    FROM customer_sales\n    ORDER BY revenue DESC, \"Customer Name\" ASC\n    LIMIT 10\n  )) * 100.0 / NULLIF((SELECT SUM(revenue) FROM customer_sales), 0) AS \"Top 10 Customers Revenue Percentage\";",
+    "column_names": [
+      "Top 10 Customers Revenue Percentage"
+    ],
+    "rows": [
+      [
+        9.885830443682034
+      ]
+    ],
+    "row_count": 1,
+    "answer": "前十大客戶的銷售額加起來占全部銷售額的 9.89%。\n\n| Top 10 Customers Revenue Percentage   |\n|:--------------------------------------|\n| 9.89                                  |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 113.9
+  },
+  {
+    "id": "X-top_customer_concentration-10-v1",
+    "question": "Top 10 客戶銷售額合計占總銷售額的比例是多少？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-top_customer_concentration-10",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH customer_revenue AS (\n  SELECT\n    \"Customer Name\",\n    SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  WHERE \"Customer Name\" IS NOT NULL\n  GROUP BY \"Customer Name\"\n),\ntop_10 AS (\n  SELECT \"Customer Name\"\n  FROM customer_revenue\n  ORDER BY revenue DESC, \"Customer Name\" ASC\n  LIMIT 10\n)\nSELECT\n  (SELECT SUM(revenue) FROM customer_revenue WHERE \"Customer Name\" IN (SELECT \"Customer Name\" FROM top_10)) * 100.0\n  / NULLIF((SELECT SUM(\"Total Revenue\") FROM sales_data), 0) AS \"Top 10 Customer Revenue Share\"",
+    "column_names": [
+      "Top 10 Customer Revenue Share"
+    ],
+    "rows": [
+      [
+        9.885830443682034
+      ]
+    ],
+    "row_count": 1,
+    "answer": "Top 10 客戶銷售額合計占總銷售額的比例為 9.89%。\n\n| Top 10 Customer Revenue Share   |\n|:--------------------------------|\n| 9.89                            |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 142.2
+  },
+  {
+    "id": "X-top_customer_concentration-10-v2",
+    "question": "頭十家客戶的銷售金額合起來，占總銷售額的百分比是多少？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-top_customer_concentration-10",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH customer_sales AS (\n  SELECT \"Customer Name\", SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  GROUP BY \"Customer Name\"\n),\ntop10 AS (\n  SELECT \"Customer Name\", revenue\n  FROM customer_sales\n  ORDER BY revenue DESC, \"Customer Name\" ASC\n  LIMIT 10\n),\ntotal AS (\n  SELECT SUM(\"Total Revenue\") AS total_revenue\n  FROM sales_data\n)\nSELECT\n  (SELECT SUM(revenue) FROM top10) * 100.0 / NULLIF((SELECT total_revenue FROM total), 0) AS percentage",
+    "column_names": [
+      "percentage"
+    ],
+    "rows": [
+      [
+        9.885830443682034
+      ]
+    ],
+    "row_count": 1,
+    "answer": "頭十家客戶的銷售金額合計占總銷售額的 9.89%。\n\n| percentage   |\n|:-------------|\n| 9.89         |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 46.4
+  },
+  {
+    "id": "X-large_order_share-10-seed",
+    "question": "各區域中，數量 10 件以上的大訂單貢獻了多少比例的銷售額？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-large_order_share-10",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 2,
+    "sql_executed": 2,
+    "sql_query": "WITH order_level AS (\n  SELECT\n    \"Order ID\",\n    \"Region\",\n    SUM(\"Quantity\") AS order_qty,\n    SUM(\"Total Revenue\") AS order_rev\n  FROM sales_data\n  GROUP BY \"Order ID\", \"Region\"\n),\nregion_total AS (\n  SELECT\n    \"Region\",\n    SUM(\"Total Revenue\") AS total_rev\n  FROM sales_data\n  GROUP BY \"Region\"\n),\nlarge_orders AS (\n  SELECT\n    \"Region\",\n    SUM(order_rev) AS large_rev\n  FROM order_level\n  WHERE order_qty >= 10\n  GROUP BY \"Region\"\n)\nSELECT\n  rt.\"Region\" AS \"Region\",\n  ROUND(100.0 * COALESCE(lo.large_rev, 0) / NULLIF(rt.total_rev, 0), 2) AS \"Large Order Revenue Share (%)\"\nFROM region_total AS rt\nLEFT JOIN large_orders AS lo\n  ON rt.\"Region\" = lo.\"Region\"\nORDER BY rt.\"Region\" ASC;",
+    "column_names": [
+      "Region",
+      "Large Order Revenue Share (%)"
+    ],
+    "rows": [
+      [
+        "APAC",
+        37.61
+      ],
+      [
+        "EMEA",
+        42.62
+      ],
+      [
+        "LATAM",
+        39.66
+      ],
+      [
+        "North America",
+        41.42
+      ]
+    ],
+    "row_count": 4,
+    "answer": "各區域中，數量 10 件以上的大訂單銷售額佔比如下：\n- APAC：37.61%\n- EMEA：42.62%\n- LATAM：39.66%\n- North America：41.42%\n\n其中 EMEA 佔比最高（42.62%），APAC 佔比最低（37.61%），兩者相差 5.01 個百分點。\n\n| Region        | Large Order Revenue Share (%)   |\n|:--------------|:--------------------------------|\n| APAC          | 37.61                           |\n| EMEA          | 42.62                           |\n| LATAM         | 39.66                           |\n| North America | 41.42                           |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 231.4
+  },
+  {
+    "id": "X-large_order_share-10-v1",
+    "question": "計算各區域中，數量達十件訂單的銷售額占比。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-large_order_share-10",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT t.\"Region\", SUM(CASE WHEN t.\"Order Quantity\" >= 10 THEN t.\"Order Revenue\" ELSE 0 END) * 100.0 / NULLIF(SUM(t.\"Order Revenue\"), 0) AS \"Sales Revenue Share\" FROM (SELECT \"Order ID\", \"Region\", SUM(\"Quantity\") AS \"Order Quantity\", SUM(\"Total Revenue\") AS \"Order Revenue\" FROM sales_data GROUP BY \"Order ID\", \"Region\") t GROUP BY t.\"Region\" ORDER BY t.\"Region\";",
+    "column_names": [
+      "Region",
+      "Sales Revenue Share"
+    ],
+    "rows": [
+      [
+        "APAC",
+        37.614337115366
+      ],
+      [
+        "EMEA",
+        42.61529571148605
+      ],
+      [
+        "LATAM",
+        39.65894972511011
+      ],
+      [
+        "North America",
+        41.42335270597942
+      ]
+    ],
+    "row_count": 4,
+    "answer": "各區域中，數量達十件訂單的銷售額占比如下：\n- APAC：37.61%\n- EMEA：42.62%\n- LATAM：39.66%\n- North America：41.42%\n\n| Region        | Sales Revenue Share   |\n|:--------------|:----------------------|\n| APAC          | 37.61                 |\n| EMEA          | 42.62                 |\n| LATAM         | 39.66                 |\n| North America | 41.42                 |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 119.9
+  },
+  {
+    "id": "X-large_order_share-10-v2",
+    "question": "想知道每個地區裡，買十件以上的大單，佔了總銷售額幾成？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-large_order_share-10",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 2,
+    "sql_executed": 2,
+    "sql_query": "WITH order_agg AS (\n  SELECT\n    \"Order ID\",\n    \"Region\",\n    SUM(\"Quantity\") AS order_qty,\n    SUM(\"Total Revenue\") AS order_rev\n  FROM sales_data\n  GROUP BY \"Order ID\", \"Region\"\n)\nSELECT\n  \"Region\",\n  ROUND(\n    SUM(CASE WHEN order_qty >= 10 THEN order_rev ELSE 0 END) * 100.0 / NULLIF(SUM(order_rev), 0),\n    2\n  ) AS \"Large Order Revenue Share %\"\nFROM order_agg\nGROUP BY \"Region\"\nORDER BY \"Region\";",
+    "column_names": [
+      "Region",
+      "Large Order Revenue Share %"
+    ],
+    "rows": [
+      [
+        "APAC",
+        37.61
+      ],
+      [
+        "EMEA",
+        42.62
+      ],
+      [
+        "LATAM",
+        39.66
+      ],
+      [
+        "North America",
+        41.42
+      ]
+    ],
+    "row_count": 4,
+    "answer": "各區域中，購買十件以上的大單佔總銷售額的比例如下：\n- APAC：37.61%\n- EMEA：42.62%\n- LATAM：39.66%\n- North America：41.42%\n\n其中，EMEA 的大單銷售額佔比最高，為 42.62%；APAC 最低，為 37.61%。\n\n| Region        | Large Order Revenue Share %   |\n|:--------------|:------------------------------|\n| APAC          | 37.61                         |\n| EMEA          | 42.62                         |\n| LATAM         | 39.66                         |\n| North America | 41.42                         |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 192.7
+  },
+  {
+    "id": "X-best_month_each_year-seed",
+    "question": "2023 年和 2024 年各自銷售額最高的是哪個月？金額多少？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-best_month_each_year",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH monthly AS (\n  SELECT\n    substr(\"Order Date\", 1, 4) AS \"Year\",\n    substr(\"Order Date\", 1, 7) AS \"Month\",\n    SUM(\"Total Revenue\") AS \"Total Revenue\"\n  FROM sales_data\n  WHERE substr(\"Order Date\", 1, 4) IN ('2023', '2024')\n  GROUP BY substr(\"Order Date\", 1, 4), substr(\"Order Date\", 1, 7)\n),\nranked AS (\n  SELECT\n    \"Year\",\n    \"Month\",\n    \"Total Revenue\",\n    ROW_NUMBER() OVER (\n      PARTITION BY \"Year\"\n      ORDER BY \"Total Revenue\" DESC, \"Month\" ASC\n    ) AS rn\n  FROM monthly\n)\nSELECT\n  \"Year\",\n  \"Month\",\n  \"Total Revenue\"\nFROM ranked\nWHERE rn = 1\nORDER BY \"Year\" ASC;",
+    "column_names": [
+      "Year",
+      "Month",
+      "Total Revenue"
+    ],
+    "rows": [
+      [
+        "2023",
+        "2023-10",
+        6839475.09
+      ],
+      [
+        "2024",
+        "2024-10",
+        5779322.77
+      ]
+    ],
+    "row_count": 2,
+    "answer": "2023 年銷售額最高的月份是 2023-10，金額為 6,839,475.09 元；2024 年銷售額最高的月份是 2024-10，金額為 5,779,322.77 元。\n\n| Year   | Month   | Total Revenue   |\n|:-------|:--------|:----------------|\n| 2023   | 2023-10 | 6,839,475.09    |\n| 2024   | 2024-10 | 5,779,322.77    |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 57.1
+  },
+  {
+    "id": "X-best_month_each_year-v1",
+    "question": "2023 與 2024 年最高營收月份及金額？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-best_month_each_year",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Year\", \"Month\", \"Revenue\" FROM (SELECT substr(\"Order Date\", 1, 4) AS \"Year\", substr(\"Order Date\", 1, 7) AS \"Month\", SUM(\"Total Revenue\") AS \"Revenue\", ROW_NUMBER() OVER (PARTITION BY substr(\"Order Date\", 1, 4) ORDER BY SUM(\"Total Revenue\") DESC, substr(\"Order Date\", 1, 7) ASC) AS \"rn\" FROM sales_data WHERE substr(\"Order Date\", 1, 4) IN ('2023', '2024') GROUP BY substr(\"Order Date\", 1, 4), substr(\"Order Date\", 1, 7)) WHERE \"rn\" = 1 ORDER BY \"Year\" ASC, \"Month\" ASC;",
+    "column_names": [
+      "Year",
+      "Month",
+      "Revenue"
+    ],
+    "rows": [
+      [
+        "2023",
+        "2023-10",
+        6839475.09
+      ],
+      [
+        "2024",
+        "2024-10",
+        5779322.77
+      ]
+    ],
+    "row_count": 2,
+    "answer": "2023 年最高營收月份為 2023-10，金額 6,839,475.09 元；2024 年最高營收月份為 2024-10，金額 5,779,322.77 元。\n\n| Year   | Month   | Revenue      |\n|:-------|:--------|:-------------|\n| 2023   | 2023-10 | 6,839,475.09 |\n| 2024   | 2024-10 | 5,779,322.77 |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 75.7
+  },
+  {
+    "id": "X-best_month_each_year-v2",
+    "question": "2023 和 2024 這兩年，分別是哪個月營收最高？金額各是多少？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-best_month_each_year",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH monthly AS (\n  SELECT substr(\"Order Date\", 1, 7) AS \"Year-Month\",\n         SUM(\"Total Revenue\") AS \"Revenue\"\n  FROM sales_data\n  WHERE substr(\"Order Date\", 1, 4) IN ('2023', '2024')\n  GROUP BY substr(\"Order Date\", 1, 7)\n),\nranked AS (\n  SELECT \"Year-Month\",\n         \"Revenue\",\n         ROW_NUMBER() OVER (\n           PARTITION BY substr(\"Year-Month\", 1, 4)\n           ORDER BY \"Revenue\" DESC, \"Year-Month\" ASC\n         ) AS rn\n  FROM monthly\n)\nSELECT substr(\"Year-Month\", 1, 4) AS \"Year\",\n       \"Year-Month\" AS \"Month\",\n       \"Revenue\"\nFROM ranked\nWHERE rn = 1\nORDER BY \"Year\" ASC;",
+    "column_names": [
+      "Year",
+      "Month",
+      "Revenue"
+    ],
+    "rows": [
+      [
+        "2023",
+        "2023-10",
+        6839475.09
+      ],
+      [
+        "2024",
+        "2024-10",
+        5779322.77
+      ]
+    ],
+    "row_count": 2,
+    "answer": "2023 年營收最高的月份是 2023-10，金額為 6,839,475.09 元；2024 年營收最高的月份是 2024-10，金額為 5,779,322.77 元。\n\n| Year   | Month   | Revenue      |\n|:-------|:--------|:-------------|\n| 2023   | 2023-10 | 6,839,475.09 |\n| 2024   | 2024-10 | 5,779,322.77 |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 86.4
+  },
+  {
+    "id": "X-asp_change-3-seed",
+    "question": "哪三個產品 2024 年的平均單價比 2023 年漲最多？各漲了多少？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-asp_change-3",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH yearly AS (\n  SELECT \"Product Name\",\n         substr(\"Order Date\", 1, 4) AS \"Year\",\n         AVG(\"ASP\") AS \"Avg ASP\"\n  FROM sales_data\n  WHERE substr(\"Order Date\", 1, 4) IN ('2023', '2024')\n  GROUP BY \"Product Name\", substr(\"Order Date\", 1, 4)\n)\nSELECT cur.\"Product Name\" AS \"Product Name\",\n       cur.\"Avg ASP\" - prev.\"Avg ASP\" AS \"Increase\"\nFROM yearly AS cur\nJOIN yearly AS prev\n  ON cur.\"Product Name\" = prev.\"Product Name\"\nWHERE cur.\"Year\" = '2024'\n  AND prev.\"Year\" = '2023'\nORDER BY \"Increase\" DESC, \"Product Name\" ASC\nLIMIT 3;",
+    "column_names": [
+      "Product Name",
+      "Increase"
+    ],
+    "rows": [
+      [
+        "Pro Smartphone 15",
+        0.5858557257467965
+      ],
+      [
+        "Cloud License (Annual)",
+        0.42662137738261663
+      ],
+      [
+        "Meeting Whiteboard",
+        0.25544773698953804
+      ]
+    ],
+    "row_count": 3,
+    "answer": "2024 年相比 2023 年平均單價漲幅最大的三個產品為：Pro Smartphone 15（漲幅 0.59 元）、Cloud License (Annual)（漲幅 0.43 元）與 Meeting Whiteboard（漲幅 0.26 元）。\n\n| Product Name           | Increase   |\n|:-----------------------|:-----------|\n| Pro Smartphone 15      | 0.59       |\n| Cloud License (Annual) | 0.43       |\n| Meeting Whiteboard     | 0.26       |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 98.9
+  },
+  {
+    "id": "X-asp_change-3-v1",
+    "question": "幫我看看哪三款產品，2024 年的平均單價比 2023 年高出最多錢？各漲了幾個錢？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-asp_change-3",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT\n    p.product_name,\n    p.avg_2024,\n    p.avg_2023,\n    p.avg_2024 - p.avg_2023 AS price_increase\nFROM (\n    SELECT\n        \"Product Name\" AS product_name,\n        AVG(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"ASP\" END) AS avg_2024,\n        AVG(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"ASP\" END) AS avg_2023\n    FROM sales_data\n    WHERE substr(\"Order Date\", 1, 4) IN ('2023', '2024')\n    GROUP BY \"Product Name\"\n) p\nWHERE p.avg_2024 IS NOT NULL\n  AND p.avg_2023 IS NOT NULL\nORDER BY\n    p.avg_2024 - p.avg_2023 DESC,\n    p.product_name ASC\nLIMIT 3;",
+    "column_names": [
+      "product_name",
+      "avg_2024",
+      "avg_2023",
+      "price_increase"
+    ],
+    "rows": [
+      [
+        "Pro Smartphone 15",
+        900.4137527400263,
+        899.8278970142795,
+        0.5858557257467965
+      ],
+      [
+        "Cloud License (Annual)",
+        5020.21077170418,
+        5019.784150326797,
+        0.42662137738261663
+      ],
+      [
+        "Meeting Whiteboard",
+        300.16699159663864,
+        299.9115438596491,
+        0.25544773698953804
+      ]
+    ],
+    "row_count": 3,
+    "answer": "2024 年平均單價比 2023 年漲幅最大的三款產品為：Pro Smartphone 15（漲 0.59 元）、Cloud License (Annual)（漲 0.43 元）、Meeting Whiteboard（漲 0.26 元）。\n\n| product_name           | avg_2024   | avg_2023   | price_increase   |\n|:-----------------------|:-----------|:-----------|:-----------------|\n| Pro Smartphone 15      | 900.41     | 899.83     | 0.59             |\n| Cloud License (Annual) | 5,020.21   | 5,019.78   | 0.43             |\n| Meeting Whiteboard     | 300.17     | 299.91     | 0.26             |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 87.7
+  },
+  {
+    "id": "X-asp_change-3-v2",
+    "question": "比較 2024 和 2023 的平均單價，哪三個產品漲得最貴？各差多少錢？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-asp_change-3",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT\n    p.product_name AS \"Product Name\",\n    p.avg_2024 AS \"Avg ASP 2024\",\n    p.avg_2023 AS \"Avg ASP 2023\",\n    p.avg_2024 - p.avg_2023 AS \"Price Increase\"\nFROM (\n    SELECT\n        \"Product Name\" AS product_name,\n        AVG(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"ASP\" END) AS avg_2024,\n        AVG(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"ASP\" END) AS avg_2023\n    FROM sales_data\n    WHERE substr(\"Order Date\", 1, 4) IN ('2023', '2024')\n    GROUP BY \"Product Name\"\n) p\nWHERE p.avg_2024 IS NOT NULL\n  AND p.avg_2023 IS NOT NULL\nORDER BY\n    p.avg_2024 - p.avg_2023 DESC,\n    p.product_name ASC\nLIMIT 3;",
+    "column_names": [
+      "Product Name",
+      "Avg ASP 2024",
+      "Avg ASP 2023",
+      "Price Increase"
+    ],
+    "rows": [
+      [
+        "Pro Smartphone 15",
+        900.4137527400263,
+        899.8278970142795,
+        0.5858557257467965
+      ],
+      [
+        "Cloud License (Annual)",
+        5020.21077170418,
+        5019.784150326797,
+        0.42662137738261663
+      ],
+      [
+        "Meeting Whiteboard",
+        300.16699159663864,
+        299.9115438596491,
+        0.25544773698953804
+      ]
+    ],
+    "row_count": 3,
+    "answer": "2024 年與 2023 年平均單價漲幅最大的三個產品如下：\n1. Pro Smartphone 15：漲幅 $0.59（2024 年 $900.41 vs 2023 年 $899.83）\n2. Cloud License (Annual)：漲幅 $0.43（2024 年 $5,020.21 vs 2023 年 $5,019.78）\n3. Meeting Whiteboard：漲幅 $0.26（2024 年 $300.17 vs 2023 年 $299.91）\n\n| Product Name           | Avg ASP 2024   | Avg ASP 2023   | Price Increase   |\n|:-----------------------|:---------------|:---------------|:-----------------|\n| Pro Smartphone 15      | 900.41         | 899.83         | 0.59             |\n| Cloud License (Annual) | 5,020.21       | 5,019.78       | 0.43             |\n| Meeting Whiteboard     | 300.17         | 299.91         | 0.26             |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 91.2
+  },
+  {
+    "id": "X-pareto-80-seed",
+    "question": "產品按銷售額由高到低累加，至少要幾個產品才能達到總銷售額的 80%？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-pareto-80",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 2,
+    "sql_executed": 2,
+    "sql_query": "WITH product_rev AS (\n  SELECT\n    \"Product Name\",\n    SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  GROUP BY \"Product Name\"\n),\nranked AS (\n  SELECT\n    ROW_NUMBER() OVER (ORDER BY revenue DESC, \"Product Name\" ASC) AS rn,\n    SUM(revenue) OVER (\n      ORDER BY revenue DESC, \"Product Name\" ASC\n      ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW\n    ) AS cumulative_revenue,\n    (SELECT SUM(\"Total Revenue\") FROM sales_data) AS total_revenue\n  FROM product_rev\n)\nSELECT COALESCE(MIN(rn), 0)\nFROM ranked\nWHERE cumulative_revenue >= 0.8 * total_revenue;",
+    "column_names": [
+      "COALESCE(MIN(rn), 0)"
+    ],
+    "rows": [
+      [
+        5
+      ]
+    ],
+    "row_count": 1,
+    "answer": "依銷售額由高到低累加，至少需要 5 個產品才能達到總銷售額的 80%。\n\n| COALESCE(MIN(rn), 0)   |\n|:-----------------------|\n| 5                      |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 219.2
+  },
+  {
+    "id": "X-pareto-80-v1",
+    "question": "要讓累計銷售額過半再過一點，達到八成的話，最少要幾款產品？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-pareto-80",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT MIN(rn)\nFROM (\n  SELECT\n    ROW_NUMBER() OVER (ORDER BY rev DESC, \"Product Name\" ASC) AS rn,\n    SUM(rev) OVER (ORDER BY rev DESC, \"Product Name\" ASC) AS cum_rev\n  FROM (\n    SELECT \"Product Name\", SUM(\"Total Revenue\") AS rev\n    FROM sales_data\n    GROUP BY \"Product Name\"\n  )\n)\nWHERE cum_rev >= 0.8 * (SELECT SUM(\"Total Revenue\") FROM sales_data);",
+    "column_names": [
+      "MIN(rn)"
+    ],
+    "rows": [
+      [
+        5
+      ]
+    ],
+    "row_count": 1,
+    "answer": "最少需要 5 款產品，其累計銷售額即可達到總銷售額的 80%。\n\n| MIN(rn)   |\n|:----------|\n| 5         |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 122.4
+  },
+  {
+    "id": "X-pareto-80-v2",
+    "question": "累計銷售額占比達80%需要幾個產品？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-pareto-80",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 2,
+    "sql_executed": 2,
+    "sql_query": "WITH product_rev AS (\n  SELECT\n    \"Product Name\" AS product,\n    SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  GROUP BY \"Product Name\"\n),\nranked AS (\n  SELECT\n    product,\n    revenue,\n    SUM(revenue) OVER (\n      ORDER BY revenue DESC, product ASC\n      ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW\n    ) AS cumulative_revenue,\n    SUM(revenue) OVER () AS total_revenue,\n    ROW_NUMBER() OVER (ORDER BY revenue DESC, product ASC) AS rn\n  FROM product_rev\n)\nSELECT COALESCE(MIN(rn), 0)\nFROM ranked\nWHERE cumulative_revenue * 100.0 / NULLIF(total_revenue, 0) >= 80;",
+    "column_names": [
+      "COALESCE(MIN(rn), 0)"
+    ],
+    "rows": [
+      [
+        5
+      ]
+    ],
+    "row_count": 1,
+    "answer": "累計銷售額占比達 80% 需要 5 個產品。\n\n| COALESCE(MIN(rn), 0)   |\n|:-----------------------|\n| 5                      |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 203.6
+  },
+  {
+    "id": "X-multi_region_customers-4-seed",
+    "question": "有多少位客戶在全部四個區域都下過單？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-multi_region_customers-4",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT COUNT(*) FROM (SELECT \"Customer Name\" FROM sales_data WHERE \"Customer Name\" IS NOT NULL GROUP BY \"Customer Name\" HAVING COUNT(DISTINCT \"Region\") = 4) AS customers;",
+    "column_names": [
+      "COUNT(*)"
+    ],
+    "rows": [
+      [
+        306
+      ]
+    ],
+    "row_count": 1,
+    "answer": "共有 306 位客戶在全部四個區域都下過單。\n\n| COUNT(*)   |\n|:-----------|\n| 306        |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 45.9
+  },
+  {
+    "id": "X-multi_region_customers-4-v1",
+    "question": "有幾個客戶在四個區域都下過單呀？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-multi_region_customers-4",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT COUNT(*) FROM (SELECT \"Customer Name\" FROM sales_data GROUP BY \"Customer Name\" HAVING COUNT(DISTINCT \"Region\") = 4) AS customers",
+    "column_names": [
+      "COUNT(*)"
+    ],
+    "rows": [
+      [
+        306
+      ]
+    ],
+    "row_count": 1,
+    "answer": "共有 306 位客戶在四個區域都下過單。\n\n| COUNT(*)   |\n|:-----------|\n| 306        |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 44.6
+  },
+  {
+    "id": "X-multi_region_customers-4-v2",
+    "question": "請問有幾位客戶在四個區域都有買過東西？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-multi_region_customers-4",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT COUNT(*) AS customer_count\nFROM (\n  SELECT \"Customer Name\"\n  FROM sales_data\n  WHERE \"Customer Name\" IS NOT NULL\n  GROUP BY \"Customer Name\"\n  HAVING COUNT(DISTINCT CASE WHEN \"Region\" = 'North America' THEN 1 END) = 1\n     AND COUNT(DISTINCT CASE WHEN \"Region\" = 'EMEA' THEN 1 END) = 1\n     AND COUNT(DISTINCT CASE WHEN \"Region\" = 'APAC' THEN 1 END) = 1\n     AND COUNT(DISTINCT CASE WHEN \"Region\" = 'LATAM' THEN 1 END) = 1\n) AS customers;",
+    "column_names": [
+      "customer_count"
+    ],
+    "rows": [
+      [
+        306
+      ]
+    ],
+    "row_count": 1,
+    "answer": "共有 306 位客戶在 North America、EMEA、APAC 與 LATAM 四個區域都有購買紀錄。\n\n| customer_count   |\n|:-----------------|\n| 306              |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 53.8
+  },
+  {
+    "id": "X-region_category_matrix-2023-seed",
+    "question": "2023 年每個區域在各產品類別的銷售額分別是多少？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-region_category_matrix-2023",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Region\", \"Product Category\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE substr(\"Order Date\", 1, 4) = '2023' GROUP BY \"Region\", \"Product Category\" ORDER BY \"Region\", \"Product Category\";",
+    "column_names": [
+      "Region",
+      "Product Category",
+      "Total Revenue"
+    ],
+    "rows": [
+      [
+        "APAC",
+        "Electronics",
+        7385663.05
+      ],
+      [
+        "APAC",
+        "Office Supplies",
+        1724168.27
+      ],
+      [
+        "APAC",
+        "Software",
+        3958544.18
+      ],
+      [
+        "EMEA",
+        "Electronics",
+        8208966.5
+      ],
+      [
+        "EMEA",
+        "Office Supplies",
+        2058669.5
+      ],
+      [
+        "EMEA",
+        "Software",
+        5342773.7
+      ],
+      [
+        "LATAM",
+        "Electronics",
+        1433435.57
+      ],
+      [
+        "LATAM",
+        "Office Supplies",
+        302991.9
+      ],
+      [
+        "LATAM",
+        "Software",
+        600255.39
+      ],
+      [
+        "North America",
+        "Electronics",
+        11967535.79
+      ],
+      [
+        "North America",
+        "Office Supplies",
+        2699200.65
+      ],
+      [
+        "North America",
+        "Software",
+        5724144.76
+      ]
+    ],
+    "row_count": 12,
+    "answer": "2023 年各區域在各產品類別的銷售額如下：\n\n- APAC：\n  - Electronics：7,385,663.05\n  - Office Supplies：1,724,168.27\n  - Software：3,958,544.18\n- EMEA：\n  - Electronics：8,208,966.50\n  - Office Supplies：2,058,669.50\n  - Software：5,342,773.70\n- LATAM：\n  - Electronics：1,433,435.57\n  - Office Supplies：302,991.90\n  - Software：600,255.39\n- North America：\n  - Electronics：11,967,535.79\n  - Office Supplies：2,699,200.65\n  - Software：5,724,144.76\n\n| Region        | Product Category   | Total Revenue   |\n|:--------------|:-------------------|:----------------|\n| APAC          | Electronics        | 7,385,663.05    |\n| APAC          | Office Supplies    | 1,724,168.27    |\n| APAC          | Software           | 3,958,544.18    |\n| EMEA          | Electronics        | 8,208,966.50    |\n| EMEA          | Office Supplies    | 2,058,669.50    |\n| EMEA          | Software           | 5,342,773.70    |\n| LATAM         | Electronics        | 1,433,435.57    |\n| LATAM         | Office Supplies    | 302,991.90      |\n| LATAM         | Software           | 600,255.39      |\n| North America | Electronics        | 11,967,535.79   |\n| North America | Office Supplies    | 2,699,200.65    |\n| North America | Software           | 5,724,144.76    |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 47.8
+  },
+  {
+    "id": "X-region_category_matrix-2023-v1",
+    "question": "2023 年各區域跟產品類別的銷售金額各是多少？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-region_category_matrix-2023",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Region\", \"Product Category\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE substr(\"Order Date\", 1, 4) = '2023' GROUP BY \"Region\", \"Product Category\" ORDER BY \"Region\", \"Product Category\";",
+    "column_names": [
+      "Region",
+      "Product Category",
+      "Total Revenue"
+    ],
+    "rows": [
+      [
+        "APAC",
+        "Electronics",
+        7385663.05
+      ],
+      [
+        "APAC",
+        "Office Supplies",
+        1724168.27
+      ],
+      [
+        "APAC",
+        "Software",
+        3958544.18
+      ],
+      [
+        "EMEA",
+        "Electronics",
+        8208966.5
+      ],
+      [
+        "EMEA",
+        "Office Supplies",
+        2058669.5
+      ],
+      [
+        "EMEA",
+        "Software",
+        5342773.7
+      ],
+      [
+        "LATAM",
+        "Electronics",
+        1433435.57
+      ],
+      [
+        "LATAM",
+        "Office Supplies",
+        302991.9
+      ],
+      [
+        "LATAM",
+        "Software",
+        600255.39
+      ],
+      [
+        "North America",
+        "Electronics",
+        11967535.79
+      ],
+      [
+        "North America",
+        "Office Supplies",
+        2699200.65
+      ],
+      [
+        "North America",
+        "Software",
+        5724144.76
+      ]
+    ],
+    "row_count": 12,
+    "answer": "2023 年各區域與產品類別的銷售金額如下：\n\n- APAC：\n  - Electronics：7,385,663.05\n  - Office Supplies：1,724,168.27\n  - Software：3,958,544.18\n- EMEA：\n  - Electronics：8,208,966.50\n  - Office Supplies：2,058,669.50\n  - Software：5,342,773.70\n- LATAM：\n  - Electronics：1,433,435.57\n  - Office Supplies：302,991.90\n  - Software：600,255.39\n- North America：\n  - Electronics：11,967,535.79\n  - Office Supplies：2,699,200.65\n  - Software：5,724,144.76\n\n其中，North America 的 Electronics 銷售金額最高（11,967,535.79），LATAM 的 Office Supplies 銷售金額最低（302,991.90）。\n\n| Region        | Product Category   | Total Revenue   |\n|:--------------|:-------------------|:----------------|\n| APAC          | Electronics        | 7,385,663.05    |\n| APAC          | Office Supplies    | 1,724,168.27    |\n| APAC          | Software           | 3,958,544.18    |\n| EMEA          | Electronics        | 8,208,966.50    |\n| EMEA          | Office Supplies    | 2,058,669.50    |\n| EMEA          | Software           | 5,342,773.70    |\n| LATAM         | Electronics        | 1,433,435.57    |\n| LATAM         | Office Supplies    | 302,991.90      |\n| LATAM         | Software           | 600,255.39      |\n| North America | Electronics        | 11,967,535.79   |\n| North America | Office Supplies    | 2,699,200.65    |\n| North America | Software           | 5,724,144.76    |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 43.7
+  },
+  {
+    "id": "X-region_category_matrix-2023-v2",
+    "question": "2023 年，按區域與產品類別統計銷售額。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-region_category_matrix-2023",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Region\", \"Product Category\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data WHERE substr(\"Order Date\", 1, 4) = '2023' GROUP BY \"Region\", \"Product Category\" ORDER BY \"Region\", \"Product Category\";",
+    "column_names": [
+      "Region",
+      "Product Category",
+      "Total Revenue"
+    ],
+    "rows": [
+      [
+        "APAC",
+        "Electronics",
+        7385663.05
+      ],
+      [
+        "APAC",
+        "Office Supplies",
+        1724168.27
+      ],
+      [
+        "APAC",
+        "Software",
+        3958544.18
+      ],
+      [
+        "EMEA",
+        "Electronics",
+        8208966.5
+      ],
+      [
+        "EMEA",
+        "Office Supplies",
+        2058669.5
+      ],
+      [
+        "EMEA",
+        "Software",
+        5342773.7
+      ],
+      [
+        "LATAM",
+        "Electronics",
+        1433435.57
+      ],
+      [
+        "LATAM",
+        "Office Supplies",
+        302991.9
+      ],
+      [
+        "LATAM",
+        "Software",
+        600255.39
+      ],
+      [
+        "North America",
+        "Electronics",
+        11967535.79
+      ],
+      [
+        "North America",
+        "Office Supplies",
+        2699200.65
+      ],
+      [
+        "North America",
+        "Software",
+        5724144.76
+      ]
+    ],
+    "row_count": 12,
+    "answer": "2023 年各區域與產品類別的銷售額如下：\n\n- **APAC**：\n  - Electronics：7,385,663.05\n  - Office Supplies：1,724,168.27\n  - Software：3,958,544.18\n- **EMEA**：\n  - Electronics：8,208,966.50\n  - Office Supplies：2,058,669.50\n  - Software：5,342,773.70\n- **LATAM**：\n  - Electronics：1,433,435.57\n  - Office Supplies：302,991.90\n  - Software：600,255.39\n- **North America**：\n  - Electronics：11,967,535.79\n  - Office Supplies：2,699,200.65\n  - Software：5,724,144.76\n\n其中，North America 的 Electronics 銷售額最高（11,967,535.79），LATAM 的 Office Supplies 銷售額最低（302,991.90）。\n\n| Region        | Product Category   | Total Revenue   |\n|:--------------|:-------------------|:----------------|\n| APAC          | Electronics        | 7,385,663.05    |\n| APAC          | Office Supplies    | 1,724,168.27    |\n| APAC          | Software           | 3,958,544.18    |\n| EMEA          | Electronics        | 8,208,966.50    |\n| EMEA          | Office Supplies    | 2,058,669.50    |\n| EMEA          | Software           | 5,342,773.70    |\n| LATAM         | Electronics        | 1,433,435.57    |\n| LATAM         | Office Supplies    | 302,991.90      |\n| LATAM         | Software           | 600,255.39      |\n| North America | Electronics        | 11,967,535.79   |\n| North America | Office Supplies    | 2,699,200.65    |\n| North America | Software           | 5,724,144.76    |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 40.3
+  },
+  {
+    "id": "X-category_best_month-2024-seed",
+    "question": "2024 年每個產品類別銷售額最高的月份分別是哪個月？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-category_best_month-2024",
+    "passed": false,
+    "reason": "rows differ from oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Product Category\" AS \"Product Category\", \"Month\" AS \"Month\" FROM (SELECT \"Product Category\", \"Month\", \"Revenue\", ROW_NUMBER() OVER (PARTITION BY \"Product Category\" ORDER BY \"Revenue\" DESC, \"Month\" ASC) AS rn FROM (SELECT \"Product Category\", substr(\"Order Date\", 6, 2) AS \"Month\", SUM(\"Total Revenue\") AS \"Revenue\" FROM sales_data WHERE substr(\"Order Date\", 1, 4) = '2024' GROUP BY \"Product Category\", substr(\"Order Date\", 6, 2))) WHERE rn = 1 ORDER BY \"Product Category\" ASC;",
+    "column_names": [
+      "Product Category",
+      "Month"
+    ],
+    "rows": [
+      [
+        "Electronics",
+        "10"
+      ],
+      [
+        "Office Supplies",
+        "12"
+      ],
+      [
+        "Software",
+        "10"
+      ]
+    ],
+    "row_count": 3,
+    "answer": "2024 年各產品類別銷售額最高的月份如下：\n- Electronics：10 月\n- Office Supplies：12 月\n- Software：10 月\n\n| Product Category   | Month   |\n|:-------------------|:--------|\n| Electronics        | 10      |\n| Office Supplies    | 12      |\n| Software           | 10      |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 79.7
+  },
+  {
+    "id": "X-category_best_month-2024-v1",
+    "question": "2024 年各產品類別裡，哪個月營收最高？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-category_best_month-2024",
+    "passed": false,
+    "reason": "rows differ from oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Product Category\", \"Month\", \"Revenue\"\nFROM (\n  SELECT \"Product Category\", \"Month\", \"Revenue\",\n         ROW_NUMBER() OVER (\n           PARTITION BY \"Product Category\"\n           ORDER BY \"Revenue\" DESC, \"Month\" ASC\n         ) AS rn\n  FROM (\n    SELECT \"Product Category\",\n           CAST(substr(\"Order Date\", 6, 2) AS INTEGER) AS \"Month\",\n           SUM(\"Total Revenue\") AS \"Revenue\"\n    FROM sales_data\n    WHERE substr(\"Order Date\", 1, 4) = '2024'\n    GROUP BY \"Product Category\", CAST(substr(\"Order Date\", 6, 2) AS INTEGER)\n  )\n)\nWHERE rn = 1\nORDER BY \"Product Category\" ASC;",
+    "column_names": [
+      "Product Category",
+      "Month",
+      "Revenue"
+    ],
+    "rows": [
+      [
+        "Electronics",
+        10,
+        3229179.13
+      ],
+      [
+        "Office Supplies",
+        12,
+        801840.39
+      ],
+      [
+        "Software",
+        10,
+        1818678.1
+      ]
+    ],
+    "row_count": 3,
+    "answer": "2024 年各產品類別營收最高的月份如下：\n- Electronics：10 月，營收 3,229,179.13 元\n- Office Supplies：12 月，營收 801,840.39 元\n- Software：10 月，營收 1,818,678.10 元\n\n| Product Category   | Month   | Revenue      |\n|:-------------------|:--------|:-------------|\n| Electronics        | 10      | 3,229,179.13 |\n| Office Supplies    | 12      | 801,840.39   |\n| Software           | 10      | 1,818,678.10 |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 103.0
+  },
+  {
+    "id": "X-category_best_month-2024-v2",
+    "question": "2024 年每個類別營收最高的月份是哪個月？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-category_best_month-2024",
+    "passed": false,
+    "reason": "rows differ from oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Product Category\" AS \"Product Category\", month AS \"Month\"\nFROM (\n    SELECT\n        \"Product Category\",\n        substr(\"Order Date\", 6, 2) AS month,\n        SUM(\"Total Revenue\") AS revenue,\n        ROW_NUMBER() OVER (\n            PARTITION BY \"Product Category\"\n            ORDER BY SUM(\"Total Revenue\") DESC, substr(\"Order Date\", 6, 2) ASC\n        ) AS rn\n    FROM sales_data\n    WHERE substr(\"Order Date\", 1, 4) = '2024'\n    GROUP BY \"Product Category\", substr(\"Order Date\", 6, 2)\n) AS t\nWHERE rn = 1\nORDER BY \"Product Category\" ASC;",
+    "column_names": [
+      "Product Category",
+      "Month"
+    ],
+    "rows": [
+      [
+        "Electronics",
+        "10"
+      ],
+      [
+        "Office Supplies",
+        "12"
+      ],
+      [
+        "Software",
+        "10"
+      ]
+    ],
+    "row_count": 3,
+    "answer": "2024 年各產品類別營收最高的月份如下：\n- Electronics：10 月\n- Office Supplies：12 月\n- Software：10 月\n\n| Product Category   | Month   |\n|:-------------------|:--------|\n| Electronics        | 10      |\n| Office Supplies    | 12      |\n| Software           | 10      |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 80.7
+  },
+  {
+    "id": "X-category_quarter_yoy-Electronics-seed",
+    "question": "Electronics 在 2024 年每一季與 2023 年同一季相比，銷售額成長率各是多少？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-category_quarter_yoy-Electronics",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH q AS (\n  SELECT 1 AS q\n  UNION ALL SELECT 2\n  UNION ALL SELECT 3\n  UNION ALL SELECT 4\n),\nrev AS (\n  SELECT\n    CAST(substr(\"Order Date\", 1, 4) AS INTEGER) AS year,\n    (CAST(substr(\"Order Date\", 6, 2) AS INTEGER) + 2) / 3 AS quarter,\n    SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  WHERE \"Product Category\" = 'Electronics'\n    AND CAST(substr(\"Order Date\", 1, 4) AS INTEGER) IN (2023, 2024)\n  GROUP BY 1, 2\n)\nSELECT\n  'Q' || q.q AS \"Quarter\",\n  COALESCE(r24.revenue, 0) AS \"2024 Revenue\",\n  COALESCE(r23.revenue, 0) AS \"2023 Revenue\",\n  (COALESCE(r24.revenue, 0) - COALESCE(r23.revenue, 0)) * 100.0 / NULLIF(COALESCE(r23.revenue, 0), 0) AS \"Growth Rate (%)\"\nFROM q\nLEFT JOIN rev r24 ON r24.year = 2024 AND r24.quarter = q.q\nLEFT JOIN rev r23 ON r23.year = 2023 AND r23.quarter = q.q\nORDER BY q.q;",
+    "column_names": [
+      "Quarter",
+      "2024 Revenue",
+      "2023 Revenue",
+      "Growth Rate (%)"
+    ],
+    "rows": [
+      [
+        "Q1",
+        6710676.95,
+        6522844.4,
+        2.8796110788722755
+      ],
+      [
+        "Q2",
+        5821102.33,
+        5983649.54,
+        -2.716522899835473
+      ],
+      [
+        "Q3",
+        6788433.08,
+        6794786.86,
+        -0.09350962923361308
+      ],
+      [
+        "Q4",
+        9304443.85,
+        9694320.11,
+        -4.021697814556691
+      ]
+    ],
+    "row_count": 4,
+    "answer": "Electronics 在 2024 年各季與 2023 年同季相比的銷售額成長率如下：\n- Q1：2.88%（2024 年 6,710,676.95 元 vs 2023 年 6,522,844.40 元）\n- Q2：-2.72%（2024 年 5,821,102.33 元 vs 2023 年 5,983,649.54 元）\n- Q3：-0.09%（2024 年 6,788,433.08 元 vs 2023 年 6,794,786.86 元）\n- Q4：-4.02%（2024 年 9,304,443.85 元 vs 2023 年 9,694,320.11 元）\n\n四季中僅 Q1 成長，其餘三季皆衰退。\n\n| Quarter   | 2024 Revenue   | 2023 Revenue   | Growth Rate (%)   |\n|:----------|:---------------|:---------------|:------------------|\n| Q1        | 6,710,676.95   | 6,522,844.40   | 2.88              |\n| Q2        | 5,821,102.33   | 5,983,649.54   | -2.72             |\n| Q3        | 6,788,433.08   | 6,794,786.86   | -0.09             |\n| Q4        | 9,304,443.85   | 9,694,320.11   | -4.02             |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 100.2
+  },
+  {
+    "id": "X-category_quarter_yoy-Electronics-v1",
+    "question": "Electronics 在 2024 年跟 2023 年比，每季的營收成長百分比是多少？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-category_quarter_yoy-Electronics",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH rev AS (\n  SELECT\n    CAST(substr(\"Order Date\", 1, 4) AS INTEGER) AS year,\n    (CAST(substr(\"Order Date\", 6, 2) AS INTEGER) + 2) / 3 AS quarter,\n    SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  WHERE \"Product Category\" = 'Electronics'\n    AND CAST(substr(\"Order Date\", 1, 4) AS INTEGER) IN (2023, 2024)\n  GROUP BY 1, 2\n),\nquarters AS (\n  SELECT 1 AS quarter\n  UNION ALL SELECT 2\n  UNION ALL SELECT 3\n  UNION ALL SELECT 4\n)\nSELECT\n  'Q' || q.quarter AS \"Quarter\",\n  (COALESCE(r24.revenue, 0) - COALESCE(r23.revenue, 0)) * 100.0 / NULLIF(r23.revenue, 0) AS \"Growth Percentage\"\nFROM quarters q\nLEFT JOIN rev r23 ON r23.year = 2023 AND r23.quarter = q.quarter\nLEFT JOIN rev r24 ON r24.year = 2024 AND r24.quarter = q.quarter\nORDER BY q.quarter;",
+    "column_names": [
+      "Quarter",
+      "Growth Percentage"
+    ],
+    "rows": [
+      [
+        "Q1",
+        2.8796110788722755
+      ],
+      [
+        "Q2",
+        -2.716522899835473
+      ],
+      [
+        "Q3",
+        -0.09350962923361308
+      ],
+      [
+        "Q4",
+        -4.021697814556691
+      ]
+    ],
+    "row_count": 4,
+    "answer": "Electronics 2024 年各季相較 2023 年同季的營收成長率如下：Q1 成長 2.88%，Q2 下降 2.72%，Q3 下降 0.09%，Q4 下降 4.02%。\n\n| Quarter   | Growth Percentage   |\n|:----------|:--------------------|\n| Q1        | 2.88                |\n| Q2        | -2.72               |\n| Q3        | -0.09               |\n| Q4        | -4.02               |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 127.1
+  },
+  {
+    "id": "X-category_quarter_yoy-Electronics-v2",
+    "question": "算一下 2024 年 vs 2023 年 Electronics 各季銷售額的年增率。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-category_quarter_yoy-Electronics",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT\n  'Q' || ((CAST(substr(\"Order Date\", 6, 2) AS INTEGER) + 2) / 3) AS \"Quarter\",\n  SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END) AS \"2023 Revenue\",\n  SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END) AS \"2024 Revenue\",\n  (SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END)\n   - SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END))\n  * 100.0\n  / NULLIF(SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END), 0) AS \"YoY Growth Rate\"\nFROM sales_data\nWHERE \"Product Category\" = 'Electronics'\n  AND substr(\"Order Date\", 1, 4) IN ('2023', '2024')\nGROUP BY 'Q' || ((CAST(substr(\"Order Date\", 6, 2) AS INTEGER) + 2) / 3)\nORDER BY \"Quarter\";",
+    "column_names": [
+      "Quarter",
+      "2023 Revenue",
+      "2024 Revenue",
+      "YoY Growth Rate"
+    ],
+    "rows": [
+      [
+        "Q1",
+        6522844.4,
+        6710676.95,
+        2.8796110788722755
+      ],
+      [
+        "Q2",
+        5983649.54,
+        5821102.33,
+        -2.716522899835473
+      ],
+      [
+        "Q3",
+        6794786.86,
+        6788433.08,
+        -0.09350962923361308
+      ],
+      [
+        "Q4",
+        9694320.11,
+        9304443.85,
+        -4.021697814556691
+      ]
+    ],
+    "row_count": 4,
+    "answer": "2024 年 vs 2023 年 Electronics 各季銷售額的年增率如下：\n- Q1：2023 年 6,522,844.40 元，2024 年 6,710,676.95 元，年增率 +2.88%。\n- Q2：2023 年 5,983,649.54 元，2024 年 5,821,102.33 元，年增率 -2.72%。\n- Q3：2023 年 6,794,786.86 元，2024 年 6,788,433.08 元，年增率 -0.09%。\n- Q4：2023 年 9,694,320.11 元，2024 年 9,304,443.85 元，年增率 -4.02%。\n\n四個季度中，僅 Q1 呈現正成長，Q2、Q3、Q4 均為負成長。\n\n| Quarter   | 2023 Revenue   | 2024 Revenue   | YoY Growth Rate   |\n|:----------|:---------------|:---------------|:------------------|\n| Q1        | 6,522,844.40   | 6,710,676.95   | 2.88              |\n| Q2        | 5,983,649.54   | 5,821,102.33   | -2.72             |\n| Q3        | 6,794,786.86   | 6,788,433.08   | -0.09             |\n| Q4        | 9,694,320.11   | 9,304,443.85   | -4.02             |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 140.1
+  },
+  {
+    "id": "X-weekday-seed",
+    "question": "星期一到星期日，每一天的總銷售額各是多少？請用長條圖比較。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-weekday",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT CASE strftime('%w', \"Order Date\") WHEN '1' THEN '星期一' WHEN '2' THEN '星期二' WHEN '3' THEN '星期三' WHEN '4' THEN '星期四' WHEN '5' THEN '星期五' WHEN '6' THEN '星期六' WHEN '0' THEN '星期日' END AS \"Day of Week\", SUM(\"Total Revenue\") AS \"Total Revenue\" FROM sales_data GROUP BY 1 ORDER BY CASE strftime('%w', \"Order Date\") WHEN '1' THEN 1 WHEN '2' THEN 2 WHEN '3' THEN 3 WHEN '4' THEN 4 WHEN '5' THEN 5 WHEN '6' THEN 6 WHEN '0' THEN 7 END",
+    "column_names": [
+      "Day of Week",
+      "Total Revenue"
+    ],
+    "rows": [
+      [
+        "星期一",
+        14137809.52
+      ],
+      [
+        "星期二",
+        14831402.68
+      ],
+      [
+        "星期三",
+        14054124.02
+      ],
+      [
+        "星期四",
+        15426271.12
+      ],
+      [
+        "星期五",
+        14891869.2
+      ],
+      [
+        "星期六",
+        14134186.21
+      ],
+      [
+        "星期日",
+        14308388.75
+      ]
+    ],
+    "row_count": 7,
+    "answer": "星期一到星期日各天的總銷售額如下：\n- 星期一：14,137,809.52\n- 星期二：14,831,402.68\n- 星期三：14,054,124.02\n- 星期四：15,426,271.12\n- 星期五：14,891,869.20\n- 星期六：14,134,186.21\n- 星期日：14,308,388.75\n\n星期四的總銷售額最高（15,426,271.12），星期三最低（14,054,124.02），兩者相差 1,372,147.10。\n\n| Day of Week   | Total Revenue   |\n|:--------------|:----------------|\n| 星期一        | 14,137,809.52   |\n| 星期二        | 14,831,402.68   |\n| 星期三        | 14,054,124.02   |\n| 星期四        | 15,426,271.12   |\n| 星期五        | 14,891,869.20   |\n| 星期六        | 14,134,186.21   |\n| 星期日        | 14,308,388.75   |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 64.5
+  },
+  {
+    "id": "X-weekday-v1",
+    "question": "幫我看下從週一到週日，每天總共收了多少錢？畫個長條圖比較一下。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-weekday",
+    "passed": false,
+    "reason": "rows differ from oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH days AS (\n  SELECT 1 AS ord, '週一' AS day UNION ALL\n  SELECT 2, '週二' UNION ALL\n  SELECT 3, '週三' UNION ALL\n  SELECT 4, '週四' UNION ALL\n  SELECT 5, '週五' UNION ALL\n  SELECT 6, '週六' UNION ALL\n  SELECT 7, '週日'\n),\nagg AS (\n  SELECT\n    CASE strftime('%w', \"Order Date\")\n      WHEN '1' THEN 1\n      WHEN '2' THEN 2\n      WHEN '3' THEN 3\n      WHEN '4' THEN 4\n      WHEN '5' THEN 5\n      WHEN '6' THEN 6\n      WHEN '0' THEN 7\n    END AS ord,\n    SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  GROUP BY strftime('%w', \"Order Date\")\n)\nSELECT\n  d.day AS \"星期\",\n  COALESCE(a.revenue, 0) AS \"總營收\"\nFROM days d\nLEFT JOIN agg a ON d.ord = a.ord\nORDER BY d.ord;",
+    "column_names": [
+      "星期",
+      "總營收"
+    ],
+    "rows": [
+      [
+        "週一",
+        14137809.52
+      ],
+      [
+        "週二",
+        14831402.68
+      ],
+      [
+        "週三",
+        14054124.02
+      ],
+      [
+        "週四",
+        15426271.12
+      ],
+      [
+        "週五",
+        14891869.2
+      ],
+      [
+        "週六",
+        14134186.21
+      ],
+      [
+        "週日",
+        14308388.75
+      ]
+    ],
+    "row_count": 7,
+    "answer": "週四營收最高，為 15,426,271.12 元；週六最低，為 14,134,186.21 元。兩者相差 1,292,084.91 元。\n\n| 星期   | 總營收        |\n|:-------|:--------------|\n| 週一   | 14,137,809.52 |\n| 週二   | 14,831,402.68 |\n| 週三   | 14,054,124.02 |\n| 週四   | 15,426,271.12 |\n| 週五   | 14,891,869.20 |\n| 週六   | 14,134,186.21 |\n| 週日   | 14,308,388.75 |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 80.1
+  },
+  {
+    "id": "X-weekday-v2",
+    "question": "依星期幾統計每日營收金額，請以長條圖呈現。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-weekday",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT\n  CASE strftime('%w', \"Order Date\")\n    WHEN '1' THEN '星期一'\n    WHEN '2' THEN '星期二'\n    WHEN '3' THEN '星期三'\n    WHEN '4' THEN '星期四'\n    WHEN '5' THEN '星期五'\n    WHEN '6' THEN '星期六'\n    WHEN '0' THEN '星期日'\n  END AS \"星期幾\",\n  SUM(\"Total Revenue\") AS \"營收金額\"\nFROM sales_data\nGROUP BY 1\nORDER BY\n  CASE strftime('%w', \"Order Date\")\n    WHEN '1' THEN 1\n    WHEN '2' THEN 2\n    WHEN '3' THEN 3\n    WHEN '4' THEN 4\n    WHEN '5' THEN 5\n    WHEN '6' THEN 6\n    WHEN '0' THEN 7\n  END;",
+    "column_names": [
+      "星期幾",
+      "營收金額"
+    ],
+    "rows": [
+      [
+        "星期一",
+        14137809.52
+      ],
+      [
+        "星期二",
+        14831402.68
+      ],
+      [
+        "星期三",
+        14054124.02
+      ],
+      [
+        "星期四",
+        15426271.12
+      ],
+      [
+        "星期五",
+        14891869.2
+      ],
+      [
+        "星期六",
+        14134186.21
+      ],
+      [
+        "星期日",
+        14308388.75
+      ]
+    ],
+    "row_count": 7,
+    "answer": "依星期幾統計的每日營收金額如下：\n- 星期一：14,137,809.52\n- 星期二：14,831,402.68\n- 星期三：14,054,124.02\n- 星期四：15,426,271.12\n- 星期五：14,891,869.20\n- 星期六：14,134,186.21\n- 星期日：14,308,388.75\n\n其中星期四的營收金額最高，為 15,426,271.12；星期三的營收金額最低，為 14,054,124.02。兩者差額為 1,372,147.10。\n\n| 星期幾   | 營收金額      |\n|:---------|:--------------|\n| 星期一   | 14,137,809.52 |\n| 星期二   | 14,831,402.68 |\n| 星期三   | 14,054,124.02 |\n| 星期四   | 15,426,271.12 |\n| 星期五   | 14,891,869.20 |\n| 星期六   | 14,134,186.21 |\n| 星期日   | 14,308,388.75 |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 75.7
+  },
+  {
+    "id": "X-region_top_customers_orders-EMEA-2024-5-seed",
+    "question": "EMEA 在 2024 年銷售額前五大的客戶是誰？他們各下了幾筆訂單？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-region_top_customers_orders-EMEA-2024-5",
+    "passed": false,
+    "reason": "rows differ from oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Customer Name\", COUNT(DISTINCT \"Order ID\") AS \"Order Count\" FROM sales_data WHERE \"Region\" = 'EMEA' AND substr(\"Order Date\", 1, 4) = '2024' GROUP BY \"Customer Name\" ORDER BY SUM(\"Total Revenue\") DESC, \"Customer Name\" ASC LIMIT 5;",
+    "column_names": [
+      "Customer Name",
+      "Order Count"
+    ],
+    "rows": [
+      [
+        "Next Summit Corp.",
+        39
+      ],
+      [
+        "Next Gamma Solutions",
+        27
+      ],
+      [
+        "Beta Next Solutions",
+        45
+      ],
+      [
+        "Prime Gamma Inc.",
+        21
+      ],
+      [
+        "Elite Prime Group",
+        17
+      ]
+    ],
+    "row_count": 5,
+    "answer": "EMEA 2024 年銷售額前五大的客戶依序為：Next Summit Corp.（39 筆訂單）、Next Gamma Solutions（27 筆訂單）、Beta Next Solutions（45 筆訂單）、Prime Gamma Inc.（21 筆訂單）與 Elite Prime Group（17 筆訂單）。\n\n| Customer Name        | Order Count   |\n|:---------------------|:--------------|\n| Next Summit Corp.    | 39            |\n| Next Gamma Solutions | 27            |\n| Beta Next Solutions  | 45            |\n| Prime Gamma Inc.     | 21            |\n| Elite Prime Group    | 17            |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 89.0
+  },
+  {
+    "id": "X-region_top_customers_orders-EMEA-2024-5-v1",
+    "question": "查 2024 年 EMEA 銷售額前 5 的客戶及訂單數。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-region_top_customers_orders-EMEA-2024-5",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Customer Name\", SUM(\"Total Revenue\") AS \"Total Revenue\", COUNT(DISTINCT \"Order ID\") AS \"Order Count\" FROM sales_data WHERE \"Region\" = 'EMEA' AND substr(\"Order Date\", 1, 4) = '2024' GROUP BY \"Customer Name\" ORDER BY SUM(\"Total Revenue\") DESC, \"Customer Name\" ASC LIMIT 5",
+    "column_names": [
+      "Customer Name",
+      "Total Revenue",
+      "Order Count"
+    ],
+    "rows": [
+      [
+        "Next Summit Corp.",
+        252250.72,
+        39
+      ],
+      [
+        "Next Gamma Solutions",
+        249004.42,
+        27
+      ],
+      [
+        "Beta Next Solutions",
+        197655.53,
+        45
+      ],
+      [
+        "Prime Gamma Inc.",
+        194945.69,
+        21
+      ],
+      [
+        "Elite Prime Group",
+        189359.5,
+        17
+      ]
+    ],
+    "row_count": 5,
+    "answer": "2024 年 EMEA 銷售額前 5 的客戶依序為：Next Summit Corp.（252,250.72 元，39 筆訂單）、Next Gamma Solutions（249,004.42 元，27 筆訂單）、Beta Next Solutions（197,655.53 元，45 筆訂單）、Prime Gamma Inc.（194,945.69 元，21 筆訂單）與 Elite Prime Group（189,359.50 元，17 筆訂單）。\n\n| Customer Name        | Total Revenue   | Order Count   |\n|:---------------------|:----------------|:--------------|\n| Next Summit Corp.    | 252,250.72      | 39            |\n| Next Gamma Solutions | 249,004.42      | 27            |\n| Beta Next Solutions  | 197,655.53      | 45            |\n| Prime Gamma Inc.     | 194,945.69      | 21            |\n| Elite Prime Group    | 189,359.50      | 17            |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 41.8
+  },
+  {
+    "id": "X-region_top_customers_orders-EMEA-2024-5-v2",
+    "question": "2024 年 EMEA 銷售額前 5 的客戶是誰？各自訂單幾筆？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-region_top_customers_orders-EMEA-2024-5",
+    "passed": false,
+    "reason": "rows differ from oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Customer Name\", COUNT(DISTINCT \"Order ID\") AS \"Order Count\" FROM sales_data WHERE \"Region\" = 'EMEA' AND substr(\"Order Date\", 1, 4) = '2024' GROUP BY \"Customer Name\" ORDER BY SUM(\"Total Revenue\") DESC, \"Customer Name\" ASC LIMIT 5;",
+    "column_names": [
+      "Customer Name",
+      "Order Count"
+    ],
+    "rows": [
+      [
+        "Next Summit Corp.",
+        39
+      ],
+      [
+        "Next Gamma Solutions",
+        27
+      ],
+      [
+        "Beta Next Solutions",
+        45
+      ],
+      [
+        "Prime Gamma Inc.",
+        21
+      ],
+      [
+        "Elite Prime Group",
+        17
+      ]
+    ],
+    "row_count": 5,
+    "answer": "2024 年 EMEA 銷售額前 5 的客戶依序為：Next Summit Corp.（39 筆訂單）、Next Gamma Solutions（27 筆訂單）、Beta Next Solutions（45 筆訂單）、Prime Gamma Inc.（21 筆訂單）與 Elite Prime Group（17 筆訂單）。\n\n| Customer Name        | Order Count   |\n|:---------------------|:--------------|\n| Next Summit Corp.    | 39            |\n| Next Gamma Solutions | 27            |\n| Beta Next Solutions  | 45            |\n| Prime Gamma Inc.     | 21            |\n| Elite Prime Group    | 17            |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 59.4
+  },
+  {
+    "id": "X-avg_qty_per_order-seed",
+    "question": "各產品類別平均每筆訂單買幾件？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-avg_qty_per_order",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Product Category\", CAST(SUM(\"Quantity\") AS REAL) / NULLIF(COUNT(DISTINCT \"Order ID\"), 0) AS \"Average Quantity per Order\" FROM sales_data GROUP BY \"Product Category\" ORDER BY \"Product Category\" ASC;",
+    "column_names": [
+      "Product Category",
+      "Average Quantity per Order"
+    ],
+    "rows": [
+      [
+        "Electronics",
+        4.515151515151516
+      ],
+      [
+        "Office Supplies",
+        4.6663523495206665
+      ],
+      [
+        "Software",
+        4.6893587760013755
+      ]
+    ],
+    "row_count": 3,
+    "answer": "各產品類別平均每筆訂單購買件數如下：\n- Electronics：4.52 件\n- Office Supplies：4.67 件\n- Software：4.69 件\n\n其中 Software 平均每筆訂單購買件數最高（4.69 件），Electronics 最低（4.52 件），兩者相差約 0.17 件。\n\n| Product Category   | Average Quantity per Order   |\n|:-------------------|:-----------------------------|\n| Electronics        | 4.52                         |\n| Office Supplies    | 4.67                         |\n| Software           | 4.69                         |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 71.3
+  },
+  {
+    "id": "X-avg_qty_per_order-v1",
+    "question": "不同產品類別平均一單都買幾件？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-avg_qty_per_order",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Product Category\", SUM(\"Quantity\") * 1.0 / COUNT(DISTINCT \"Order ID\") AS \"Average Quantity per Order\" FROM sales_data GROUP BY \"Product Category\" ORDER BY \"Product Category\" ASC;",
+    "column_names": [
+      "Product Category",
+      "Average Quantity per Order"
+    ],
+    "rows": [
+      [
+        "Electronics",
+        4.515151515151516
+      ],
+      [
+        "Office Supplies",
+        4.6663523495206665
+      ],
+      [
+        "Software",
+        4.6893587760013755
+      ]
+    ],
+    "row_count": 3,
+    "answer": "各產品類別的平均每單購買件數如下：\n- Electronics：4.52 件\n- Office Supplies：4.67 件\n- Software：4.69 件\n\n其中 Software 的平均件數最高，Electronics 最低。\n\n| Product Category   | Average Quantity per Order   |\n|:-------------------|:-----------------------------|\n| Electronics        | 4.52                         |\n| Office Supplies    | 4.67                         |\n| Software           | 4.69                         |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 75.4
+  },
+  {
+    "id": "X-avg_qty_per_order-v2",
+    "question": "各品類平均每單數量多少？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-avg_qty_per_order",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Product Category\", SUM(\"Quantity\") * 1.0 / COUNT(DISTINCT \"Order ID\") AS \"Average Quantity Per Order\" FROM sales_data GROUP BY \"Product Category\" ORDER BY \"Product Category\";",
+    "column_names": [
+      "Product Category",
+      "Average Quantity Per Order"
+    ],
+    "rows": [
+      [
+        "Electronics",
+        4.515151515151516
+      ],
+      [
+        "Office Supplies",
+        4.6663523495206665
+      ],
+      [
+        "Software",
+        4.6893587760013755
+      ]
+    ],
+    "row_count": 3,
+    "answer": "各品類平均每單數量如下：\n- Electronics：4.52\n- Office Supplies：4.67\n- Software：4.69\n\n其中 Software 最高（4.69），Electronics 最低（4.52），兩者相差 0.17。\n\n| Product Category   | Average Quantity Per Order   |\n|:-------------------|:-----------------------------|\n| Electronics        | 4.52                         |\n| Office Supplies    | 4.67                         |\n| Software           | 4.69                         |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 64.1
+  },
+  {
+    "id": "X-countries_above_avg-seed",
+    "question": "哪些國家的總銷售額高於所有國家的平均值？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-countries_above_avg",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH country_totals AS (\n  SELECT \"Country\", SUM(\"Total Revenue\") AS \"Total Revenue\"\n  FROM sales_data\n  GROUP BY \"Country\"\n)\nSELECT \"Country\", \"Total Revenue\"\nFROM country_totals\nWHERE \"Total Revenue\" > (SELECT AVG(\"Total Revenue\") FROM country_totals)\nORDER BY \"Total Revenue\" DESC;",
+    "column_names": [
+      "Country",
+      "Total Revenue"
+    ],
+    "rows": [
+      [
+        "United States",
+        20786210.91
+      ],
+      [
+        "Canada",
+        20126176.41
+      ],
+      [
+        "Germany",
+        8029456.63
+      ],
+      [
+        "Netherlands",
+        7894926.14
+      ]
+    ],
+    "row_count": 4,
+    "answer": "總銷售額高於所有國家平均值的國家有 4 個，依序為：\n1. United States：20,786,210.91\n2. Canada：20,126,176.41\n3. Germany：8,029,456.63\n4. Netherlands：7,894,926.14\n\n| Country       | Total Revenue   |\n|:--------------|:----------------|\n| United States | 20,786,210.91   |\n| Canada        | 20,126,176.41   |\n| Germany       | 8,029,456.63    |\n| Netherlands   | 7,894,926.14    |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 50.9
+  },
+  {
+    "id": "X-countries_above_avg-v1",
+    "question": "幫我看看哪些國家的營收比較高，要高過所有國家平均數的那幾家？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-countries_above_avg",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH country_rev AS (\n  SELECT \"Country\", SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  GROUP BY \"Country\"\n),\navg_rev AS (\n  SELECT AVG(revenue) AS avg_revenue\n  FROM country_rev\n)\nSELECT c.\"Country\", c.revenue\nFROM country_rev c\nCROSS JOIN avg_rev a\nWHERE c.revenue > a.avg_revenue\nORDER BY c.revenue DESC, c.\"Country\" ASC;",
+    "column_names": [
+      "Country",
+      "revenue"
+    ],
+    "rows": [
+      [
+        "United States",
+        20786210.91
+      ],
+      [
+        "Canada",
+        20126176.41
+      ],
+      [
+        "Germany",
+        8029456.63
+      ],
+      [
+        "Netherlands",
+        7894926.14
+      ]
+    ],
+    "row_count": 4,
+    "answer": "共有 4 個國家的營收高於所有國家平均數，依序為：\n1. United States：20,786,210.91\n2. Canada：20,126,176.41\n3. Germany：8,029,456.63\n4. Netherlands：7,894,926.14\n\n| Country       | revenue       |\n|:--------------|:--------------|\n| United States | 20,786,210.91 |\n| Canada        | 20,126,176.41 |\n| Germany       | 8,029,456.63  |\n| Netherlands   | 7,894,926.14  |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 44.5
+  },
+  {
+    "id": "X-countries_above_avg-v2",
+    "question": "列出銷售額超過平均值的國家清單。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-countries_above_avg",
+    "passed": false,
+    "reason": "rows differ from oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Country\"\nFROM sales_data\nGROUP BY \"Country\"\nHAVING SUM(\"Total Revenue\") > (\n  SELECT AVG(country_total)\n  FROM (\n    SELECT SUM(\"Total Revenue\") AS country_total\n    FROM sales_data\n    GROUP BY \"Country\"\n  )\n)\nORDER BY \"Country\" ASC;",
+    "column_names": [
+      "Country"
+    ],
+    "rows": [
+      [
+        "Canada"
+      ],
+      [
+        "Germany"
+      ],
+      [
+        "Netherlands"
+      ],
+      [
+        "United States"
+      ]
+    ],
+    "row_count": 4,
+    "answer": "銷售額超過平均值的國家共有 4 個，依字母順序排列為：Canada、Germany、Netherlands、United States。\n\n| Country       |\n|:--------------|\n| Canada        |\n| Germany       |\n| Netherlands   |\n| United States |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 53.2
+  },
+  {
+    "id": "X-h2_vs_h1-2024-seed",
+    "question": "2024 年下半年相比上半年，各區域的銷售額成長了多少百分比？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-h2_vs_h1-2024",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Region\", SUM(CASE WHEN CAST(substr(\"Order Date\", 6, 2) AS INTEGER) <= 6 THEN \"Total Revenue\" ELSE 0 END) AS \"H1 Revenue\", SUM(CASE WHEN CAST(substr(\"Order Date\", 6, 2) AS INTEGER) >= 7 THEN \"Total Revenue\" ELSE 0 END) AS \"H2 Revenue\", (SUM(CASE WHEN CAST(substr(\"Order Date\", 6, 2) AS INTEGER) >= 7 THEN \"Total Revenue\" ELSE 0 END) - SUM(CASE WHEN CAST(substr(\"Order Date\", 6, 2) AS INTEGER) <= 6 THEN \"Total Revenue\" ELSE 0 END)) * 100.0 / NULLIF(SUM(CASE WHEN CAST(substr(\"Order Date\", 6, 2) AS INTEGER) <= 6 THEN \"Total Revenue\" ELSE 0 END), 0) AS \"Growth Percent\" FROM sales_data WHERE substr(\"Order Date\", 1, 4) = '2024' GROUP BY \"Region\" ORDER BY \"Region\" ASC;",
+    "column_names": [
+      "Region",
+      "H1 Revenue",
+      "H2 Revenue",
+      "Growth Percent"
+    ],
+    "rows": [
+      [
+        "APAC",
+        5607625.71,
+        6236046.08,
+        11.206532006573601
+      ],
+      [
+        "EMEA",
+        6752640.93,
+        8724449.97,
+        29.200561090696127
+      ],
+      [
+        "LATAM",
+        1165106.01,
+        1370327.42,
+        17.613968878248247
+      ],
+      [
+        "North America",
+        8992271.52,
+        11529234.6,
+        28.212705481117414
+      ]
+    ],
+    "row_count": 4,
+    "answer": "2024 年下半年相比上半年，各區域銷售額成長百分比如下：\n- EMEA：29.20%（H1 6,752,640.93 元，H2 8,724,449.97 元）\n- North America：28.21%（H1 8,992,271.52 元，H2 11,529,234.60 元）\n- LATAM：17.61%（H1 1,165,106.01 元，H2 1,370,327.42 元）\n- APAC：11.21%（H1 5,607,625.71 元，H2 6,236,046.08 元）\n\nEMEA 成長幅度最高，APAC 最低。\n\n| Region        | H1 Revenue   | H2 Revenue    | Growth Percent   |\n|:--------------|:-------------|:--------------|:-----------------|\n| APAC          | 5,607,625.71 | 6,236,046.08  | 11.21            |\n| EMEA          | 6,752,640.93 | 8,724,449.97  | 29.20            |\n| LATAM         | 1,165,106.01 | 1,370,327.42  | 17.61            |\n| North America | 8,992,271.52 | 11,529,234.60 | 28.21            |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 73.2
+  },
+  {
+    "id": "X-h2_vs_h1-2024-v1",
+    "question": "2024 年各區域下半年比上半年多賣了百分之幾？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-h2_vs_h1-2024",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Region\", ROUND((SUM(CASE WHEN CAST(substr(\"Order Date\", 6, 2) AS INTEGER) BETWEEN 7 AND 12 THEN \"Total Revenue\" ELSE 0 END) - SUM(CASE WHEN CAST(substr(\"Order Date\", 6, 2) AS INTEGER) BETWEEN 1 AND 6 THEN \"Total Revenue\" ELSE 0 END)) * 100.0 / NULLIF(SUM(CASE WHEN CAST(substr(\"Order Date\", 6, 2) AS INTEGER) BETWEEN 1 AND 6 THEN \"Total Revenue\" ELSE 0 END), 0), 2) AS \"H2_vs_H1_Revenue_Growth_Percent\" FROM sales_data WHERE substr(\"Order Date\", 1, 4) = '2024' GROUP BY \"Region\" ORDER BY \"Region\" ASC;",
+    "column_names": [
+      "Region",
+      "H2_vs_H1_Revenue_Growth_Percent"
+    ],
+    "rows": [
+      [
+        "APAC",
+        11.21
+      ],
+      [
+        "EMEA",
+        29.2
+      ],
+      [
+        "LATAM",
+        17.61
+      ],
+      [
+        "North America",
+        28.21
+      ]
+    ],
+    "row_count": 4,
+    "answer": "2024 年各區域下半年營收較上半年的成長率如下：\n- EMEA：29.20%\n- North America：28.21%\n- LATAM：17.61%\n- APAC：11.21%\n\n| Region        | H2_vs_H1_Revenue_Growth_Percent   |\n|:--------------|:----------------------------------|\n| APAC          | 11.21                             |\n| EMEA          | 29.20                             |\n| LATAM         | 17.61                             |\n| North America | 28.21                             |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 95.6
+  },
+  {
+    "id": "X-h2_vs_h1-2024-v2",
+    "question": "2024 年各區域下半年營收對上半年的成長百分比？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-h2_vs_h1-2024",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Region\", SUM(CASE WHEN CAST(substr(\"Order Date\", 6, 2) AS INTEGER) <= 6 THEN \"Total Revenue\" ELSE 0 END) AS \"H1 Revenue\", SUM(CASE WHEN CAST(substr(\"Order Date\", 6, 2) AS INTEGER) > 6 THEN \"Total Revenue\" ELSE 0 END) AS \"H2 Revenue\", ((SUM(CASE WHEN CAST(substr(\"Order Date\", 6, 2) AS INTEGER) > 6 THEN \"Total Revenue\" ELSE 0 END) - SUM(CASE WHEN CAST(substr(\"Order Date\", 6, 2) AS INTEGER) <= 6 THEN \"Total Revenue\" ELSE 0 END)) * 100.0) / NULLIF(SUM(CASE WHEN CAST(substr(\"Order Date\", 6, 2) AS INTEGER) <= 6 THEN \"Total Revenue\" ELSE 0 END), 0) AS \"Growth Percentage\" FROM sales_data WHERE substr(\"Order Date\", 1, 4) = '2024' GROUP BY \"Region\" ORDER BY \"Region\" ASC;",
+    "column_names": [
+      "Region",
+      "H1 Revenue",
+      "H2 Revenue",
+      "Growth Percentage"
+    ],
+    "rows": [
+      [
+        "APAC",
+        5607625.71,
+        6236046.08,
+        11.206532006573601
+      ],
+      [
+        "EMEA",
+        6752640.93,
+        8724449.97,
+        29.200561090696127
+      ],
+      [
+        "LATAM",
+        1165106.01,
+        1370327.42,
+        17.613968878248247
+      ],
+      [
+        "North America",
+        8992271.52,
+        11529234.6,
+        28.212705481117414
+      ]
+    ],
+    "row_count": 4,
+    "answer": "2024 年各區域下半年營收對上半年的成長百分比如下：\n- APAC：11.21%（H1 營收 5,607,625.71，H2 營收 6,236,046.08）\n- EMEA：29.20%（H1 營收 6,752,640.93，H2 營收 8,724,449.97）\n- LATAM：17.61%（H1 營收 1,165,106.01，H2 營收 1,370,327.42）\n- North America：28.21%（H1 營收 8,992,271.52，H2 營收 11,529,234.60）\n\n其中 EMEA 成長率最高（29.20%），APAC 成長率最低（11.21%）。\n\n| Region        | H1 Revenue   | H2 Revenue    | Growth Percentage   |\n|:--------------|:-------------|:--------------|:--------------------|\n| APAC          | 5,607,625.71 | 6,236,046.08  | 11.21               |\n| EMEA          | 6,752,640.93 | 8,724,449.97  | 29.20               |\n| LATAM         | 1,165,106.01 | 1,370,327.42  | 17.61               |\n| North America | 8,992,271.52 | 11,529,234.60 | 28.21               |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 79.3
+  },
+  {
+    "id": "X-country_rank_in_region-Japan-seed",
+    "question": "Japan 的銷售額在同一個區域的國家裡排第幾名？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-country_rank_in_region-Japan",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH country_revenue AS (\n    SELECT\n        \"Country\",\n        SUM(\"Total Revenue\") AS revenue\n    FROM sales_data\n    WHERE \"Region\" = 'APAC'\n    GROUP BY \"Country\"\n),\nranked_countries AS (\n    SELECT\n        \"Country\",\n        revenue,\n        ROW_NUMBER() OVER (ORDER BY revenue DESC, \"Country\" ASC) AS country_rank\n    FROM country_revenue\n)\nSELECT country_rank\nFROM ranked_countries\nWHERE \"Country\" = 'Japan';",
+    "column_names": [
+      "country_rank"
+    ],
+    "rows": [
+      [
+        5
+      ]
+    ],
+    "row_count": 1,
+    "answer": "Japan 在 APAC 區域的國家銷售額中排名第 5 名。\n\n| country_rank   |\n|:---------------|\n| 5              |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 104.5
+  },
+  {
+    "id": "X-country_rank_in_region-Japan-v1",
+    "question": "在日本所屬的區域裡，它的銷售金額排在第幾名？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-country_rank_in_region-Japan",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH country_revenue AS (\n  SELECT \"Country\", SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  WHERE \"Region\" = 'APAC'\n  GROUP BY \"Country\"\n),\nranked AS (\n  SELECT \"Country\",\n         ROW_NUMBER() OVER (ORDER BY revenue DESC, \"Country\" ASC) AS \"rank\"\n  FROM country_revenue\n)\nSELECT \"rank\"\nFROM ranked\nWHERE \"Country\" = 'Japan';",
+    "column_names": [
+      "rank"
+    ],
+    "rows": [
+      [
+        5
+      ]
+    ],
+    "row_count": 1,
+    "answer": "在日本所屬的區域（APAC）中，其銷售金額排名第 5 名。\n\n| rank   |\n|:-------|\n| 5      |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 90.5
+  },
+  {
+    "id": "X-country_rank_in_region-Japan-v2",
+    "question": "日本在該區域的營收名次是第幾？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-country_rank_in_region-Japan",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT rn AS \"Rank\"\nFROM (\n  SELECT\n    \"Country\",\n    SUM(\"Total Revenue\") AS revenue,\n    ROW_NUMBER() OVER (ORDER BY SUM(\"Total Revenue\") DESC, \"Country\" ASC) AS rn\n  FROM sales_data\n  WHERE \"Region\" = 'APAC'\n  GROUP BY \"Country\"\n)\nWHERE \"Country\" = 'Japan';",
+    "column_names": [
+      "Rank"
+    ],
+    "rows": [
+      [
+        5
+      ]
+    ],
+    "row_count": 1,
+    "answer": "日本在 APAC 區域的營收名次為第 5 名。\n\n| Rank   |\n|:-------|\n| 5      |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 97.9
+  },
+  {
+    "id": "X-nth_customer-2023-2-seed",
+    "question": "2023 年銷售額第二高的客戶是誰？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-nth_customer-2023-2",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Customer Name\" FROM sales_data WHERE substr(\"Order Date\", 1, 4) = '2023' GROUP BY \"Customer Name\" ORDER BY SUM(\"Total Revenue\") DESC, \"Customer Name\" ASC LIMIT 1 OFFSET 1;",
+    "column_names": [
+      "Customer Name"
+    ],
+    "rows": [
+      [
+        "Prime Summit Corp."
+      ]
+    ],
+    "row_count": 1,
+    "answer": "2023 年銷售額第二高的客戶是 Prime Summit Corp.。\n\n| Customer Name      |\n|:-------------------|\n| Prime Summit Corp. |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 46.3
+  },
+  {
+    "id": "X-nth_customer-2023-2-v1",
+    "question": "2023 年客戶裡，營收排第二的是誰？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-nth_customer-2023-2",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Customer Name\" FROM sales_data WHERE substr(\"Order Date\", 1, 4) = '2023' GROUP BY \"Customer Name\" ORDER BY SUM(\"Total Revenue\") DESC, \"Customer Name\" ASC LIMIT 1 OFFSET 1;",
+    "column_names": [
+      "Customer Name"
+    ],
+    "rows": [
+      [
+        "Prime Summit Corp."
+      ]
+    ],
+    "row_count": 1,
+    "answer": "2023 年客戶裡，營收排第二的是 Prime Summit Corp.。\n\n| Customer Name      |\n|:-------------------|\n| Prime Summit Corp. |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 58.0
+  },
+  {
+    "id": "X-nth_customer-2023-2-v2",
+    "question": "哪位客戶在 2023 年的銷售額居亞軍？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-nth_customer-2023-2",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Customer Name\"\nFROM (\n    SELECT \"Customer Name\", SUM(\"Total Revenue\") AS revenue\n    FROM sales_data\n    WHERE substr(\"Order Date\", 1, 4) = '2023'\n    GROUP BY \"Customer Name\"\n)\nORDER BY revenue DESC, \"Customer Name\" ASC\nLIMIT 1 OFFSET 1;",
+    "column_names": [
+      "Customer Name"
+    ],
+    "rows": [
+      [
+        "Prime Summit Corp."
+      ]
+    ],
+    "row_count": 1,
+    "answer": "2023 年銷售額居亞軍的客戶是 Prime Summit Corp.。\n\n| Customer Name      |\n|:-------------------|\n| Prime Summit Corp. |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 65.1
+  },
+  {
+    "id": "X-months_beat_last_year-seed",
+    "question": "2024 年有哪些月份的銷售額超過 2023 年同一個月？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-months_beat_last_year",
+    "passed": false,
+    "reason": "rows differ from oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH m2024 AS (\n  SELECT\n    substr(\"Order Date\", 1, 7) AS \"Month\",\n    SUM(\"Total Revenue\") AS \"Revenue\"\n  FROM sales_data\n  WHERE \"Order Date\" LIKE '2024-%'\n  GROUP BY substr(\"Order Date\", 1, 7)\n),\nm2023 AS (\n  SELECT\n    substr(\"Order Date\", 1, 7) AS \"Month\",\n    SUM(\"Total Revenue\") AS \"Revenue\"\n  FROM sales_data\n  WHERE \"Order Date\" LIKE '2023-%'\n  GROUP BY substr(\"Order Date\", 1, 7)\n)\nSELECT\n  m2024.\"Month\"\nFROM m2024\nJOIN m2023\n  ON substr(m2024.\"Month\", 6, 2) = substr(m2023.\"Month\", 6, 2)\nWHERE m2024.\"Revenue\" > m2023.\"Revenue\"\nORDER BY m2024.\"Month\";",
+    "column_names": [
+      "Month"
+    ],
+    "rows": [
+      [
+        "2024-01"
+      ],
+      [
+        "2024-04"
+      ],
+      [
+        "2024-05"
+      ],
+      [
+        "2024-06"
+      ],
+      [
+        "2024-12"
+      ]
+    ],
+    "row_count": 5,
+    "answer": "2024 年有 5 個月份的銷售額超過 2023 年同一個月，分別為 2024-01、2024-04、2024-05、2024-06 和 2024-12。\n\n| Month   |\n|:--------|\n| 2024-01 |\n| 2024-04 |\n| 2024-05 |\n| 2024-06 |\n| 2024-12 |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 84.5
+  },
+  {
+    "id": "X-months_beat_last_year-v1",
+    "question": "2024 年哪些月份的營收比 2023 年同月還高？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-months_beat_last_year",
+    "passed": false,
+    "reason": "rows differ from oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH RECURSIVE months(m) AS (\n  SELECT 1\n  UNION ALL\n  SELECT m + 1 FROM months WHERE m < 12\n),\nrev AS (\n  SELECT CAST(substr(\"Order Date\", 6, 2) AS INTEGER) AS m,\n         CAST(substr(\"Order Date\", 1, 4) AS INTEGER) AS y,\n         SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  WHERE substr(\"Order Date\", 1, 4) IN ('2023', '2024')\n  GROUP BY 1, 2\n)\nSELECT printf('2024-%02d', months.m) AS \"Month\"\nFROM months\nLEFT JOIN rev AS r2024 ON r2024.m = months.m AND r2024.y = 2024\nLEFT JOIN rev AS r2023 ON r2023.m = months.m AND r2023.y = 2023\nWHERE COALESCE(r2024.revenue, 0) > COALESCE(r2023.revenue, 0)\nORDER BY months.m;",
+    "column_names": [
+      "Month"
+    ],
+    "rows": [
+      [
+        "2024-01"
+      ],
+      [
+        "2024-04"
+      ],
+      [
+        "2024-05"
+      ],
+      [
+        "2024-06"
+      ],
+      [
+        "2024-12"
+      ]
+    ],
+    "row_count": 5,
+    "answer": "2024 年營收高於 2023 年同月的月份共有 5 個，依序為 2024-01、2024-04、2024-05、2024-06 與 2024-12。\n\n| Month   |\n|:--------|\n| 2024-01 |\n| 2024-04 |\n| 2024-05 |\n| 2024-06 |\n| 2024-12 |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 141.2
+  },
+  {
+    "id": "X-months_beat_last_year-v2",
+    "question": "2024 年哪幾個月銷售額超過 2023 年同月？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-months_beat_last_year",
+    "passed": false,
+    "reason": "rows differ from oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH m2024 AS (\n  SELECT substr(\"Order Date\", 1, 7) AS \"Month\",\n         SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  WHERE substr(\"Order Date\", 1, 4) = '2024'\n  GROUP BY substr(\"Order Date\", 1, 7)\n),\nm2023 AS (\n  SELECT substr(\"Order Date\", 1, 7) AS \"Month\",\n         SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  WHERE substr(\"Order Date\", 1, 4) = '2023'\n  GROUP BY substr(\"Order Date\", 1, 7)\n)\nSELECT a.\"Month\" AS \"Month\",\n       a.revenue AS \"2024 Revenue\",\n       COALESCE(b.revenue, 0) AS \"2023 Revenue\"\nFROM m2024 a\nLEFT JOIN m2023 b ON b.\"Month\" = '2023-' || substr(a.\"Month\", 6, 2)\nWHERE a.revenue > COALESCE(b.revenue, 0)\nORDER BY a.\"Month\";",
+    "column_names": [
+      "Month",
+      "2024 Revenue",
+      "2023 Revenue"
+    ],
+    "rows": [
+      [
+        "2024-01",
+        4338003.76,
+        3578066.96
+      ],
+      [
+        "2024-04",
+        3572966.46,
+        3272525.35
+      ],
+      [
+        "2024-05",
+        3720037.53,
+        3317275.0
+      ],
+      [
+        "2024-06",
+        3319938.58,
+        3261806.64
+      ],
+      [
+        "2024-12",
+        5673876.5,
+        5639635.67
+      ]
+    ],
+    "row_count": 5,
+    "answer": "2024 年有 5 個月的銷售額超過 2023 年同月，分別為 1 月、4 月、5 月、6 月與 12 月。其中 1 月 2024 年銷售額為 4,338,003.76 元，高於 2023 年同月的 3,578,066.96 元；12 月 2024 年銷售額為 5,673,876.50 元，略高於 2023 年同月的 5,639,635.67 元。\n\n| Month   | 2024 Revenue   | 2023 Revenue   |\n|:--------|:---------------|:---------------|\n| 2024-01 | 4,338,003.76   | 3,578,066.96   |\n| 2024-04 | 3,572,966.46   | 3,272,525.35   |\n| 2024-05 | 3,720,037.53   | 3,317,275.00   |\n| 2024-06 | 3,319,938.58   | 3,261,806.64   |\n| 2024-12 | 5,673,876.50   | 5,639,635.67   |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 162.4
+  },
+  {
+    "id": "X-high_price_orders-500-seed",
+    "question": "單價超過 500 的訂單，在各產品類別各有幾筆？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-high_price_orders-500",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Product Category\", COUNT(DISTINCT \"Order ID\") AS \"訂單數\" FROM sales_data WHERE \"ASP\" > 500 GROUP BY \"Product Category\" ORDER BY \"Product Category\" ASC;",
+    "column_names": [
+      "Product Category",
+      "訂單數"
+    ],
+    "rows": [
+      [
+        "Electronics",
+        10179
+      ],
+      [
+        "Office Supplies",
+        2272
+      ],
+      [
+        "Software",
+        2347
+      ]
+    ],
+    "row_count": 3,
+    "answer": "單價超過 500 的訂單共 3 個產品類別：Electronics 10,179 筆、Office Supplies 2,272 筆、Software 2,347 筆。\n\n| Product Category   | 訂單數   |\n|:-------------------|:---------|\n| Electronics        | 10,179   |\n| Office Supplies    | 2,272    |\n| Software           | 2,347    |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 53.1
+  },
+  {
+    "id": "X-high_price_orders-500-v1",
+    "question": "ASP大於500的訂單，按產品類別統計筆數",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-high_price_orders-500",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Product Category\", COUNT(DISTINCT \"Order ID\") AS \"Order Count\" FROM sales_data WHERE \"ASP\" > 500 GROUP BY \"Product Category\" ORDER BY \"Order Count\" DESC, \"Product Category\" ASC;",
+    "column_names": [
+      "Product Category",
+      "Order Count"
+    ],
+    "rows": [
+      [
+        "Electronics",
+        10179
+      ],
+      [
+        "Software",
+        2347
+      ],
+      [
+        "Office Supplies",
+        2272
+      ]
+    ],
+    "row_count": 3,
+    "answer": "ASP 大於 500 的訂單中，Electronics 類別共 10,179 筆，Software 2,347 筆，Office Supplies 2,272 筆。\n\n| Product Category   | Order Count   |\n|:-------------------|:--------------|\n| Electronics        | 10,179        |\n| Software           | 2,347         |\n| Office Supplies    | 2,272         |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 87.0
+  },
+  {
+    "id": "X-high_price_orders-500-v2",
+    "question": "單價超過五百的訂單，各產品類別分別有幾筆？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-high_price_orders-500",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Product Category\", COUNT(DISTINCT \"Order ID\") AS \"訂單數\" FROM sales_data WHERE \"ASP\" > 500 GROUP BY \"Product Category\" ORDER BY \"訂單數\" DESC, \"Product Category\" ASC;",
+    "column_names": [
+      "Product Category",
+      "訂單數"
+    ],
+    "rows": [
+      [
+        "Electronics",
+        10179
+      ],
+      [
+        "Software",
+        2347
+      ],
+      [
+        "Office Supplies",
+        2272
+      ]
+    ],
+    "row_count": 3,
+    "answer": "單價超過五百的訂單中，Electronics 有 10,179 筆，Software 有 2,347 筆，Office Supplies 有 2,272 筆。\n\n| Product Category   | 訂單數   |\n|:-------------------|:---------|\n| Electronics        | 10,179   |\n| Software           | 2,347    |\n| Office Supplies    | 2,272    |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 49.0
+  },
+  {
+    "id": "X-revenue_per_customer_region-seed",
+    "question": "各區域平均每位客戶貢獻多少銷售額？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-revenue_per_customer_region",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Region\", SUM(\"Total Revenue\") / NULLIF(COUNT(DISTINCT \"Customer Name\"), 0) AS \"Average Revenue per Customer\" FROM sales_data GROUP BY \"Region\" ORDER BY \"Average Revenue per Customer\" DESC;",
+    "column_names": [
+      "Region",
+      "Average Revenue per Customer"
+    ],
+    "rows": [
+      [
+        "North America",
+        83665.4137423313
+      ],
+      [
+        "EMEA",
+        65447.36968421053
+      ],
+      [
+        "APAC",
+        54872.350859030834
+      ],
+      [
+        "LATAM",
+        15177.932367601246
+      ]
+    ],
+    "row_count": 4,
+    "answer": "各區域平均每位客戶貢獻的銷售額如下：\n- North America：83,665.41\n- EMEA：65,447.37\n- APAC：54,872.35\n- LATAM：15,177.93\n\nNorth America 最高，LATAM 最低，兩者差額為 68,487.48。\n\n| Region        | Average Revenue per Customer   |\n|:--------------|:-------------------------------|\n| North America | 83,665.41                      |\n| EMEA          | 65,447.37                      |\n| APAC          | 54,872.35                      |\n| LATAM         | 15,177.93                      |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 70.1
+  },
+  {
+    "id": "X-revenue_per_customer_region-v1",
+    "question": "想知道每個區域裡，平均一個客戶大概貢獻多少營收？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-revenue_per_customer_region",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Region\", SUM(\"Total Revenue\") / NULLIF(COUNT(DISTINCT \"Customer Name\"), 0) AS \"Average Revenue per Customer\" FROM sales_data GROUP BY \"Region\" ORDER BY \"Region\" ASC;",
+    "column_names": [
+      "Region",
+      "Average Revenue per Customer"
+    ],
+    "rows": [
+      [
+        "APAC",
+        54872.350859030834
+      ],
+      [
+        "EMEA",
+        65447.36968421053
+      ],
+      [
+        "LATAM",
+        15177.932367601246
+      ],
+      [
+        "North America",
+        83665.4137423313
+      ]
+    ],
+    "row_count": 4,
+    "answer": "各區域平均每位客戶的營收如下：\n- North America：83,665.41 元\n- EMEA：65,447.37 元\n- APAC：54,872.35 元\n- LATAM：15,177.93 元\n\nNorth America 的平均客戶營收最高，LATAM 最低。\n\n| Region        | Average Revenue per Customer   |\n|:--------------|:-------------------------------|\n| APAC          | 54,872.35                      |\n| EMEA          | 65,447.37                      |\n| LATAM         | 15,177.93                      |\n| North America | 83,665.41                      |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 47.7
+  },
+  {
+    "id": "X-revenue_per_customer_region-v2",
+    "question": "各區域人均銷售金額是多少？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-revenue_per_customer_region",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Region\", SUM(\"Total Revenue\") / COUNT(DISTINCT \"Customer Name\") AS \"人均銷售金額\" FROM sales_data GROUP BY \"Region\";",
+    "column_names": [
+      "Region",
+      "人均銷售金額"
+    ],
+    "rows": [
+      [
+        "APAC",
+        54872.350859030834
+      ],
+      [
+        "EMEA",
+        65447.36968421053
+      ],
+      [
+        "LATAM",
+        15177.932367601246
+      ],
+      [
+        "North America",
+        83665.4137423313
+      ]
+    ],
+    "row_count": 4,
+    "answer": "各區域人均銷售金額如下：North America 為 83,665.41 元，EMEA 為 65,447.37 元，APAC 為 54,872.35 元，LATAM 為 15,177.93 元。\n\n| Region        | 人均銷售金額   |\n|:--------------|:---------------|\n| APAC          | 54,872.35      |\n| EMEA          | 65,447.37      |\n| LATAM         | 15,177.93      |\n| North America | 83,665.41      |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 63.3
+  },
+  {
+    "id": "X-country_top_quantity_product-LATAM-seed",
+    "question": "LATAM 每個國家銷售量最高的產品分別是什麼？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-country_top_quantity_product-LATAM",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Country\", \"Product Name\", \"Total Quantity\"\nFROM (\n  SELECT\n    \"Country\",\n    \"Product Name\",\n    SUM(\"Quantity\") AS \"Total Quantity\",\n    ROW_NUMBER() OVER (\n      PARTITION BY \"Country\"\n      ORDER BY SUM(\"Quantity\") DESC, \"Product Name\" ASC\n    ) AS rn\n  FROM sales_data\n  WHERE \"Region\" = 'LATAM'\n  GROUP BY \"Country\", \"Product Name\"\n) ranked\nWHERE rn = 1\nORDER BY \"Country\" ASC;",
+    "column_names": [
+      "Country",
+      "Product Name",
+      "Total Quantity"
+    ],
+    "rows": [
+      [
+        "Brazil",
+        "Enterprise Laptop X1",
+        630
+      ],
+      [
+        "Mexico",
+        "Enterprise Laptop X1",
+        549
+      ]
+    ],
+    "row_count": 2,
+    "answer": "LATAM 地區中，巴西（Brazil）銷售量最高的產品是 Enterprise Laptop X1，總數量為 630 件；墨西哥（Mexico）銷售量最高的產品也是 Enterprise Laptop X1，總數量為 549 件。\n\n| Country   | Product Name         | Total Quantity   |\n|:----------|:---------------------|:-----------------|\n| Brazil    | Enterprise Laptop X1 | 630              |\n| Mexico    | Enterprise Laptop X1 | 549              |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 51.4
+  },
+  {
+    "id": "X-country_top_quantity_product-LATAM-v1",
+    "question": "LATAM 每國銷量冠軍產品？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-country_top_quantity_product-LATAM",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH country_product AS (\n  SELECT\n    \"Country\",\n    \"Product Name\",\n    SUM(\"Quantity\") AS \"Total Quantity\"\n  FROM sales_data\n  WHERE \"Region\" = 'LATAM'\n  GROUP BY \"Country\", \"Product Name\"\n),\nranked AS (\n  SELECT\n    \"Country\",\n    \"Product Name\",\n    \"Total Quantity\",\n    ROW_NUMBER() OVER (\n      PARTITION BY \"Country\"\n      ORDER BY \"Total Quantity\" DESC, \"Product Name\" ASC\n    ) AS rn\n  FROM country_product\n)\nSELECT\n  \"Country\",\n  \"Product Name\",\n  \"Total Quantity\"\nFROM ranked\nWHERE rn = 1\nORDER BY \"Country\" ASC;",
+    "column_names": [
+      "Country",
+      "Product Name",
+      "Total Quantity"
+    ],
+    "rows": [
+      [
+        "Brazil",
+        "Enterprise Laptop X1",
+        630
+      ],
+      [
+        "Mexico",
+        "Enterprise Laptop X1",
+        549
+      ]
+    ],
+    "row_count": 2,
+    "answer": "LATAM 地區中，巴西（Brazil）的銷量冠軍產品為 Enterprise Laptop X1，總銷量 630 件；墨西哥（Mexico）的銷量冠軍產品同樣為 Enterprise Laptop X1，總銷量 549 件。\n\n| Country   | Product Name         | Total Quantity   |\n|:----------|:---------------------|:-----------------|\n| Brazil    | Enterprise Laptop X1 | 630              |\n| Mexico    | Enterprise Laptop X1 | 549              |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 78.4
+  },
+  {
+    "id": "X-country_top_quantity_product-LATAM-v2",
+    "question": "在拉丁美洲這片區域裡，每個國家銷量最高的產品各是哪一個？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-country_top_quantity_product-LATAM",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH country_product AS (\n  SELECT\n    \"Country\",\n    \"Product Name\",\n    SUM(\"Quantity\") AS TotalQuantity\n  FROM sales_data\n  WHERE \"Region\" = 'LATAM'\n  GROUP BY \"Country\", \"Product Name\"\n),\nranked AS (\n  SELECT\n    \"Country\",\n    \"Product Name\",\n    TotalQuantity,\n    ROW_NUMBER() OVER (\n      PARTITION BY \"Country\"\n      ORDER BY TotalQuantity DESC, \"Product Name\" ASC\n    ) AS rn\n  FROM country_product\n)\nSELECT\n  \"Country\",\n  \"Product Name\",\n  TotalQuantity\nFROM ranked\nWHERE rn = 1\nORDER BY \"Country\" ASC;",
+    "column_names": [
+      "Country",
+      "Product Name",
+      "TotalQuantity"
+    ],
+    "rows": [
+      [
+        "Brazil",
+        "Enterprise Laptop X1",
+        630
+      ],
+      [
+        "Mexico",
+        "Enterprise Laptop X1",
+        549
+      ]
+    ],
+    "row_count": 2,
+    "answer": "在拉丁美洲區域，巴西銷量最高的產品是 Enterprise Laptop X1（630 件），墨西哥銷量最高的產品也是 Enterprise Laptop X1（549 件）。\n\n| Country   | Product Name         | TotalQuantity   |\n|:----------|:---------------------|:----------------|\n| Brazil    | Enterprise Laptop X1 | 630             |\n| Mexico    | Enterprise Laptop X1 | 549             |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 66.6
+  },
+  {
+    "id": "X-product_growth_amount-3-seed",
+    "question": "2024 年比 2023 年銷售額增加最多的三個產品是哪些？各增加多少？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-product_growth_amount-3",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT \"Product Name\", SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END) - SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END) AS \"Increase\" FROM sales_data WHERE substr(\"Order Date\", 1, 4) IN ('2023', '2024') GROUP BY \"Product Name\" ORDER BY \"Increase\" DESC, \"Product Name\" ASC LIMIT 3;",
+    "column_names": [
+      "Product Name",
+      "Increase"
+    ],
+    "rows": [
+      [
+        "Security Suite",
+        548956.6600000001
+      ],
+      [
+        "4K Monitor 27\"",
+        153661.16999999993
+      ],
+      [
+        "Standing Desk",
+        46226.110000000335
+      ]
+    ],
+    "row_count": 3,
+    "answer": "2024 年比 2023 年銷售額增加最多的三個產品：\n1. Security Suite：增加 548,956.66\n2. 4K Monitor 27\"：增加 153,661.17\n3. Standing Desk：增加 46,226.11\n\n| Product Name   | Increase   |\n|:---------------|:-----------|\n| Security Suite | 548,956.66 |\n| 4K Monitor 27\" | 153,661.17 |\n| Standing Desk  | 46,226.11  |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 75.8
+  },
+  {
+    "id": "X-product_growth_amount-3-v1",
+    "question": "跟2023年比，2024年產品營收多出來最多的前三名是誰？各增加了多少錢？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-product_growth_amount-3",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH rev AS (\n  SELECT\n    \"Product Name\",\n    SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END) AS rev_2024,\n    SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END) AS rev_2023\n  FROM sales_data\n  WHERE substr(\"Order Date\", 1, 4) IN ('2023', '2024')\n  GROUP BY \"Product Name\"\n)\nSELECT\n  \"Product Name\" AS product,\n  rev_2024 - rev_2023 AS revenue_increase\nFROM rev\nWHERE rev_2024 - rev_2023 > 0\nORDER BY revenue_increase DESC, \"Product Name\" ASC\nLIMIT 3;",
+    "column_names": [
+      "product",
+      "revenue_increase"
+    ],
+    "rows": [
+      [
+        "Security Suite",
+        548956.6600000001
+      ],
+      [
+        "4K Monitor 27\"",
+        153661.16999999993
+      ],
+      [
+        "Standing Desk",
+        46226.110000000335
+      ]
+    ],
+    "row_count": 3,
+    "answer": "與 2023 年相比，2024 年產品營收增加最多的前三名如下：\n1. Security Suite：增加 548,956.66 元\n2. 4K Monitor 27\"：增加 153,661.17 元\n3. Standing Desk：增加 46,226.11 元\n\n| product        | revenue_increase   |\n|:---------------|:-------------------|\n| Security Suite | 548,956.66         |\n| 4K Monitor 27\" | 153,661.17         |\n| Standing Desk  | 46,226.11          |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 100.2
+  },
+  {
+    "id": "X-product_growth_amount-3-v2",
+    "question": "哪三個產品在 2024 年比 2023 年的銷售金額增加最多？請列出各增加了多少。",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-product_growth_amount-3",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT\n  \"Product Name\" AS \"Product Name\",\n  SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2024' THEN \"Total Revenue\" ELSE 0 END) -\n  SUM(CASE WHEN substr(\"Order Date\", 1, 4) = '2023' THEN \"Total Revenue\" ELSE 0 END) AS \"Increase\"\nFROM sales_data\nWHERE substr(\"Order Date\", 1, 4) IN ('2023', '2024')\nGROUP BY \"Product Name\"\nORDER BY \"Increase\" DESC, \"Product Name\" ASC\nLIMIT 3;",
+    "column_names": [
+      "Product Name",
+      "Increase"
+    ],
+    "rows": [
+      [
+        "Security Suite",
+        548956.6600000001
+      ],
+      [
+        "4K Monitor 27\"",
+        153661.16999999993
+      ],
+      [
+        "Standing Desk",
+        46226.110000000335
+      ]
+    ],
+    "row_count": 3,
+    "answer": "2024 年比 2023 年銷售金額增加最多的三個產品為：Security Suite 增加 548,956.66 元、4K Monitor 27\" 增加 153,661.17 元、Standing Desk 增加 46,226.11 元。\n\n| Product Name   | Increase   |\n|:---------------|:-----------|\n| Security Suite | 548,956.66 |\n| 4K Monitor 27\" | 153,661.17 |\n| Standing Desk  | 46,226.11  |",
+    "chart_type": "bar",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 89.5
+  },
+  {
+    "id": "X-customer_category_mix-GlobalSummitSolutions-seed",
+    "question": "Global Summit Solutions 的消費金額中，各產品類別各占多少比例？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-customer_category_mix-GlobalSummitSolutions",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH cat AS (\n  SELECT \"Product Category\", SUM(\"Total Revenue\") AS category_revenue\n  FROM sales_data\n  WHERE \"Customer Name\" = 'Global Summit Solutions'\n  GROUP BY \"Product Category\"\n),\ntotal AS (\n  SELECT SUM(\"Total Revenue\") AS total_revenue\n  FROM sales_data\n  WHERE \"Customer Name\" = 'Global Summit Solutions'\n)\nSELECT c.\"Product Category\" AS \"Product Category\",\n       c.category_revenue AS \"Total Revenue\",\n       ROUND(c.category_revenue * 100.0 / NULLIF(t.total_revenue, 0), 2) AS \"Percentage\"\nFROM cat c\nCROSS JOIN total t\nORDER BY c.category_revenue DESC, c.\"Product Category\" ASC;",
+    "column_names": [
+      "Product Category",
+      "Total Revenue",
+      "Percentage"
+    ],
+    "rows": [
+      [
+        "Electronics",
+        314045.39,
+        66.69
+      ],
+      [
+        "Software",
+        86293.33,
+        18.32
+      ],
+      [
+        "Office Supplies",
+        70585.22,
+        14.99
+      ]
+    ],
+    "row_count": 3,
+    "answer": "Global Summit Solutions 的消費金額中，Electronics 佔 66.69%（314,045.39 元），Software 佔 18.32%（86,293.33 元），Office Supplies 佔 14.99%（70,585.22 元）。\n\n| Product Category   | Total Revenue   | Percentage   |\n|:-------------------|:----------------|:-------------|\n| Electronics        | 314,045.39      | 66.69        |\n| Software           | 86,293.33       | 18.32        |\n| Office Supplies    | 70,585.22       | 14.99        |",
+    "chart_type": "pie",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 58.7
+  },
+  {
+    "id": "X-customer_category_mix-GlobalSummitSolutions-v1",
+    "question": "Global Summit Solutions 這客戶的銷售額，看看每個產品類別各占幾成？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-customer_category_mix-GlobalSummitSolutions",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT\n  \"Product Category\",\n  SUM(\"Total Revenue\") AS \"Total Revenue\",\n  ROUND(\n    SUM(\"Total Revenue\") * 100.0 / NULLIF(\n      (SELECT SUM(\"Total Revenue\") FROM sales_data WHERE \"Customer Name\" = 'Global Summit Solutions'),\n      0\n    ),\n    2\n  ) AS \"Percentage\"\nFROM sales_data\nWHERE \"Customer Name\" = 'Global Summit Solutions'\nGROUP BY \"Product Category\"\nORDER BY \"Percentage\" DESC;",
+    "column_names": [
+      "Product Category",
+      "Total Revenue",
+      "Percentage"
+    ],
+    "rows": [
+      [
+        "Electronics",
+        314045.39,
+        66.69
+      ],
+      [
+        "Software",
+        86293.33,
+        18.32
+      ],
+      [
+        "Office Supplies",
+        70585.22,
+        14.99
+      ]
+    ],
+    "row_count": 3,
+    "answer": "Global Summit Solutions 的銷售額中，Electronics 佔 66.69%（314,045.39 元），Software 佔 18.32%（86,293.33 元），Office Supplies 佔 14.99%（70,585.22 元）。\n\n| Product Category   | Total Revenue   | Percentage   |\n|:-------------------|:----------------|:-------------|\n| Electronics        | 314,045.39      | 66.69        |\n| Software           | 86,293.33       | 18.32        |\n| Office Supplies    | 70,585.22       | 14.99        |",
+    "chart_type": "pie",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 64.6
+  },
+  {
+    "id": "X-customer_category_mix-GlobalSummitSolutions-v2",
+    "question": "Global Summit Solutions 各產品類別的營收占比是多少？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-customer_category_mix-GlobalSummitSolutions",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "SELECT\n  \"Product Category\",\n  SUM(\"Total Revenue\") * 100.0 / NULLIF((SELECT SUM(\"Total Revenue\") FROM sales_data WHERE \"Customer Name\" = 'Global Summit Solutions'), 0) AS \"Revenue Share (%)\"\nFROM sales_data\nWHERE \"Customer Name\" = 'Global Summit Solutions'\nGROUP BY \"Product Category\"\nORDER BY \"Revenue Share (%)\" DESC, \"Product Category\" ASC;",
+    "column_names": [
+      "Product Category",
+      "Revenue Share (%)"
+    ],
+    "rows": [
+      [
+        "Electronics",
+        66.68707265126508
+      ],
+      [
+        "Software",
+        18.324260601404124
+      ],
+      [
+        "Office Supplies",
+        14.98866674733079
+      ]
+    ],
+    "row_count": 3,
+    "answer": "Global Summit Solutions 各產品類別的營收占比如下：\n- Electronics：66.69%\n- Software：18.32%\n- Office Supplies：14.99%\n\n| Product Category   | Revenue Share (%)   |\n|:-------------------|:--------------------|\n| Electronics        | 66.69               |\n| Software           | 18.32               |\n| Office Supplies    | 14.99               |",
+    "chart_type": "pie",
+    "error": null,
+    "runtime_error": false,
+    "seconds": 57.8
+  },
+  {
+    "id": "X-quarter_max_qoq-seed",
+    "question": "2023 到 2024 年間，哪一季的銷售額季增率最高？是多少？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "seed",
+    "seed_id": "X-quarter_max_qoq",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 2,
+    "sql_executed": 2,
+    "sql_query": "WITH quarterly AS (\n  SELECT\n    CAST(substr(\"Order Date\", 1, 4) AS INTEGER) AS year,\n    (CAST(substr(\"Order Date\", 6, 2) AS INTEGER) + 2) / 3 AS quarter,\n    SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  WHERE \"Order Date\" BETWEEN '2022-10-01' AND '2024-12-31'\n  GROUP BY 1, 2\n)\nSELECT\n  cur.year || '-Q' || cur.quarter AS quarter,\n  (cur.revenue - prev.revenue) * 100.0 / NULLIF(prev.revenue, 0) AS qoq_growth_rate\nFROM quarterly AS cur\nLEFT JOIN quarterly AS prev\n  ON prev.year = CASE WHEN cur.quarter = 1 THEN cur.year - 1 ELSE cur.year END\n  AND prev.quarter = CASE WHEN cur.quarter = 1 THEN 4 ELSE cur.quarter - 1 END\nWHERE cur.year BETWEEN 2023 AND 2024\nORDER BY qoq_growth_rate DESC, quarter ASC\nLIMIT 1;",
+    "column_names": [
+      "quarter",
+      "qoq_growth_rate"
+    ],
+    "rows": [
+      [
+        "2023-Q4",
+        53.397824344026816
+      ]
+    ],
+    "row_count": 1,
+    "answer": "2023 到 2024 年間，銷售額季增率最高的季度是 2023-Q4，季增率為 53.40%。\n\n| quarter   | qoq_growth_rate   |\n|:----------|:------------------|\n| 2023-Q4   | 53.40             |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 284.0
+  },
+  {
+    "id": "X-quarter_max_qoq-v1",
+    "question": "2023 到 2024 期間，哪一個季度的營收比上一季漲最多？漲幅幾%？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-quarter_max_qoq",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH q AS (\n  SELECT\n    substr(\"Order Date\", 1, 4) AS year,\n    (CAST(substr(\"Order Date\", 6, 2) AS INTEGER) + 2) / 3 AS qnum,\n    substr(\"Order Date\", 1, 4) || '-Q' || ((CAST(substr(\"Order Date\", 6, 2) AS INTEGER) + 2) / 3) AS quarter,\n    SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  WHERE CAST(substr(\"Order Date\", 1, 4) AS INTEGER) BETWEEN 2022 AND 2024\n  GROUP BY 1, 2\n),\ncur AS (\n  SELECT\n    quarter,\n    revenue,\n    CASE\n      WHEN qnum = 1 THEN (CAST(year AS INTEGER) - 1) || '-Q4'\n      ELSE year || '-Q' || (qnum - 1)\n    END AS prev_quarter\n  FROM q\n  WHERE CAST(year AS INTEGER) BETWEEN 2023 AND 2024\n)\nSELECT\n  c.quarter AS \"Quarter\",\n  ROUND((c.revenue - p.revenue) * 100.0 / NULLIF(p.revenue, 0), 2) AS \"Increase %\"\nFROM cur c\nJOIN q p ON p.quarter = c.prev_quarter\nWHERE p.revenue IS NOT NULL AND p.revenue <> 0\nORDER BY (c.revenue - p.revenue) * 100.0 / NULLIF(p.revenue, 0) DESC, c.quarter ASC\nLIMIT 1",
+    "column_names": [
+      "Quarter",
+      "Increase %"
+    ],
+    "rows": [
+      [
+        "2023-Q4",
+        53.4
+      ]
+    ],
+    "row_count": 1,
+    "answer": "2023 到 2024 期間，營收比上一季漲最多的季度是 2023-Q4，漲幅為 53.40%。\n\n| Quarter   | Increase %   |\n|:----------|:-------------|\n| 2023-Q4   | 53.40        |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 163.6
+  },
+  {
+    "id": "X-quarter_max_qoq-v2",
+    "question": "2023 到 2024 年，哪個單季的營收比上季漲最多？漲幅多少？",
+    "label": "allow",
+    "subset": "complex",
+    "category": "sales_query",
+    "difficulty": "complex",
+    "source": "rewrite",
+    "seed_id": "X-quarter_max_qoq",
+    "passed": true,
+    "reason": "rows match oracle",
+    "workflow_status": "completed",
+    "sql_attempts": 1,
+    "sql_executed": 1,
+    "sql_query": "WITH q AS (\n  SELECT\n    CAST(substr(\"Order Date\", 1, 4) AS INTEGER) AS year,\n    (CAST(substr(\"Order Date\", 6, 2) AS INTEGER) + 2) / 3 AS qtr,\n    SUM(\"Total Revenue\") AS revenue\n  FROM sales_data\n  WHERE \"Order Date\" BETWEEN '2022-10-01' AND '2024-12-31'\n  GROUP BY 1, 2\n),\nlabeled AS (\n  SELECT\n    year || '-Q' || qtr AS quarter,\n    revenue\n  FROM q\n),\ncandidates AS (\n  SELECT\n    year || '-Q' || qtr AS quarter,\n    revenue,\n    CASE\n      WHEN qtr = 1 THEN (year - 1) || '-Q4'\n      ELSE year || '-Q' || (qtr - 1)\n    END AS prev_quarter\n  FROM q\n  WHERE year IN (2023, 2024)\n)\nSELECT\n  c.quarter AS \"Quarter\",\n  (c.revenue - p.revenue) * 100.0 / NULLIF(p.revenue, 0) AS \"Growth Rate (%)\"\nFROM candidates c\nJOIN labeled p ON p.quarter = c.prev_quarter\nORDER BY \"Growth Rate (%)\" DESC, c.quarter ASC\nLIMIT 1;",
+    "column_names": [
+      "Quarter",
+      "Growth Rate (%)"
+    ],
+    "rows": [
+      [
+        "2023-Q4",
+        53.397824344026816
+      ]
+    ],
+    "row_count": 1,
+    "answer": "2023 到 2024 年間，單季營收比上季漲幅最高的是 2023-Q4，漲幅為 53.40%。\n\n| Quarter   | Growth Rate (%)   |\n|:----------|:------------------|\n| 2023-Q4   | 53.40             |",
+    "chart_type": null,
+    "error": null,
+    "runtime_error": false,
+    "seconds": 156.7
+  }
+]

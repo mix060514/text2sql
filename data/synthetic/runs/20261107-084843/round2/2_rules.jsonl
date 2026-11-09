@@ -1,0 +1,20 @@
+{"seed_id": "C-Electronics", "round": 2, "style": "口語", "question": "3C 類產品每年營收總共多少？", "status": null, "reasons": []}
+{"seed_id": "C-Electronics", "round": 2, "style": "簡短", "question": "列出 Electronics 各年度銷售金額。", "status": null, "reasons": []}
+{"seed_id": "E-2023", "round": 2, "style": "口語", "question": "2023 年哪個季度的銷售金額最高？", "status": null, "reasons": []}
+{"seed_id": "H", "round": 2, "style": "口語", "question": "2024 年 Q4 比 2023 年 Q4 多賣了多少錢？", "status": null, "reasons": []}
+{"seed_id": "J", "round": 2, "style": "口語", "question": "2023 到 2024 這期間，哪個客戶的購買金額變動幅度最大？", "status": null, "reasons": []}
+{"seed_id": "K-Electronics", "round": 2, "style": "口語", "question": "哪家客戶買 Electronics 產品花的錢最多？", "status": null, "reasons": []}
+{"seed_id": "K-Electronics", "round": 2, "style": "簡短", "question": "Electronics 類別銷售額最高的客戶是哪個？", "status": null, "reasons": []}
+{"seed_id": "N1", "round": 2, "style": "口語", "question": "想了解一下，每個區域的營業額分別有多少錢？", "status": null, "reasons": []}
+{"seed_id": "N2", "round": 2, "style": "口語", "question": "我想看各產品類別賣了多少钱，麻煩用圖表幫我比較一下。", "status": null, "reasons": ["language: 含簡體字 钱"]}
+{"seed_id": "N2", "round": 2, "style": "簡短", "question": "請以圖表形式，比較各產品類別的總營收。", "status": null, "reasons": []}
+{"seed_id": "N9-Software", "round": 2, "style": "口語", "question": "軟體類別裡面，各產品的營收各是多少？", "status": null, "reasons": []}
+{"seed_id": "N12-2023", "round": 2, "style": "口語", "question": "2023 年每一季的營收是多少？", "status": null, "reasons": []}
+{"seed_id": "O5-EMEA", "round": 2, "style": "口語", "question": "麻煩給我 EMEA 地區 2023 跟 2024 年，按季度看的營收趨勢圖。", "status": null, "reasons": []}
+{"seed_id": "P1", "round": 2, "style": "口語", "question": "幫我算一下各區域的銷售額比例，然後畫個圓餅圖出來。", "status": null, "reasons": []}
+{"seed_id": "P1", "round": 2, "style": "簡短", "question": "請用圓餅圖顯示各區域的銷售額占比。", "status": null, "reasons": []}
+{"seed_id": "Q7", "round": 2, "style": "口語", "question": "誰下的單最多啊？", "status": null, "reasons": []}
+{"seed_id": "Q8", "round": 2, "style": "口語", "question": "哪個國家的營收數字最高？", "status": null, "reasons": []}
+{"seed_id": "Q12-CloudLicenseAnnual", "round": 2, "style": "口語", "question": "Cloud License (Annual) 的營收總計是多少？", "status": null, "reasons": []}
+{"seed_id": "B02", "round": 2, "style": "口語", "question": "猜一下 2025 年 Q1 亞太區營收會有多少？", "status": null, "reasons": []}
+{"seed_id": "B02", "round": 2, "style": "簡短", "question": "預估 2025 第一季 APAC 的銷售額。", "status": null, "reasons": []}
