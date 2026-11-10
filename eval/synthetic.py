@@ -313,12 +313,16 @@ def find_reusable(items, metadata, results_dir=RESULTS_DIR):
     return reused
 
 
-# Three question sets shown separately: template rewrites (eval_set_v3 seeds A..Q),
-# SQL-first complex queries (seed ids X-*), and guardrail block items.
-SUBSETS = ("template", "complex", "block")
+# Question sets shown separately: template rewrites (eval_set_v3 seeds A..Q), SQL-first
+# complex queries (seed ids X-*), guardrail block items, and the hand-built banks under
+# data/banks/ (scripts/build_eval_banks.py), whose items name their own subset.
+SUBSETS = ("template", "complex", "block", "alias")
+BANKS_DIR = PROJECT_DIR / "data" / "banks"
 
 
 def subset_of(item) -> str:
+    if item.get("subset"):
+        return item["subset"]
     if item["label"] == "block":
         return "block"
     return "complex" if str(item.get("seed_id") or "").startswith("X-") else "template"

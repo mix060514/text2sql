@@ -184,3 +184,24 @@ class Reuse(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Banks(unittest.TestCase):
+    """data/banks/* (scripts/build_eval_banks.py) load like a synthetic run and grade their own oracle as a pass."""
+
+    def test_banks_load_and_their_oracle_passes(self):
+        for name, size in (("template", 16), ("alias", 27)):
+            _, items = synthetic.load_run(synthetic.BANKS_DIR / name)
+            self.assertEqual(len(items), size)
+            self.assertEqual({synthetic.subset_of(i) for i in items}, {name})
+            for item in items:
+                plot = item.get("expected_plot") or {}
+                chart = {"data": [{"type": synthetic.PLOTLY_TYPE[plot["chart_type"]],
+                                   "x": plot.get("expected_x_order") or [], "labels": plot.get("expected_x_order") or []}]
+                         * (plot.get("expected_traces") or 1)} if plot.get("should_plot") else None
+                state = {"workflow_status": "completed", "query_success": True, "workflow_trace": run_trace("ok"),
+                         "raw_query_result": item["ground_truth"]["rows"],
+                         "plot_decision": {"should_plot": bool(chart), "chart_type": plot.get("chart_type")},
+                         "chart_json": json.dumps(chart) if chart else ""}
+                result = synthetic.grade_state(item, state)
+                self.assertTrue(result["passed"], f"{item['id']}: {result['reason']}")

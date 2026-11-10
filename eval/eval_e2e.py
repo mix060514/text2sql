@@ -691,7 +691,7 @@ async def run_synthetic(run_dir=None, limit=None, label=None, reuse=True, timeou
     """Run the synthetic golden + guardrail set; grade deterministically against its oracle."""
     import synthetic
 
-    run_dir = pathlib.Path(run_dir) if run_dir else synthetic.latest_run()
+    run_dir = pathlib.Path(run_dir).resolve() if run_dir else synthetic.latest_run()
     manifest, items = synthetic.load_run(run_dir)
     if label:
         items = [item for item in items if item["label"] == label]
@@ -701,12 +701,13 @@ async def run_synthetic(run_dir=None, limit=None, label=None, reuse=True, timeou
     metadata = {"workflow": run_metadata(EVAL_SET_PATH)["workflow"],
                 "model": run_metadata(EVAL_SET_PATH)["model"],
                 "database_sha256": manifest["database_sha256"],
-                "dataset": f"synthetic/{run_dir.name}/dataset.jsonl",
+                "dataset": str((run_dir / "dataset.jsonl").relative_to(PROJECT_DIR / "data")),
                 "dataset_sha256": manifest["dataset_sha256"]}
     reused = synthetic.find_reusable(items, metadata) if reuse else {}
 
     tag = f"_{subset}" if subset else ""
-    output_dir = PROJECT_DIR / "eval" / "results" / f"synthetic{tag}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
+    prefix = "bank" if run_dir.parent == synthetic.BANKS_DIR else "synthetic"
+    output_dir = PROJECT_DIR / "eval" / "results" / f"{prefix}{tag}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
     output_dir.mkdir(parents=True, exist_ok=True)
     print(f"\n{'='*70}")
     print(f"Synthetic Evaluation | run {run_dir.name} | Cases: {len(items)} | reused passes: {len(reused)}")
@@ -786,8 +787,11 @@ if __name__ == "__main__":
         help="Run the synthetic set (default: newest complete data/synthetic/runs/<run>) "
              "with deterministic grading instead of eval_set_v3",
     )
+    parser.add_argument("--bank", choices=["template", "alias"],
+                        help="Run a hand-built bank from data/banks/<name> (scripts/build_eval_banks.py), "
+                             "graded like --synthetic")
     parser.add_argument("--label", choices=["allow", "block"], help="--synthetic: only this label")
-    parser.add_argument("--subset", choices=["template", "complex", "block"],
+    parser.add_argument("--subset", choices=["template", "complex", "block", "alias"],
                         help="--synthetic: only template rewrites, SQL-first complex (X-*) or block items")
     parser.add_argument("--concurrency", type=int, default=1,
                         help="questions in flight at once (match the model server's parallel slots)")
@@ -806,6 +810,9 @@ if __name__ == "__main__":
         asyncio.run(rejudge_run(run_dir))
         raise SystemExit(0)
 
+    if args.bank:
+        args.synthetic = str(PROJECT_DIR / "data" / "banks" / args.bank)
+        args.subset = args.bank
     if args.synthetic:
         asyncio.run(run_synthetic(
             run_dir=None if args.synthetic == "latest" else args.synthetic,
