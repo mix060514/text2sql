@@ -13,10 +13,6 @@ if BACKEND != "qwen27b":
 WORKFLOW_VARIANT = "qwen27b"
 ANALYSIS_MODEL = LLAMA_CPP_MODEL
 
-LLAMA_CPP_VL_MODEL = os.getenv("LLAMA_CPP_VL_MODEL", "openai/Qwen3VL-4B-Instruct-Q4_K_M.gguf")
-LLAMA_CPP_VL_API_KEY = os.getenv("LLAMA_CPP_VL_API_KEY", "aaa")
-LLAMA_CPP_VL_API_BASE = os.getenv("LLAMA_CPP_VL_API_BASE", "http://localhost:8082")
-
 # Worst path: intent 1 + (SQL + review) x 3 + report x 2 = 9.
 MAX_LLM_CALLS = int(os.getenv("MAX_LLM_CALLS", "9"))
 # One time limit per question (user decision 2026-11-08: 600 s, so 4 questions can share the GPU).
