@@ -18,6 +18,8 @@ DB_PATH = PROJECT_DIR / "data" / "global_sales_data.sqlite"
 CONTROLLER_FAILURES = {"SQL_ATTEMPTS_EXHAUSTED", "REPORT_ATTEMPTS_EXHAUSTED"}
 # Old e2e records keep only the first 50 rows; a 50-row record may be truncated.
 E2E_ROW_CAP = 50
+# Oracle columns that only restate the row order of a ranked list.
+RANK_COLUMNS = {"rank"}
 
 
 def digest(path):
@@ -134,9 +136,15 @@ def required_rows(item):
 
     string/list items ask for entities ("哪個客戶"); the oracle adds the ranking metric
     as a supporting column, so only its text columns are required. number/dataframe
-    items require every oracle column.
+    items require every oracle column, except that a dataframe answer need not repeat a
+    `rank` column: the row order already says it (X-category_top3_quantity). A number item
+    whose answer is the rank keeps it.
     """
     rows = item["ground_truth"]["rows"]
+    columns = item["ground_truth"].get("columns") or []
+    if item.get("eval_type") == "dataframe" and rows and len(columns) == len(rows[0]) > 1:
+        keep = [j for j, name in enumerate(columns) if str(name).lower() not in RANK_COLUMNS]
+        return [[row[j] for j in keep] for row in rows]
     if item.get("eval_type") not in ("string", "list") or not rows:
         return rows
     keep = [j for j in range(len(rows[0])) if any(_number(row[j]) is None for row in rows)]

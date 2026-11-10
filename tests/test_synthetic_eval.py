@@ -51,6 +51,18 @@ class RequiredRows(unittest.TestCase):
         self.assertEqual(synthetic.required_rows(number), [[323]])
         self.assertEqual(synthetic.required_rows(frame), [["2023", 1.5]])
 
+    def test_rank_column_is_optional_unless_the_rank_is_the_answer(self):
+        # X-category_top3_quantity: the rank follows from the row order, so an answer without it is right.
+        top3 = {"eval_type": "dataframe", "ground_truth": {
+            "columns": ["product_category", "rank", "product_name", "total_quantity"],
+            "rows": [["Electronics", 1, "Laptop", 25023], ["Electronics", 2, "Phone", 20924]]}}
+        actual = [["Electronics", "Laptop", 25023], ["Electronics", "Phone", 20924]]
+        self.assertTrue(synthetic.rows_match(synthetic.required_rows(top3), actual))
+        self.assertFalse(synthetic.rows_match(synthetic.required_rows(top3), [["Electronics", "Laptop", 1]] * 2))
+        # "Japan ranks where in its region?": the rank is the asked number and stays required.
+        rank = {"eval_type": "number", "ground_truth": {"columns": ["country", "rank"], "rows": [["Japan", 2]]}}
+        self.assertEqual(synthetic.required_rows(rank), [["Japan", 2]])
+
 
 class GradeState(unittest.TestCase):
     def test_allow_requires_published_matching_rows(self):
