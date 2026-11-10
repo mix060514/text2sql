@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-09 19:59:14",
+  "generated_at": "2026-11-10 07:05:17",
   "overall": {
     "template": {
       "2026-11-07": {
@@ -1134,11 +1134,11 @@
       "fix": "在 few-shot 範例示範 WITH ... AS MATERIALIZED，前 N 名只算一次。",
       "timing": {
         "plain": {
-          "seconds": 17.925,
+          "seconds": 12.462,
           "finished": true
         },
         "materialized": {
-          "seconds": 0.007,
+          "seconds": 0.005,
           "finished": true
         }
       },
@@ -2785,6 +2785,86 @@
         "答案": "正確"
       }
     ]
+  },
+  "paraphrase": {
+    "complex": {
+      "questions": 34,
+      "runs": [
+        {
+          "run": "加入意圖後（臨時伺服器）",
+          "seed": {
+            "count": 31,
+            "total": 34
+          },
+          "rewrite": {
+            "count": 63,
+            "total": 68
+          },
+          "rewrite_differs": {
+            "count": 9,
+            "total": 68
+          }
+        },
+        {
+          "run": "Docker router",
+          "seed": {
+            "count": 33,
+            "total": 34
+          },
+          "rewrite": {
+            "count": 60,
+            "total": 68
+          },
+          "rewrite_differs": {
+            "count": 8,
+            "total": 68
+          }
+        }
+      ],
+      "rerun_differs": {
+        "count": 13,
+        "total": 102
+      }
+    },
+    "block": {
+      "questions": 42,
+      "runs": [
+        {
+          "run": "加入意圖後（臨時伺服器）",
+          "seed": {
+            "count": 42,
+            "total": 42
+          },
+          "rewrite": {
+            "count": 83,
+            "total": 84
+          },
+          "rewrite_differs": {
+            "count": 1,
+            "total": 84
+          }
+        },
+        {
+          "run": "Docker router",
+          "seed": {
+            "count": 42,
+            "total": 42
+          },
+          "rewrite": {
+            "count": 83,
+            "total": 84
+          },
+          "rewrite_differs": {
+            "count": 1,
+            "total": 84
+          }
+        }
+      ],
+      "rerun_differs": {
+        "count": 0,
+        "total": 126
+      }
+    }
   },
   "timeout_reruns": [
     {

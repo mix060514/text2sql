@@ -6,8 +6,8 @@ a shorter-thinking Qwen3.8-27B post-train). TEXT2SQL_BACKEND (config.BACKEND) ac
 "qwen27b". The Codex CLI backend was removed on 2026-11-08 (the service is external-facing;
 a CLI agent subprocess is not a suitable serving path). It remains in git at 96f9615.
 Read docs/HANDOFF.md first (current state, open issues, next task), then README.md and
-docs/ARCHITECTURE.md before changing the workflow. Module names (M1–M5) and terms used in
-discussion are defined in docs/MODULES.md (diagram: docs/architecture.svg).
+docs/ARCHITECTURE.md before changing the workflow. The six terms used in
+discussion (資料庫、題目、標準答案、考卷、問答系統、成績單) and their old names (M1–M5, seeds, banks) are in docs/MODULES.md (diagram: docs/architecture.svg).
 
 ## Commands
 

@@ -15,7 +15,7 @@ with st.container(border=True):
     st.markdown(
         "**這一頁是問答系統的考試成績。** 每一題都有事先算好的標準答案，系統從讀題、寫 SQL、"
         "查資料庫到寫出回答與圖表，整條流程完整跑一次，再由程式逐題和標準答案比對（不用 LLM 評審）。\n\n"
-        "- **模板問題**：16 題常見業務提問，每題測一種能力（篩選加總、訂單數、平均單價、Top-N、"
+        "- **基本問題**：16 題常見業務提問，每題測一種能力（篩選加總、訂單數、平均單價、Top-N、"
         "年增率、同季比較、組內取最大、長條／折線／圓餅圖），檢查查出來的數字與圖表。\n"
         "- **說法對齊**：地區與國家的各種叫法（北美、歐非中東、US、大陸…），每種叫法一題，"
         "句型固定，答錯就代表那個叫法沒有對上資料庫裡的值。\n"
@@ -23,15 +23,15 @@ with st.container(border=True):
         "檢查系統有沒有拒絕，而不是硬去執行查詢。\n"
         "- **複雜問題**：需要多步驟計算的查詢，每題還有換句話說的改寫版，"
         "檢查換了問法答案是否仍然一樣。\n\n"
-        "標準答案由題庫裡的 SQL 直接在資料庫上計算，不由被測的系統產生。"
+        "標準答案由每題附的 SQL 直接在資料庫上計算，不由被測的系統產生。"
         "左側可切換題組；顯示的是最新一次考試的結果。"
     )
 
 # title -> (results folder prefix, subset)
-GROUPS = {"模板問題": ("bank", "template"), "說法對齊": ("bank", "alias"),
+GROUPS = {"基本問題": ("bank", "template"), "說法對齊": ("bank", "alias"),
           "攔截問題": ("synthetic", "block"), "複雜問題": ("synthetic", "complex")}
 group = st.sidebar.radio("題組", list(GROUPS), help=(
-    "模板問題與說法對齊：手工挑選的小題庫（data/banks/）。攔截問題：不該查資料的輸入，"
+    "基本問題與說法對齊：手工挑選的題目（data/banks/）。攔截問題：不該查資料的輸入，"
     "系統不得執行任何 SELECT。複雜問題：34 種 SQL-first 複雜查詢與其改寫。"))
 BLOCK_KIND = {"write_request": "寫入／修改請求", "chitchat": "閒聊", "prompt_injection": "提示注入",
               "not_in_data": "資料庫外的問題"}
@@ -137,7 +137,7 @@ def show_table(columns, rows):
 def show_bank_questions(subset, title):
     """Before the first run, list the bank so the reader still sees what it asks."""
     path = data_dir / "banks" / subset / "dataset.jsonl"
-    st.info(f"{title}還沒有評估結果；以下是題庫裡的題目與標準答案。")
+    st.info(f"{title}還沒有評估結果；以下是考卷裡的題目與標準答案。")
     if path.exists():
         items = load_items(path).values()
         st.dataframe(pd.DataFrame([{"題目": i["question"], "測什麼": i.get("ability") or i.get("canonical"),
@@ -161,7 +161,7 @@ def show_synthetic(prefix, subset, title):
     meta = summary.get("run_metadata", {})
     if meta:
         model = str(meta.get("model", "")).removeprefix("openai/")
-        st.caption(f"模型 `{model}` · 題庫 `{meta.get('dataset')}` · {summary.get('timestamp', '')}")
+        st.caption(f"模型 `{model}` · 考卷 `{meta.get('dataset')}` · {summary.get('timestamp', '')}")
 
     items = synthetic_items(meta.get("dataset"))
     df = pd.DataFrame(records)

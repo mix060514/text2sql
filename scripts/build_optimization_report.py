@@ -214,6 +214,44 @@ def router_section(review, reviewed) -> dict | None:
     return out or None
 
 
+def paraphrase_section(review) -> dict | None:
+    """Did asking the same question in other words find more failures than asking it once?
+
+    Each synthetic question is a seed sentence plus two model rewrites. Per subset and per
+    full run: pass counts of seed sentences and of rewrites, and rewrites graded differently
+    from their own seed sentence. Across the two runs: the same sentence graded differently
+    (run-to-run variation). Complex rows use the reviewed grade; block rows the strict one.
+    """
+    out = {}
+    for subset, files, key in (
+            ("complex", (("加入意圖後（臨時伺服器）", "complex_intent.json"), ("Docker router", "complex_router.json")), "reviewed"),
+            ("block", (("加入意圖後（臨時伺服器）", "block_final.json"), ("Docker router", "block_router_mtp4.json")), "passed")):
+        if not all((OUT / name).exists() for _, name in files):
+            continue
+        rate = lambda part: {"count": sum(part), "total": len(part)}
+        runs, graded = [], []
+        for label, name in files:
+            source = {r["question"]: r.get("source") for r in json.loads((OUT / name).read_text(encoding="utf-8"))}
+            rows = {r["question"]: dict(r, ok=bool(r[key]), source=source[r["question"]])
+                    for r in o.load_synthetic(OUT / name, subset, review if subset == "complex" else None)}
+            seeds = {}
+            for r in rows.values():
+                seeds.setdefault(r["seed_id"], {"seed": [], "rewrite": []})[r["source"]].append(r["ok"])
+            graded.append(rows)
+            runs.append({
+                "run": label,
+                "seed": rate([r["ok"] for r in rows.values() if r["source"] == "seed"]),
+                "rewrite": rate([r["ok"] for r in rows.values() if r["source"] == "rewrite"]),
+                "rewrite_differs": rate([ok != v["seed"][0] for v in seeds.values() for ok in v["rewrite"]]),
+            })
+        a, b = graded
+        if set(a) != set(b):
+            continue
+        out[subset] = {"questions": len({r["seed_id"] for r in b.values()}), "runs": runs,
+                       "rerun_differs": rate([a[q]["ok"] != b[q]["ok"] for q in b])}
+    return out or None
+
+
 def b_final_path() -> Path:
     return OUT / "block_final.json"
 
@@ -423,6 +461,7 @@ def main():
                   if notes_path.exists() else []},
         "intent": intent,
         "router": router_section(review, reviewed),
+        "paraphrase": paraphrase_section(review),
         "timeout_reruns": json.loads(notes_path.read_text(encoding="utf-8")).get("_timeout_reruns", [])
         if notes_path.exists() else [],
         "question_seconds": config.AGENT_TIMEOUT_SECONDS,
