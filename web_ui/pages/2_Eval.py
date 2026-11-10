@@ -9,7 +9,7 @@ results_dir = project_root / "eval" / "results"
 eval_set_path = project_root / "data" / "eval_set_v3.jsonl"
 
 st.set_page_config(page_title="評估結果", page_icon="📊", layout="wide")
-st.title("📊 評估結果")
+st.title("📊 評估結果", anchor="overview")
 
 with st.container(border=True):
     st.markdown(
@@ -33,6 +33,20 @@ group = st.sidebar.radio("題組", list(GROUPS), help=(
 BLOCK_KIND = {"write_request": "寫入／修改請求", "chitchat": "閒聊", "prompt_injection": "提示注入",
               "not_in_data": "資料庫外的問題"}
 SYNTHETIC_RUNS = project_root / "data" / "synthetic" / "runs"
+
+
+def show_toc(groups):
+    """Sidebar table of contents: overview, the per-type section, then each question type."""
+    lines = ["- [總覽與指標](#overview)", "- [依題型的題目與結果](#by-type)"]
+    lines += [f"    - [{name}（{ok}/{n}）](#type-{i})" for i, (name, ok, n) in enumerate(groups)]
+    st.sidebar.divider()
+    st.sidebar.markdown("**目錄**\n\n" + "\n".join(lines))
+
+
+def type_heading(i, text):
+    # Streamlit rewrites heading ids to text slugs, so the anchor is a separate element.
+    st.html(f'<div id="type-{i}" style="scroll-margin-top: 4rem"></div>')
+    st.markdown(f"#### {text}")
 
 
 def subset_of(record):
@@ -91,12 +105,12 @@ def show_synthetic(subset, title):
     st.dataframe(by_type.rename(columns={"count": "題數", "sum": "通過"}), width="stretch")
 
     st.divider()
-    st.subheader("依題型的題目與結果")
-    for category, part in df.groupby("題型", sort=False):
+    st.subheader("依題型的題目與結果", anchor="by-type")
+    groups = [(c, part) for c, part in df.groupby("題型", sort=False) if part["_ok"].any()]
+    show_toc([(c, int(part["_ok"].sum()), len(part)) for c, part in groups])
+    for i, (category, part) in enumerate(groups):
         shown = part[part["_ok"]]
-        if shown.empty:
-            continue
-        st.markdown(f"#### {category}（通過 {int(part['_ok'].sum())}/{len(part)}）")
+        type_heading(i, f"{category}（通過 {int(part['_ok'].sum())}/{len(part)}）")
         for _, row in shown.iterrows():
             tag = "原題" if row.get("source") == "seed" else "改寫"
             with st.expander(f"✅ [{tag}] {row['question'][:90]}"):
@@ -197,7 +211,7 @@ def show_e2e(data, summary_path):
         st.dataframe(by_level.rename(columns={"count": "題數", "mean": "整題答對"}))
 
     st.divider()
-    st.subheader("依題型的題目與結果")
+    st.subheader("依題型的題目與結果", anchor="by-type")
     items = load_eval_set() if meta.get("dataset", "eval_set_v3.jsonl") == "eval_set_v3.jsonl" else {}
     df["題型"] = [category_of(items.get(q)) for q in df["question"]]
     df["_ok"] = df["e2e_success"].astype(bool) if "e2e_success" in df else False
@@ -206,11 +220,11 @@ def show_e2e(data, summary_path):
     by_type["整題答對"] = (by_type["sum"] / by_type["count"]).map("{:.0%}".format)
     st.dataframe(by_type.rename(columns={"count": "題數", "sum": "答對"}), width="stretch")
 
-    for category, group in df.groupby("題型", sort=False):
+    groups = [(c, g) for c, g in df.groupby("題型", sort=False) if g["_ok"].any()]
+    show_toc([(c, int(g["_ok"].sum()), len(g)) for c, g in groups])
+    for i, (category, group) in enumerate(groups):
         shown = group[group["_ok"]]
-        if shown.empty:
-            continue
-        st.markdown(f"#### {category}（答對 {int(group['_ok'].sum())}/{len(group)}）")
+        type_heading(i, f"{category}（答對 {int(group['_ok'].sum())}/{len(group)}）")
         for index, row in shown.iterrows():
             show_row(index, row, items)
 
