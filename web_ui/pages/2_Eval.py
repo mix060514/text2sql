@@ -6,7 +6,7 @@ import streamlit as st
 
 project_root = pathlib.Path(__file__).parent.parent.parent.resolve()
 results_dir = project_root / "eval" / "results"
-eval_set_path = project_root / "data" / "eval_set_v3.jsonl"
+data_dir = project_root / "data"
 
 st.set_page_config(page_title="評估結果", page_icon="📊", layout="wide")
 st.title("📊 評估結果", anchor="overview")
@@ -14,25 +14,29 @@ st.title("📊 評估結果", anchor="overview")
 with st.container(border=True):
     st.markdown(
         "**這一頁是問答系統的考試成績。** 每一題都有事先算好的標準答案，系統從讀題、寫 SQL、"
-        "查資料庫到寫出回答與圖表，整條流程完整跑一次，再逐題和標準答案比對。\n\n"
-        "- **模板問題**：常見的業務提問（銷售額、排名、趨勢、占比、年增率等），"
-        "檢查查出來的數字，以及該不該畫圖、畫哪種圖。\n"
+        "查資料庫到寫出回答與圖表，整條流程完整跑一次，再由程式逐題和標準答案比對（不用 LLM 評審）。\n\n"
+        "- **模板問題**：16 題常見業務提問，每題測一種能力（篩選加總、訂單數、平均單價、Top-N、"
+        "年增率、同季比較、組內取最大、長條／折線／圓餅圖），檢查查出來的數字與圖表。\n"
+        "- **說法對齊**：地區與國家的各種叫法（北美、歐非中東、US、大陸…），每種叫法一題，"
+        "句型固定，答錯就代表那個叫法沒有對上資料庫裡的值。\n"
         "- **攔截問題**：不該去查資料的輸入（要求修改資料、閒聊、提示注入、資料庫裡沒有的東西），"
         "檢查系統有沒有拒絕，而不是硬去執行查詢。\n"
         "- **複雜問題**：需要多步驟計算的查詢，每題還有換句話說的改寫版，"
         "檢查換了問法答案是否仍然一樣。\n\n"
-        "模板與複雜問題的標準答案不由被測的系統產生，而是用 pandas 直接從原始資料另外計算，兩條路徑互相獨立。"
-        "左側可切換題組；顯示的是最新一次完整考試的結果。"
+        "標準答案由題庫裡的 SQL 直接在資料庫上計算，不由被測的系統產生。"
+        "左側可切換題組；顯示的是最新一次考試的結果。"
     )
 
-GROUPS = {"模板問題": None, "攔截問題": "block", "複雜問題": "complex"}
+# title -> (results folder prefix, subset)
+GROUPS = {"模板問題": ("bank", "template"), "說法對齊": ("bank", "alias"),
+          "攔截問題": ("synthetic", "block"), "複雜問題": ("synthetic", "complex")}
 group = st.sidebar.radio("題組", list(GROUPS), help=(
-    "模板問題：132 題模板考卷（eval_set_v3）。攔截問題：不該查資料的輸入（寫入、閒聊、"
-    "提示注入、資料庫外問題），系統不得執行任何 SELECT。複雜問題：34 種 SQL-first 複雜查詢"
-    "與其改寫，標準答案由 SQL 與 pandas 雙重計算。"))
+    "模板問題與說法對齊：手工挑選的小題庫（data/banks/）。攔截問題：不該查資料的輸入，"
+    "系統不得執行任何 SELECT。複雜問題：34 種 SQL-first 複雜查詢與其改寫。"))
 BLOCK_KIND = {"write_request": "寫入／修改請求", "chitchat": "閒聊", "prompt_injection": "提示注入",
               "not_in_data": "資料庫外的問題"}
-SYNTHETIC_RUNS = project_root / "data" / "synthetic" / "runs"
+CHART = {"bar": "長條圖", "line": "折線圖", "pie": "圓餅圖"}
+SYNTHETIC_RUNS = data_dir / "synthetic" / "runs"
 
 
 def show_toc(groups):
@@ -80,14 +84,44 @@ def seed_questions():
     return out
 
 
-def synthetic_items(dataset):
-    """Items of the graded dataset by id; metadata names it as synthetic/<run>/dataset.jsonl."""
-    run = pathlib.Path(dataset or "").parent.name
-    path = SYNTHETIC_RUNS / run / "dataset.jsonl"
-    if not run or not path.exists():
-        return {}
+def load_items(path):
     rows = (json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip())
     return {r["id"]: r for r in rows}
+
+
+def synthetic_items(dataset):
+    """Items of the graded dataset by id. Metadata names it relative to data/
+    (banks/<name>/dataset.jsonl); older synthetic runs wrote synthetic/<run>/dataset.jsonl."""
+    if not dataset:
+        return {}
+    path = data_dir / dataset
+    if not path.exists():
+        path = SYNTHETIC_RUNS / pathlib.Path(dataset).parent.name / "dataset.jsonl"
+    return load_items(path) if path.exists() else {}
+
+
+def chart_name(plot):
+    plot = plot or {}
+    return CHART.get(plot.get("chart_type"), plot.get("chart_type")) if plot.get("should_plot") else "不畫圖"
+
+
+def group_of(subset, row, item, seeds):
+    if subset == "block":
+        return BLOCK_KIND.get(row["category"], row["category"])
+    if subset == "template":
+        return chart_name(item.get("expected_plot"))
+    if subset == "alias":
+        return "地區叫法" if item.get("column") == "Region" else "國家叫法"
+    return seeds.get(row["seed_id"], row["seed_id"])
+
+
+def item_label(subset, row, item):
+    if subset == "template":
+        return f"{row['question'][:80]}（{item.get('ability', '')}）"
+    if subset == "alias":
+        return f"{item.get('alias')} → {item.get('canonical')}"
+    tag = "原題" if row.get("source") == "seed" else "改寫"
+    return f"[{tag}] {row['question'][:90]}"
 
 
 def show_table(columns, rows):
@@ -100,14 +134,27 @@ def show_table(columns, rows):
         st.caption("（空結果）")
 
 
-def show_synthetic(subset, title):
+def show_bank_questions(subset, title):
+    """Before the first run, list the bank so the reader still sees what it asks."""
+    path = data_dir / "banks" / subset / "dataset.jsonl"
+    st.info(f"{title}還沒有評估結果；以下是題庫裡的題目與標準答案。")
+    if path.exists():
+        items = load_items(path).values()
+        st.dataframe(pd.DataFrame([{"題目": i["question"], "測什麼": i.get("ability") or i.get("canonical"),
+                                    "預期圖表": chart_name(i.get("expected_plot")),
+                                    "標準答案": json.dumps(i["ground_truth"]["rows"][:3], ensure_ascii=False)}
+                                   for i in items]), hide_index=True, width="stretch")
+    st.stop()
+
+
+def show_synthetic(prefix, subset, title):
     runs = []
-    for path in sorted(results_dir.glob("synthetic*/synthetic_results.json"), reverse=True):
+    for path in sorted(results_dir.glob(f"{prefix}*/synthetic_results.json"), reverse=True):
         records = [r for r in json.loads(path.read_text(encoding="utf-8")) if subset_of(r) == subset]
         if records:
             runs.append((path.parent.name, path.parent / "synthetic_summary.json", records))
     if not runs:
-        st.info(f"還沒有{title}的評估結果。")
+        show_bank_questions(subset, title) if prefix == "bank" else st.info(f"還沒有{title}的評估結果。")
         st.stop()
     _, summary_path, records = runs[0]  # newest run
     summary = json.loads(summary_path.read_text(encoding="utf-8")) if summary_path.exists() else {}
@@ -119,17 +166,18 @@ def show_synthetic(subset, title):
     items = synthetic_items(meta.get("dataset"))
     df = pd.DataFrame(records)
     df["_ok"] = df["passed"].astype(bool)
+    seeds = seed_questions() if subset == "complex" else {}
+    df["題型"] = [group_of(subset, row, items.get(row["id"]) or {}, seeds) for _, row in df.iterrows()]
     if subset == "block":
-        df["題型"] = df["category"].map(lambda c: BLOCK_KIND.get(c, c))
         metric, note = "攔截成功", "攔截成功：系統沒有執行任何 SELECT，也沒有發布查詢結果。"
     else:
-        seeds = seed_questions()
-        df["題型"] = df["seed_id"].map(lambda s: seeds.get(s, s))
-        metric, note = "答案正確", "答案正確：查詢結果與 SQL＋pandas 雙重計算的標準答案逐列相符（程式判定，不用 LLM 評審）。"
+        metric, note = "答案正確", ("答案正確：查詢結果與標準答案逐列相符，且有預期圖表的題目，"
+                                    "畫不畫圖、圖表類型、X 軸順序都相符（程式判定，不用 LLM 評審）。")
     cols = st.columns(3)
     cols[0].metric("題數", len(df))
     cols[1].metric(metric, f"{df['_ok'].mean():.1%}")
-    cols[2].metric("原題／改寫", f"{(df['source'] == 'seed').sum()}／{(df['source'] == 'rewrite').sum()}")
+    if (df["source"] == "rewrite").any():
+        cols[2].metric("原題／改寫", f"{(df['source'] == 'seed').sum()}／{(df['source'] == 'rewrite').sum()}")
     st.caption(note)
 
     by_type = df.groupby("題型", sort=False)["_ok"].agg(["count", "sum"])
@@ -143,10 +191,12 @@ def show_synthetic(subset, title):
     for i, (category, part) in enumerate(groups):
         type_heading(i, f"{category}（通過 {int(part['_ok'].sum())}/{len(part)}）")
         for _, row in failed_first(part).iterrows():
-            tag = "原題" if row.get("source") == "seed" else "改寫"
-            with st.expander(f"{'✅' if row['_ok'] else '❌'} [{tag}] {row['question'][:90]}"):
+            item = items.get(row.get("id")) or {}
+            with st.expander(f"{'✅' if row['_ok'] else '❌'} {item_label(subset, row, item)}"):
+                if subset == "alias":
+                    st.markdown(f"**題目：** {row['question']}")
                 st.caption(f"判定：{row.get('reason')}")
-                truth = (items.get(row.get("id")) or {}).get("ground_truth")
+                truth = item.get("ground_truth")
                 if subset == "block":
                     st.markdown("**系統回答：**")
                     st.write(row.get("answer") or "")
@@ -161,6 +211,10 @@ def show_synthetic(subset, title):
                 with col2:
                     st.markdown(f"**系統查詢結果**（{row.get('row_count', 0)} 列）：")
                     show_table(row.get("column_names"), row.get("rows"))
+                if item.get("expected_plot"):
+                    actual = {"should_plot": row.get("should_plot", bool(row.get("chart_type"))),
+                              "chart_type": row.get("chart_type")}
+                    st.markdown(f"**圖表：** 預期 `{chart_name(item['expected_plot'])}`，實際 `{chart_name(actual)}`")
                 st.markdown("**SQL：**")
                 st.code(row.get("sql_query") or "", language="sql")
                 st.markdown("**系統回答：**")
@@ -168,133 +222,4 @@ def show_synthetic(subset, title):
     st.stop()
 
 
-if GROUPS[group]:
-    show_synthetic(GROUPS[group], group)
-
-# eval/eval_e2e.py writes <run>/e2e_results.json (+ e2e_summary.json); show the newest run.
-runs = sorted(results_dir.glob("*/e2e_results.json"), key=lambda p: p.parent.name, reverse=True)
-if not runs:
-    st.warning("目前沒有評估結果。")
-    st.stop()
-
-selected_file = runs[0]
-data = json.loads(selected_file.read_text(encoding="utf-8"))
-if not data:
-    st.error("這個評估批次沒有資料。")
-    st.stop()
-
-
-def load_eval_set():
-    if not eval_set_path.exists():
-        return {}
-    rows = (json.loads(line) for line in eval_set_path.read_text(encoding="utf-8").splitlines() if line.strip())
-    return {r["question"]: r for r in rows}
-
-
-# First tag of each eval_set_v3 item is its question type (see scripts/generate_ground_truth.py).
-CATEGORY = {
-    "revenue": "銷售額", "top_products": "熱銷產品", "trend": "趨勢", "top_customer": "重要客戶",
-    "advanced": "進階分析", "yoy": "年增率", "share": "占比", "quarterly": "季度",
-    "comparison": "比較", "simple": "單一數值", "regional_preference": "地區偏好",
-    "top": "最高排名", "asp": "平均單價", "orders": "訂單數", "quantity": "銷售量",
-}
-
-
-def category_of(item):
-    tags = (item or {}).get("tags") or []
-    return CATEGORY.get(tags[0], tags[0]) if tags else "其他"
-
-
-DIFFICULTY = {"simple": "簡單", "medium": "中等", "hard": "困難"}
-CHART = {"bar": "長條圖", "line": "折線圖", "pie": "圓餅圖", "table": "表格"}
-chart_name = lambda should, kind: CHART.get(kind, kind) if should else "不畫圖"
-
-
-def show_e2e(data, summary_path):
-    summary = json.loads(summary_path.read_text(encoding="utf-8")) if summary_path.exists() else {}
-    meta = summary.get("run_metadata", {})
-    if meta:
-        model = str(meta.get("model", ""))
-        model = model.split("/", 1)[1] if model.startswith("openai/") else model
-        st.caption(f"模型 `{model}` · 流程 `{meta.get('workflow')}` · "
-                   f"題庫 `{meta.get('dataset')}` · {summary.get('timestamp', '')}")
-
-    df = pd.DataFrame(data)
-    rate = lambda col: f"{df[col].mean():.1%}" if col in df else "–"
-    cols = st.columns(4)
-    cols[0].metric("題數", len(df))
-    cols[1].metric("整題答對", rate("e2e_success"))
-    cols[2].metric("SQL 正確（LLM 評審）", rate("sql_correct"))
-    plotted = df[df["has_expected_plot"]] if "has_expected_plot" in df else df.iloc[0:0]
-    cols[3].metric("畫圖判斷正確", f"{plotted['plot_decision_correct'].mean():.1%}" if len(plotted) else "–")
-
-    # Two shapes: the eval's own per-question deadline (sql_query == "TIMEOUT") and a model
-    # request timeout surfaced as workflow_error {'code': 'Timeout', ...} in sql_reasoning.
-    timed_out = pd.Series(False, index=df.index)
-    if "sql_query" in df:
-        timed_out |= df["sql_query"].eq("TIMEOUT")
-    if "sql_reasoning" in df:
-        timed_out |= df["sql_reasoning"].astype(str).str.contains("'code': 'Timeout'", regex=False)
-    timeouts = int(timed_out.sum())
-    with st.expander("指標怎麼算", expanded=True):
-        st.markdown(f"""
-- **題庫**：132 題模板考卷，題目由 17 個題型填入地區、產品等產生，標準答案用 pandas 從原始資料計算，
-  與問答系統寫的 SQL 是兩條獨立路徑。其中 54 題只是同一個地區換不同叫法（例如 EMEA／歐非中東）。
-- **SQL 正確**：由另一個 LLM 評審比對查詢結果與標準答案，給 0–10 分。LLM 評審可能誤判，
-  失敗題請展開對照「標準答案」與「查詢結果」再下結論。
-- **畫圖判斷正確**：只計算有標註預期圖表的題目，比對該不該畫圖以及圖表類型。
-- **整題答對**：SQL 正確，且（有預期圖表時）畫圖判斷、圖表類型、X 軸順序與資料序列數都正確。
-- 每題有執行時間上限，逾時算答錯；這個批次有 {timeouts} 題逾時（含模型請求逾時）。
-""")
-
-    if {"difficulty", "e2e_success"} <= set(df.columns):
-        by_level = (df.groupby("difficulty")["e2e_success"].agg(["count", "mean"])
-                      .reindex([k for k in DIFFICULTY if k in set(df["difficulty"])]))
-        by_level.index = [DIFFICULTY[k] for k in by_level.index]
-        by_level.index.name = "難度"
-        by_level["mean"] = by_level["mean"].map("{:.1%}".format)
-        st.dataframe(by_level.rename(columns={"count": "題數", "mean": "整題答對"}))
-
-    st.divider()
-    st.subheader("依題型的題目與結果", anchor="by-type")
-    items = load_eval_set() if meta.get("dataset", "eval_set_v3.jsonl") == "eval_set_v3.jsonl" else {}
-    df["題型"] = [category_of(items.get(q)) for q in df["question"]]
-    df["_ok"] = df["e2e_success"].astype(bool) if "e2e_success" in df else False
-
-    by_type = df.groupby("題型", sort=False)["_ok"].agg(["count", "sum"])
-    by_type["整題答對"] = (by_type["sum"] / by_type["count"]).map("{:.0%}".format)
-    st.dataframe(by_type.rename(columns={"count": "題數", "sum": "答對"}), width="stretch")
-
-    groups = weakest_first(df)
-    show_toc([(c, int(g["_ok"].sum()), len(g)) for c, g in groups])
-    for i, (category, group) in enumerate(groups):
-        type_heading(i, f"{category}（答對 {int(group['_ok'].sum())}/{len(group)}）")
-        for index, row in failed_first(group).iterrows():
-            show_row(index, row, items)
-
-
-def show_row(index, row, items):
-    ok = bool(row["_ok"])
-    truth = items.get(row["question"], {})
-    with st.expander(f"{'✅' if ok else '❌'} Q{index+1}: {row['question'][:80]}（評審 {row.get('sql_score')}/10）"):
-        col1, col2 = st.columns(2)
-        with col1:
-            if "ground_truth" in truth:
-                st.markdown("**標準答案：**")
-                st.code(json.dumps(truth["ground_truth"], ensure_ascii=False, indent=2), language="json")
-            st.markdown("**系統回答：**")
-            st.write(row.get("answer"))
-            st.markdown("**SQL：**")
-            st.code(row.get("sql_query") or "", language="sql")
-        with col2:
-            st.markdown("**評審理由：**")
-            st.info(row.get("sql_reasoning") or "")
-            if row.get("has_expected_plot"):
-                st.markdown(
-                    f"**圖表：** 預期 `{chart_name(row.get('expected_should_plot'), row.get('expected_chart_type'))}`，"
-                    f"實際 `{chart_name(row.get('actual_should_plot'), row.get('actual_chart_type'))}`"
-                )
-            st.markdown("**查詢結果：**")
-            st.code(json.dumps(row.get("sql_result"), ensure_ascii=False, default=str)[:3000], language="json")
-
-show_e2e(data, selected_file.parent / "e2e_summary.json")
+show_synthetic(*GROUPS[group], group)
