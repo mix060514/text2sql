@@ -37,7 +37,7 @@
 | 不同叫法 | 10 | 問題裡的地區或國家名稱和資料庫存的不一樣；三種句型輪流 |
 | 該拒答 | 20 | 要求改資料、資料庫沒有的資料、閒聊、提示注入，各 5 題 |
 
-- **問法**：44 題用口語問法（取自先前由本機模型改寫、通過檢查的句子），40 題用原句。
+- **問法**：44 題用口語問法（句子直接寫在配分表裡），40 題用原句。
 - **沒放進考卷的題目**：4 題多步驟查詢的答案格式不唯一（正負號、月份寫法、星期寫法），不適合當考題。
   另有 3 題的標準答案只保留題目問的欄位（原本多附一欄金額或年份）。
 - **該拒答的 20 題**由 AI 起草與複查，尚無人工確認。
@@ -48,7 +48,6 @@
 |---|---|
 | 出題：配分表與考卷 | `scripts/build_exam.py` → `data/exam/` |
 | 題目來源（原句與 SQL） | `data/seeds/`（`scripts/build_golden_seeds.py`、`build_complex_seeds.py`、`build_guardrail_seeds.py`） |
-| 口語問法的來源 | `data/synthetic/runs/20261107-162208/dataset.jsonl`（`scripts/generate_synthetic.py`） |
 | 批改 | `eval/eval_e2e.py --exam`、`eval/synthetic.py` → `eval/results/exam_<時間>/` |
 | 問答系統 | `src/text2sql/agents/planned_agent/qwen_workflow.py`、`src/text2sql/runtime.py`（流程見 `docs/ARCHITECTURE.md`） |
 | 網頁 | `web_ui/` |
@@ -67,11 +66,11 @@
 | 舊名詞 | 現在怎麼說 |
 |---|---|
 | M1 出題程式（`scripts/generate_ground_truth.py`，2026-11-10 退休） | 舊考卷的出題程式；只為重現基本題型與歷史成績而保留 |
-| M2 合成程式 | 口語問法的來源；不再是日常流程 |
+| M2 合成程式（改寫程式） | 已移除（2026-11-10，git c7c60db）。口語問法直接寫在配分表裡 |
 | M3 評估器 | 批改 |
 | M4 問答系統 | 問答系統 |
 | M5 網頁服務 | 網頁 |
 | 黃金種子／模板種子、攔截種子、複雜種子 | 題目來源（原句與 SQL） |
 | 模板題庫、說法對齊題庫（`data/banks/`，已刪除） | 併入考卷的基本查詢、畫圖、不同叫法 |
-| 合成考卷（354 題，每題三種說法） | 已由考卷取代；留作口語問法的來源與換說法實驗的紀錄 |
+| 合成考卷（354 題，每題三種說法） | 已由考卷取代；`data/synthetic/runs/` 留作優化成果頁數字的依據 |
 | 模板考卷（`data/eval_set_v3.jsonl`，132 題） | 舊考卷，只當歷史紀錄（優化成果頁的早期成績來自它） |

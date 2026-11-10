@@ -20,13 +20,9 @@ discussion (資料庫、題目、標準答案、考卷、問答系統、成績�
   each asked once, graded by code against the SQLite oracle and expected chart, no judge)
 - `uv run python scripts/build_exam.py` (offline; rebuilds data/exam from the PICKS blueprint in that script)
 - `uv run python eval/eval_e2e.py --limit 5` (historical eval_set_v3 run with the LLM judge; retired 2026-11-10)
-- `uv run python eval/eval_e2e.py --synthetic [RUN_DIR] [--label allow|block] [--no-reuse]` (live model; synthetic set graded
-  against its SQLite oracle, no judge; reuses earlier passes for the same model/DB, incl. regraded eval_e2e rows)
 - `uv run python scripts/build_golden_seeds.py` (offline; golden seeds from legacy templates, SQL checked against legacy pandas)
 - `uv run python scripts/build_guardrail_seeds.py` (offline; 42 block seeds, prints a review table)
 - `uv run python scripts/build_complex_seeds.py` (offline; 34 SQL-first complex seeds, SQL checked against pandas on the CSV)
-- `uv run python scripts/generate_synthetic.py` (live model; staged synthetic golden + guardrail set, see docs/SYNTHETIC_DATA_METHOD.md)
-  Add `--resume-from data/synthetic/runs/<run>` to reuse accepted rewrites and regenerate only what fails.
 
 ## Boundaries
 
@@ -50,8 +46,7 @@ The current evaluation is the exam (data/exam, scripts/build_exam.py): under 100
 (基本查詢、畫圖、多步驟查詢、不同叫法、該拒答), each question asked once and testing a different point, graded by
 code (eval/synthetic.py): rows against the SQLite oracle, plus the expected chart where the item has one.
 To test something new, add a row to PICKS; do not ask the same question again in other words.
-The earlier sets (16 template, 27 alias, 354 synthetic with every question in three wordings) are retired; the
-synthetic runs stay as the source of colloquial wordings and of the paraphrase experiment on the optimization page.
+The earlier sets (16 template, 27 alias, 354 synthetic with every question in three wordings) are retired.
 M1 (generate_ground_truth.py) and data/eval_set_v3.jsonl are retired (2026-11-10); v3 stays only as the record
 behind the optimization page. Do not compare a changed database against old ground truth, or treat an LLM judge as truth.
 Smoke compares executed data/actual chart generation with deterministic SQLite oracles.
@@ -60,6 +55,9 @@ quarters, YYYY-Qn for multi-year quarters, YYYY-MM for months.
 
 ## History
 
+The rewrite program ("M2": scripts/generate_synthetic.py, datagen/pipeline.py, datagen/llm.py) was removed on
+2026-11-10; it is in git at c7c60db. Its runs under data/synthetic/runs stay as the evidence behind the optimization
+page (eval_e2e.py --synthetic RUN_DIR can still replay one). New exam questions are written directly in natural wording.
 The removed Codex backend (codex_workflow.py, codex_backend.py, mcp_server.py) is at 96f9615.
 step_publish now always requires the semantic review. The source branches
 codex/text2sql-qwen27b and codex/text2sql-strong are kept unchanged.

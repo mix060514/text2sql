@@ -10,11 +10,14 @@
   M1–M5、種子、題庫、合成考卷不再出現在首頁、評估頁、架構圖。資料檔與欄位名稱沒有改。
 - **考卷**（`scripts/build_exam.py` → `data/exam/`，`eval_e2e.py --exam`）：84 題，每題只出現一次，五組：
   基本查詢 14、畫圖 10、多步驟查詢 30、不同叫法 10、該拒答 20。配分表是程式裡的 `PICKS`，要測新東西就加一列。
-  44 題用口語問法（取自 `data/synthetic/runs/20261107-162208` 已通過檢查的改寫），40 題用原句。
+  44 題用口語問法（句子直接寫在配分表裡），40 題用原句。
   4 題多步驟查詢因答案格式不唯一沒放進考卷（country_decline、category_best_month、weekday、months_beat_last_year）；
   3 題的標準答案只保留題目問的欄位。不同叫法改成三種句型輪流（銷售額、訂單數、銷售量）。
+- **改寫程式（舊稱 M2）已移除**：`scripts/generate_synthetic.py`、`datagen/pipeline.py`、`datagen/llm.py` 與其測試（git c7c60db 可找回）。
+  `compute_oracle`、`load_seeds` 搬到 `datagen/oracle.py`。`datagen/checks.py`（問法規則檢查）仍被題目來源的建置程式使用，保留。
+  `data/synthetic/runs/` 保留，是優化成果頁數字的依據。
 - **取代的東西**：`data/banks/`（模板 16、說法對齊 27）已刪；`--bank` 改成 `--exam`；合成考卷 354 題不再是評估對象，
-  只留作口語問法的來源與換說法實驗的紀錄。評估頁只顯示這張考卷（讀 `eval/results/exam_*`）。
+  只留作換說法實驗的紀錄。評估頁只顯示這張考卷（讀 `eval/results/exam_*`）。
 - **換說法實驗**（優化成果頁，`build_optimization_report.paraphrase_section`，用既有兩次完整評估，沒有重跑模型）：
   複雜題原句 31/34、33/34，改寫 63/68、60/68；改寫與自己的原句結果不同 9/68、8/68，同一句話兩次評估結果不同 13/102。
   攔截題兩次評估完全相同（原句 42/42、改寫 83/84）。換說法造成的差異無法和重跑的差異區分，所以改成每題只問一次。
