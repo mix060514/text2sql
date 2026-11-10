@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ARCHITECTURE_SVG = ROOT / "docs" / "architecture.svg"
+QA_FLOW_SVG = ROOT / "docs" / "qa-flow.svg"
 sys.path.insert(0, str(ROOT / "src"))
 from text2sql.config import ANALYSIS_MODEL
 
@@ -44,16 +45,21 @@ st.markdown(f"""
 **建議從左側「對話查詢」開始**：側邊欄有幾題範例問題，回答下方可展開執行流程，
 逐步查看模型寫的 SQL、查詢結果與審查結果。程式碼：{github_link('GitHub', REPO_URL)}
 """, unsafe_allow_html=True)
+
+
+def show_svg(path, alt, width):
+    if path.exists():
+        svg = base64.b64encode(path.read_bytes()).decode()
+        st.markdown(f'<img src="data:image/svg+xml;base64,{svg}" alt="{alt}" style="width:100%;max-width:{width}px">',
+                    unsafe_allow_html=True)
+
+
+st.subheader("問答系統怎麼運作")
+show_svg(QA_FLOW_SVG, "問答系統內部流程", 960)
 st.divider()
 st.subheader("檢核機制")
 st.markdown("問答系統的正確性由一張 84 題的考卷驗證：每題的標準答案由資料庫算出，問答系統作答後由程式逐題批改。")
-if ARCHITECTURE_SVG.exists():
-    svg = base64.b64encode(ARCHITECTURE_SVG.read_bytes()).decode()
-    st.markdown(
-        f'<img src="data:image/svg+xml;base64,{svg}" alt="text2sql 架構圖" '
-        'style="width:100%;max-width:960px">',
-        unsafe_allow_html=True,
-    )
+show_svg(ARCHITECTURE_SVG, "檢核機制流程圖", 960)
 st.markdown("""
 | 名詞 | 意思 |
 |---|---|

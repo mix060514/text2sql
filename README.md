@@ -30,6 +30,10 @@
   → step_draw_chart（程式）Plotly 繪圖
 ```
 
+![問答系統內部流程](docs/qa-flow.svg)
+
+檢核機制（考卷、批改、成績單）：
+
 ![架構](docs/architecture.svg)
 
 網頁的對話頁會即時畫出這張流程圖：圓角框是 LLM、方框是程式，綠色通過、紅色拒絕或失敗，
