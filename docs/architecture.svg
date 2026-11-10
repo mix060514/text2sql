@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="680" height="770" viewBox="0 0 680 770" role="img">
 <title>text2sql 架構：模組、產出與區塊</title>
-<desc>M1 出題程式產出模板考卷；從模板考卷挑 42 題成為黃金種子，加上攔截與複雜種子，由 M2 合成程式產出合成考卷。M3 評估器用兩份考卷考 M4 問答系統並產出成績單。使用者透過 M5 網頁服務向 M4 提問並取得答案。銷售資料供 M1 算答案、供 M4 查詢。</desc>
+<desc>從黃金種子手挑 16 題成為模板題庫；說法對齊題庫每個地區或國家叫法一題，標準答案由 SQL 在銷售資料上計算。黃金種子加上攔截與複雜種子，由 M2 合成程式產出合成考卷。M3 評估器用這些題目考 M4 問答系統，由程式比對答案與圖表並產出成績單。使用者透過 M5 網頁服務向 M4 提問並取得答案。</desc>
 <style>
 text { font-family: "Noto Sans TC", "Noto Sans CJK TC", "Microsoft JhengHei", "PingFang TC", sans-serif; }
 .th { font-size: 14px; font-weight: 500; fill: #2C2C2A; }
@@ -22,18 +22,17 @@ text { font-family: "Noto Sans TC", "Noto Sans CJK TC", "Microsoft JhengHei", "P
 <g class="amber"><rect x="34" y="200" width="612" height="210" rx="12"/><text class="th" x="636" y="222" text-anchor="end">合成出題區：種子 → 改寫 → 檢查</text></g>
 <g class="green"><rect x="450" y="420" width="196" height="282" rx="12"/><text class="th" x="548" y="438" text-anchor="middle">產品區：使用者會用到的</text></g>
 
-<g class="purple"><rect x="40" y="30" width="180" height="56" rx="8"/><text class="th" x="130" y="50" text-anchor="middle" dominant-baseline="central">M1 出題程式</text><text class="ts" x="130" y="69" text-anchor="middle" dominant-baseline="central">題型填空 + 算答案</text></g>
+<g class="out"><rect x="40" y="30" width="180" height="56" rx="8"/><text class="th" x="130" y="50" text-anchor="middle" dominant-baseline="central">說法對齊題庫 27</text><text class="ts" x="130" y="69" text-anchor="middle" dominant-baseline="central">每個叫法一題</text></g>
 <g class="out"><rect x="460" y="30" width="180" height="56" rx="8"/><text class="th" x="550" y="50" text-anchor="middle" dominant-baseline="central">銷售資料</text><text class="ts" x="550" y="69" text-anchor="middle" dominant-baseline="central">3 萬筆，2023–2024</text></g>
 <line x1="458" y1="58" x2="224" y2="58" class="arr" marker-end="url(#arrow)"/>
-<text class="ts" x="340" y="48" text-anchor="middle">算標準答案</text>
+<text class="ts" x="340" y="48" text-anchor="middle">SQL 算標準答案</text>
 <path d="M640 58 L662 58 L662 568 L644 568" class="arr" marker-end="url(#arrow)"/>
 
-<line x1="130" y1="88" x2="130" y2="116" class="arr" marker-end="url(#arrow)"/>
-<g class="out"><rect x="40" y="120" width="180" height="56" rx="8"/><text class="th" x="130" y="140" text-anchor="middle" dominant-baseline="central">模板考卷</text><text class="ts" x="130" y="159" text-anchor="middle" dominant-baseline="central">132 題</text></g>
-<line x1="130" y1="178" x2="130" y2="236" class="arr" marker-end="url(#arrow)"/>
-<text class="ts" x="142" y="192" text-anchor="start">挑 42 題</text>
+<g class="out"><rect x="40" y="120" width="180" height="56" rx="8"/><text class="th" x="130" y="140" text-anchor="middle" dominant-baseline="central">模板題庫 16</text><text class="ts" x="130" y="159" text-anchor="middle" dominant-baseline="central">每題一種能力</text></g>
+<line x1="130" y1="238" x2="130" y2="180" class="arr" marker-end="url(#arrow)"/>
+<text class="ts" x="142" y="212" text-anchor="start">挑 16 題</text>
 
-<g class="out"><rect x="40" y="240" width="180" height="56" rx="8"/><text class="th" x="130" y="260" text-anchor="middle" dominant-baseline="central">黃金種子 42</text><text class="ts" x="130" y="279" text-anchor="middle" dominant-baseline="central">補 SQL，雙重驗證</text></g>
+<g class="out"><rect x="40" y="240" width="180" height="56" rx="8"/><text class="th" x="130" y="260" text-anchor="middle" dominant-baseline="central">黃金種子 42</text><text class="ts" x="130" y="279" text-anchor="middle" dominant-baseline="central">舊題型各一例，附 SQL</text></g>
 <g class="out"><rect x="250" y="240" width="180" height="56" rx="8"/><text class="th" x="340" y="260" text-anchor="middle" dominant-baseline="central">攔截種子 42</text><text class="ts" x="340" y="279" text-anchor="middle" dominant-baseline="central">手寫，該拒答的題</text></g>
 <g class="out"><rect x="460" y="240" width="180" height="56" rx="8"/><text class="th" x="550" y="260" text-anchor="middle" dominant-baseline="central">複雜種子 34 型</text><text class="ts" x="550" y="279" text-anchor="middle" dominant-baseline="central">先寫 SQL 再出題</text></g>
 
@@ -50,9 +49,10 @@ text { font-family: "Noto Sans TC", "Noto Sans CJK TC", "Microsoft JhengHei", "P
 <g class="teal"><rect x="460" y="450" width="180" height="56" rx="8"/><text class="th" x="550" y="470" text-anchor="middle" dominant-baseline="central">M5 網頁服務</text><text class="ts" x="550" y="489" text-anchor="middle" dominant-baseline="central">使用者從這裡提問</text></g>
 <line x1="550" y1="510" x2="550" y2="536" class="arr" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
 
-<path d="M40 148 L24 148 L24 568 L246 568" class="arr" marker-end="url(#arrow)"/>
+<path d="M40 58 L24 58 L24 568 L246 568" class="arr" marker-end="url(#arrow)"/>
+<path d="M40 148 L24 148" class="arr"/>
 
-<g class="coral"><rect x="250" y="540" width="180" height="56" rx="8"/><text class="th" x="340" y="560" text-anchor="middle" dominant-baseline="central">M3 評估器</text><text class="ts" x="340" y="579" text-anchor="middle" dominant-baseline="central">模板卷 judge／合成卷對答案</text></g>
+<g class="coral"><rect x="250" y="540" width="180" height="56" rx="8"/><text class="th" x="340" y="560" text-anchor="middle" dominant-baseline="central">M3 評估器</text><text class="ts" x="340" y="579" text-anchor="middle" dominant-baseline="central">程式比對答案與圖表</text></g>
 <line x1="434" y1="568" x2="456" y2="568" class="arr" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
 <g class="teal"><rect x="460" y="540" width="180" height="56" rx="8"/><text class="th" x="550" y="560" text-anchor="middle" dominant-baseline="central">M4 問答系統</text><text class="ts" x="550" y="579" text-anchor="middle" dominant-baseline="central">查資料、回答</text></g>
 
