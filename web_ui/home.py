@@ -39,7 +39,7 @@ st.markdown(f"""
 逐步查看模型寫的 SQL、查詢結果與審查結果。程式碼：{github_link('GitHub', REPO_URL)}
 """, unsafe_allow_html=True)
 st.divider()
-st.subheader("系統架構")
+st.subheader("檢核機制")
 st.markdown("問答系統的正確性由一張 84 題的考卷驗證：每題的標準答案由資料庫算出，問答系統作答後由程式逐題批改。")
 if ARCHITECTURE_SVG.exists():
     svg = base64.b64encode(ARCHITECTURE_SVG.read_bytes()).decode()
