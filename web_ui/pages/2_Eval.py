@@ -80,6 +80,26 @@ def seed_questions():
     return out
 
 
+def synthetic_items(dataset):
+    """Items of the graded dataset by id; metadata names it as synthetic/<run>/dataset.jsonl."""
+    run = pathlib.Path(dataset or "").parent.name
+    path = SYNTHETIC_RUNS / run / "dataset.jsonl"
+    if not run or not path.exists():
+        return {}
+    rows = (json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip())
+    return {r["id"]: r for r in rows}
+
+
+def show_table(columns, rows):
+    # Regraded eval_e2e rows carry no column_names; DataFrame cells read missing keys as NaN.
+    rows = rows if isinstance(rows, list) else []
+    columns = columns if isinstance(columns, list) and rows and len(columns) == len(rows[0]) else None
+    if rows:
+        st.dataframe(pd.DataFrame(rows, columns=columns), hide_index=True)
+    else:
+        st.caption("（空結果）")
+
+
 def show_synthetic(subset, title):
     runs = []
     for path in sorted(results_dir.glob("synthetic*/synthetic_results.json"), reverse=True):
@@ -96,6 +116,7 @@ def show_synthetic(subset, title):
         model = str(meta.get("model", "")).removeprefix("openai/")
         st.caption(f"模型 `{model}` · 題庫 `{meta.get('dataset')}` · {summary.get('timestamp', '')}")
 
+    items = synthetic_items(meta.get("dataset"))
     df = pd.DataFrame(records)
     df["_ok"] = df["passed"].astype(bool)
     if subset == "block":
@@ -124,12 +145,26 @@ def show_synthetic(subset, title):
         for _, row in failed_first(part).iterrows():
             tag = "原題" if row.get("source") == "seed" else "改寫"
             with st.expander(f"{'✅' if row['_ok'] else '❌'} [{tag}] {row['question'][:90]}"):
+                st.caption(f"判定：{row.get('reason')}")
+                truth = (items.get(row.get("id")) or {}).get("ground_truth")
+                if subset == "block":
+                    st.markdown("**系統回答：**")
+                    st.write(row.get("answer") or "")
+                    continue
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.markdown("**標準答案：**")
+                    if truth:
+                        show_table(truth.get("columns"), truth.get("rows"))
+                    else:
+                        st.caption("（找不到這題的標準答案）")
+                with col2:
+                    st.markdown(f"**系統查詢結果**（{row.get('row_count', 0)} 列）：")
+                    show_table(row.get("column_names"), row.get("rows"))
+                st.markdown("**SQL：**")
+                st.code(row.get("sql_query") or "", language="sql")
                 st.markdown("**系統回答：**")
                 st.write(row.get("answer") or "")
-                if subset != "block":
-                    st.markdown("**SQL：**")
-                    st.code(row.get("sql_query") or "", language="sql")
-                st.caption(f"判定：{row.get('reason')}")
     st.stop()
 
 
