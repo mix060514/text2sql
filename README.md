@@ -49,15 +49,15 @@
 
 細節、失敗分類與已知限制見 [docs/VALIDATION.md](docs/VALIDATION.md)。
 
-## 測試資料怎麼來的
+## 考卷怎麼來的
 
-- **基本問題**：從舊 17 個題型各取一例、答案經 SQL 驗證的 42 題裡手挑 16 題，每題測一種能力。
-- **說法對齊**：提示詞別名對照表裡的每個叫法（北美、歐非中東、US、大陸…）各一題，句型固定。
+- **一張考卷，84 題，每題考不同的東西、只出現一次**（`scripts/build_exam.py` 裡的配分表，要測新東西就加一列）：
+  基本查詢 14、畫圖 10、多步驟查詢 30、不同叫法 10、該拒答 20。
+- **標準答案**不由人或模型填寫：每題附一條 SQL，拿到資料庫執行的結果就是標準答案。
+- **問法**：約一半的題目用口語問法，取自先前由本機模型改寫、通過規則／標籤／語意檢查的句子；其餘用原句。
+- 先前的做法是每題用三種說法各問一次（354 題）。實測顯示換說法造成的差異和同一句話重跑的差異相當
+  （優化成果頁的實驗），所以改成每題只問一次。方法紀錄見 [docs/SYNTHETIC_DATA_METHOD.md](docs/SYNTHETIC_DATA_METHOD.md)。
 - 舊考卷（132 題，LLM judge 評分）只留作歷史紀錄。
-- **複雜問題與攔截問題**：參考「用合成資料測試 AI Guardrails」的方法，原句 → 本機模型改寫問法 → 規則、標籤、語意、SQL 對題
-  四層檢查 → 不通過就把原因放回 prompt 重寫。每題的 SQL 都要和 pandas 的實作逐列一致才收。
-  換說法有沒有多找到錯，見優化成果頁的實驗（差異與同一句話重跑的差異相當）。
-  方法與被刷掉的實例見 [docs/SYNTHETIC_DATA_METHOD.md](docs/SYNTHETIC_DATA_METHOD.md)。
 
 ## 執行
 
@@ -89,10 +89,8 @@ uv run python scripts/verify_all.py
 # 線上：8 題 smoke，與 SQLite oracle 比對
 uv run python scripts/smoke_workflow.py --output docs/smoke-qwen27b.json
 
-# 線上：模板題庫、說法對齊題庫與合成考卷（SQLite 比對，不用 judge）
-uv run python eval/eval_e2e.py --bank template
-uv run python eval/eval_e2e.py --bank alias
-uv run python eval/eval_e2e.py --synthetic
+# 線上：考卷 84 題（SQLite 比對，不用 judge）
+uv run python eval/eval_e2e.py --exam --concurrency 4
 ```
 
 `data/eval_manifest.json` 記錄 DB 與考卷的 SHA-256，避免拿舊標準答案評估新資料。

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="760" height="560" viewBox="0 0 760 560" role="img">
 <title>text2sql 架構：出題、考卷、問答系統、批改、成績單</title>
-<desc>人與 AI 決定考什麼並寫出題目與 SQL；出題程式把 SQL 拿到資料庫算出標準答案，部分題目另由模型改寫問法，組成考卷。批改程式把考卷的題目交給問答系統、收回答案，由程式比對答案與圖表並產出成績單。產品區在右側：使用者透過網頁向問答系統提問，問答系統唯讀查詢資料庫並產出答案。</desc>
+<desc>人與 AI 決定考什麼並寫出題目與 SQL；出題程式把 SQL 拿到資料庫算出標準答案，部分題目採用口語問法，組成每題只出現一次的考卷。批改程式把考卷的題目交給問答系統、收回答案，由程式比對答案與圖表並產出成績單。產品區在右側：使用者透過網頁向問答系統提問，問答系統唯讀查詢資料庫並產出答案。</desc>
 <style>
 text { font-family: "Noto Sans TC", "Noto Sans CJK TC", "Microsoft JhengHei", "PingFang TC", sans-serif; }
 .th { font-size: 14px; font-weight: 500; fill: #2C2C2A; }
@@ -29,9 +29,9 @@ text { font-family: "Noto Sans TC", "Noto Sans CJK TC", "Microsoft JhengHei", "P
 
 <g class="out"><rect x="40" y="130" width="180" height="56" rx="8"/><text class="th" x="130" y="150" text-anchor="middle" dominant-baseline="central">人／AI</text><text class="ts" x="130" y="169" text-anchor="middle" dominant-baseline="central">決定考什麼，寫題目與 SQL</text></g>
 <line x1="224" y1="158" x2="246" y2="158" class="arr" marker-end="url(#arrow)"/>
-<g class="purple"><rect x="250" y="130" width="180" height="56" rx="8"/><text class="th" x="340" y="150" text-anchor="middle" dominant-baseline="central">出題</text><text class="ts" x="340" y="169" text-anchor="middle" dominant-baseline="central">算標準答案，部分題目換說法</text></g>
+<g class="purple"><rect x="250" y="130" width="180" height="56" rx="8"/><text class="th" x="340" y="150" text-anchor="middle" dominant-baseline="central">出題</text><text class="ts" x="340" y="169" text-anchor="middle" dominant-baseline="central">算標準答案，部分題目用口語</text></g>
 <line x1="340" y1="188" x2="340" y2="226" class="arr" marker-end="url(#arrow)"/>
-<g class="out"><rect x="250" y="230" width="180" height="56" rx="8"/><text class="th" x="340" y="250" text-anchor="middle" dominant-baseline="central">考卷</text><text class="ts" x="340" y="269" text-anchor="middle" dominant-baseline="central">271 題，分四組</text></g>
+<g class="out"><rect x="250" y="230" width="180" height="56" rx="8"/><text class="th" x="340" y="250" text-anchor="middle" dominant-baseline="central">考卷</text><text class="ts" x="340" y="269" text-anchor="middle" dominant-baseline="central">84 題，每題考不同的東西</text></g>
 <line x1="340" y1="288" x2="340" y2="326" class="arr" marker-end="url(#arrow)"/>
 <g class="coral"><rect x="250" y="330" width="180" height="56" rx="8"/><text class="th" x="340" y="350" text-anchor="middle" dominant-baseline="central">批改</text><text class="ts" x="340" y="369" text-anchor="middle" dominant-baseline="central">程式比對答案與圖表</text></g>
 <line x1="340" y1="388" x2="340" y2="426" class="arr" marker-end="url(#arrow)"/>
