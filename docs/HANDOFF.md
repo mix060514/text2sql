@@ -25,7 +25,7 @@
 - 50 題平均生成約 780 tokens（舊 8 題約 420），所以單題時間比舊表長。
 
 **router 已套用**（`/mnt/data1/llama-config/acer-two-profiles.ini` 的 `[swift15-27b-iq3-xxs]`）：MTP 4 路、64k kv-unified、
-`ctx-checkpoints = 4`、`cache-ram = 2048`、`no-mmproj = true`（text2sql 沒用到視覺；圖片頁接的是另一台 8082）。
+`ctx-checkpoints = 4`、`cache-ram = 2048`、`no-mmproj = true`（text2sql 沒用到視覺；讀圖頁與 `LLAMA_CPP_VL_*` 設定已於 2026-11-10 移除）。
 備份：`acer-two-profiles.before-dflash2-np2-20261109.ini`（改前，MTP 4 路＋mmproj、無上限）、
 `acer-two-profiles.before-mtp-np4-nommproj-20261109.ini`（中間短暫套用過的 DFlash2 2 路）。
 使用者 15:39 重啟；以 `/v1/models` 參數、子程序 ps（`--spec-type draft-mtp --parallel 4 --cache-ram 2048
