@@ -40,7 +40,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 st.divider()
 st.subheader("系統架構")
-st.markdown("**怎麼知道問答系統答得對？** 像學校考試一樣：先出一份有標準答案的考卷，讓問答系統作答，再由程式批改。")
+st.markdown("問答系統的正確性由一張 84 題的考卷驗證：每題的標準答案由資料庫算出，問答系統作答後由程式逐題批改。")
 if ARCHITECTURE_SVG.exists():
     svg = base64.b64encode(ARCHITECTURE_SVG.read_bytes()).decode()
     st.markdown(
