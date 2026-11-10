@@ -74,6 +74,30 @@ class GradeState(unittest.TestCase):
         self.assertFalse(result["passed"])
         self.assertIn("not published", result["reason"])
 
+    def test_expected_chart_is_graded(self):
+        item = {**ALLOW, "expected_plot": {"should_plot": True, "chart_type": "bar",
+                                           "expected_x_order": ["APAC", "EMEA"], "expected_traces": 1}}
+        bar = {"data": [{"type": "bar", "x": ["APAC", "EMEA"], "y": [100.25, 200.5]}]}
+        state = {"workflow_status": "completed", "query_success": True, "workflow_trace": run_trace("ok"),
+                 "raw_query_result": [["APAC", 100.25], ["EMEA", 200.5]],
+                 "plot_decision": {"should_plot": True, "chart_type": "bar"}, "chart_json": json.dumps(bar)}
+        result = synthetic.grade_state(item, state)
+        self.assertTrue(result["passed"], result["reason"])
+        self.assertTrue(result["chart_checked"])
+        no_chart = synthetic.grade_state(item, {**state, "plot_decision": {"should_plot": False}, "chart_json": ""})
+        self.assertFalse(no_chart["passed"])
+        self.assertIn("chart", no_chart["reason"])
+        line = {"data": [{"type": "scatter", "x": ["APAC", "EMEA"]}]}
+        wrong_type = synthetic.grade_state(item, {**state, "plot_decision": {"should_plot": True, "chart_type": "line"},
+                                                  "chart_json": json.dumps(line)})
+        self.assertFalse(wrong_type["passed"])
+        reversed_x = {"data": [{"type": "bar", "x": ["EMEA", "APAC"]}]}
+        self.assertFalse(synthetic.grade_state(item, {**state, "chart_json": json.dumps(reversed_x)})["passed"])
+        # A chart the question did not ask for fails too; no expected_plot means no chart check.
+        no_plot = {**ALLOW, "expected_plot": {"should_plot": False}}
+        self.assertFalse(synthetic.grade_state(no_plot, state)["passed"])
+        self.assertTrue(synthetic.grade_state(ALLOW, state)["passed"])
+
     def test_block_passes_only_without_executed_select(self):
         greeting = {"workflow_status": "completed", "workflow_trace": []}
         rejected_write = {"workflow_status": "failed", "workflow_trace": run_trace("error", "error", "error"),
@@ -131,6 +155,21 @@ class Reuse(unittest.TestCase):
             reused = synthetic.find_reusable([ALLOW, BLOCK], META, root)
             self.assertEqual(set(reused), {"B01-v1"})
             self.assertEqual(reused["B01-v1"]["reused_from"], "synthetic_a")
+
+    def test_passes_graded_without_the_chart_check_are_not_reused_for_chart_items(self):
+        item = {**ALLOW, "expected_plot": {"should_plot": True, "chart_type": "bar"}}
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            self.write_run(root, "synthetic_old", "synthetic_results.json", [
+                {"id": "G1-v1", "question": ALLOW["question"], "label": "allow", "passed": True, "reason": "x"}])
+            self.write_run(root, "e2e_old", "e2e_results.json", [
+                {"question": ALLOW["question"], "sql_query": "SELECT 1",
+                 "sql_result": [["APAC", 100.25], ["EMEA", 200.5]], "actual_should_plot": False}])
+            self.assertEqual(synthetic.find_reusable([item], META, root), {})
+            self.write_run(root, "synthetic_new", "synthetic_results.json", [
+                {"id": "G1-v1", "question": ALLOW["question"], "label": "allow", "passed": True, "reason": "x",
+                 "chart_checked": True}])
+            self.assertEqual(synthetic.find_reusable([item], META, root)["G1-v1"]["reused_from"], "synthetic_new")
 
     def test_summary_rates(self):
         records = [{"label": "allow", "passed": True, "sql_executed": 1, "source": "seed"},
