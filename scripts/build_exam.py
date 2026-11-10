@@ -121,6 +121,8 @@ DROP_COLUMNS = {
     "X-region_top_customers_orders-EMEA-2024-5": ["total_revenue"],
     "X-countries_above_avg": ["total_revenue"],
     "X-best_month_each_year": ["year"],
+    "X-category_top3_quantity": ["total_quantity"],
+    "X-country_top_quantity_product-LATAM": ["total_quantity"],
 }
 
 # 不同叫法：the name in the question is not the value stored in the database.

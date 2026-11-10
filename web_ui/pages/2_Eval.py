@@ -94,6 +94,9 @@ if len(block):
     cols[3].metric("該拒答的題：成功拒答", f"{int(block['_ok'].sum())}/{len(block)}")
 st.caption("答案正確：查詢結果與標準答案逐列相符；要畫圖的題目，畫不畫圖、圖表類型、橫軸順序也要相符。"
            "成功拒答：系統沒有執行任何查詢，也沒有發布查詢結果。")
+reused = int(df["reused_from"].notna().sum()) if "reused_from" in df else 0
+if reused:
+    st.caption(f"這次評估實際重跑 {len(df) - reused} 題；其餘 {reused} 題沿用先前已通過的結果（同一個模型、同一份資料庫）。")
 if len(df) < len(items):
     st.warning(f"這次評估只完成 {len(df)} 題，考卷共 {len(items)} 題。")
 
