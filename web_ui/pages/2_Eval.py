@@ -11,6 +11,20 @@ eval_set_path = project_root / "data" / "eval_set_v3.jsonl"
 st.set_page_config(page_title="評估結果", page_icon="📊", layout="wide")
 st.title("📊 評估結果")
 
+with st.container(border=True):
+    st.markdown(
+        "**這一頁是問答系統的考試成績。** 每一題都有事先算好的標準答案，系統從讀題、寫 SQL、"
+        "查資料庫到寫出回答與圖表，整條流程完整跑一次，再逐題和標準答案比對。\n\n"
+        "- **模板問題**：常見的業務提問（銷售額、排名、趨勢、占比、年增率等），"
+        "檢查查出來的數字，以及該不該畫圖、畫哪種圖。\n"
+        "- **攔截問題**：不該去查資料的輸入（要求修改資料、閒聊、提示注入、資料庫裡沒有的東西），"
+        "檢查系統有沒有拒絕，而不是硬去執行查詢。\n"
+        "- **複雜問題**：需要多步驟計算的查詢，每題還有換句話說的改寫版，"
+        "檢查換了問法答案是否仍然一樣。\n\n"
+        "模板與複雜問題的標準答案不由被測的系統產生，而是用 pandas 直接從原始資料另外計算，兩條路徑互相獨立。"
+        "左側可切換題組；顯示的是最新一次完整考試的結果。"
+    )
+
 GROUPS = {"模板問題": None, "攔截問題": "block", "複雜問題": "complex"}
 group = st.sidebar.radio("題組", list(GROUPS), help=(
     "模板問題：132 題模板考卷（eval_set_v3）。攔截問題：不該查資料的輸入（寫入、閒聊、"
@@ -50,8 +64,7 @@ def show_synthetic(subset, title):
     if not runs:
         st.info(f"還沒有{title}的評估結果。")
         st.stop()
-    name = st.sidebar.selectbox("選擇評估批次", [r[0] for r in runs])
-    _, summary_path, records = next(r for r in runs if r[0] == name)
+    _, summary_path, records = runs[0]  # newest run
     summary = json.loads(summary_path.read_text(encoding="utf-8")) if summary_path.exists() else {}
     meta = summary.get("run_metadata", {})
     if meta:
@@ -99,54 +112,17 @@ def show_synthetic(subset, title):
 if GROUPS[group]:
     show_synthetic(GROUPS[group], group)
 
-# eval/eval_e2e.py writes <run>/e2e_results.json (+ e2e_summary.json); the older eval/eval.py
-# wrote <run>/eval_results.json. List current e2e runs first, newest first, then legacy ones.
-E2E, LEGACY = "e2e", "legacy"
-runs = sorted(
-    [(p, E2E) for p in results_dir.glob("*/e2e_results.json")],
-    key=lambda r: r[0].parent.name, reverse=True,
-)
-if st.sidebar.checkbox("顯示舊版評估", help="舊資料庫與舊題庫的結果，數字不能與目前的評估直接比較。"):
-    runs += sorted(
-        [(p, LEGACY) for p in results_dir.glob("*/eval_results.json")],
-        key=lambda r: r[0].parent.name, reverse=True,
-    )
-
+# eval/eval_e2e.py writes <run>/e2e_results.json (+ e2e_summary.json); show the newest run.
+runs = sorted(results_dir.glob("*/e2e_results.json"), key=lambda p: p.parent.name, reverse=True)
 if not runs:
     st.warning("目前沒有評估結果。")
     st.stop()
 
-labels = {(p.parent.name if k == E2E else f"[舊版] {p.parent.name}"): (p, k) for p, k in runs}
-selected_file, kind = labels[st.sidebar.selectbox("選擇評估批次", list(labels))]
-
+selected_file = runs[0]
 data = json.loads(selected_file.read_text(encoding="utf-8"))
 if not data:
     st.error("這個評估批次沒有資料。")
     st.stop()
-
-
-def show_legacy(data):
-    st.caption("舊版評估（舊資料庫與舊題庫），不能與目前的評估直接比較。")
-    df = pd.DataFrame(data)
-    st.metric(label="題數", value=len(df))
-    st.metric(label="LLM 評審平均分數", value=f"{df['llm_judge_score'].mean():.2f} / 10")
-    st.divider()
-    st.subheader("逐題結果")
-    for index, row in df.iterrows():
-        with st.expander(f"Q{index+1}: {row['question'][:80]}...（評審 {row['llm_judge_score']}）"):
-            col1, col2 = st.columns(2)
-            with col1:
-                st.markdown("**標準答案：**")
-                st.code(json.dumps(row["expected"], ensure_ascii=False, indent=2), language="json")
-                st.markdown("**系統回答：**")
-                st.write(row["final_answer"])
-                st.markdown("**SQL：**")
-                st.code(row["sql_query"], language="sql")
-            with col2:
-                st.markdown("**評審理由：**")
-                st.info(row["llm_judge_reasoning"])
-                st.markdown("**查詢結果：**")
-                st.code(str(row["execute_result"]), language="json")
 
 
 def load_eval_set():
@@ -263,7 +239,4 @@ def show_row(index, row, items):
             st.markdown("**查詢結果：**")
             st.code(json.dumps(row.get("sql_result"), ensure_ascii=False, default=str)[:3000], language="json")
 
-if kind == E2E:
-    show_e2e(data, selected_file.parent / "e2e_summary.json")
-else:
-    show_legacy(data)
+show_e2e(data, selected_file.parent / "e2e_summary.json")
