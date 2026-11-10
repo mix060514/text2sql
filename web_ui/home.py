@@ -88,7 +88,7 @@ if ARCHITECTURE_SVG.exists():
     svg = base64.b64encode(ARCHITECTURE_SVG.read_bytes()).decode()
     st.markdown(
         f'<img src="data:image/svg+xml;base64,{svg}" alt="text2sql 架構圖" '
-        'style="width:100%;max-width:760px">',
+        'style="width:100%;max-width:960px">',
         unsafe_allow_html=True,
     )
 st.caption(f"名詞與程式位置見 {github_link('docs/MODULES.md', f'{DOCS_URL}/MODULES.md')}，"
