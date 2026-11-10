@@ -8,8 +8,8 @@
     "不同叫法": 10,
     "該拒答": 20
   },
-  "dataset_sha256": "58b4ddd741dd89a09d9f9f62108a30d5082b1b2aea49fddc59790b9d3bf6fde7",
+  "dataset_sha256": "07bcec10cbca468e146890af2d08698c7ffeb7c56f4b269491a1730c0aba427c",
   "database_sha256": "72f64a081fa0d20741a09528ec7a8d03eba976fde47d08a8be920e1c4ba1fb7a",
-  "built_at": "2026-11-10T07:33:17",
+  "built_at": "2026-11-10T08:07:46",
   "builder": "scripts/build_exam.py"
 }

@@ -87,7 +87,7 @@ block = df[df["label"] == "block"]
 
 cols = st.columns(4)
 cols[0].metric("題數", f"{len(df)}／{len(items)}" if len(df) < len(items) else len(df))
-cols[1].metric("通過", f"{int(df['_ok'].sum())}/{len(df)}（{df['_ok'].mean():.0%}）")
+cols[1].metric("通過", f"{int(df['_ok'].sum())}/{len(df)}")
 if len(allow):
     cols[2].metric("該回答的題：答案正確", f"{int(allow['_ok'].sum())}/{len(allow)}")
 if len(block):
