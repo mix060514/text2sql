@@ -14,7 +14,6 @@ services:
       # The local llama router runs on the host (0.0.0.0:18080); ai-stack no longer has llama-cpp.
       - LLAMA_CPP_API_BASE=http://host.docker.internal:18080/v1
       - LLAMA_CPP_MODEL=openai/swift15-27b-iq3-xxs
-      - LLAMA_CPP_VL_API_BASE=http://llama-cpp-vl:8080
     extra_hosts:
       - "host.docker.internal:host-gateway"
     deploy:

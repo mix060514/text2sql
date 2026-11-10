@@ -167,7 +167,7 @@ DFlash2（2026-11-09）：`--model-draft Qwen3.8-27B-DFlash2-Q4_K_M.gguf --spec-
   原本的 systemd 服務 `llama-server-qwen` 已於 2026-11-09 移除（不再保留回退）。
   - compose：`~/infra/ai-stack/docker-compose.yml`（專案名 `ai-stack`）；映像由 `~/infra/ai-stack/llama-router/Dockerfile` 建置
     （`nvidia/cuda:12.8.1-runtime-ubuntu24.04`＋`libgomp1`；b10941 需要 GLIBC 2.38，Ubuntu 22.04 映像不能用）。
-    同檔的 ollama／llama-cpp／llama-cpp-vl／open-webui 都放在 profile 裡，預設 `docker compose up -d` 只起 router（GPU 只有 16 GB）。
+    同檔另有放在 profile 裡的 open-webui，預設 `docker compose up -d` 只起 router（GPU 只有 16 GB）；ollama／llama-cpp／llama-cpp-vl 已於 2026-11-09 移除。
   - 執行的仍是掛進去的 `/mnt/data1/llama-b10941/llama-server`，參數與 systemd 相同（router、`--models-max 1`、`-lv 4`、port 18080）。
     `network_mode: host`：主機用 `127.0.0.1:18080`，web UI 容器用 `host.docker.internal:18080`，都不必改。
   - 在 `~/infra/ai-stack` 下執行：
