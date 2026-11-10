@@ -72,6 +72,15 @@ class PublicationTests(unittest.TestCase):
         step_publish(AnswerSubmission(answer="2023: 10；2024: 20。", chart_type="bar", x_column="Year", y_column="Revenue"), state)
         self.assertEqual(json.loads(state["chart_json"])["data"][0]["x"], ["2023", "2024"])
 
+    def test_pie_slices_are_ordered_largest_first(self):
+        """The slice order is fixed by code (value DESC, name ASC), whatever order the SQL returned."""
+        state = self.state(["Region", "Share"], [["APAC", 25.0], ["EMEA", 30.0], ["LATAM", 5.0], ["North America", 40.0],
+                                                 ["Africa", 5.0]])
+        step_publish(AnswerSubmission(answer="answer", chart_type="pie", x_column="Region", y_column="Share"), state)
+        trace = json.loads(state["chart_json"])["data"][0]
+        self.assertEqual(trace["labels"], ["North America", "EMEA", "APAC", "Africa", "LATAM"])
+        self.assertIs(trace["sort"], False)  # Plotly draws them in this order instead of re-sorting
+
     def test_pie_negative_values_rejected(self):
         with self.assertRaises(ValueError):
             step_publish(AnswerSubmission(answer="answer", chart_type="pie", x_column="Region", y_column="Revenue"), self.state(rows=[["A", -1], ["B", 2]]))

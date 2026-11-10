@@ -9,6 +9,7 @@ st.navigation([
     st.Page("pages/1_Chat.py", title="對話查詢", icon="💬"),
     st.Page("pages/2_Eval.py", title="評估結果", icon="📊"),
     st.Page("pages/5_Optimization.py", title="優化成果", icon="🛠️"),
+    st.Page("pages/6_Prompts.py", title="Prompt 模板", icon="📝"),
     st.Page("pages/3_System_Monitor.py", title="系統監控", icon="🖥️"),
     st.Page("pages/4_Data_Dashboard.py", title="資料儀表板", icon="📈"),
 ]).run()

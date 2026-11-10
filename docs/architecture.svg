@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="680" height="770" viewBox="0 0 680 770" role="img">
-<title>text2sql 架構：模組、產出與區塊</title>
-<desc>從黃金種子手挑 16 題成為模板題庫；說法對齊題庫每個地區或國家叫法一題，標準答案由 SQL 在銷售資料上計算。黃金種子加上攔截與複雜種子，由 M2 合成程式產出合成考卷。M3 評估器用這些題目考 M4 問答系統，由程式比對答案與圖表並產出成績單。使用者透過 M5 網頁服務向 M4 提問並取得答案。</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="680" viewBox="0 0 960 680" role="img">
+<title>text2sql 架構：出題、考卷、問答系統、批改、成績單</title>
+<desc>出題：寫出題目與 SQL，把 SQL 拿到資料庫算出標準答案，組成考卷。考卷 84 題、每題考不同的項目，分五組：基本查詢、畫圖、多步驟查詢、不同叫法、該拒答。批改程式把考卷的題目交給問答系統、收回答案，由程式比對答案與圖表並產出成績單。產品區在右側：使用者透過網頁向問答系統提問，問答系統唯讀查詢資料庫並產出答案。</desc>
 <style>
 text { font-family: "Noto Sans TC", "Noto Sans CJK TC", "Microsoft JhengHei", "PingFang TC", sans-serif; }
 .th { font-size: 14px; font-weight: 500; fill: #2C2C2A; }
@@ -15,52 +15,44 @@ text { font-family: "Noto Sans TC", "Noto Sans CJK TC", "Microsoft JhengHei", "P
 .coral .th { fill: #712B13; } .coral .ts { fill: #993C1D; }
 .amber rect { fill: #FAEEDA; stroke: #854F0B; stroke-width: 0.8; } .amber .th { fill: #633806; }
 .green rect { fill: #EAF3DE; stroke: #3B6D11; stroke-width: 0.8; } .green .th { fill: #27500A; }
+.ti { font-size: 12px; font-weight: 400; fill: #5F5E5A; }
 </style>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#73726C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
-<rect x="0" y="0" width="680" height="770" fill="#FFFFFF"/>
+<rect x="0" y="0" width="960" height="680" fill="#FFFFFF"/>
 
-<g class="amber"><rect x="34" y="200" width="612" height="210" rx="12"/><text class="th" x="636" y="222" text-anchor="end">合成出題區：種子 → 改寫 → 檢查</text></g>
-<g class="green"><rect x="450" y="420" width="196" height="282" rx="12"/><text class="th" x="548" y="438" text-anchor="middle">產品區：使用者會用到的</text></g>
+<g class="amber"><rect x="34" y="120" width="666" height="290" rx="12"/><text class="th" x="52" y="143" text-anchor="start">考卷：84 題，每題考不同的項目</text></g>
+<g class="green"><rect x="730" y="326" width="200" height="282" rx="12"/><text class="th" x="830" y="344" text-anchor="middle">產品區：使用者會用到的</text></g>
 
-<g class="out"><rect x="40" y="30" width="180" height="56" rx="8"/><text class="th" x="130" y="50" text-anchor="middle" dominant-baseline="central">說法對齊題庫 27</text><text class="ts" x="130" y="69" text-anchor="middle" dominant-baseline="central">每個叫法一題</text></g>
-<g class="out"><rect x="460" y="30" width="180" height="56" rx="8"/><text class="th" x="550" y="50" text-anchor="middle" dominant-baseline="central">銷售資料</text><text class="ts" x="550" y="69" text-anchor="middle" dominant-baseline="central">3 萬筆，2023–2024</text></g>
-<line x1="458" y1="58" x2="224" y2="58" class="arr" marker-end="url(#arrow)"/>
-<text class="ts" x="340" y="48" text-anchor="middle">SQL 算標準答案</text>
-<path d="M640 58 L662 58 L662 568 L644 568" class="arr" marker-end="url(#arrow)"/>
+<g class="purple"><rect x="277" y="30" width="180" height="56" rx="8"/><text class="th" x="367" y="50" text-anchor="middle" dominant-baseline="central">出題</text><text class="ts" x="367" y="69" text-anchor="middle" dominant-baseline="central">寫題目與 SQL，算出標準答案</text></g>
+<g class="out"><rect x="740" y="30" width="180" height="56" rx="8"/><text class="th" x="830" y="50" text-anchor="middle" dominant-baseline="central">資料庫</text><text class="ts" x="830" y="69" text-anchor="middle" dominant-baseline="central">銷售資料 3 萬筆，2023–2024</text></g>
+<line x1="736" y1="58" x2="461" y2="58" class="arr" marker-end="url(#arrow)"/>
+<text class="ts" x="598" y="48" text-anchor="middle">用 SQL 算出標準答案</text>
+<line x1="367" y1="88" x2="367" y2="116" class="arr" marker-end="url(#arrow)"/>
 
-<g class="out"><rect x="40" y="120" width="180" height="56" rx="8"/><text class="th" x="130" y="140" text-anchor="middle" dominant-baseline="central">模板題庫 16</text><text class="ts" x="130" y="159" text-anchor="middle" dominant-baseline="central">每題一種能力</text></g>
-<line x1="130" y1="238" x2="130" y2="180" class="arr" marker-end="url(#arrow)"/>
-<text class="ts" x="142" y="212" text-anchor="start">挑 16 題</text>
+<g class="out"><rect x="52" y="158" width="200" height="112" rx="8"/><text class="th" x="152" y="178" text-anchor="middle" dominant-baseline="central">基本查詢</text><text class="ti" x="152" y="201" text-anchor="middle" dominant-baseline="central">加總、訂單數、銷售量</text><text class="ti" x="152" y="218" text-anchor="middle" dominant-baseline="central">平均單價</text><text class="ti" x="152" y="235" text-anchor="middle" dominant-baseline="central">取第一名、前三名</text><text class="ti" x="152" y="252" text-anchor="middle" dominant-baseline="central">年增率、同季比較</text></g>
+<g class="out"><rect x="267" y="158" width="200" height="112" rx="8"/><text class="th" x="367" y="178" text-anchor="middle" dominant-baseline="central">畫圖</text><text class="ti" x="367" y="201" text-anchor="middle" dominant-baseline="central">長條圖：分類比較、前五名</text><text class="ti" x="367" y="218" text-anchor="middle" dominant-baseline="central">折線圖：逐月、逐季趨勢</text><text class="ti" x="367" y="235" text-anchor="middle" dominant-baseline="central">圓餅圖：占比</text><text class="ti" x="367" y="252" text-anchor="middle" dominant-baseline="central">檢查圖表類型與順序</text></g>
+<g class="out"><rect x="482" y="158" width="200" height="112" rx="8"/><text class="th" x="582" y="178" text-anchor="middle" dominant-baseline="central">多步驟查詢</text><text class="ti" x="582" y="201" text-anchor="middle" dominant-baseline="central">每組各取第一名</text><text class="ti" x="582" y="218" text-anchor="middle" dominant-baseline="central">累計、占比、月增率</text><text class="ti" x="582" y="235" text-anchor="middle" dominant-baseline="central">跨年比較、名次</text><text class="ti" x="582" y="252" text-anchor="middle" dominant-baseline="central">新客戶、回購客戶</text></g>
+<g class="out"><rect x="52" y="284" width="200" height="112" rx="8"/><text class="th" x="152" y="304" text-anchor="middle" dominant-baseline="central">不同叫法</text><text class="ti" x="152" y="327" text-anchor="middle" dominant-baseline="central">地區：歐非中東、亞太、拉美</text><text class="ti" x="152" y="344" text-anchor="middle" dominant-baseline="central">國家：大陸、US、UK、德國</text><text class="ti" x="152" y="361" text-anchor="middle" dominant-baseline="central">名稱和資料庫存的不一樣</text></g>
+<g class="out"><rect x="267" y="284" width="200" height="112" rx="8"/><text class="th" x="367" y="304" text-anchor="middle" dominant-baseline="central">該拒答</text><text class="ti" x="367" y="327" text-anchor="middle" dominant-baseline="central">要求改資料</text><text class="ti" x="367" y="344" text-anchor="middle" dominant-baseline="central">資料庫沒有的資料</text><text class="ti" x="367" y="361" text-anchor="middle" dominant-baseline="central">閒聊</text><text class="ti" x="367" y="378" text-anchor="middle" dominant-baseline="central">提示注入</text></g>
+<text class="ts" x="582" y="322" text-anchor="middle">每一題只出現一次</text>
+<text class="ts" x="582" y="342" text-anchor="middle">約一半用口語問法</text>
+<text class="ts" x="582" y="362" text-anchor="middle">要測新項目，就加一題</text>
 
-<g class="out"><rect x="40" y="240" width="180" height="56" rx="8"/><text class="th" x="130" y="260" text-anchor="middle" dominant-baseline="central">黃金種子 42</text><text class="ts" x="130" y="279" text-anchor="middle" dominant-baseline="central">舊題型各一例，附 SQL</text></g>
-<g class="out"><rect x="250" y="240" width="180" height="56" rx="8"/><text class="th" x="340" y="260" text-anchor="middle" dominant-baseline="central">攔截種子 42</text><text class="ts" x="340" y="279" text-anchor="middle" dominant-baseline="central">手寫，該拒答的題</text></g>
-<g class="out"><rect x="460" y="240" width="180" height="56" rx="8"/><text class="th" x="550" y="260" text-anchor="middle" dominant-baseline="central">複雜種子 34 型</text><text class="ts" x="550" y="279" text-anchor="middle" dominant-baseline="central">先寫 SQL 再出題</text></g>
+<line x1="367" y1="412" x2="367" y2="442" class="arr" marker-end="url(#arrow)"/>
+<g class="coral"><rect x="277" y="446" width="180" height="56" rx="8"/><text class="th" x="367" y="466" text-anchor="middle" dominant-baseline="central">批改</text><text class="ts" x="367" y="485" text-anchor="middle" dominant-baseline="central">程式比對答案與圖表</text></g>
+<line x1="367" y1="504" x2="367" y2="532" class="arr" marker-end="url(#arrow)"/>
+<g class="out"><rect x="277" y="536" width="180" height="56" rx="8"/><text class="th" x="367" y="556" text-anchor="middle" dominant-baseline="central">成績單</text><text class="ts" x="367" y="575" text-anchor="middle" dominant-baseline="central">答對 + 拒答 + 誤擋率</text></g>
 
-<path d="M130 298 L130 364 L246 364" class="arr" marker-end="url(#arrow)"/>
-<line x1="340" y1="298" x2="340" y2="332" class="arr" marker-end="url(#arrow)"/>
-<path d="M550 298 L550 364 L434 364" class="arr" marker-end="url(#arrow)"/>
+<line x1="830" y1="88" x2="830" y2="322" class="arr" marker-end="url(#arrow)"/>
+<text class="ts" x="842" y="210" text-anchor="start">唯讀查詢</text>
+<g class="teal"><rect x="740" y="356" width="180" height="56" rx="8"/><text class="th" x="830" y="376" text-anchor="middle" dominant-baseline="central">網頁</text><text class="ts" x="830" y="395" text-anchor="middle" dominant-baseline="central">使用者從這裡提問</text></g>
+<line x1="830" y1="416" x2="830" y2="442" class="arr" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<g class="teal"><rect x="740" y="446" width="180" height="56" rx="8"/><text class="th" x="830" y="466" text-anchor="middle" dominant-baseline="central">問答系統</text><text class="ts" x="830" y="485" text-anchor="middle" dominant-baseline="central">查資料、回答</text></g>
+<line x1="830" y1="504" x2="830" y2="532" class="arr" marker-end="url(#arrow)"/>
+<g class="out"><rect x="740" y="536" width="180" height="56" rx="8"/><text class="th" x="830" y="556" text-anchor="middle" dominant-baseline="central">答案</text><text class="ts" x="830" y="575" text-anchor="middle" dominant-baseline="central">表格 + 圖 + 說明</text></g>
 
-<g class="purple"><rect x="250" y="336" width="180" height="56" rx="8"/><text class="th" x="340" y="356" text-anchor="middle" dominant-baseline="central">M2 合成程式</text><text class="ts" x="340" y="375" text-anchor="middle" dominant-baseline="central">Qwen 改寫 + 檢查</text></g>
-<line x1="340" y1="394" x2="340" y2="446" class="arr" marker-end="url(#arrow)"/>
+<line x1="461" y1="474" x2="736" y2="474" class="arr" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<text class="ts" x="598" y="464" text-anchor="middle">出題、收答案</text>
 
-<g class="out"><rect x="250" y="450" width="180" height="56" rx="8"/><text class="th" x="340" y="470" text-anchor="middle" dominant-baseline="central">合成考卷</text><text class="ts" x="340" y="489" text-anchor="middle" dominant-baseline="central">354 題，含攔截題</text></g>
-<line x1="340" y1="508" x2="340" y2="536" class="arr" marker-end="url(#arrow)"/>
-
-<g class="teal"><rect x="460" y="450" width="180" height="56" rx="8"/><text class="th" x="550" y="470" text-anchor="middle" dominant-baseline="central">M5 網頁服務</text><text class="ts" x="550" y="489" text-anchor="middle" dominant-baseline="central">使用者從這裡提問</text></g>
-<line x1="550" y1="510" x2="550" y2="536" class="arr" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
-
-<path d="M40 58 L24 58 L24 568 L246 568" class="arr" marker-end="url(#arrow)"/>
-<path d="M40 148 L24 148" class="arr"/>
-
-<g class="coral"><rect x="250" y="540" width="180" height="56" rx="8"/><text class="th" x="340" y="560" text-anchor="middle" dominant-baseline="central">M3 評估器</text><text class="ts" x="340" y="579" text-anchor="middle" dominant-baseline="central">程式比對答案與圖表</text></g>
-<line x1="434" y1="568" x2="456" y2="568" class="arr" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
-<g class="teal"><rect x="460" y="540" width="180" height="56" rx="8"/><text class="th" x="550" y="560" text-anchor="middle" dominant-baseline="central">M4 問答系統</text><text class="ts" x="550" y="579" text-anchor="middle" dominant-baseline="central">查資料、回答</text></g>
-
-<line x1="340" y1="598" x2="340" y2="626" class="arr" marker-end="url(#arrow)"/>
-<line x1="550" y1="598" x2="550" y2="626" class="arr" marker-end="url(#arrow)"/>
-<g class="out"><rect x="250" y="630" width="180" height="56" rx="8"/><text class="th" x="340" y="650" text-anchor="middle" dominant-baseline="central">成績單</text><text class="ts" x="340" y="669" text-anchor="middle" dominant-baseline="central">答對 + 攔截 + 誤擋率</text></g>
-<g class="out"><rect x="460" y="630" width="180" height="56" rx="8"/><text class="th" x="550" y="650" text-anchor="middle" dominant-baseline="central">答案</text><text class="ts" x="550" y="669" text-anchor="middle" dominant-baseline="central">表格 + 圖 + 說明</text></g>
-
-<text class="ts" x="340" y="730" text-anchor="middle">實線彩色框 = 模組（有編號）　虛線框 = 資料或產出（沒編號）</text>
-<text class="ts" x="340" y="752" text-anchor="middle">琥珀底 = 合成出題區　綠底 = 產品區　紫 = 出考卷　青 = 產品　橘 = 閱卷</text>
+<text class="ts" x="480" y="646" text-anchor="middle">實線彩色框 = 程式　虛線框 = 資料或產出　琥珀底 = 考卷的測試項目　綠底 = 產品區，其餘都為了測試它而存在</text>
 </svg>

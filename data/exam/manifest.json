@@ -1,0 +1,15 @@
+{
+  "status": "complete",
+  "count": 84,
+  "groups": {
+    "基本查詢": 14,
+    "畫圖": 10,
+    "多步驟查詢": 30,
+    "不同叫法": 10,
+    "該拒答": 20
+  },
+  "dataset_sha256": "b26a1cdf3990d6c675a379680e1398cc386dc762fef10341ce5e0d7469e20428",
+  "database_sha256": "72f64a081fa0d20741a09528ec7a8d03eba976fde47d08a8be920e1c4ba1fb7a",
+  "built_at": "2026-11-10T08:43:36",
+  "builder": "scripts/build_exam.py"
+}

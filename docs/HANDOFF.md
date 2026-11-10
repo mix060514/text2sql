@@ -1,6 +1,42 @@
-# 交接紀錄（2026-11-09 更新；以下 11-07 段落為歷史）
+# 交接紀錄（2026-11-10 更新；以下 11-07 段落為歷史）
 
 新 session 先讀這份，再讀 README.md 與 CLAUDE.md。
+
+## 2026-11-10 一張考卷 84 題；名詞簡化成六個詞
+
+使用者的要求：考卷像學校考試，每題考不同的東西，不要同一題換句話考三遍；總題數 100 以內；名詞要少。
+
+- **名詞**：對外與討論只用六個詞：資料庫、題目、標準答案、考卷、問答系統、成績單（`docs/MODULES.md`，含舊名詞對照）。
+  M1–M5、種子、題庫、合成考卷不再出現在首頁、評估頁、架構圖。資料檔與欄位名稱沒有改。
+- **考卷**（`scripts/build_exam.py` → `data/exam/`，`eval_e2e.py --exam`）：84 題，每題只出現一次，五組：
+  基本查詢 14、畫圖 10、多步驟查詢 30、不同叫法 10、該拒答 20。配分表是程式裡的 `PICKS`，要測新東西就加一列。
+  43 題用口語問法（句子直接寫在配分表裡），41 題用原句。
+  4 題多步驟查詢因答案格式不唯一沒放進考卷（country_decline、category_best_month、weekday、months_beat_last_year）；
+  5 題的標準答案只保留題目問的欄位（`DROP_COLUMNS`）。不同叫法改成三種句型輪流（銷售額、訂單數、銷售量）。
+- **改寫程式（舊稱 M2）已移除**：`scripts/generate_synthetic.py`、`datagen/pipeline.py`、`datagen/llm.py` 與其測試（git c7c60db 可找回）。
+  `compute_oracle`、`load_seeds` 搬到 `datagen/oracle.py`。`datagen/checks.py`（問法規則檢查）仍被題目來源的建置程式使用，保留。
+  `data/synthetic/runs/` 保留，是優化成果頁數字的依據。
+- **取代的東西**：`data/banks/`（模板 16、說法對齊 27）已刪；`--bank` 改成 `--exam`；合成考卷 354 題不再是評估對象，
+  只留作換說法實驗的紀錄。評估頁只顯示這張考卷（讀 `eval/results/exam_*`）。
+- **換說法實驗**（優化成果頁，`build_optimization_report.paraphrase_section`，用既有兩次完整評估，沒有重跑模型）：
+  複雜題原句 31/34、33/34，改寫 63/68、60/68；改寫與自己的原句結果不同 9/68、8/68，同一句話兩次評估結果不同 13/102。
+  攔截題兩次評估完全相同（原句 42/42、改寫 83/84）。換說法造成的差異無法和重跑的差異區分，所以改成每題只問一次。
+- **刪除的舊檔**（已確認沒有程式引用）：`data/eval_set_v2.jsonl`、`data/plot_eval_set.jsonl`、`eval/eval.py`、`eval/eval_plot.py`、
+  `docs/EVAL_UPGRADE.md`、`scripts/` 下的 add_expected_plot、gen_plot_eval_set、debug_data_mismatch、read_data、
+  test_failed_cases、failed_cases_results.json、test_plot_agent。
+- **保留的歷史**：舊考卷 132 題（`data/eval_set_v3.jsonl`）、舊出題程式（`scripts/generate_ground_truth.py`）與
+  `eval_e2e.py` 裡的 LLM 評審流程，只為了優化成果頁早期數字可以重現。優化成果頁開頭有一段說明它用的是改版前的題目。
+- **未處理**：該拒答的 20 題（來源 42 題）由 AI 起草與複查，尚無人工確認。
+- **實跑結果**（Swift 1.5，Docker router，4 路，不沿用舊結果，`eval/results/exam_2026-11-10_08-08-53`）：**81/84**，
+  該回答的題 61/64、該拒答 20/20、誤擋 0，平均每題 97 秒。錯的 3 題：
+  - 圓餅圖 2 題（訂單數占比、2023 年類別占比）：數字對，但扇形沒有由大到小排列。同日較早那次這兩題各對一次、錯一次，
+    是問答系統時對時錯，尚未修。
+  - 「2024 年才第一次下單的客戶」：模型服務中途斷線（MidStreamFallbackError），不是答錯。
+  - 過程：第一次跑（`exam_2026-11-10_07-34-16`）81/84，其中 2 題是口語問法有歧義（「平均一台賣多少錢」「多賣了百分之幾」），
+    已換掉問法後整份重跑。重跑後 80/84，其中 1 題（LATAM 每國銷量最高的產品）系統答對產品但標準答案多要一欄數量，
+    題目沒問；標準答案改成只留題目問的欄位後，用同一份回答重新比對為通過（成績檔已註明 regraded）。
+
+（以下 11-10 早上的段落是改版前的狀態，留作紀錄。）
 
 ## 2026-11-10 評估改用兩個小題庫，M1 退休
 

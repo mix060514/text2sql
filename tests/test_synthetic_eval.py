@@ -186,15 +186,20 @@ if __name__ == "__main__":
     unittest.main()
 
 
-class Banks(unittest.TestCase):
-    """data/banks/* (scripts/build_eval_banks.py) load like a synthetic run and grade their own oracle as a pass."""
+class Exam(unittest.TestCase):
+    """data/exam (scripts/build_exam.py) loads like a synthetic run and grades its own oracle as a pass."""
 
-    def test_banks_load_and_their_oracle_passes(self):
-        for name, size in (("template", 16), ("alias", 27)):
-            _, items = synthetic.load_run(synthetic.BANKS_DIR / name)
-            self.assertEqual(len(items), size)
-            self.assertEqual({synthetic.subset_of(i) for i in items}, {name})
-            for item in items:
+    def test_exam_is_under_100_distinct_questions(self):
+        _, items = synthetic.load_run(synthetic.EXAM_DIR)
+        self.assertLessEqual(len(items), 100)
+        self.assertEqual(len({i["question"] for i in items}), len(items))
+        self.assertEqual(len({(i["group"], i["point"]) for i in items}), len(items))  # one question per point
+        self.assertEqual({synthetic.subset_of(i) for i in items}, {"exam"})
+
+    def test_exam_loads_and_its_oracle_passes(self):
+        if True:
+            _, items = synthetic.load_run(synthetic.EXAM_DIR)
+            for item in (i for i in items if i["label"] == "allow"):
                 plot = item.get("expected_plot") or {}
                 chart = {"data": [{"type": synthetic.PLOTLY_TYPE[plot["chart_type"]],
                                    "x": plot.get("expected_x_order") or [], "labels": plot.get("expected_x_order") or []}]

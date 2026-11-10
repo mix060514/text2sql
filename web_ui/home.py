@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ARCHITECTURE_SVG = ROOT / "docs" / "architecture.svg"
+QA_FLOW_SVG = ROOT / "docs" / "qa-flow.svg"
 sys.path.insert(0, str(ROOT / "src"))
 from text2sql.config import ANALYSIS_MODEL
 
@@ -32,12 +33,60 @@ def github_link(label: str, url: str) -> str:
 
 st.title("🤖 Text2SQL：用中文問銷售資料")
 st.markdown(f"""
-輸入中文問題，系統自動寫 SQL、在唯讀資料庫上執行、檢查結果是否對題，再回覆說明與圖表。
-模型在本機 GPU 上執行，SQL 執行、安全限制與圖表繪製都由程式負責，不交給模型。
+輸入中文問題，系統自動寫 SQL、在唯讀資料庫上執行、檢查結果是否對題，再回覆說明與圖表。模型在本機 GPU 上執行。
+
+**模型只負責寫 SQL 與說明文字，其餘由包住模型的程式（harness）把關：**
+
+- **執行**：只接受一條 SELECT，資料庫唯讀，有查詢時限與筆數上限。
+- **重試**：SQL 執行失敗或審查不通過，程式把錯誤原因退回給模型重寫，最多 3 次；失敗的查詢不會進到回答。
+- **回答**：資料表與圖表由程式直接從實際查詢結果產生，並核對模型引用的欄位與數值，模型不能自己填數字。
+- **拒答**：要求改資料、資料庫沒有的資料、閒聊、提示注入，由程式用固定文字拒絕，不寫也不執行 SQL。
 
 **建議從左側「對話查詢」開始**：側邊欄有幾題範例問題，回答下方可展開執行流程，
 逐步查看模型寫的 SQL、查詢結果與審查結果。程式碼：{github_link('GitHub', REPO_URL)}
 """, unsafe_allow_html=True)
+
+
+def show_svg(path, alt, width):
+    if path.exists():
+        svg = base64.b64encode(path.read_bytes()).decode()
+        st.markdown(f'<img src="data:image/svg+xml;base64,{svg}" alt="{alt}" style="width:100%;max-width:{width}px">',
+                    unsafe_allow_html=True)
+
+
+st.subheader("問答系統怎麼運作")
+show_svg(QA_FLOW_SVG, "問答系統內部流程", 960)
+st.divider()
+st.subheader("檢核機制")
+st.markdown("問答系統的正確性由一張 84 題的考卷驗證：每題的標準答案由資料庫算出，問答系統作答後由程式逐題批改。")
+show_svg(ARCHITECTURE_SVG, "檢核機制流程圖", 960)
+st.markdown("""
+| 名詞 | 意思 |
+|---|---|
+| 資料庫 | 銷售資料，單一資料表，3 萬筆，2023–2024 |
+| 題目 | 使用者會問的一句話，例如「EMEA 的總銷售額是多少？」 |
+| 標準答案 | 每題事先寫好一條 SQL，拿到資料庫執行的結果就是標準答案，不由人或模型填寫；該拒答的題目，標準答案是「不查資料」 |
+| 考卷 | 84 道題目，每題考不同的項目、只出現一次 |
+| 問答系統 | 被測試的對象，也就是本網站的「對話查詢」：寫 SQL、唯讀查詢、語意審查、回答與圖表 |
+| 成績單 | 程式逐題比對查詢結果、圖表類型與順序後的結果，不用 LLM 評審（見「評估結果」頁） |
+
+考卷共 84 題，每題考不同的東西、只出現一次，分五組：
+
+| 題組 | 題數 | 考什麼 |
+|---|---|---|
+| 基本查詢 | 14 | 一條查詢就能回答：加總、訂單數、平均單價、取第一名或前幾名、年增率 |
+| 畫圖 | 10 | 除了數字還要畫對圖：長條圖、折線圖、圓餅圖 |
+| 多步驟查詢 | 30 | 要分幾步才算得出來：每組各取第一名、累計、占比、跨年比較、客戶是否回購 |
+| 不同叫法 | 10 | 問題裡的地區或國家名稱和資料庫存的不一樣（歐非中東、大陸、US…） |
+| 該拒答 | 20 | 不該去查資料的輸入：要求改資料、資料庫沒有的資料、閒聊、提示注入 |
+
+約一半的題目用口語問法。要測新的東西，就在配分表加一列。
+""")
+st.caption(f"名詞與程式位置見 {github_link('docs/MODULES.md', f'{DOCS_URL}/MODULES.md')}，"
+           f"問答流程細節見 {github_link('docs/ARCHITECTURE.md', f'{DOCS_URL}/ARCHITECTURE.md')}。",
+           unsafe_allow_html=True)
+
+st.divider()
 # "openai/" is only LiteLLM's provider prefix for an OpenAI-compatible endpoint, not the model.
 MODEL_ALIAS = ANALYSIS_MODEL.split("/", 1)[1] if ANALYSIS_MODEL.startswith("openai/") else ANALYSIS_MODEL
 
@@ -57,32 +106,3 @@ st.markdown(f"""
   不新增任何模型或顯存，攔截題由 7.9% 提升到 99.2%。比較數字見「🛠️ 優化成果」頁。
 - 模型來源：🤗 [Swift-1.5-Qwen3.8-27B-GSQ-RCO-GGUF](https://huggingface.co/ukisai/Swift-1.5-Qwen3.8-27B-GSQ-RCO-GGUF)
 """)
-
-st.divider()
-st.subheader("系統架構")
-st.markdown("""
-| 編號 | 模組 | 做什麼 | 產出 |
-|---|---|---|---|
-| M2 | 合成程式 | 由模型改寫種子題的問法，再經規則、標籤、語意三層檢查 | 合成考卷（354 題，含 126 題攔截題） |
-| M3 | 評估器 | 用四組題目測試 M4，由程式比對查詢結果與標準答案、圖表類型與順序，不用 LLM 評審 | 成績單（見「評估結果」頁） |
-| M4 | 問答系統 | 寫 SQL、唯讀查詢、語意審查、回答與圖表 | 答案（表格＋圖表＋說明） |
-| M5 | 網頁服務 | 本網站，使用者從這裡提問 | 網頁畫面 |
-
-四組題目：**模板題庫** 16 題（每題測一種能力）、**說法對齊** 27 題（北美、歐非中東、US 等叫法各一題）、
-**攔截題** 126 題、**複雜題** 102 題（含換句話說的改寫）。
-
-早期的 M1 出題程式產生 132 題模板考卷，其中 54 題只是換地區叫法，同一個錯會重複計分，且由 LLM 評審改分；
-已由上面兩個小題庫取代，不再使用。
-
-名詞：**考卷／題庫**＝評估集（題目＋標準答案）；**攔截題**＝應該拒答的題目，例如要求修改資料或與資料無關的問題。
-""")
-if ARCHITECTURE_SVG.exists():
-    svg = base64.b64encode(ARCHITECTURE_SVG.read_bytes()).decode()
-    st.markdown(
-        f'<img src="data:image/svg+xml;base64,{svg}" alt="text2sql 架構圖" '
-        'style="width:100%;max-width:680px">',
-        unsafe_allow_html=True,
-    )
-st.caption(f"完整名詞定義見 {github_link('docs/MODULES.md', f'{DOCS_URL}/MODULES.md')}，"
-           f"問答流程細節見 {github_link('docs/ARCHITECTURE.md', f'{DOCS_URL}/ARCHITECTURE.md')}。",
-           unsafe_allow_html=True)

@@ -1,9 +1,0 @@
-{
-  "status": "complete",
-  "bank": "alias",
-  "count": 27,
-  "dataset_sha256": "38d919c05277a0eedf6b5b549216539cec103d9aff355556f5389244340dda73",
-  "database_sha256": "72f64a081fa0d20741a09528ec7a8d03eba976fde47d08a8be920e1c4ba1fb7a",
-  "built_at": "2026-11-10T05:07:11",
-  "builder": "scripts/build_eval_banks.py"
-}

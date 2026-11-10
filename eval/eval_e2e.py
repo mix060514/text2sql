@@ -705,8 +705,9 @@ async def run_synthetic(run_dir=None, limit=None, label=None, reuse=True, timeou
                 "dataset_sha256": manifest["dataset_sha256"]}
     reused = synthetic.find_reusable(items, metadata) if reuse else {}
 
-    tag = f"_{subset}" if subset else ""
-    prefix = "bank" if run_dir.parent == synthetic.BANKS_DIR else "synthetic"
+    is_exam = run_dir == synthetic.EXAM_DIR
+    tag = "" if is_exam else (f"_{subset}" if subset else "")
+    prefix = "exam" if is_exam else "synthetic"
     output_dir = PROJECT_DIR / "eval" / "results" / f"{prefix}{tag}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
     output_dir.mkdir(parents=True, exist_ok=True)
     print(f"\n{'='*70}")
@@ -787,11 +788,10 @@ if __name__ == "__main__":
         help="Run the synthetic set (default: newest complete data/synthetic/runs/<run>) "
              "with deterministic grading instead of eval_set_v3",
     )
-    parser.add_argument("--bank", choices=["template", "alias"],
-                        help="Run a hand-built bank from data/banks/<name> (scripts/build_eval_banks.py), "
-                             "graded like --synthetic")
+    parser.add_argument("--exam", action="store_true",
+                        help="Run the exam in data/exam (scripts/build_exam.py), graded like --synthetic")
     parser.add_argument("--label", choices=["allow", "block"], help="--synthetic: only this label")
-    parser.add_argument("--subset", choices=["template", "complex", "block", "alias"],
+    parser.add_argument("--subset", choices=["exam", "template", "complex", "block"],
                         help="--synthetic: only template rewrites, SQL-first complex (X-*) or block items")
     parser.add_argument("--concurrency", type=int, default=1,
                         help="questions in flight at once (match the model server's parallel slots)")
@@ -810,9 +810,9 @@ if __name__ == "__main__":
         asyncio.run(rejudge_run(run_dir))
         raise SystemExit(0)
 
-    if args.bank:
-        args.synthetic = str(PROJECT_DIR / "data" / "banks" / args.bank)
-        args.subset = args.bank
+    if args.exam:
+        args.synthetic = str(PROJECT_DIR / "data" / "exam")
+        args.subset = "exam"
     if args.synthetic:
         asyncio.run(run_synthetic(
             run_dir=None if args.synthetic == "latest" else args.synthetic,

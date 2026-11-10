@@ -313,11 +313,11 @@ def find_reusable(items, metadata, results_dir=RESULTS_DIR):
     return reused
 
 
-# Question sets shown separately: template rewrites (eval_set_v3 seeds A..Q), SQL-first
-# complex queries (seed ids X-*), guardrail block items, and the hand-built banks under
-# data/banks/ (scripts/build_eval_banks.py), whose items name their own subset.
-SUBSETS = ("template", "complex", "block", "alias")
-BANKS_DIR = PROJECT_DIR / "data" / "banks"
+# The exam (data/exam, scripts/build_exam.py) is the current question set; its items name
+# their own subset. Earlier synthetic runs are split into template rewrites (seeds A..Q),
+# SQL-first complex queries (seed ids X-*) and guardrail block items.
+SUBSETS = ("exam", "template", "complex", "block")
+EXAM_DIR = PROJECT_DIR / "data" / "exam"
 
 
 def subset_of(item) -> str:

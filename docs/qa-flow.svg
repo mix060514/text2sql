@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="350" viewBox="0 0 960 350" role="img">
+<title>問答系統內部流程</title>
+<desc>使用者問題先由模型判斷意圖；不是銷售資料查詢就由程式用固定文字拒答。是查詢則由模型寫一條 SELECT，程式唯讀執行，模型審查 SQL 是否真的回答問題；執行失敗或審查不通過就附原因退回重寫，合計最多 3 次。通過後模型寫說明與圖表規格，程式核對欄位與數值並產生表格，再依實際資料畫圖，組成回答。</desc>
+<style>
+text { font-family: "Noto Sans TC", "Noto Sans CJK TC", "Microsoft JhengHei", "PingFang TC", sans-serif; }
+.th { font-size: 14px; font-weight: 500; fill: #2C2C2A; }
+.ts { font-size: 12px; font-weight: 400; fill: #5F5E5A; }
+.arr { stroke: #73726C; stroke-width: 1.2; fill: none; }
+.out rect { fill: #FFFFFF; stroke: #B4B2A9; stroke-width: 0.8; stroke-dasharray: 4 3; }
+.purple rect { fill: #EEEDFE; stroke: #534AB7; stroke-width: 0.8; }
+.purple .th { fill: #3C3489; } .purple .ts { fill: #534AB7; }
+.teal rect { fill: #E1F5EE; stroke: #0F6E56; stroke-width: 0.8; }
+.teal .th { fill: #085041; } .teal .ts { fill: #0F6E56; }
+.coral rect { fill: #FAECE7; stroke: #993C1D; stroke-width: 0.8; }
+.coral .th { fill: #712B13; } .coral .ts { fill: #993C1D; }
+.amber rect { fill: #FAEEDA; stroke: #854F0B; stroke-width: 0.8; } .amber .th { fill: #633806; }
+.green rect { fill: #EAF3DE; stroke: #3B6D11; stroke-width: 0.8; } .green .th { fill: #27500A; }
+.ti { font-size: 12px; font-weight: 400; fill: #5F5E5A; }
+</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#73726C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<rect x="0" y="0" width="960" height="350" fill="#FFFFFF"/>
+
+<path d="M860 46 L860 22 L480 22 L480 42" class="arr" marker-end="url(#arrow)"/>
+<path d="M670 46 L670 22" class="arr"/>
+<text class="ts" x="670" y="13" text-anchor="middle">執行失敗或審查不通過：附原因退回重寫，合計最多 3 次</text>
+
+<g class="out"><rect x="20" y="46" width="160" height="56" rx="8"/><text class="th" x="100" y="66" text-anchor="middle" dominant-baseline="central">使用者問題</text><text class="ts" x="100" y="85" text-anchor="middle" dominant-baseline="central">中文提問</text></g>
+<line x1="182" y1="74" x2="206" y2="74" class="arr" marker-end="url(#arrow)"/>
+<g class="purple"><rect x="210" y="46" width="160" height="56" rx="16"/><text class="th" x="290" y="66" text-anchor="middle" dominant-baseline="central">判斷意圖</text><text class="ts" x="290" y="85" text-anchor="middle" dominant-baseline="central">是不是銷售資料查詢</text></g>
+<line x1="372" y1="74" x2="396" y2="74" class="arr" marker-end="url(#arrow)"/>
+<g class="purple"><rect x="400" y="46" width="160" height="56" rx="16"/><text class="th" x="480" y="66" text-anchor="middle" dominant-baseline="central">寫 SQL</text><text class="ts" x="480" y="85" text-anchor="middle" dominant-baseline="central">產生一條 SELECT</text></g>
+<line x1="562" y1="74" x2="586" y2="74" class="arr" marker-end="url(#arrow)"/>
+<g class="teal"><rect x="590" y="46" width="160" height="56" rx="2"/><text class="th" x="670" y="66" text-anchor="middle" dominant-baseline="central">執行 SQL</text><text class="ts" x="670" y="85" text-anchor="middle" dominant-baseline="central">唯讀、限時、限筆數</text></g>
+<line x1="752" y1="74" x2="776" y2="74" class="arr" marker-end="url(#arrow)"/>
+<g class="purple"><rect x="780" y="46" width="160" height="56" rx="16"/><text class="th" x="860" y="66" text-anchor="middle" dominant-baseline="central">審查</text><text class="ts" x="860" y="85" text-anchor="middle" dominant-baseline="central">SQL 是否真的回答問題</text></g>
+
+<path d="M250 104 L250 150 L100 150 L100 192" class="arr" marker-end="url(#arrow)"/>
+<text class="ts" x="112" y="172" text-anchor="start">不是資料查詢</text>
+<g class="teal"><rect x="20" y="196" width="160" height="56" rx="2"/><text class="th" x="100" y="216" text-anchor="middle" dominant-baseline="central">拒答</text><text class="ts" x="100" y="235" text-anchor="middle" dominant-baseline="central">固定文字，不寫 SQL</text></g>
+
+<line x1="860" y1="104" x2="860" y2="192" class="arr" marker-end="url(#arrow)"/>
+<text class="ts" x="848" y="150" text-anchor="end">審查通過</text>
+<g class="purple"><rect x="780" y="196" width="160" height="56" rx="16"/><text class="th" x="860" y="216" text-anchor="middle" dominant-baseline="central">寫說明</text><text class="ts" x="860" y="235" text-anchor="middle" dominant-baseline="central">說明文字與圖表規格</text></g>
+<line x1="778" y1="224" x2="754" y2="224" class="arr" marker-end="url(#arrow)"/>
+<g class="teal"><rect x="590" y="196" width="160" height="56" rx="2"/><text class="th" x="670" y="216" text-anchor="middle" dominant-baseline="central">核對與發布</text><text class="ts" x="670" y="235" text-anchor="middle" dominant-baseline="central">核對欄位、數值，產生表格</text></g>
+<line x1="588" y1="224" x2="564" y2="224" class="arr" marker-end="url(#arrow)"/>
+<g class="teal"><rect x="400" y="196" width="160" height="56" rx="2"/><text class="th" x="480" y="216" text-anchor="middle" dominant-baseline="central">畫圖</text><text class="ts" x="480" y="235" text-anchor="middle" dominant-baseline="central">依實際查詢結果繪圖</text></g>
+<line x1="398" y1="224" x2="374" y2="224" class="arr" marker-end="url(#arrow)"/>
+<g class="out"><rect x="210" y="196" width="160" height="56" rx="8"/><text class="th" x="290" y="216" text-anchor="middle" dominant-baseline="central">回答</text><text class="ts" x="290" y="235" text-anchor="middle" dominant-baseline="central">表格 + 圖 + 說明</text></g>
+
+<path d="M670 254 L670 276 L860 276 L860 256" class="arr" marker-end="url(#arrow)"/>
+<text class="ts" x="765" y="294" text-anchor="middle">格式或欄位錯誤：退回重寫，最多 2 次</text>
+
+<text class="ts" x="480" y="330" text-anchor="middle">紫色圓角框 = 模型（同一個本機模型擔任不同角色）　青色方框 = 程式，一定會執行　虛線框 = 輸入與輸出</text>
+</svg>

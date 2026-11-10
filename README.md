@@ -30,12 +30,16 @@
   → step_draw_chart（程式）Plotly 繪圖
 ```
 
+![問答系統內部流程](docs/qa-flow.svg)
+
+檢核機制（考卷、批改、成績單）：
+
 ![架構](docs/architecture.svg)
 
 網頁的對話頁會即時畫出這張流程圖：圓角框是 LLM、方框是程式，綠色通過、紅色拒絕或失敗，
 點任一步可看它的輸入、輸出與耗時，用來證明答案的每個數字都來自實際查詢。
 
-模組編號（M1–M5）與名詞見 [docs/MODULES.md](docs/MODULES.md)。
+名詞（資料庫、題目、標準答案、考卷、問答系統、成績單）與程式位置見 [docs/MODULES.md](docs/MODULES.md)。
 
 ## 成績
 
@@ -43,20 +47,22 @@
 |---|---|---|
 | 離線測試 `verify_all.py` | 全數通過 | 真實 SQLite、假模型注入錯誤，不呼叫 LLM |
 | Smoke 8 題 | **8/8** | 實際資料與圖表直接和 SQLite oracle 比對（[紀錄](docs/smoke-swift15.json)） |
-| 模板考卷 132 題（歷史） | SQL 正確 **84.8%**（112/132） | 2026-11-07，Swift 1.5；LLM judge 評分。2026-11-10 起改用下方兩個小題庫 |
-| 模板題庫 16 題、說法對齊 27 題 | **16/16**、**27/27** | 2026-11-10，Swift 1.5；程式比對 SQLite 標準答案與圖表，不用 judge。模板 10 題沿用 11-09 結果（資料列重新比對），6 題圖表題與 27 題叫法實跑 |
-| 合成考卷 354 題 | 進行中 | 放行 228（含 102 題 CTE／視窗函數等複雜查詢）、攔截 126；以 SQLite 標準答案比對 |
+| 舊考卷 132 題（歷史） | SQL 正確 **84.8%**（112/132） | 2026-11-07，Swift 1.5；LLM judge 評分。2026-11-10 起改用下方的考卷 |
+| 考卷 84 題 | **81/84** | 2026-11-10，Swift 1.5，整份實跑、不沿用舊結果；程式比對 SQLite 標準答案與圖表，不用 judge。該回答 61/64、該拒答 20/20。錯的 3 題：2 題圓餅圖扇形沒有由大到小排列、1 題模型服務中途斷線 |
+| 改版前的題目（歷史） | 複雜題 **93/102**、攔截題 **125/126** | 2026-11-09，每題三種說法；複雜題為人工複核後（嚴格逐列比對 77/102） |
 
 細節、失敗分類與已知限制見 [docs/VALIDATION.md](docs/VALIDATION.md)。
 
-## 測試資料怎麼來的
+## 考卷怎麼來的
 
-- **模板題庫**：從黃金種子（舊 17 個題型各取一例、答案經 SQL 驗證）手挑 16 題，每題測一種能力。
-- **說法對齊題庫**：提示詞別名對照表裡的每個叫法（北美、歐非中東、US、大陸…）各一題，句型固定。
-- 舊的模板考卷（132 題，LLM judge 評分）只留作歷史紀錄。
-- **合成考卷**：參考「用合成資料測試 AI Guardrails」的方法，種子 → 本機模型改寫問法 → 規則、標籤、語意、SQL 對題
-  四層檢查 → 不通過就把原因放回 prompt 重寫。每個種子的 SQL 都要和 pandas 的實作逐列一致才收。
-  方法與被刷掉的實例見 [docs/SYNTHETIC_DATA_METHOD.md](docs/SYNTHETIC_DATA_METHOD.md)。
+- **一張考卷，84 題，每題考不同的東西、只出現一次**（`scripts/build_exam.py` 裡的配分表，要測新東西就加一列）：
+  基本查詢 14、畫圖 10、多步驟查詢 30、不同叫法 10、該拒答 20。
+- **標準答案**不由人或模型填寫：每題附一條 SQL，拿到資料庫執行的結果就是標準答案。
+- **問法**：約一半的題目用口語問法，其餘用原句。口語句子直接寫在配分表裡。
+- 先前的做法是每題用三種說法各問一次（354 題）。實測顯示換說法造成的差異和同一句話重跑的差異相當
+  （優化成果頁的實驗），所以改成每題只問一次，改寫程式也已移除。
+  當時的方法紀錄見 [docs/SYNTHETIC_DATA_METHOD.md](docs/SYNTHETIC_DATA_METHOD.md)。
+- 舊考卷（132 題，LLM judge 評分）只留作歷史紀錄。
 
 ## 執行
 
@@ -88,10 +94,8 @@ uv run python scripts/verify_all.py
 # 線上：8 題 smoke，與 SQLite oracle 比對
 uv run python scripts/smoke_workflow.py --output docs/smoke-qwen27b.json
 
-# 線上：模板題庫、說法對齊題庫與合成考卷（SQLite 比對，不用 judge）
-uv run python eval/eval_e2e.py --bank template
-uv run python eval/eval_e2e.py --bank alias
-uv run python eval/eval_e2e.py --synthetic
+# 線上：考卷 84 題（SQLite 比對，不用 judge）
+uv run python eval/eval_e2e.py --exam --concurrency 4
 ```
 
 `data/eval_manifest.json` 記錄 DB 與考卷的 SHA-256，避免拿舊標準答案評估新資料。
