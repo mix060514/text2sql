@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-09 11:39:03",
+  "generated_at": "2026-11-09 19:59:14",
   "overall": {
     "template": {
       "2026-11-07": {
@@ -873,6 +873,196 @@
       "measured_at": "2026-11-08 17:19:54"
     }
   ],
+  "concurrency_sweep": {
+    "rows": [
+      {
+        "drafting": "dflash2",
+        "parallel": 1,
+        "requests": 50,
+        "variant": "64k，token_embd 在 GPU",
+        "aggregate_tps": 29.3,
+        "median_seconds": 19.2,
+        "avg_seconds": 25.2,
+        "p90_seconds": 47.8,
+        "max_seconds": 88.3,
+        "avg_completion_tokens": 739,
+        "gpu_mem_mib": 13685,
+        "server_rss_mib": 3633,
+        "truncated": 0,
+        "empty_answers": 0
+      },
+      {
+        "drafting": "dflash2",
+        "parallel": 2,
+        "requests": 50,
+        "variant": "64k，token_embd 在 GPU",
+        "aggregate_tps": 50.0,
+        "median_seconds": 21.4,
+        "avg_seconds": 32.4,
+        "p90_seconds": 51.2,
+        "max_seconds": 175.0,
+        "avg_completion_tokens": 841,
+        "gpu_mem_mib": 14643,
+        "server_rss_mib": 3413,
+        "truncated": 0,
+        "empty_answers": 0
+      },
+      {
+        "drafting": "dflash2",
+        "parallel": 3,
+        "requests": 50,
+        "variant": "64k，token_embd 在 GPU",
+        "aggregate_tps": 58.6,
+        "median_seconds": 28.9,
+        "avg_seconds": 43.9,
+        "p90_seconds": 112.0,
+        "max_seconds": 216.3,
+        "avg_completion_tokens": 915,
+        "gpu_mem_mib": 15583,
+        "server_rss_mib": 4165,
+        "truncated": 0,
+        "empty_answers": 0
+      },
+      {
+        "drafting": "mtp",
+        "parallel": 1,
+        "requests": 50,
+        "variant": "64k，token_embd 在 GPU",
+        "aggregate_tps": 29.7,
+        "median_seconds": 21.8,
+        "avg_seconds": 24.4,
+        "p90_seconds": 45.7,
+        "max_seconds": 88.1,
+        "avg_completion_tokens": 724,
+        "gpu_mem_mib": 12997,
+        "server_rss_mib": 2183,
+        "truncated": 0,
+        "empty_answers": 0
+      },
+      {
+        "drafting": "mtp",
+        "parallel": 2,
+        "requests": 50,
+        "variant": "64k，token_embd 在 GPU",
+        "aggregate_tps": 36.2,
+        "median_seconds": 33.5,
+        "avg_seconds": 43.2,
+        "p90_seconds": 89.2,
+        "max_seconds": 142.7,
+        "avg_completion_tokens": 798,
+        "gpu_mem_mib": 13595,
+        "server_rss_mib": 3500,
+        "truncated": 0,
+        "empty_answers": 0
+      },
+      {
+        "drafting": "mtp",
+        "parallel": 3,
+        "requests": 50,
+        "variant": "64k，token_embd 在 GPU",
+        "aggregate_tps": 54.7,
+        "median_seconds": 30.7,
+        "avg_seconds": 41.7,
+        "p90_seconds": 88.3,
+        "max_seconds": 149.2,
+        "avg_completion_tokens": 780,
+        "gpu_mem_mib": 14193,
+        "server_rss_mib": 3420,
+        "truncated": 0,
+        "empty_answers": 0
+      },
+      {
+        "drafting": "mtp",
+        "parallel": 4,
+        "requests": 50,
+        "variant": "64k，token_embd 在 GPU",
+        "aggregate_tps": 60.8,
+        "median_seconds": 33.2,
+        "avg_seconds": 46.2,
+        "p90_seconds": 110.1,
+        "max_seconds": 161.9,
+        "avg_completion_tokens": 765,
+        "gpu_mem_mib": 14791,
+        "server_rss_mib": 4874,
+        "truncated": 0,
+        "empty_answers": 0
+      },
+      {
+        "drafting": "mtp",
+        "parallel": 5,
+        "requests": 50,
+        "variant": "64k，token_embd 在 GPU",
+        "aggregate_tps": 66.7,
+        "median_seconds": 42.3,
+        "avg_seconds": 63.6,
+        "p90_seconds": 131.8,
+        "max_seconds": 308.1,
+        "avg_completion_tokens": 922,
+        "gpu_mem_mib": 15169,
+        "server_rss_mib": 4717,
+        "truncated": 0,
+        "empty_answers": 0
+      },
+      {
+        "drafting": "mtp",
+        "parallel": 6,
+        "requests": 50,
+        "variant": "64k，token_embd 在 GPU",
+        "aggregate_tps": 66.5,
+        "median_seconds": 46.9,
+        "avg_seconds": 59.6,
+        "p90_seconds": 129.6,
+        "max_seconds": 186.6,
+        "avg_completion_tokens": 775,
+        "gpu_mem_mib": 15767,
+        "server_rss_mib": 6161,
+        "truncated": 0,
+        "empty_answers": 0
+      },
+      {
+        "drafting": "mtp",
+        "parallel": 7,
+        "requests": 50,
+        "variant": "ctx 49152 kv-unified, token_embd on CPU, no mmproj, ctx-checkpoints 4, cache-ram 2048",
+        "aggregate_tps": 68.9,
+        "median_seconds": 57.0,
+        "avg_seconds": 72.8,
+        "p90_seconds": 173.4,
+        "max_seconds": 283.9,
+        "avg_completion_tokens": 884,
+        "gpu_mem_mib": 15535,
+        "server_rss_mib": 7211,
+        "truncated": 0,
+        "empty_answers": 0
+      }
+    ],
+    "failures": [
+      {
+        "設定": "MTP 7 路，64k",
+        "結果": "啟動失敗：顯存差 293.68 MiB"
+      },
+      {
+        "設定": "MTP 7 路，64k，token_embd 放 CPU（省 388 MiB）",
+        "結果": "能啟動，第一批請求時 CUDA out of memory 崩潰"
+      },
+      {
+        "設定": "MTP 8 路，48k，token_embd 放 CPU",
+        "結果": "執行中 CUDA out of memory 崩潰"
+      },
+      {
+        "設定": "DFlash2 4 路，64k",
+        "結果": "啟動失敗：顯存差 165.00 MiB"
+      },
+      {
+        "設定": "DFlash2 4 路，64k，token_embd 放 CPU",
+        "結果": "能啟動，第一批請求時 CUDA out of memory 崩潰"
+      },
+      {
+        "設定": "DFlash2 4 路，32k，token_embd 放 CPU",
+        "結果": "約 45/50 題未崩潰，使用者決定停止，沒有完整數字"
+      }
+    ]
+  },
   "sleep": {
     "sleep_idle_seconds": 30,
     "vram_awake_mib": 13901,
@@ -944,7 +1134,7 @@
       "fix": "在 few-shot 範例示範 WITH ... AS MATERIALIZED，前 N 名只算一次。",
       "timing": {
         "plain": {
-          "seconds": 16.889,
+          "seconds": 17.925,
           "finished": true
         },
         "materialized": {
@@ -2439,6 +2629,158 @@
         "題目": "請呈現 APAC 區域 2023 至 2024 年各季度的銷售額趨勢。",
         "加入意圖後（一次 4 題）": "逾時 600 秒",
         "單獨重跑": "50 秒",
+        "意圖": "sales_query",
+        "答案": "正確"
+      }
+    ]
+  },
+  "router": {
+    "block": {
+      "before": {
+        "n": 126,
+        "success": 0.9920634920634921,
+        "timeout": 0.0,
+        "first_try": 0.0,
+        "avg_seconds": 9.1
+      },
+      "after": {
+        "n": 126,
+        "success": 0.9920634920634921,
+        "timeout": 0.0,
+        "first_try": 0.0,
+        "avg_seconds": 7.3
+      }
+    },
+    "template": {
+      "before": {
+        "n": 132,
+        "success": 0.9393939393939394,
+        "timeout": 0.022727272727272728,
+        "first_try": 0.9384615384615385,
+        "avg_seconds": 142.9
+      },
+      "after": {
+        "n": 132,
+        "success": 0.9393939393939394,
+        "timeout": 0.022727272727272728,
+        "first_try": 0.9457364341085271,
+        "avg_seconds": 148.3
+      },
+      "false_blocks": [],
+      "regressed": [
+        {
+          "question": "請呈現 Electronics 類別在 2023 至 2024 年的月銷售額趨勢。",
+          "reason": "4 題並發下跑滿 600 秒；單獨重跑 56 秒，與標準答案一致。"
+        },
+        {
+          "question": "請呈現 Office Supplies 類別在 2023 至 2024 年的月銷售額趨勢。",
+          "reason": "4 題並發下跑滿 600 秒；單獨重跑 49 秒，與標準答案一致。"
+        }
+      ],
+      "fixed": [
+        "請呈現 EMEA 區域 2023 至 2024 年各季度的銷售額趨勢。",
+        "請呈現 APAC 區域 2023 至 2024 年各季度的銷售額趨勢。"
+      ]
+    },
+    "complex": {
+      "before": {
+        "n": 102,
+        "success": 0.9215686274509803,
+        "timeout": 0.029411764705882353,
+        "first_try": 0.9183673469387755,
+        "avg_seconds": 168.3
+      },
+      "after": {
+        "n": 102,
+        "success": 0.9117647058823529,
+        "timeout": 0.029411764705882353,
+        "first_try": 0.8865979381443299,
+        "avg_seconds": 172.7
+      },
+      "false_blocks": [
+        {
+          "question": "2024 年買齊三類產品的客戶總數",
+          "refused_as": "not_in_data",
+          "reason": "誤擋：意圖判斷判成 not_in_data（以為資料沒有「買齊三類」）；同題另一種問法「2024 年有幾位客戶三種產品都買過？」這次放行且答對。"
+        },
+        {
+          "question": "各區域人均銷售金額是多少？",
+          "refused_as": "not_in_data",
+          "reason": "誤擋（與加入意圖後那輪相同）：把「人均」當成需要人口資料；同義問法「各區域平均每位客戶貢獻多少銷售額？」放行。"
+        }
+      ],
+      "regressed": [
+        {
+          "question": "2024 年買齊三類產品的客戶總數",
+          "reason": "誤擋：意圖判斷判成 not_in_data（以為資料沒有「買齊三類」）；同題另一種問法「2024 年有幾位客戶三種產品都買過？」這次放行且答對。"
+        },
+        {
+          "question": "在日本所屬的區域裡，它的銷售金額排在第幾名？",
+          "reason": "已知 SQL 錯誤：先篩 Japan 再排名，名次永遠是 1；同題型另兩種問法這次答對。"
+        },
+        {
+          "question": "2024 年哪些月份的營收比 2023 年同月還高？",
+          "reason": "真 SQL 錯誤：用 substr(\"Month\", 4, 2) 取月份（應為 6），2023 年永遠配不到，12 個月全部被列出；語意審查沒抓到。同題型另一問法這次答對。"
+        },
+        {
+          "question": "LATAM 每國銷量冠軍產品？",
+          "reason": "產品正確（Brazil、Mexico 都是 Enterprise Laptop X1），但只列產品、沒帶銷量欄，嚴格比對與複核規則都不接受。"
+        },
+        {
+          "question": "2024 年哪幾個月銷售額超過 2023 年同月？",
+          "reason": "4 題並發下跑滿 600 秒；單獨重跑 92 秒，與標準答案一致。"
+        },
+        {
+          "question": "單價超過五百的訂單，各產品類別分別有幾筆？",
+          "reason": "4 題並發下跑滿 600 秒；單獨重跑 48 秒，與標準答案一致。"
+        },
+        {
+          "question": "各區域平均每位客戶貢獻多少銷售額？",
+          "reason": "4 題並發下跑滿 600 秒；單獨重跑 52 秒，與標準答案一致。"
+        }
+      ],
+      "fixed": [
+        "2024 年有幾位客戶三種產品都買過？",
+        "2023 年和 2024 年各自銷售額最高的是哪個月？金額多少？",
+        "Japan 的銷售額在同一個區域的國家裡排第幾名？",
+        "在拉丁美洲這片區域裡，每個國家銷量最高的產品各是哪一個？",
+        "2024 年比 2023 年銷售額增加最多的三個產品是哪些？各增加多少？",
+        "跟2023年比，2024年產品營收多出來最多的前三名是誰？各增加了多少錢？"
+      ]
+    },
+    "timeout_reruns": [
+      {
+        "題目": "2024 年哪幾個月銷售額超過 2023 年同月？",
+        "Docker router（一次 4 題）": "逾時 600 秒",
+        "單獨重跑": "92 秒",
+        "意圖": "sales_query",
+        "答案": "正確"
+      },
+      {
+        "題目": "單價超過五百的訂單，各產品類別分別有幾筆？",
+        "Docker router（一次 4 題）": "逾時 600 秒",
+        "單獨重跑": "48 秒",
+        "意圖": "sales_query",
+        "答案": "正確"
+      },
+      {
+        "題目": "各區域平均每位客戶貢獻多少銷售額？",
+        "Docker router（一次 4 題）": "逾時 600 秒",
+        "單獨重跑": "52 秒",
+        "意圖": "sales_query",
+        "答案": "正確"
+      },
+      {
+        "題目": "請呈現 Electronics 類別在 2023 至 2024 年的月銷售額趨勢。",
+        "Docker router（一次 4 題）": "逾時 600 秒",
+        "單獨重跑": "56 秒",
+        "意圖": "sales_query",
+        "答案": "正確"
+      },
+      {
+        "題目": "請呈現 Office Supplies 類別在 2023 至 2024 年的月銷售額趨勢。",
+        "Docker router（一次 4 題）": "逾時 600 秒",
+        "單獨重跑": "49 秒",
         "意圖": "sales_query",
         "答案": "正確"
       }

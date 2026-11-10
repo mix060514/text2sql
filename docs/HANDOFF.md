@@ -2,6 +2,54 @@
 
 新 session 先讀這份，再讀 README.md 與 CLAUDE.md。
 
+## 2026-11-09 router 設定：每種 50 題的並發掃描
+
+原本照 12 個請求的結果打算改 DFlash2 2 路；使用者要求改用每種 50 題、從 1 路加到放不下為止重測。
+`scripts/bench_concurrency.py --requests 50 --question-set synthetic`（合成考卷放行題固定抽 50 題），
+臨時伺服器都不載入視覺模組、加 `--ctx-checkpoints 4 --cache-ram 2048`；只量寫 SQL 這一步的速度。
+證據 `docs/optimization/concurrency_sweep.json`、`concurrency_sweep_smallctx.json`，頁面「並發掃描」有流程圖。
+
+| 設定 | 總吞吐量 | 單題中位數／平均 | 顯存 |
+|---|---|---|---|
+| MTP 1／2／3 路 | 29.7／36.2／54.7 tok/s | 21.8／33.5／30.7 秒；24.4／43.2／41.7 | 13.0–14.2 GB |
+| **MTP 4 路（採用）** | **60.8** | **33.2／46.2** | 14.8 GB |
+| MTP 5／6 路 | 66.7／66.5 | 42.3／46.9；63.6／59.6 | 15.2／15.8 GB |
+| MTP 7 路（48k、token_embd 在 CPU） | 68.9 | 57.0／72.8 | — |
+| DFlash2 1／2／3 路 | 29.3／50.0／58.6 | 19.2／21.4／28.9；25.2／32.4／43.9 | 13.7–15.6 GB |
+
+- 放不下：MTP 7（64k，差 294 MiB；token_embd 放 CPU 能啟動但執行時 OOM）、MTP 8（48k 執行時 OOM）、
+  DFlash2 4（64k，差 165 MiB；token_embd 放 CPU 執行時 OOM；32k 跑到約 45/50 未崩潰，使用者決定停止，無數字）。
+- 選法（測試前先講好）：吞吐量最高者的 10% 以內，挑單題最快 → MTP 4 路。
+- DFlash2 沒有 12 請求時量到的 1.5 倍（1 路 29.3 對 MTP 29.7）。整輪 GPU 過熱降頻：89°C、核心約 1 GHz／2.1 GHz，
+  `SW Thermal Slowdown: Active`；散熱是下一個最大的加速空間，處理後要重測。
+- 50 題平均生成約 780 tokens（舊 8 題約 420），所以單題時間比舊表長。
+
+**router 已套用**（`/mnt/data1/llama-config/acer-two-profiles.ini` 的 `[swift15-27b-iq3-xxs]`）：MTP 4 路、64k kv-unified、
+`ctx-checkpoints = 4`、`cache-ram = 2048`、`no-mmproj = true`（text2sql 沒用到視覺；圖片頁接的是另一台 8082）。
+備份：`acer-two-profiles.before-dflash2-np2-20261109.ini`（改前，MTP 4 路＋mmproj、無上限）、
+`acer-two-profiles.before-mtp-np4-nommproj-20261109.ini`（中間短暫套用過的 DFlash2 2 路）。
+使用者 15:39 重啟；以 `/v1/models` 參數、子程序 ps（`--spec-type draft-mtp --parallel 4 --cache-ram 2048
+--swa-checkpoints 4 --no-mmproj-auto`）與 `/slots`（4 路、每路 65,536）確認，顯存 14.6 GB。
+
+**尚待**
+- ~~新 router 設定上的答對率~~：2026-11-09 晚上在 Docker router（18080，`--concurrency 4`）驗收完，見下一段。
+
+**Docker router 驗收（2026-11-09 17:15–20:10）**，與加入意圖後那輪比（那輪跑在臨時伺服器，差別只有當時載入視覺模組、不在 Docker）：
+
+| 考卷 | 加入意圖後 | Docker router | 證據 |
+|---|---|---|---|
+| 攔截題 | 125/126，平均 9.1 秒 | 125/126，平均 7.3 秒 | `block_router_mtp4.json` |
+| 複雜題（複核後） | 94/102，平均 168 秒 | 93/102，平均 173 秒，誤擋 2 | `complex_router.json`（synthetic_complex_2026-11-09_17-15-40） |
+| 模板題 | 124/132，平均 143 秒 | 124/132，平均 148 秒，誤擋 0 | `template_router.json`（e2e_2026-11-09_18-30-35） |
+
+- 由對變錯逐題原因在 `regression_notes.json` 的 `_router_regressions`（頁面「驗收」一節有列）：
+  5 題是 4 題並發下逾時，單獨重跑 48–92 秒全部正確（`router_timeout_reruns_alone.json`）；
+  誤擋 2（「人均」同上次；新增「2024 年買齊三類產品的客戶總數」判成 not_in_data）；
+  日本名次（已知）；同月比較用 `substr("Month", 4, 2)` 取月份的真 SQL 錯誤、語意審查沒抓到；LATAM 冠軍產品缺銷量欄。
+- 修好：複雜 6 題（含上次的日本名次、3 題逾時）、模板 2 題。答對題目的翻轉在兩輪間互有進出，屬模型隨機性，總數持平。
+- 結論：搬到 Docker、拿掉視覺模組後答對率不變；誤擋仍是「人均」「買齊三類」這類推導量（意圖提示的已知問題，使用者決定先不修）。
+- ~~把 router 從 systemd 改成 Docker~~：2026-11-09 已切換，見下方「router 設定」。
+
 ## 2026-11-09 意圖判斷（攔截題）
 
 在 agent_sql 前加 `agent_intent`（本機模型、不思考、輸出 `IntentDecision{intent, reason}`）。
@@ -113,11 +161,32 @@ DFlash2（2026-11-09）：`--model-draft Qwen3.8-27B-DFlash2-Q4_K_M.gguf --spec-
 
 ### router 設定
 
-- 設定：`/mnt/data1/llama-config/acer-two-profiles.ini`，systemd 系統服務 `llama-server-qwen`（不是 Docker），重啟需使用者 sudo。
+- 設定：`~/infra/ai-stack/llama-router/config/acer-two-profiles.ini`（2026-11-09 起由 git 管理，容器內掛在 `/config`，唯讀）。
+  `/mnt/data1/llama-config/` 已刪（2026-11-09）；本文提到的 `.before-*.ini` 都只留在 `/mnt/data1/llama-config-backup-20261109-before-docker.tgz`。之後改設定改 git 版並 commit。
+- **執行方式（2026-11-09 起）：Docker 容器 `llama-router`（`~/infra/ai-stack/docker-compose.yml` 的 `llama-router` 服務），改設定或重啟都不需要 sudo。**
+  原本的 systemd 服務 `llama-server-qwen` 已於 2026-11-09 移除（不再保留回退）。
+  - compose：`~/infra/ai-stack/docker-compose.yml`（專案名 `ai-stack`）；映像由 `~/infra/ai-stack/llama-router/Dockerfile` 建置
+    （`nvidia/cuda:12.8.1-runtime-ubuntu24.04`＋`libgomp1`；b10941 需要 GLIBC 2.38，Ubuntu 22.04 映像不能用）。
+    同檔的 ollama／llama-cpp／llama-cpp-vl／open-webui 都放在 profile 裡，預設 `docker compose up -d` 只起 router（GPU 只有 16 GB）。
+  - 執行的仍是掛進去的 `/mnt/data1/llama-b10941/llama-server`，參數與 systemd 相同（router、`--models-max 1`、`-lv 4`、port 18080）。
+    `network_mode: host`：主機用 `127.0.0.1:18080`，web UI 容器用 `host.docker.internal:18080`，都不必改。
+  - 在 `~/infra/ai-stack` 下執行：
+    - 改 ini 後重啟：`docker compose restart llama-router`
+    - 日誌（取代 journalctl）：`docker compose logs -f --tail 200 llama-router`
+    - 子程序參數：`docker exec llama-router ps -eo pid,args`
+    - 另開測試 router（不影響正式）：`LLAMA_ROUTER_PORT=18095 docker compose -p llama-router-test up -d llama-router`
+      （GPU 只有 16 GB，正式 router 有載入模型時測試 router 不可載入）
+    - **不要**對 ai-stack 下 `docker compose down`：prd／dev web UI 容器掛在 `ai-stack_default` 網路上。
+  - 設定改壞：在 ~/infra 用 git 退回 compose／ini，再 `docker compose restart llama-router`。
+  - 切換後驗證：`/slots` 4 路、每路 65,536；顯存 14,561 MiB（systemd 時 14,559）；
+    `run_planned_agent.py 'EMEA 的總銷售額是多少？'` 得 31,087,500.60；prd／dev web UI 容器實際對話成功。
+  - 2026-11-09 稍後整合進 ai-stack 後重驗：`/health` ok、`/v1/models` 三個 preset、swift15 `/slots` 4 路 65,536、顯存 14,385 MiB、
+    prd／dev web UI 容器內 `host.docker.internal:18080/health` ok。原本 `/mnt/data1/llama-config/*llama-router*` 與 `~/infra/llama-router/` 已刪。
+  - 備份：`/mnt/data1/llama-config-backup-20261109-before-docker.tgz`。
 - 2026-11-08 備份：`acer-two-profiles.before-text2sql-sleep-20261108.ini`。
 - 使用者決定把 `[swift15-27b-iq3-xxs]` 改成 64k、`sleep-idle-seconds = 600`、`parallel = 4`、`kv-unified = true`；
   已生效（ps／`/slots` 確認 4 路、每路 65,536）。
-- **未解決：主記憶體上限尚未加入 ini。** 4 路跑約 15 分鐘後 checkpoint（每份約 150 MiB、每路最多 32 份）＋8 GB
+- ~~未解決：主記憶體上限尚未加入 ini~~（2026-11-09 已加入並套用，見上方「router 設定」）。 4 路跑約 15 分鐘後 checkpoint（每份約 150 MiB、每路最多 32 份）＋8 GB
   prompt 快取用到 9.9 GB，主機在 HDD swap 上卡死（95c2389）。需要使用者在該段加 `ctx-checkpoints = 4`、
   `cache-ram = 2048` 並 `sudo systemctl restart llama-server-qwen`、`sudo swapoff -a && sudo swapon -a`。
   加上限的臨時伺服器跑完 6 小時定版評估，伺服器 RSS 最高 5.2 GB，swap 未增加。
@@ -125,7 +194,7 @@ DFlash2（2026-11-09）：`--model-draft Qwen3.8-27B-DFlash2-Q4_K_M.gguf --spec-
 
 ### 尚待
 
-- DFlash2＋2 路若要上 router，先跑一次模板題確認答對率不變。
+- ~~DFlash2＋2 路若要上 router~~：50 題重測後改採 MTP 4 路（見上方）。
 - `SQL_FEW_SHOT` 預設已改為 true（2026-11-09 使用者決定）；設 false 可關閉。
 - ~~意圖判斷~~（2026-11-09 完成）；日本名次類的「先排名再篩選」範例仍待做。
 - 並發 2／4 路加測到每種 36 個請求，數字較可信。
@@ -338,7 +407,8 @@ DFlash2（2026-11-09）：`--model-draft Qwen3.8-27B-DFlash2-Q4_K_M.gguf --spec-
 - 宣稱完成要附證據（指令輸出、測試結果）。
 - 本機模型一次只能處理一個請求：模型相關工作不可平行執行。
 - 端點：`http://127.0.0.1:18080/v1`，模型 `swift15-27b-iq3-xxs`（2026-11-07 前為 `qwen3.8-27b-iq3-xxs`）。
-- 模型部署：router 設定 `/mnt/data1/llama-config/acer-two-profiles.ini`（`--models-max 1`，一次只載入一個模型），
+- 模型部署：Docker 容器（2026-11-09 起，重啟不需 sudo，見「router 設定」），
+  router 設定 `~/infra/ai-stack/llama-router/config/acer-two-profiles.ini`（2026-11-09 前在 `/mnt/data1/llama-config/`；`--models-max 1`，一次只載入一個模型），
   改前備份 `acer-two-profiles.before-swift15-20261107.ini`；模型檔在 `/mnt/data1/models/`。
 
 ## 複習資料

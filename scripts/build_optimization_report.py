@@ -144,6 +144,76 @@ def intent_section(b_before, b_rows, t_few_rows, t_int, c_few_rows, c_int, revie
     return out
 
 
+def sweep_rows() -> list[dict]:
+    """2026-11-09 sweep: 50 fixed synthetic questions per setting, no mmproj, RAM caps."""
+    rows = []
+    for name, variant in (("concurrency_sweep.json", "64k，token_embd 在 GPU"),
+                          ("concurrency_sweep_smallctx.json", None)):
+        path = OUT / name
+        if not path.exists():
+            continue
+        for r in json.loads(path.read_text(encoding="utf-8")):
+            secs = sorted(x["seconds"] for x in r["requests_detail"])
+            n = len(secs)
+            rows.append({
+                "drafting": r.get("drafting", "mtp"), "parallel": r["parallel"], "requests": r["requests"],
+                "variant": variant or r.get("note", ""), "aggregate_tps": r["aggregate_tps"],
+                "median_seconds": round((secs[n // 2 - 1] + secs[n // 2]) / 2 if n % 2 == 0 else secs[n // 2], 1),
+                "avg_seconds": r["avg_request_seconds"], "p90_seconds": secs[int(n * 0.9)],
+                "max_seconds": secs[-1], "avg_completion_tokens": round(sum(
+                    x["completion_tokens"] for x in r["requests_detail"]) / n),
+                "gpu_mem_mib": r["gpu_mem_mib"], "server_rss_mib": r.get("server_rss_mib"),
+                "truncated": r["truncated"], "empty_answers": r["empty_answers"]})
+    return rows
+
+
+SWEEP_FAILURES = [
+    {"設定": "MTP 7 路，64k", "結果": "啟動失敗：顯存差 293.68 MiB"},
+    {"設定": "MTP 7 路，64k，token_embd 放 CPU（省 388 MiB）", "結果": "能啟動，第一批請求時 CUDA out of memory 崩潰"},
+    {"設定": "MTP 8 路，48k，token_embd 放 CPU", "結果": "執行中 CUDA out of memory 崩潰"},
+    {"設定": "DFlash2 4 路，64k", "結果": "啟動失敗：顯存差 165.00 MiB"},
+    {"設定": "DFlash2 4 路，64k，token_embd 放 CPU", "結果": "能啟動，第一批請求時 CUDA out of memory 崩潰"},
+    {"設定": "DFlash2 4 路，32k，token_embd 放 CPU", "結果": "約 45/50 題未崩潰，使用者決定停止，沒有完整數字"},
+]
+
+
+def router_section(review, reviewed) -> dict | None:
+    """Acceptance of the Docker router (MTP 4 slots, no mmproj, RAM caps) against the intent-gate runs."""
+    notes_path = OUT / "regression_notes.json"
+    notes = json.loads(notes_path.read_text(encoding="utf-8")) if notes_path.exists() else {}
+    why = notes.get("_router_regressions", {})
+    out = {}
+    block_path = OUT / "block_router_mtp4.json"
+    if block_path.exists():
+        before = o.load_synthetic(OUT / "block_final.json", "block") if (OUT / "block_final.json").exists() else []
+        out["block"] = {"before": o.stats(before) if before else None,
+                        "after": o.stats(o.load_synthetic(block_path, "block"))}
+    for key, before_name, after_name in (("template", "template_intent.json", "template_router.json"),
+                                         ("complex", "complex_intent.json", "complex_router.json")):
+        if not (OUT / after_name).exists() or not (OUT / before_name).exists():
+            continue
+        if key == "template":
+            b_rows, a_rows = o.load_template(OUT / before_name), o.load_template(OUT / after_name)
+            raw = json.loads((OUT / after_name).read_text(encoding="utf-8"))
+        else:
+            b_rows = reviewed(o.load_synthetic(OUT / before_name, "complex", review))
+            a_rows = reviewed(o.load_synthetic(OUT / after_name, "complex", review))
+            raw = [r for r in json.loads((OUT / after_name).read_text(encoding="utf-8")) if r.get("label") != "block"]
+        before = {r["question"]: r for r in b_rows}
+        out[key] = {
+            "before": o.stats(b_rows), "after": o.stats(a_rows),
+            "false_blocks": [{"question": r["question"], "refused_as": refusal_kind(r.get("answer")),
+                              "reason": why.get(r["question"], "（未複核）")}
+                             for r in raw if refusal_kind(r.get("answer"))],
+            "regressed": [{"question": r["question"], "reason": why.get(r["question"], "（未複核）")} for r in a_rows
+                          if before.get(r["question"], {}).get("passed") and not r["passed"]],
+            "fixed": [r["question"] for r in a_rows
+                      if r["question"] in before and not before[r["question"]]["passed"] and r["passed"]],
+        }
+    out["timeout_reruns"] = notes.get("_router_timeout_reruns", [])
+    return out or None
+
+
 def b_final_path() -> Path:
     return OUT / "block_final.json"
 
@@ -157,6 +227,8 @@ def main():
     ap.add_argument("--block-final", type=Path)
     ap.add_argument("--template-intent", type=Path)
     ap.add_argument("--complex-intent", type=Path)
+    ap.add_argument("--template-router", type=Path, help="template run on the Docker router (MTP 4 slots)")
+    ap.add_argument("--complex-router", type=Path, help="complex run on the Docker router (MTP 4 slots)")
     args = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
 
@@ -169,6 +241,8 @@ def main():
     b_final = copy(args.block_final and args.block_final / "synthetic_results.json", "block_final.json")
     b_before = copy(None, "block_before_intent.json")
     t_int = copy(args.template_intent and args.template_intent / "e2e_results.json", "template_intent.json")
+    copy(args.template_router and args.template_router / "e2e_results.json", "template_router.json")
+    copy(args.complex_router and args.complex_router / "synthetic_results.json", "complex_router.json")
     c_int = copy(args.complex_intent and args.complex_intent / "synthetic_results.json", "complex_intent.json")
     streaming = OUT / "timeout_questions_after_streaming.jsonl"
 
@@ -330,6 +404,7 @@ def main():
         "concurrency": [{k: v for k, v in row.items() if k != "requests_detail"}
                         for row in json.loads((OUT / "concurrency.json").read_text(encoding="utf-8"))]
                        if (OUT / "concurrency.json").exists() else [],
+        "concurrency_sweep": {"rows": sweep_rows(), "failures": SWEEP_FAILURES},
         "sleep": json.loads((OUT / "sleep_test.json").read_text(encoding="utf-8"))
                  if (OUT / "sleep_test.json").exists() else None,
         "cases": cases,
@@ -347,6 +422,7 @@ def main():
                   "examples": json.loads(notes_path.read_text(encoding="utf-8")).get("_block_examples", [])
                   if notes_path.exists() else []},
         "intent": intent,
+        "router": router_section(review, reviewed),
         "timeout_reruns": json.loads(notes_path.read_text(encoding="utf-8")).get("_timeout_reruns", [])
         if notes_path.exists() else [],
         "question_seconds": config.AGENT_TIMEOUT_SECONDS,

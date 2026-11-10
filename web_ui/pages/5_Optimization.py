@@ -33,6 +33,24 @@ def delta(before, after, key, fmt, better="up"):
     return text
 
 
+def flow(dot: str, caption: str):
+    """A small left-to-right flow chart describing how a measurement was made."""
+    st.graphviz_chart("digraph { rankdir=LR; bgcolor=transparent; "
+                      "node [shape=box, style=\"rounded,filled\", fillcolor=\"#eef2ff\", color=\"#6b7bd6\", "
+                      "fontname=\"Noto Sans TC\", fontsize=11]; edge [color=\"#8c959f\", fontsize=10, "
+                      "fontname=\"Noto Sans TC\"]; " + dot + " }", width="stretch")
+    st.caption(caption)
+
+
+toc: list[tuple[int, str, str]] = []  # (level, title, anchor) for the sidebar table of contents
+
+
+def section(title: str, anchor: str):
+    """A subheader that is also listed in the sidebar table of contents."""
+    st.subheader(title, anchor=anchor)
+    toc.append((0, title, anchor))
+
+
 def metric_row(before, after, labels=("成功率", "逾時率", "平均耗時")):
     cols = st.columns(len(labels))
     spec = {"成功率": ("success", "pct", "normal"), "逾時率": ("timeout", "pct", "inverse"),
@@ -55,7 +73,7 @@ st.markdown(
 
 # ---- Overview ---------------------------------------------------------------------------
 overall = report["overall"]["template"]
-st.subheader("模板題整體（132 題）")
+section("模板題整體（132 題）", "overall-template")
 stages = [("2026-11-07 第一次完整評估", overall.get("2026-11-07")),
           ("基礎設施與評分修正後", overall.get("baseline")),
           ("定版（few-shot＋單一時限＋思考 4096）", overall.get("few_shot"))]
@@ -75,7 +93,7 @@ st.caption("定版評估一次送 4 題（伺服器 4 路並發），每題時�
 
 cx = report["overall"].get("complex") or {}
 if cx.get("baseline"):
-    st.subheader("複雜題整體（34 種題型 × 原題與 2 個改寫）")
+    section("複雜題整體（34 種題型 × 原題與 2 個改寫）", "overall-complex")
     rows = [("基準（嚴格比對）", cx.get("baseline")), ("基準（人工複核後）", cx.get("baseline_reviewed")),
             ("定版（嚴格比對）", cx.get("few_shot")), ("定版（人工複核後）", cx.get("few_shot_reviewed"))]
     st.dataframe(pd.DataFrame([
@@ -87,10 +105,12 @@ if cx.get("baseline"):
 
 # ---- Cases ------------------------------------------------------------------------------
 st.divider()
-st.subheader("優化案例")
-for case in report["cases"]:
+section("優化案例", "cases")
+for i, case in enumerate(report["cases"], 1):
     with st.container(border=True):
-        st.markdown(f"#### {case['title']}")
+        # Streamlit rewrites heading ids, so the anchor is a separate element in the same block.
+        st.markdown(f'<span id="case-{i}" style="display:block; scroll-margin-top:4.5rem"></span>\n\n#### {case["title"]}', unsafe_allow_html=True)
+        toc.append((1, case["title"], f"case-{i}"))
         st.caption(f"範圍：{case.get('scope', '')}")
         c1, c2, c3 = st.columns(3)
         c1.markdown(f"**問題**\n\n{case['problem']}")
@@ -122,7 +142,7 @@ if report.get("complex_review"):
 
 # ---- Few-shot ---------------------------------------------------------------------------
 st.divider()
-st.subheader("Few-shot：難題型加入同類範例")
+section("Few-shot：難題型加入同類範例", "few-shot")
 st.markdown(
     "以「基礎設施與評分修正後」的評估為基準，找出**有失敗、需要重試或平均超過 120 秒**的題型，"
     "為它們各寫一個**同題型、不同內容**的範例（例如考題問 LATAM，範例用 Japan；考題問前五大，範例用前三大），"
@@ -153,7 +173,7 @@ few_shot_table(few.get("complex"), "複雜題（34 種 SQL-first 題型，每種
 changes = report.get("changes") or {}
 if any(changes.values()):
     st.divider()
-    st.subheader("逐題變化：基準 → 定版")
+    section("逐題變化：基準 → 定版", "changes")
     st.markdown("同一批題目在基準與定版各跑一次。除了看整體成功率，也逐題檢查**原本答對、定版答錯**的題目與原因，"
                 "確認優化沒有把原本對的題目改壞；模型生成本身有隨機性，少數翻轉可能只是波動。")
     for key, name in (("template", "模板題"), ("complex", "複雜題（人工複核後）")):
@@ -176,10 +196,22 @@ names = {"write_request": "要求改資料", "not_in_data": "資料庫沒有的�
          "chitchat": "閒聊、寫詩", "prompt_injection": "提示注入、越權"}
 if ib.get("before") or ib.get("after"):
     st.divider()
-    st.subheader("攔截題：加入意圖判斷前後")
+    section("攔截題：加入意圖判斷前後", "intent-block")
     st.markdown("不該執行查詢的問題（改資料、資料庫沒有的資料、閒聊、提示注入）：成功＝沒有執行任何 SELECT 就拒絕。"
                 "2026-11-09 在寫 SQL 之前加入「意圖判斷」步驟：模型只輸出類別，拒答由程式用固定文字執行，不寫也不執行 SQL。")
     metric_row(ib.get("before"), ib.get("after"), ("成功率", "逾時率", "平均耗時"))
+    with st.expander("怎麼測的（流程圖）", expanded=False):
+        flow('q [label="使用者問題"]; i [label="agent_intent\\n本機模型、不思考"]; '
+             'r [label="程式固定文字拒答\\n不寫、不執行 SQL", fillcolor="#fde8e8", color="#cf222e"]; '
+             'w [label="agent_sql → 唯讀執行 → 審查\\n→ 報告 → 發布"]; '
+             'q -> i; i -> r [label="改資料／資料沒有／閒聊／注入"]; i -> w [label="sales_query"];',
+             "加入的步驟：模型只輸出類別與理由，拒答由程式執行；理由只進執行紀錄，不進回答。")
+        flow('d [label="合成考卷 354 題\\n＋模板考卷 132 題"]; s [label="臨時伺服器 18090\\nrouter 同參數、一次 4 題"]; '
+             'b [label="攔截 126 題\\n沒有任何 SELECT 成功＝擋下"]; c [label="複雜 102 題\\n資料列與 SQLite 標準答案比對\\n＋人工複核規則"]; '
+             't [label="模板 132 題\\nLLM 評審＋程式檢查圖表"]; v [label="與加入前的定版逐題比較\\n誤擋＝回答是固定拒答文字"]; '
+             'x [label="逾時題單獨重跑\\n分辨並發還是題目本身"]; '
+             'd -> s; s -> b; s -> c; s -> t; b -> v; c -> v; t -> v; v -> x;',
+             "評估流程：同一份考卷、同一組伺服器參數，只差有沒有意圖判斷；由對變錯的題目逐題寫原因。")
     rows = []
     for label, cats, overall in (("加入前", ib.get("before_by_category") or {}, ib.get("before")),
                                  ("加入後", ib.get("after_by_category") or {}, ib.get("after"))):
@@ -203,7 +235,7 @@ if ib.get("before") or ib.get("after"):
 
 allow = intent.get("allow") or {}
 if allow:
-    st.subheader("放行題有沒有被誤擋")
+    section("放行題有沒有被誤擋", "intent-allow")
     st.markdown("同一份模板考卷與複雜題，跟加入意圖判斷前的定版比較。誤擋＝回答是固定拒答文字（逐題列出）。")
     rows = []
     for key, name in (("template", "模板題"), ("complex", "複雜題（複核後）")):
@@ -240,7 +272,7 @@ if allow:
 
 tools = (intent.get("tools") or {})
 if tools.get("tools"):
-    st.subheader("意圖判斷用什麼工具：實測比較")
+    section("意圖判斷用什麼工具：實測比較", "intent-tools")
     st.markdown(
         "條件：不能佔用 GPU、不能影響本機模型。先試 Jev 類型的開源判斷模型（Jev 本身只有託管 API；開源對應是 Laya）"
         "與兩個開源提示注入分類器，全部在 CPU 上跑；再與「用已載入的本機模型判斷」比較。"
@@ -259,6 +291,15 @@ if tools.get("tools"):
                 "主記憶體": f"{e['model_rss_mb']:,} MB" if "model_rss_mb" in e else "不新增",
                 "顯存": "0（CPU）" if "model_rss_mb" in e else "不新增（沿用已載入模型）",
                 "每題延遲 p50": f"{e['lat_ms_p50']:.0f} ms"})
+    with st.expander("怎麼測的（流程圖）", expanded=False):
+        flow('seed [label="種子題\\n攔截 42＋放行 76"]; tune [label="只用種子調整\\n選項說明／提示"]; '
+             'cpu [label="CPU 工具\\n獨立 venv、torch CPU 版\\nCUDA_VISIBLE_DEVICES 為空"]; '
+             'ft [label="Laya 微調\\n種子分組 2 折"]; llm [label="本機模型\\n不思考、一次短呼叫"]; '
+             'ev [label="離線分類 486 題\\n攔截 126＋放行 360\\n不執行 SQL"]; '
+             'm [label="攔截率、誤擋率、類別正確\\n主記憶體（RSS）、延遲\\nnvidia-smi 確認無 GPU 程序"]; '
+             'seed -> tune; tune -> cpu; tune -> llm; seed -> ft; cpu -> ev; ft -> ev [label="只評未參與訓練的題"]; '
+             'llm -> ev; ev -> m;',
+             "工具比較流程：調整只看種子，成績只看考卷；微調模型只用沒見過的種子改寫題評分，避免拿訓練題考自己。")
     st.dataframe(pd.DataFrame(trs), hide_index=True, width="stretch")
     st.success("採用：" + tools.get("decision", ""))
     g = tools.get("gpu_evidence") or {}
@@ -273,14 +314,14 @@ if tools.get("tools"):
 reruns = report.get("timeout_reruns") or []
 if reruns:
     st.divider()
-    st.subheader("逾時題單獨重跑")
+    section("逾時題單獨重跑", "timeout-reruns")
     st.markdown("定版評估一次送 4 題；為了分清逾時是並發造成還是題目本身難，把定版逾時的放行題在同一台伺服器上一次只送 1 題重跑。")
     st.dataframe(pd.DataFrame(reruns), hide_index=True, width="stretch")
 
 conc = report.get("concurrency") or []
 if conc:
     st.divider()
-    st.subheader("並發測試：同時處理幾個請求")
+    section("並發測試：同時處理幾個請求", "concurrency")
     st.markdown(
         "模型伺服器原本一次只處理一個請求，其他人要排隊。這裡用同一張 GPU、同樣的總上下文，"
         "測試同時處理 1 到 N 個寫 SQL 請求（真實 prompt、思考上限與輸出上限）時的吞吐量與單一請求耗時。"
@@ -303,10 +344,9 @@ if conc:
     if base and mtp_rows:
         best = max(mtp_rows, key=lambda r: r["aggregate_tps"])
         st.success(
-            f"建議：多人使用時設 {best['parallel']} 路。總吞吐量 {best['aggregate_tps']} tokens/秒，是 1 路的 "
+            f"結果：MTP {best['parallel']} 路總吞吐量 {best['aggregate_tps']} tokens/秒，是 1 路的 "
             f"{best['aggregate_tps'] / base['aggregate_tps']:.1f} 倍；代價是單一請求平均 {best['avg_request_seconds']:.0f} 秒"
-            f"（1 路 {base['avg_request_seconds']:.0f} 秒），顯存 {best['gpu_mem_mib']:,} MiB。"
-            "只有一個人使用（例如面試 demo）時 1 路最快。")
+            f"（1 路 {base['avg_request_seconds']:.0f} 秒），顯存 {best['gpu_mem_mib']:,} MiB。")
         dfl = [r for r in conc if r.get("drafting") == "dflash2"]
         if dfl:
             d_best = max(dfl, key=lambda r: r["aggregate_tps"])
@@ -318,8 +358,9 @@ if conc:
                 f"吞吐量和延遲都勝過 MTP {best['parallel']} 路（{best['aggregate_tps']}、{best['avg_request_seconds']:.0f} 秒）。"
                 "代價：草稿模型多佔顯存，最多 2 路（4 路試了 5 種省顯存設定，不是開不起來就是第一個請求就崩潰，見下方）。"
                 "草稿模型是為原版 Qwen3.8-27B 訓練、這裡配 Swift 1.5，接受率仍有約 50–75%；推測解碼由主模型逐 token 驗證，理論上輸出不變（未另跑答對率評估）；每種只有 12 個請求，倍數要保守看待。"
-                "router 尚未改用 DFlash2（需使用者決定）。")
-        st.info("2026-11-08 已套用到模型服務：4 路、各路共用 64k 上下文（kv-unified）、閒置 10 分鐘自動休眠釋放顯存。"
+                "之後改用每種 50 題重測，DFlash2 沒有這個優勢，router 最後選 MTP 4 路（見下方「並發掃描」）。")
+        st.info("2026-11-08 已套用到模型服務：4 路、各路共用 64k 上下文（kv-unified）、閒置 10 分鐘自動休眠釋放顯存"
+                "（2026-11-09 再加主記憶體上限、拿掉視覺模組）。"
                 "套用後以伺服器程序參數與 /slots 確認：4 路、每路可用 65,536 tokens，顯存 15.7 GB。")
         st.warning(
             "套用後真實運行才發現的副作用：4 路同時跑評估約 15 分鐘後，伺服器在**主記憶體**為每一路保存的 "
@@ -333,4 +374,91 @@ if conc:
     st.caption("總吞吐量＝所有請求生成的 tokens ÷ 整批耗時；prompt 快取命中＝固定開頭（資料庫說明與範例）"
                "直接沿用 KV cache、不需重算的 token 數。")
 
+sweep = report.get("concurrency_sweep") or {}
+if sweep.get("rows"):
+    st.divider()
+    section("並發掃描：每種 50 題，找出 router 的設定（2026-11-09）", "concurrency-sweep")
+    st.markdown(
+        "上面的並發測試每種只有 12 個請求、題目 8 題輪流。這裡改用合成考卷固定抽出的 50 題，"
+        "MTP 與 DFlash2 各從 1 路加到放不下為止；伺服器都不載入視覺模組、加主記憶體上限（與 router 相同）。"
+        "只量「寫 SQL」這一步的速度，不評答對率。")
+    with st.expander("怎麼測的（流程圖）", expanded=False):
+        flow('q [label="固定 50 題\\n合成考卷放行題\\n固定亂數種子"]; srv [label="啟動臨時伺服器\\nMTP 或 DFlash2、N 路\\n不載入視覺模組、主記憶體上限"]; '
+             'ok [label="health 正常？", shape=diamond, fillcolor="#fff4e0", color="#c27c0e"]; '
+             'run [label="N 個客戶端同時送\\n真實 agent_sql 請求\\n一個回來就送下一個"]; '
+             'rec [label="記錄總吞吐量、每題耗時\\n顯存、伺服器主記憶體\\n截斷、空答案"]; '
+             'stop [label="放不下或崩潰\\n記錄原因、換下一種", fillcolor="#fde8e8", color="#cf222e"]; '
+             'pick [label="選設定：吞吐量最高的 10% 內\\n挑單題最快"]; '
+             'q -> srv [label="N＝1"]; srv -> ok; ok -> run [label="是"]; run -> rec; rec -> pick; '
+             'rec -> srv [label="N＋1，重開", constraint=false, style=dashed]; '
+             'ok -> stop [label="否"]; run -> stop [label="CUDA OOM"]; stop -> pick;',
+             "掃描流程：每個設定都重開伺服器，讓 N 路一直塞滿；放不下時再試 token_embd 放 CPU、縮小 context。")
+    rows = sweep["rows"]
+    best = max(r["aggregate_tps"] for r in rows)
+    st.dataframe(pd.DataFrame([{
+        "草稿方式": r["drafting"].upper(), "路數": r["parallel"], "條件": r["variant"],
+        "總吞吐量 (tokens/秒)": r["aggregate_tps"], "相對最高": f"{r['aggregate_tps'] / best:.0%}",
+        "單題中位數": sec(r["median_seconds"]), "單題平均": sec(r["avg_seconds"]),
+        "最慢 10%": sec(r["p90_seconds"]), "最慢": sec(r["max_seconds"]),
+        "平均生成 tokens": r["avg_completion_tokens"], "顯存 (MiB)": r["gpu_mem_mib"],
+        "伺服器主記憶體 (MiB)": r["server_rss_mib"], "截斷": r["truncated"], "空答案": r["empty_answers"]}
+        for r in sorted(rows, key=lambda r: (r["drafting"], r["parallel"]))]), hide_index=True, width="stretch")
+    with st.expander("放不下或崩潰的設定"):
+        st.dataframe(pd.DataFrame(sweep.get("failures") or []), hide_index=True, width="stretch")
+    st.success(
+        "選定 MTP 4 路（已套用到 router，2026-11-09 15:39 重啟後以程序參數與 /slots 確認 4 路、每路 65,536）。"
+        "規則：先找總吞吐量最高者，再從相差 10% 以內的設定中選單題最快者。MTP 5～7 路吞吐量只多約 10–13%，"
+        "單題卻多等 4–6 成；DFlash2 2／3 路單題較快，但總吞吐量少 18%／4%（3 路單題平均也不比 MTP 4 路快）。")
+    st.warning(
+        "DFlash2 這次沒有之前量到的優勢（1 路 29.3 對 MTP 29.7 tokens/秒）。之前的 1.5 倍只有 12 個請求。"
+        "整輪測試時 GPU 都在過熱降頻：89°C、核心時脈約 1 GHz（上限 2.1 GHz），驅動回報 SW Thermal Slowdown；"
+        "所有設定在同樣狀態下比較，但絕對數字會比散熱良好時低。這次的 50 題比 8 題難，平均生成約 780 tokens（之前約 420），"
+        "所以單題時間也比上面的表長。")
+    st.info("拿掉視覺模組省約 1.2 GB 顯存；MTP 6 路因此放得下（之前差 885 MiB）。"
+            "加主記憶體上限後，伺服器主記憶體最高 6.2 GB（6 路），主機沒有再進 swap。")
+
+router = report.get("router") or {}
+if router:
+    st.divider()
+    st.subheader("驗收：搬到 Docker 的 router（MTP 4 路）")
+    st.markdown(
+        "router 從 systemd 改成 Docker 容器 `llama-router`（同一個 llama.cpp 執行檔、同一份設定檔），"
+        "設定是上方掃描選出的 MTP 4 路、不載入視覺模組、主記憶體上限。三份考卷直接打正式的 18080，"
+        "與加入意圖判斷後的結果比較。那一輪跑在臨時伺服器：同樣 MTP 4 路、64k、主記憶體上限，"
+        "差別只有當時載入了視覺模組、不在 Docker 裡。")
+    with st.expander("怎麼測的（流程圖）", expanded=False):
+        flow('r [label="Docker router 18080\\nMTP 4 路、無視覺、主記憶體上限"]; '
+             'b [label="攔截 126 題"]; c [label="複雜 102 題\\n＋人工複核規則"]; t [label="模板 132 題"]; '
+             'v [label="與加入意圖後的結果\\n逐題比較"]; x [label="由對變錯逐題寫原因\\n逾時題單獨重跑"]; '
+             'r -> b; r -> c; r -> t; b -> v; c -> v; t -> v; v -> x;',
+             "驗收流程：同樣的考卷與一次 4 題，只換成正式 router；變化逐題寫原因。")
+    rows = []
+    for key, name in (("block", "攔截題"), ("complex", "複雜題（複核後）"), ("template", "模板題")):
+        a = router.get(key)
+        if not a:
+            continue
+        for label, st_ in (("加入意圖後（臨時伺服器）", a.get("before")), ("Docker router", a.get("after"))):
+            if st_:
+                rows.append({"考卷": name, "版本": label, "題數": st_["n"], "成功率": pct(st_["success"]),
+                             "逾時率": pct(st_["timeout"]), "平均耗時": sec(st_["avg_seconds"]),
+                             "誤擋": str(len(a.get("false_blocks") or [])) if label == "Docker router" and key != "block" else "–"})
+    st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
+    for key, name in (("complex", "複雜題"), ("template", "模板題")):
+        a = router.get(key) or {}
+        if a.get("regressed"):
+            with st.expander(f"{name}由對變錯 {len(a['regressed'])} 題與原因"):
+                st.dataframe(pd.DataFrame([{"題目": r["question"], "原因": r["reason"]} for r in a["regressed"]]),
+                             hide_index=True, width="stretch",
+                             column_config={"原因": st.column_config.TextColumn(width="large")})
+        if a.get("fixed"):
+            with st.expander(f"{name}由錯變對 {len(a['fixed'])} 題"):
+                st.dataframe(pd.DataFrame({"題目": a["fixed"]}), hide_index=True, width="stretch")
+    if router.get("timeout_reruns"):
+        with st.expander("Docker router 上逾時的題目：單獨重跑"):
+            st.dataframe(pd.DataFrame(router["timeout_reruns"]), hide_index=True, width="stretch")
+
 st.caption(f"報告產生時間：{report.get('generated_at', '')}")
+
+with st.sidebar:
+    st.markdown("**本頁目錄**\n\n" + "\n".join(
+        f"{'    ' * level}- [{title}](#{anchor})" for level, title, anchor in toc))
