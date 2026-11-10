@@ -49,6 +49,17 @@ def type_heading(i, text):
     st.markdown(f"#### {text}")
 
 
+def weakest_first(df):
+    """Question types ordered by pass rate (lowest first), ties keep their original order."""
+    groups = list(df.groupby("題型", sort=False))
+    return sorted(groups, key=lambda g: g[1]["_ok"].mean())
+
+
+def failed_first(part):
+    """Failed questions first, each half in its original order."""
+    return part.sort_values("_ok", kind="stable")
+
+
 def subset_of(record):
     if record.get("subset"):
         return record["subset"]
@@ -106,14 +117,13 @@ def show_synthetic(subset, title):
 
     st.divider()
     st.subheader("依題型的題目與結果", anchor="by-type")
-    groups = [(c, part) for c, part in df.groupby("題型", sort=False) if part["_ok"].any()]
+    groups = weakest_first(df)
     show_toc([(c, int(part["_ok"].sum()), len(part)) for c, part in groups])
     for i, (category, part) in enumerate(groups):
-        shown = part[part["_ok"]]
         type_heading(i, f"{category}（通過 {int(part['_ok'].sum())}/{len(part)}）")
-        for _, row in shown.iterrows():
+        for _, row in failed_first(part).iterrows():
             tag = "原題" if row.get("source") == "seed" else "改寫"
-            with st.expander(f"✅ [{tag}] {row['question'][:90]}"):
+            with st.expander(f"{'✅' if row['_ok'] else '❌'} [{tag}] {row['question'][:90]}"):
                 st.markdown("**系統回答：**")
                 st.write(row.get("answer") or "")
                 if subset != "block":
@@ -220,12 +230,11 @@ def show_e2e(data, summary_path):
     by_type["整題答對"] = (by_type["sum"] / by_type["count"]).map("{:.0%}".format)
     st.dataframe(by_type.rename(columns={"count": "題數", "sum": "答對"}), width="stretch")
 
-    groups = [(c, g) for c, g in df.groupby("題型", sort=False) if g["_ok"].any()]
+    groups = weakest_first(df)
     show_toc([(c, int(g["_ok"].sum()), len(g)) for c, g in groups])
     for i, (category, group) in enumerate(groups):
-        shown = group[group["_ok"]]
         type_heading(i, f"{category}（答對 {int(group['_ok'].sum())}/{len(group)}）")
-        for index, row in shown.iterrows():
+        for index, row in failed_first(group).iterrows():
             show_row(index, row, items)
 
 
