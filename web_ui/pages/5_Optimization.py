@@ -71,6 +71,13 @@ st.markdown(
     "（`scripts/build_optimization_report.py`），不是手動填寫。"
 )
 
+st.info(
+    "本頁的數字來自改版前的題目，當時分三份：**模板題**（舊考卷 132 題，由程式套題型產生）、"
+    "**複雜題**（34 題多步驟查詢，每題原句加兩種改寫，共 102 題）、**攔截題**（42 題該拒答的輸入，每題三種問法，共 126 題）。"
+    "複雜題與攔截題合稱合成考卷。現行考卷是每題只問一次的 84 題，成績見「評估結果」頁；"
+    "改成每題只問一次的依據是本頁的「換說法實驗」。"
+)
+
 # ---- Overview ---------------------------------------------------------------------------
 overall = report["overall"]["template"]
 section("模板題整體（132 題）", "overall-template")
@@ -316,12 +323,12 @@ if para:
     st.divider()
     section("實驗：同一題換說法，有沒有多找到錯", "paraphrase")
     st.markdown(
-        "複雜問題與攔截問題的每一題都有三種問法：原句，加上本機模型改寫的兩種說法"
+        "複雜題與攔截題的每一題都有三種問法：原句，加上本機模型改寫的兩種說法"
         "（改寫要通過規則、標籤、語意三層檢查才收）。這裡比較原句與改寫的通過數，"
         "並用同一份題目的兩次完整評估，量**同一句話重跑一次**結果會不會不同。"
     )
     frac = lambda r: f"{r['count']}/{r['total']}（{r['count'] / r['total']:.0%}）" if r["total"] else "–"
-    names = {"complex": "複雜問題", "block": "攔截問題"}
+    names = {"complex": "複雜題", "block": "攔截題"}
     st.dataframe(pd.DataFrame([
         {"題組": f"{names[k]}（{v['questions']} 題 × 3 種問法）", "評估": run["run"], "原句通過": frac(run["seed"]),
          "改寫通過": frac(run["rewrite"]), "改寫與自己的原句結果不同": frac(run["rewrite_differs"])}
@@ -330,7 +337,7 @@ if para:
     cols = st.columns(len(para))
     for col, (k, v) in zip(cols, para.items()):
         col.metric(f"{names[k]}：同一句話兩次評估結果不同", frac(v["rerun_differs"]))
-    st.caption("複雜問題用人工複核後的判分（見「複雜題人工複核明細」），攔截問題用嚴格判分；"
+    st.caption("複雜題用人工複核後的判分（見「複雜題人工複核明細」），攔截題用嚴格判分；"
                "兩次評估的模型與提示詞相同，差別只有伺服器（臨時伺服器／Docker router）。")
     cx = para.get("complex")
     if cx:
@@ -342,11 +349,11 @@ if para:
         direction = (f"兩次評估中一次{ahead(first)}通過率較高、一次{ahead(second)}較高"
                      if ahead(first) != ahead(second) else f"兩次評估都是{ahead(first)}通過率較高")
         st.info(
-            f"複雜問題：改寫和自己的原句結果不同的比例（{lo:.0%}–{hi:.0%}）與同一句話重跑一次的差異（{rr:.0%}）相當，"
+            f"複雜題：改寫和自己的原句結果不同的比例（{lo:.0%}–{hi:.0%}）與同一句話重跑一次的差異（{rr:.0%}）相當，"
             f"{direction}；換說法造成的差異無法和重跑的差異區分。"
-            "攔截問題：兩次評估結果完全相同，84 題改寫只有同一題沒有擋下。"
+            "攔截題：兩次評估結果完全相同，84 題改寫只有同一題沒有擋下。"
             "多考的這 152 題改寫沒有帶來原句以外的穩定發現；找到問題的是新增的題目種類"
-            "（攔截問題讓拒答率從 7.9% 提升到 99.2%，見「攔截題：加入意圖判斷前後」）。"
+            "（攔截題讓拒答率從 7.9% 提升到 99.2%，見「攔截題：加入意圖判斷前後」）。現行考卷因此改成每題只問一次。"
         )
 
 reruns = report.get("timeout_reruns") or []
