@@ -20,8 +20,8 @@ class QuarterRuleTests(unittest.TestCase):
 
     def test_quarter_expression_matches_ground_truth(self):
         expr = self.quarter_expr()
-        truth = next(json.loads(l) for l in (ROOT / "data/eval_set_v3.jsonl").open(encoding="utf-8")
-                     if json.loads(l)["question"] == "2023 年各季度的銷售額分別是多少？")["ground_truth"]
+        truth = next(json.loads(l) for l in (ROOT / "data/seeds/golden_seeds.jsonl").open(encoding="utf-8")
+                     if json.loads(l)["seed_id"] == "N12-2023")["reference_answer"]
         sql = (f"SELECT 'Q' || ({expr}) AS q, ROUND(SUM(\"Total Revenue\"), 2) AS revenue FROM sales_data "
                f"WHERE substr(\"Order Date\", 1, 4) = '2023' GROUP BY q ORDER BY q")
         rows = tools.read_sales(sql)["rows"]
