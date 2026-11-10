@@ -38,31 +38,17 @@ st.markdown(f"""
 **建議從左側「對話查詢」開始**：側邊欄有幾題範例問題，回答下方可展開執行流程，
 逐步查看模型寫的 SQL、查詢結果與審查結果。程式碼：{github_link('GitHub', REPO_URL)}
 """, unsafe_allow_html=True)
-# "openai/" is only LiteLLM's provider prefix for an OpenAI-compatible endpoint, not the model.
-MODEL_ALIAS = ANALYSIS_MODEL.split("/", 1)[1] if ANALYSIS_MODEL.startswith("openai/") else ANALYSIS_MODEL
-
-st.subheader("使用的模型")
-st.markdown(f"""
-目前分析模型：`{MODEL_ALIAS}`
-
-- **Swift 1.5**：UkisAI 以阿里巴巴開源的 **Qwen3.8-27B** 做後訓練的版本，思考 token 較少、回應較快。
-- 量化格式為 GSQ-RCO IQ3_XXS GGUF（約 10.4 GB，含 MTP 推測解碼），
-  由 **本機 llama.cpp** 伺服器執行，模型推論不呼叫任何外部 API。
-- 同一個模型分別擔任四個角色：意圖判斷、SQL 規劃、語意審查、回答撰寫；SQL 執行與檢查由程式負責。
-- **意圖判斷**（2026-11-09 加入）：寫 SQL 前先判斷問題是不是銷售資料查詢；要求改資料、資料庫沒有的資料
-  （預測、毛利）、閒聊、提示注入這四類由程式直接用固定文字拒答，不寫也不執行 SQL。
-  曾比較 Jev 類的開源判斷模型 Laya、提示注入分類器 PIGuard 與 ProtectAI（皆在 CPU 上執行、不佔顯存），
-  但它們在中文四類上分不清：攔得多的誤擋也多（Laya 攔 86%、誤擋 59%），誤擋少的攔不到（ProtectAI 22%、
-  PIGuard 0%），用本專案種子微調 Laya 後未見過的題目仍只攔 67–75%、誤擋 5–12%。改用已載入的同一個模型、不思考的短判斷，
-  不新增任何模型或顯存，攔截題由 7.9% 提升到 99.2%。比較數字見「🛠️ 優化成果」頁。
-- 模型來源：🤗 [Swift-1.5-Qwen3.8-27B-GSQ-RCO-GGUF](https://huggingface.co/ukisai/Swift-1.5-Qwen3.8-27B-GSQ-RCO-GGUF)
-""")
-
 st.divider()
 st.subheader("系統架構")
+st.markdown("**怎麼知道問答系統答得對？** 像學校考試一樣：先出一份有標準答案的考卷，讓問答系統作答，再由程式批改。")
+if ARCHITECTURE_SVG.exists():
+    svg = base64.b64encode(ARCHITECTURE_SVG.read_bytes()).decode()
+    st.markdown(
+        f'<img src="data:image/svg+xml;base64,{svg}" alt="text2sql 架構圖" '
+        'style="width:100%;max-width:960px">',
+        unsafe_allow_html=True,
+    )
 st.markdown("""
-**怎麼知道問答系統答得對？** 像學校考試一樣：先出一份有標準答案的考卷，讓問答系統作答，再由程式批改。
-
 | 名詞 | 意思 |
 |---|---|
 | 資料庫 | 銷售資料，單一資料表，3 萬筆，2023–2024 |
@@ -84,13 +70,27 @@ st.markdown("""
 
 約一半的題目用口語問法。要測新的東西，就在配分表加一列。
 """)
-if ARCHITECTURE_SVG.exists():
-    svg = base64.b64encode(ARCHITECTURE_SVG.read_bytes()).decode()
-    st.markdown(
-        f'<img src="data:image/svg+xml;base64,{svg}" alt="text2sql 架構圖" '
-        'style="width:100%;max-width:960px">',
-        unsafe_allow_html=True,
-    )
 st.caption(f"名詞與程式位置見 {github_link('docs/MODULES.md', f'{DOCS_URL}/MODULES.md')}，"
            f"問答流程細節見 {github_link('docs/ARCHITECTURE.md', f'{DOCS_URL}/ARCHITECTURE.md')}。",
            unsafe_allow_html=True)
+
+st.divider()
+# "openai/" is only LiteLLM's provider prefix for an OpenAI-compatible endpoint, not the model.
+MODEL_ALIAS = ANALYSIS_MODEL.split("/", 1)[1] if ANALYSIS_MODEL.startswith("openai/") else ANALYSIS_MODEL
+
+st.subheader("使用的模型")
+st.markdown(f"""
+目前分析模型：`{MODEL_ALIAS}`
+
+- **Swift 1.5**：UkisAI 以阿里巴巴開源的 **Qwen3.8-27B** 做後訓練的版本，思考 token 較少、回應較快。
+- 量化格式為 GSQ-RCO IQ3_XXS GGUF（約 10.4 GB，含 MTP 推測解碼），
+  由 **本機 llama.cpp** 伺服器執行，模型推論不呼叫任何外部 API。
+- 同一個模型分別擔任四個角色：意圖判斷、SQL 規劃、語意審查、回答撰寫；SQL 執行與檢查由程式負責。
+- **意圖判斷**（2026-11-09 加入）：寫 SQL 前先判斷問題是不是銷售資料查詢；要求改資料、資料庫沒有的資料
+  （預測、毛利）、閒聊、提示注入這四類由程式直接用固定文字拒答，不寫也不執行 SQL。
+  曾比較 Jev 類的開源判斷模型 Laya、提示注入分類器 PIGuard 與 ProtectAI（皆在 CPU 上執行、不佔顯存），
+  但它們在中文四類上分不清：攔得多的誤擋也多（Laya 攔 86%、誤擋 59%），誤擋少的攔不到（ProtectAI 22%、
+  PIGuard 0%），用本專案種子微調 Laya 後未見過的題目仍只攔 67–75%、誤擋 5–12%。改用已載入的同一個模型、不思考的短判斷，
+  不新增任何模型或顯存，攔截題由 7.9% 提升到 99.2%。比較數字見「🛠️ 優化成果」頁。
+- 模型來源：🤗 [Swift-1.5-Qwen3.8-27B-GSQ-RCO-GGUF](https://huggingface.co/ukisai/Swift-1.5-Qwen3.8-27B-GSQ-RCO-GGUF)
+""")

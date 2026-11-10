@@ -142,7 +142,11 @@ def step_draw_chart(spec: AnswerSubmission, columns: list[str], rows: list[list]
     if spec.chart_type == "pie":
         if (data[spec.y_column] < 0).any() or data[spec.y_column].sum() <= 0:
             raise ValueError("Pie values must be nonnegative with a positive total.")
+        # Largest slice first, ties by name: the order is the code's, not whatever the SQL returned.
+        data = data.assign(_label=data[spec.x_column].astype(str)).sort_values(
+            [spec.y_column, "_label"], ascending=[False, True], kind="stable")
         figure = px.pie(data, names=spec.x_column, values=spec.y_column, hole=0.3)
+        figure.update_traces(sort=False, direction="clockwise")
     else:
         draw = px.line if spec.chart_type == "line" else px.bar
         options = {"markers": True} if spec.chart_type == "line" else {"barmode": "group"}
