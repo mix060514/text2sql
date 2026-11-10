@@ -43,14 +43,17 @@
 |---|---|---|
 | 離線測試 `verify_all.py` | 全數通過 | 真實 SQLite、假模型注入錯誤，不呼叫 LLM |
 | Smoke 8 題 | **8/8** | 實際資料與圖表直接和 SQLite oracle 比對（[紀錄](docs/smoke-swift15.json)） |
-| 模板考卷 132 題 | SQL 正確 **84.8%**（112/132） | 2026-11-07，Swift 1.5；與 2026-02 v1.0.0 的 84.1% 持平。未通過主因是 18 題模型 120 秒逾時 |
+| 模板考卷 132 題（歷史） | SQL 正確 **84.8%**（112/132） | 2026-11-07，Swift 1.5；LLM judge 評分。2026-11-10 起改用下方兩個小題庫 |
+| 模板題庫 16 題、說法對齊 27 題 | **16/16**、**27/27** | 2026-11-10，Swift 1.5；程式比對 SQLite 標準答案與圖表，不用 judge。模板 10 題沿用 11-09 結果（資料列重新比對），6 題圖表題與 27 題叫法實跑 |
 | 合成考卷 354 題 | 進行中 | 放行 228（含 102 題 CTE／視窗函數等複雜查詢）、攔截 126；以 SQLite 標準答案比對 |
 
 細節、失敗分類與已知限制見 [docs/VALIDATION.md](docs/VALIDATION.md)。
 
 ## 測試資料怎麼來的
 
-- **模板考卷**：17 個題型填入地區／國家／產品，標準答案用 pandas 從原始 CSV 計算，不經模型。
+- **模板題庫**：從黃金種子（舊 17 個題型各取一例、答案經 SQL 驗證）手挑 16 題，每題測一種能力。
+- **說法對齊題庫**：提示詞別名對照表裡的每個叫法（北美、歐非中東、US、大陸…）各一題，句型固定。
+- 舊的模板考卷（132 題，LLM judge 評分）只留作歷史紀錄。
 - **合成考卷**：參考「用合成資料測試 AI Guardrails」的方法，種子 → 本機模型改寫問法 → 規則、標籤、語意、SQL 對題
   四層檢查 → 不通過就把原因放回 prompt 重寫。每個種子的 SQL 都要和 pandas 的實作逐列一致才收。
   方法與被刷掉的實例見 [docs/SYNTHETIC_DATA_METHOD.md](docs/SYNTHETIC_DATA_METHOD.md)。
@@ -85,8 +88,9 @@ uv run python scripts/verify_all.py
 # 線上：8 題 smoke，與 SQLite oracle 比對
 uv run python scripts/smoke_workflow.py --output docs/smoke-qwen27b.json
 
-# 線上：模板考卷（LLM judge 輔助）與合成考卷（SQLite 比對，不用 judge）
-uv run python eval/eval_e2e.py --limit 5
+# 線上：模板題庫、說法對齊題庫與合成考卷（SQLite 比對，不用 judge）
+uv run python eval/eval_e2e.py --bank template
+uv run python eval/eval_e2e.py --bank alias
 uv run python eval/eval_e2e.py --synthetic
 ```
 

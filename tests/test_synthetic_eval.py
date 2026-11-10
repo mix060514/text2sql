@@ -51,6 +51,18 @@ class RequiredRows(unittest.TestCase):
         self.assertEqual(synthetic.required_rows(number), [[323]])
         self.assertEqual(synthetic.required_rows(frame), [["2023", 1.5]])
 
+    def test_rank_column_is_optional_unless_the_rank_is_the_answer(self):
+        # X-category_top3_quantity: the rank follows from the row order, so an answer without it is right.
+        top3 = {"eval_type": "dataframe", "ground_truth": {
+            "columns": ["product_category", "rank", "product_name", "total_quantity"],
+            "rows": [["Electronics", 1, "Laptop", 25023], ["Electronics", 2, "Phone", 20924]]}}
+        actual = [["Electronics", "Laptop", 25023], ["Electronics", "Phone", 20924]]
+        self.assertTrue(synthetic.rows_match(synthetic.required_rows(top3), actual))
+        self.assertFalse(synthetic.rows_match(synthetic.required_rows(top3), [["Electronics", "Laptop", 1]] * 2))
+        # "Japan ranks where in its region?": the rank is the asked number and stays required.
+        rank = {"eval_type": "number", "ground_truth": {"columns": ["country", "rank"], "rows": [["Japan", 2]]}}
+        self.assertEqual(synthetic.required_rows(rank), [["Japan", 2]])
+
 
 class GradeState(unittest.TestCase):
     def test_allow_requires_published_matching_rows(self):
@@ -61,6 +73,30 @@ class GradeState(unittest.TestCase):
         result = synthetic.grade_state(ALLOW, failed)
         self.assertFalse(result["passed"])
         self.assertIn("not published", result["reason"])
+
+    def test_expected_chart_is_graded(self):
+        item = {**ALLOW, "expected_plot": {"should_plot": True, "chart_type": "bar",
+                                           "expected_x_order": ["APAC", "EMEA"], "expected_traces": 1}}
+        bar = {"data": [{"type": "bar", "x": ["APAC", "EMEA"], "y": [100.25, 200.5]}]}
+        state = {"workflow_status": "completed", "query_success": True, "workflow_trace": run_trace("ok"),
+                 "raw_query_result": [["APAC", 100.25], ["EMEA", 200.5]],
+                 "plot_decision": {"should_plot": True, "chart_type": "bar"}, "chart_json": json.dumps(bar)}
+        result = synthetic.grade_state(item, state)
+        self.assertTrue(result["passed"], result["reason"])
+        self.assertTrue(result["chart_checked"])
+        no_chart = synthetic.grade_state(item, {**state, "plot_decision": {"should_plot": False}, "chart_json": ""})
+        self.assertFalse(no_chart["passed"])
+        self.assertIn("chart", no_chart["reason"])
+        line = {"data": [{"type": "scatter", "x": ["APAC", "EMEA"]}]}
+        wrong_type = synthetic.grade_state(item, {**state, "plot_decision": {"should_plot": True, "chart_type": "line"},
+                                                  "chart_json": json.dumps(line)})
+        self.assertFalse(wrong_type["passed"])
+        reversed_x = {"data": [{"type": "bar", "x": ["EMEA", "APAC"]}]}
+        self.assertFalse(synthetic.grade_state(item, {**state, "chart_json": json.dumps(reversed_x)})["passed"])
+        # A chart the question did not ask for fails too; no expected_plot means no chart check.
+        no_plot = {**ALLOW, "expected_plot": {"should_plot": False}}
+        self.assertFalse(synthetic.grade_state(no_plot, state)["passed"])
+        self.assertTrue(synthetic.grade_state(ALLOW, state)["passed"])
 
     def test_block_passes_only_without_executed_select(self):
         greeting = {"workflow_status": "completed", "workflow_trace": []}
@@ -120,6 +156,21 @@ class Reuse(unittest.TestCase):
             self.assertEqual(set(reused), {"B01-v1"})
             self.assertEqual(reused["B01-v1"]["reused_from"], "synthetic_a")
 
+    def test_passes_graded_without_the_chart_check_are_not_reused_for_chart_items(self):
+        item = {**ALLOW, "expected_plot": {"should_plot": True, "chart_type": "bar"}}
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            self.write_run(root, "synthetic_old", "synthetic_results.json", [
+                {"id": "G1-v1", "question": ALLOW["question"], "label": "allow", "passed": True, "reason": "x"}])
+            self.write_run(root, "e2e_old", "e2e_results.json", [
+                {"question": ALLOW["question"], "sql_query": "SELECT 1",
+                 "sql_result": [["APAC", 100.25], ["EMEA", 200.5]], "actual_should_plot": False}])
+            self.assertEqual(synthetic.find_reusable([item], META, root), {})
+            self.write_run(root, "synthetic_new", "synthetic_results.json", [
+                {"id": "G1-v1", "question": ALLOW["question"], "label": "allow", "passed": True, "reason": "x",
+                 "chart_checked": True}])
+            self.assertEqual(synthetic.find_reusable([item], META, root)["G1-v1"]["reused_from"], "synthetic_new")
+
     def test_summary_rates(self):
         records = [{"label": "allow", "passed": True, "sql_executed": 1, "source": "seed"},
                    {"label": "allow", "passed": False, "sql_executed": 0, "source": "rewrite"},
@@ -133,3 +184,24 @@ class Reuse(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Banks(unittest.TestCase):
+    """data/banks/* (scripts/build_eval_banks.py) load like a synthetic run and grade their own oracle as a pass."""
+
+    def test_banks_load_and_their_oracle_passes(self):
+        for name, size in (("template", 16), ("alias", 27)):
+            _, items = synthetic.load_run(synthetic.BANKS_DIR / name)
+            self.assertEqual(len(items), size)
+            self.assertEqual({synthetic.subset_of(i) for i in items}, {name})
+            for item in items:
+                plot = item.get("expected_plot") or {}
+                chart = {"data": [{"type": synthetic.PLOTLY_TYPE[plot["chart_type"]],
+                                   "x": plot.get("expected_x_order") or [], "labels": plot.get("expected_x_order") or []}]
+                         * (plot.get("expected_traces") or 1)} if plot.get("should_plot") else None
+                state = {"workflow_status": "completed", "query_success": True, "workflow_trace": run_trace("ok"),
+                         "raw_query_result": item["ground_truth"]["rows"],
+                         "plot_decision": {"should_plot": bool(chart), "chart_type": plot.get("chart_type")},
+                         "chart_json": json.dumps(chart) if chart else ""}
+                result = synthetic.grade_state(item, state)
+                self.assertTrue(result["passed"], f"{item['id']}: {result['reason']}")

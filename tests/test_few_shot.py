@@ -12,8 +12,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def eval_questions():
-    qs = {json.loads(l)["question"] for l in (ROOT / "data/eval_set_v3.jsonl").open(encoding="utf-8") if l.strip()}
-    for path in (ROOT / "data/synthetic/runs").glob("*/dataset.jsonl"):
+    qs = set()
+    for path in [*(ROOT / "data/synthetic/runs").glob("*/dataset.jsonl"), *(ROOT / "data/banks").glob("*/dataset.jsonl")]:
         qs |= {json.loads(l)["question"] for l in path.open(encoding="utf-8") if l.strip()}
     return qs
 
@@ -33,7 +33,7 @@ class FewShotTests(unittest.TestCase):
     def test_examples_do_not_reproduce_any_oracle_answer(self):
         """Same type, different content: no example returns the rows of an evaluation answer."""
         answers = []
-        for path in (ROOT / "data/synthetic/runs").glob("*/dataset.jsonl"):
+        for path in [*(ROOT / "data/synthetic/runs").glob("*/dataset.jsonl"), *(ROOT / "data/banks").glob("*/dataset.jsonl")]:
             for line in path.open(encoding="utf-8"):
                 if line.strip():
                     rows = (json.loads(line).get("ground_truth") or {}).get("rows")
