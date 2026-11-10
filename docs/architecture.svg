@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="680" viewBox="0 0 960 680" role="img">
 <title>text2sql 架構：出題、考卷、問答系統、批改、成績單</title>
-<desc>人與 AI 決定考什麼並寫出題目與 SQL；出題程式把 SQL 拿到資料庫算出標準答案，組成考卷。考卷 84 題、每題考不同的項目，分五組：基本查詢、畫圖、多步驟查詢、不同叫法、該拒答。批改程式把考卷的題目交給問答系統、收回答案，由程式比對答案與圖表並產出成績單。產品區在右側：使用者透過網頁向問答系統提問，問答系統唯讀查詢資料庫並產出答案。</desc>
+<desc>出題：寫出題目與 SQL，把 SQL 拿到資料庫算出標準答案，組成考卷。考卷 84 題、每題考不同的項目，分五組：基本查詢、畫圖、多步驟查詢、不同叫法、該拒答。批改程式把考卷的題目交給問答系統、收回答案，由程式比對答案與圖表並產出成績單。產品區在右側：使用者透過網頁向問答系統提問，問答系統唯讀查詢資料庫並產出答案。</desc>
 <style>
 text { font-family: "Noto Sans TC", "Noto Sans CJK TC", "Microsoft JhengHei", "PingFang TC", sans-serif; }
 .th { font-size: 14px; font-weight: 500; fill: #2C2C2A; }
@@ -23,9 +23,7 @@ text { font-family: "Noto Sans TC", "Noto Sans CJK TC", "Microsoft JhengHei", "P
 <g class="amber"><rect x="34" y="120" width="666" height="290" rx="12"/><text class="th" x="52" y="143" text-anchor="start">考卷：84 題，每題考不同的項目</text></g>
 <g class="green"><rect x="730" y="326" width="200" height="282" rx="12"/><text class="th" x="830" y="344" text-anchor="middle">產品區：使用者會用到的</text></g>
 
-<g class="out"><rect x="52" y="30" width="180" height="56" rx="8"/><text class="th" x="142" y="50" text-anchor="middle" dominant-baseline="central">人／AI</text><text class="ts" x="142" y="69" text-anchor="middle" dominant-baseline="central">決定考什麼，寫題目與 SQL</text></g>
-<line x1="236" y1="58" x2="273" y2="58" class="arr" marker-end="url(#arrow)"/>
-<g class="purple"><rect x="277" y="30" width="180" height="56" rx="8"/><text class="th" x="367" y="50" text-anchor="middle" dominant-baseline="central">出題</text><text class="ts" x="367" y="69" text-anchor="middle" dominant-baseline="central">把 SQL 拿去算標準答案</text></g>
+<g class="purple"><rect x="277" y="30" width="180" height="56" rx="8"/><text class="th" x="367" y="50" text-anchor="middle" dominant-baseline="central">出題</text><text class="ts" x="367" y="69" text-anchor="middle" dominant-baseline="central">寫題目與 SQL，算出標準答案</text></g>
 <g class="out"><rect x="740" y="30" width="180" height="56" rx="8"/><text class="th" x="830" y="50" text-anchor="middle" dominant-baseline="central">資料庫</text><text class="ts" x="830" y="69" text-anchor="middle" dominant-baseline="central">銷售資料 3 萬筆，2023–2024</text></g>
 <line x1="736" y1="58" x2="461" y2="58" class="arr" marker-end="url(#arrow)"/>
 <text class="ts" x="598" y="48" text-anchor="middle">用 SQL 算出標準答案</text>
@@ -56,5 +54,5 @@ text { font-family: "Noto Sans TC", "Noto Sans CJK TC", "Microsoft JhengHei", "P
 <line x1="461" y1="474" x2="736" y2="474" class="arr" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
 <text class="ts" x="598" y="464" text-anchor="middle">出題、收答案</text>
 
-<text class="ts" x="480" y="646" text-anchor="middle">實線彩色框 = 程式　虛線框 = 人、資料或產出　琥珀底 = 考卷的測試項目　綠底 = 產品區，其餘都為了測試它而存在</text>
+<text class="ts" x="480" y="646" text-anchor="middle">實線彩色框 = 程式　虛線框 = 資料或產出　琥珀底 = 考卷的測試項目　綠底 = 產品區，其餘都為了測試它而存在</text>
 </svg>
